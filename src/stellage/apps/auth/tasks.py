@@ -31,6 +31,6 @@ def send_confirmation_email(to_email, token):
     ) as smtp:
         smtp.login(
             user=settings.email_settings.email_username,
-            password=settings.email_settings.email_password,
+            password=settings.email_settings.email_password.get_secret_value(),
         )
         smtp.send_message(message)
