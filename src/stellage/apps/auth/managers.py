@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException, status
-from sqlalchemy import insert
+from sqlalchemy import insert, update
 from sqlalchemy.exc import IntegrityError
 
 from stellage.apps.auth.schemas import CreateUser, UserReturnData
@@ -34,3 +34,14 @@ class UserManager:
             await session.commit()
             user_data = result.scalar_one()
             return UserReturnData(**user_data.__dict__)
+
+
+    async def confirm_user(self, email: str) -> None:
+        async with self.db.db_session() as session:
+            query = (
+                update(self.model)
+                .where(self.model.email == email)
+                .values(is_verified=True, is_active=True)
+            )
+            await session.execute(query)
+            await session.commit()
