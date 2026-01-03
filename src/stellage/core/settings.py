@@ -55,7 +55,7 @@ class AppSettings(BaseAppSettings):
     email_settings: EmailSettings = EmailSettings()
     redis_settings: RedisSettings = RedisSettings()
 
-    templates_dir: str = TAMPLATES_DIR
+    templates_dir: str = TEMPLATES_DIR
     frontend_url: str
 
 settings = AppSettings()
