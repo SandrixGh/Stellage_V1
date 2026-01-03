@@ -20,6 +20,8 @@ class DbSettings(BaseSettings):
         extra="ignore",
     )
 
+
+
     @property
     def db_url(self):
         return \
@@ -28,5 +30,13 @@ class DbSettings(BaseSettings):
 
 class Settings(BaseSettings):
     db_settings: DbSettings = DbSettings()
+    secret_key: SecretStr
+
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
 settings = Settings()
