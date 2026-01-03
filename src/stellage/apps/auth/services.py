@@ -1,9 +1,12 @@
 from fastapi import Depends
+from itsdangerous import URLSafeTimedSerializer
 
 from stellage.apps.auth.handlers import AuthHandler
 from stellage.apps.auth.managers import UserManager
 from stellage.apps.auth.schemas import RegisterUser, CreateUser
+from stellage.core.settings import settings
 
+from .tasks import send_confirmation_email
 
 class UserService:
     def __init__(
@@ -13,6 +16,7 @@ class UserService:
     ):
         self.manager = manager
         self.handler = handler
+        self.serializer = URLSafeTimedSerializer(secret_key=settings.secret_key.get_secret_value())
 
     async def register_user(self, user: RegisterUser):
         hashed_password = await self.handler.get_hashed_password(user.password)
@@ -22,5 +26,9 @@ class UserService:
             hashed_password=hashed_password,
         )
 
-        return await self.manager.create_user(new_user)
+        user_data = await self.manager.create_user(new_user)
 
+        confirmation_token = self.serializer.dumps(user_data.email)
+        send_confirmation_email.delay(user_data.email, confirmation_token)
+
+        return user_data
