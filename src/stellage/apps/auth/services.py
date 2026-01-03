@@ -1,5 +1,5 @@
-from fastapi import Depends
-from itsdangerous import URLSafeTimedSerializer
+from fastapi import Depends, HTTPException, status
+from itsdangerous import URLSafeTimedSerializer, BadSignature
 
 from stellage.apps.auth.handlers import AuthHandler
 from stellage.apps.auth.managers import UserManager
@@ -32,3 +32,16 @@ class UserService:
         send_confirmation_email.delay(user_data.email, confirmation_token)
 
         return user_data
+
+
+    async def confirm_user(self, token: str):
+        try:
+            email = self.serializer.loads(token, max_age=3600)
+
+        except BadSignature:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired token"
+            )
+
+        await self.manager.confirm_user(email)
