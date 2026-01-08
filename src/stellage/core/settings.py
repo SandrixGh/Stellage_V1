@@ -58,4 +58,6 @@ class AppSettings(BaseAppSettings):
     templates_dir: str = TEMPLATES_DIR
     frontend_url: str
 
+    access_token_expire: int
+
 settings = AppSettings()
