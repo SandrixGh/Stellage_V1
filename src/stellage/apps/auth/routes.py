@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, status, Depends
 
-from stellage.apps.auth.schemas import UserReturnData, RegisterUser
+from stellage.apps.auth.schemas import UserReturnData, AuthUser
 from stellage.apps.auth.services import UserService
 
 auth_router = APIRouter(
@@ -16,7 +16,7 @@ auth_router = APIRouter(
     status_code=status.HTTP_201_CREATED,
 )
 async def registration(
-    user: RegisterUser,
+    user: AuthUser,
     service: Annotated[
         UserService,
         Depends(UserService)

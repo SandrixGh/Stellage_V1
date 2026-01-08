@@ -3,7 +3,7 @@ from itsdangerous import URLSafeTimedSerializer, BadSignature
 
 from stellage.apps.auth.handlers import AuthHandler
 from stellage.apps.auth.managers import UserManager
-from stellage.apps.auth.schemas import RegisterUser, CreateUser, UserReturnData
+from stellage.apps.auth.schemas import AuthUser, CreateUser, UserReturnData
 from stellage.core.settings import settings
 
 from .tasks import send_confirmation_email
@@ -18,7 +18,7 @@ class UserService:
         self.handler = handler
         self.serializer = URLSafeTimedSerializer(secret_key=settings.secret_key.get_secret_value())
 
-    async def register_user(self, user: RegisterUser) -> UserReturnData:
+    async def register_user(self, user: AuthUser) -> UserReturnData:
         hashed_password = await self.handler.get_hashed_password(user.password)
 
         new_user = CreateUser(

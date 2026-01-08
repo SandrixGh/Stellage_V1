@@ -13,7 +13,7 @@ class GetUserByEmail(BaseModel):
     email: EmailStr
 
 
-class RegisterUser(GetUserByEmail):
+class AuthUser(GetUserByEmail):
     password: Annotated[str, StringConstraints(
         min_length=8,
         max_length=128,
@@ -30,3 +30,7 @@ class UserReturnData(GetUserByID, GetUserByEmail):
     is_superuser: bool = False
     created_at: datetime.datetime
     updated_at: datetime.datetime
+
+
+class GetUserWithIDAndEmail(GetUserByID, CreateUser):
+    pass
