@@ -49,7 +49,7 @@ class UserService:
 
 
     async def login_user(self, user: AuthUser) -> JSONResponse:
-        exist_user = await self.manager.get_user_by_email(email=user.email)
+        exist_user = await self.manager.get_user_by_email(email=str(user.email))
 
         is_invalid_exist_user: bool = (
             exist_user is None
