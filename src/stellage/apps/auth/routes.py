@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, status, Depends
+from starlette.responses import JSONResponse
 
 from stellage.apps.auth.schemas import UserReturnData, AuthUser
 from stellage.apps.auth.services import UserService
@@ -39,3 +40,17 @@ async def confirm_registration(
 ) -> dict[str, str]:
     await service.confirm_user(token=token)
     return {"message": "User confirmed successfully"}
+
+
+@auth_router.post(
+    path="/login",
+    status_code=status.HTTP_200_OK,
+)
+async def login_user(
+    user: AuthUser,
+    service: Annotated[
+        UserService,
+        Depends(UserService)
+    ],
+) -> JSONResponse:
+    return await service.login_user(user=user)
