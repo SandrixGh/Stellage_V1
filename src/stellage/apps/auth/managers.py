@@ -1,19 +1,24 @@
+import uuid
+
 from fastapi import Depends, HTTPException, status
-from sqlalchemy import insert, update
+from sqlalchemy import insert, update, select
 from sqlalchemy.exc import IntegrityError
 
-from stellage.apps.auth.schemas import CreateUser, UserReturnData
+from stellage.apps.auth.schemas import CreateUser, UserReturnData, GetUserWithIDAndEmail
 from stellage.core.core_dependencies.db_dependency import DBDependency
+from stellage.core.core_dependencies.redis_dependency import RedisDependency
 from stellage.database.models import User
 
 
 class UserManager:
     def __init__(
         self,
-        db: DBDependency = Depends(DBDependency)
+        db: DBDependency = Depends(DBDependency),
+        redis: RedisDependency = Depends(RedisDependency),
     ) -> None:
         self.db = db
         self.model = User
+        self.redis = redis
 
     async def create_user(
         self,
@@ -45,3 +50,30 @@ class UserManager:
             )
             await session.execute(query)
             await session.commit()
+
+
+    async def get_user_by_email(self, email: str) -> GetUserWithIDAndEmail | None:
+        async with self.db.db_session() as session:
+            query = select(
+                self.model.id,
+                self.model.email,
+                self.model.hashed_password
+            ).where(self.model.email == email)
+
+            result = await session.execute(query)
+            user = result.mappings().first()
+
+            if user:
+                return GetUserWithIDAndEmail(**user)
+
+            return None
+
+
+    async def store_access_token(
+        self,
+        user_id: uuid.UUID,
+        token: str,
+        session_id: str,
+    ) -> None:
+        async with self.redis.get_client() as client:
+            await client.set(f"{user_id}:{session_id}", token)
