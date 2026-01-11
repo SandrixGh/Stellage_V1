@@ -110,3 +110,11 @@ class UserManager:
 
             return None
 
+
+    async def revoke_access_token(
+        self,
+        user_id: uuid.UUID | str,
+        session_id: str,
+    ) -> None:
+        async with self.redis.get_client() as client:
+            return await client.delete(f"{user_id}:{session_id}")
