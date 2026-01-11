@@ -3,7 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, status, Depends
 from starlette.responses import JSONResponse
 
-from stellage.apps.auth.schemas import UserReturnData, AuthUser
+from stellage.apps.auth.depends import get_current_user
+from stellage.apps.auth.schemas import UserReturnData, AuthUser, UserVerifySchema
 from stellage.apps.auth.services import UserService
 
 auth_router = APIRouter(
@@ -54,3 +55,34 @@ async def login_user(
     ],
 ) -> JSONResponse:
     return await service.login_user(user=user)
+
+
+@auth_router.get(
+    path="/logout",
+    status_code=status.HTTP_200_OK,
+)
+async def logout(
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ],
+    service: Annotated[
+        UserService,
+        Depends(UserService)
+    ],
+) -> JSONResponse:
+    return await service.logout_user(user=user)
+
+
+@auth_router.get(
+    path="/get-user",
+    status_code=status.HTTP_200_OK,
+    response_model=UserVerifySchema,
+)
+async def get_auth_user(
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ],
+) -> UserVerifySchema:
+    return user
