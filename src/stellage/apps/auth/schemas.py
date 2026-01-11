@@ -34,3 +34,7 @@ class UserReturnData(GetUserByID, GetUserByEmail):
 
 class GetUserWithIDAndEmail(GetUserByID, CreateUser):
     pass
+
+
+class UserVerifySchema(GetUserByID, GetUserByEmail):
+    session_id: str | uuid.UUID | None = None
