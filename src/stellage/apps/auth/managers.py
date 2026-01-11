@@ -1,10 +1,11 @@
 import uuid
 
+from dns.e164 import query
 from fastapi import Depends, HTTPException, status
 from sqlalchemy import insert, update, select
 from sqlalchemy.exc import IntegrityError
 
-from stellage.apps.auth.schemas import CreateUser, UserReturnData, GetUserWithIDAndEmail
+from stellage.apps.auth.schemas import CreateUser, UserReturnData, GetUserWithIDAndEmail, UserVerifySchema
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.core.core_dependencies.redis_dependency import RedisDependency
 from stellage.database.models import User
@@ -77,3 +78,35 @@ class UserManager:
     ) -> None:
         async with self.redis.get_client() as client:
             await client.set(f"{user_id}:{session_id}", token)
+
+
+    async def get_access_token(
+        self,
+        user_id: str |uuid.UUID,
+        session_id: str,
+    ) -> str | None:
+        async with self.redis.get_client() as client:
+            return await client.get(f"{user_id}:{session_id}")
+
+
+    async def get_user_by_id(
+        self,
+        user_id: str | uuid.UUID,
+    ) -> UserVerifySchema | None:
+        async with self.db.db_session() as session:
+            query = (
+                select(
+                    self.model.id,
+                    self.model.email,
+                )
+                .where(self.model.id == user_id)
+            )
+
+            result = await session.execute(query)
+            user = result.mappings().one_or_none()
+
+            if user:
+                return UserVerifySchema(**user)
+
+            return None
+
