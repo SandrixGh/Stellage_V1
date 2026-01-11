@@ -4,7 +4,7 @@ from starlette.responses import JSONResponse
 
 from stellage.apps.auth.handlers import AuthHandler
 from stellage.apps.auth.managers import UserManager
-from stellage.apps.auth.schemas import AuthUser, CreateUser, UserReturnData
+from stellage.apps.auth.schemas import AuthUser, CreateUser, UserReturnData, UserVerifySchema
 from stellage.core.settings import settings
 
 from .tasks import send_confirmation_email
@@ -86,3 +86,17 @@ class UserService:
 
         return response
 
+
+    async def logout_user(
+        self,
+        user: UserVerifySchema,
+    ) -> JSONResponse:
+        await self.manager.revoke_access_token(
+            user_id=user.id,
+            session_id=user.session_id,
+        )
+
+        response = JSONResponse(content={"message": "Logged out"})
+        response.delete_cookie(key="Authorization")
+
+        return response
