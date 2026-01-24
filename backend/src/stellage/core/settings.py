@@ -60,4 +60,6 @@ class AppSettings(BaseAppSettings):
 
     access_token_expire: int
 
+    confirmation_code_length: int
+
 settings = AppSettings()
