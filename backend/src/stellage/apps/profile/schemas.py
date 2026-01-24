@@ -6,7 +6,7 @@ class ChangeEmailRequest(BaseModel):
     new_email: EmailStr
 
 
-class ConfirmationCodeRequest():
+class ConfirmationCodeRequest(BaseModel):
     email: EmailStr
     confirmation_code: str
 
