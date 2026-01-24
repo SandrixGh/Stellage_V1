@@ -6,6 +6,7 @@ from stellage.apps.auth.handlers import AuthHandler
 from stellage.apps.auth.schemas import UserVerifySchema
 from stellage.apps.profile.managers import ProfileManager
 from stellage.apps.profile.schemas import ChangeEmailRequest, ConfirmationCodeRequest, ChangePasswordRequest
+from stellage.apps.profile.tasks import send_confirmation_code
 from stellage.core.settings import settings
 
 
@@ -39,6 +40,10 @@ class ProfileService:
         )
 
         await self.manager.store_confirmation_code(
+            confirmation_code_request=confirmation_code_request
+        )
+
+        send_confirmation_code.delay(
             confirmation_code_request=confirmation_code_request
         )
 
