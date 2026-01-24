@@ -1,4 +1,6 @@
 import datetime
+import random
+import string
 import uuid
 
 import jwt
@@ -75,3 +77,10 @@ class AuthHandler:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token"
             )
+
+    @staticmethod
+    async def generate_confirmation_code(
+        length: int
+    ) -> str:
+        characters =string.ascii_uppercase + string.digits
+        return "".join(random.choices(characters, k=length))
