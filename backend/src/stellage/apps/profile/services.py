@@ -44,7 +44,8 @@ class ProfileService:
         )
 
         send_confirmation_code.delay(
-            confirmation_code_request=confirmation_code_request
+            to_email=str(data.new_email),
+            confirmation_code=confirmation_code
         )
 
         response = JSONResponse(
