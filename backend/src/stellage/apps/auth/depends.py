@@ -44,4 +44,6 @@ async def get_current_user(
             detail="User not found"
         )
 
+    user.session_id = session_id
+
     return user
