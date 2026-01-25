@@ -5,11 +5,14 @@ celery_app = Celery(
     main="stellage",
     broker=settings.redis_settings.redis_url,
     backend=settings.redis_settings.redis_url,
-    include=["stellage.apps"]
 )
 
 celery_app.autodiscover_tasks(
-    packages=["stellage.apps"],
-    force=True
+    packages=[
+        "stellage.apps.auth",
+        "stellage.apps.profile"
+    ],
+    related_name="tasks",
+    force=True,
 )
 
