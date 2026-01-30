@@ -1,9 +1,44 @@
-function App() {
-  return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+import { useEffect } from "react";
+import { useAuthStore } from "./store/useAuthStore";
+import { LoginPage } from "./pages/LoginPage";
+import "./App.css";
 
+function App() {
+  const { checkAuth, isInitialized, isAuthenticated, user, logout } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  if (!isInitialized) {
+    return (
+      <div className="loader">
+        Загрузка...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  return (
+    <div className="container">
+      <div className="card">
+        <h1>Личный кабинет</h1>
+        <p className="user-info">
+          Вы вошли как: 
+          <strong>{user?.email}</strong>
+        </p>
+        <button
+          onClick={logout}
+          className="btn-logout"
+        >
+          Выйти из системы
+        </button>
+      </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
