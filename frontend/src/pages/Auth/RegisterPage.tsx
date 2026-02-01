@@ -1,9 +1,9 @@
 import { useState } from "react"
-import { api } from "../api/instance";
+import { api } from "../../api/instance";
 import './Auth.css';
-import { AuthForm } from "../components/Auth/AuthForm";
-import type { AuthInputProps } from "../types/Auth/AuthInput";
-import { AuthCard } from "../components/Auth/AuthCard";
+import { AuthForm } from "../../components/Auth/AuthForm";
+import type { AuthInputProps } from "../../types/Auth/AuthInput";
+import { AuthCard } from "../../components/Auth/AuthCard";
 
 export const RegisterPage = ({ onSwitch }: { onSwitch: () => void }) => {
     const [email, setEmail] = useState("");
@@ -55,9 +55,9 @@ export const RegisterPage = ({ onSwitch }: { onSwitch: () => void }) => {
             {error && <div className="error-message">{error}</div>}
             <AuthForm
                 onSubmit={handleSubmit}
-                emailData={{ field: email, setField: setEmail, label: "email", type: "email", }}
-                passwordData={{ field: password, setField: setPassword, label: "password", type: "password", }}
-                buttonContent="Войти"
+                emailData={{ field: email, setField: setEmail, label: "Еmail", type: "email", }}
+                passwordData={{ field: password, setField: setPassword, label: "Пароль", type: "password", }}
+                buttonContent="Зарегестрироваться"
             />
         </AuthCard>
     )

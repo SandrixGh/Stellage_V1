@@ -1,6 +1,6 @@
 import type { AuthFormProps } from "../../types/Auth/AuthForm";
 import { AuthInput } from "./AuthInput";
-import "../../pages/Auth.css"
+import "../../pages/Auth/Auth.css"
 
 export const AuthForm = ({onSubmit, emailData, passwordData, buttonContent}: AuthFormProps) => {
     return (

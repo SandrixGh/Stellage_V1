@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "./store/useAuthStore";
-import { LoginPage } from "./pages/LoginPage";
+import { LoginPage } from "./pages/Auth/LoginPage";
 import "./App.css";
-import { RegisterPage } from "./pages/RegisterPage";
+import { RegisterPage } from "./pages/Auth/RegisterPage";
+import { MainPage } from "./pages/Main/MainPage";
 
 function App() {
   const { checkAuth, isInitialized, isAuthenticated, user, logout } = useAuthStore();
@@ -29,19 +30,7 @@ function App() {
 
   return (
     <div className="container">
-      <div className="card">
-        <h1>Личный кабинет</h1>
-        <p className="user-info">
-          Вы вошли как: 
-          <strong>{user?.email}</strong>
-        </p>
-        <button
-          onClick={logout}
-          className="btn-logout"
-        >
-          Выйти из системы
-        </button>
-      </div>
+      <MainPage />
     </div>
   );
 }
