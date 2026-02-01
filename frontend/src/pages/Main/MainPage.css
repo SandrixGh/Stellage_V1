@@ -1,0 +1,11 @@
+.main-page {
+    display: block;
+    min-height: 100vh;
+    width: 100%;
+    background-color: #f4f5f0;
+}
+
+.header {
+    width: 100%;
+    box-sizing: border-box;
+}
