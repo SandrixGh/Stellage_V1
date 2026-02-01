@@ -86,3 +86,22 @@ async def get_auth_user(
     ],
 ) -> UserVerifySchema:
     return user
+
+
+@auth_router.get(
+    path="/delete-account",
+    status_code=status.HTTP_200_OK
+)
+async def delete_account(
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ],
+    service: Annotated[
+        UserService,
+        Depends(UserService)
+    ],
+) -> JSONResponse:
+    return await service.delete_account(
+        user=user,
+    )
