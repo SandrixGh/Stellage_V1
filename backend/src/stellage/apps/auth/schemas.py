@@ -13,6 +13,10 @@ class GetUserByEmail(BaseModel):
     email: EmailStr
 
 
+class VerificationStatus(BaseModel):
+    is_verified: bool = False
+
+
 class AuthUser(GetUserByEmail):
     password: Annotated[str, StringConstraints(
         min_length=8,
@@ -24,15 +28,14 @@ class CreateUser(GetUserByEmail):
     hashed_password: str
 
 
-class UserReturnData(GetUserByID, GetUserByEmail):
+class UserReturnData(GetUserByID, GetUserByEmail, VerificationStatus):
     is_active: bool = False
-    is_verified: bool = False
     is_superuser: bool = False
     created_at: datetime.datetime
     updated_at: datetime.datetime
 
 
-class GetUserWithIDAndEmail(GetUserByID, CreateUser):
+class GetUserWithIDAndEmail(GetUserByID, CreateUser, VerificationStatus):
     pass
 
 
