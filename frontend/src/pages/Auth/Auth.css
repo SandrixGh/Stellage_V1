@@ -108,6 +108,51 @@
     text-align: center;
 }
 
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 12px 16px;
+    padding-right: 45px;
+    border: 1px solid #000000;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #272a02;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    background-color: #c1c5a8;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    color: rgba(54, 33, 5, 0.5);
+}
+
+.password-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: rgba(54, 33, 5, 1);
+}
+
+.password-toggle.active {
+    color: #362105;
+}
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover, 
 input:-webkit-autofill:focus {

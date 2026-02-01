@@ -1,5 +1,5 @@
 import type { AuthCardProps } from "../../types/Auth/AuthCard";
-import "../../pages/Auth.css"
+import "../../pages/Auth/Auth.css"
 
 export const AuthCard = ({title, children, footer}: AuthCardProps) => {
     return (
