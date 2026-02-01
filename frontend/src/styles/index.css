@@ -5,12 +5,33 @@
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  /* Убираем flex и центровку */
+  display: block; 
   min-width: 320px;
   min-height: 100vh;
+  /* Убираем горизонтальный скролл на всякий случай */
+  overflow-x: hidden; 
 }
 
 #root {
   width: 100%;
+  min-height: 100vh;
+}
+
+/* Твой красивый скролл заработает, как только контента станет больше высоты экрана */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a2027; 
+}
+
+::-webkit-scrollbar-thumb {
+    background: #362105; 
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #c1c5a8; 
 }
