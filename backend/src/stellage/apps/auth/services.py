@@ -51,8 +51,14 @@ class UserService:
     async def login_user(self, user: AuthUser) -> JSONResponse:
         exist_user = await self.manager.get_user_by_email(email=str(user.email))
 
+        if not exist_user.is_verified:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Exist user is not verified",
+            )
+
         is_invalid_exist_user: bool = (
-            exist_user is None
+            not exist_user
             or not await self.handler.verify_password(
                 raw_password=user.password,
                 hashed_password=exist_user.hashed_password,
