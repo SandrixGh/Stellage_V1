@@ -10,9 +10,9 @@
     background: rgb(230, 229, 213);
     padding: 40px;
     border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
     width: 100%;
     max-width: 400px;
+    box-sizing: border-box;
 }
 
 .auth-card h2 {
@@ -83,6 +83,31 @@
     text-align: center;
 }
 
+.auth-footer {
+    margin-top: 20px;
+    text-align: center;
+    color: #23262a;
+}
+
+.auth-link {
+    color: #362105;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-left: 5px;
+}
+
+.success-message {
+    color: #fef2f2;
+    background: #025310aa;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e2fee2;
+    margin-bottom: 20px;
+    font-size: 14px;
+    text-align: center;
+}
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover, 
 input:-webkit-autofill:focus {
@@ -92,6 +117,8 @@ input:-webkit-autofill:focus {
     transition: background-color 5000s ease-in-out 0s;
     /* Добавляем внутреннюю тень, чтобы имитировать цвет фона, если переход не сработал */
     box-shadow: inset 0 0 0 1000px #c1c5a8;
+    font-size: 16px;
+    font-weight: 600;
 }
 
 /* Фикс для темной темы, если браузер пытается навязать свои стили */

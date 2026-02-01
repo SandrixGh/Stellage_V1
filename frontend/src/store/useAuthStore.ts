@@ -1,40 +1,43 @@
 import { create } from "zustand";
-import type { UserVerifySchema } from "../types/auth";
+import type { UserReturnData, UserVerifySchema} from "../types/Auth/auth";
 import { api } from "../api/instance";
 
 interface AuthState {
     user: UserVerifySchema | null;
-    isAuthenticated: boolean;
-    isInitialized: boolean;
+    userLogin: UserReturnData | null;
 
     login: (email: string, password: string) => Promise<void>;
+
     logout: () => Promise<void>;
     checkAuth: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
     user: null,
-    isAuthenticated: false,
-    isInitialized: false,
+    userLogin: null,
 
     checkAuth: async () => {
         try {
             const res = await api.get<UserVerifySchema>("/auth/get-user");
-            set({user: res.data, isAuthenticated: true, isInitialized: true});
+            set({user: res.data});
         } catch {
-            set({ user: null, isAuthenticated: false, isInitialized: true });
+            set({ user: null});
         }
     },
 
     login: async (email, password) => {
-        await api.post("/auth/login", {email, password});
-        const res = await api.get<UserVerifySchema>("/auth/get-user");
-        set({user: res.data, isAuthenticated: true})
+        try {
+            const res = await api.post<UserReturnData>("/auth/login", {email, password});
+            set({userLogin: res.data});
+        } catch {
+            set({userLogin: null});
+        }
+        
     },
 
     logout: async () => {
         await api.get('/auth/logout');
-        set({ user: null, isAuthenticated: false });
+        set({ user: null});
     },
 }))
 

@@ -1,8 +1,10 @@
 import { useState } from "react"
 import { useAuthStore } from "../store/useAuthStore";
 import './Auth.css';
+import { AuthCard } from "../components/Auth/AuthCard";
+import { AuthForm } from "../components/Auth/AuthForm";
 
-export const LoginPage = () => {
+export const LoginPage = ({ onSwitch }: { onSwitch: () => void }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -22,44 +24,23 @@ export const LoginPage = () => {
     }
 
     return (
-        <div className="auth-container">
-            <div className="auth-card">
-                <h2 >
-                    Вход в Stellage
-                </h2>
-
-                {error && <div className="error-message">{error}</div>}
-
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>Email</label>
-                        <input
-                            type="email"
-                            placeholder="example@mail.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Пароль</label>
-                        <input
-                            type="password"
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        className="btn-primary"
-                    >
-                        Войти
-                    </button>
-                </form>
-            </div>
-        </div>
+        <AuthCard 
+            title="Вход в Stellage"
+            footer={
+                <>Ещё нет аккаунта? 
+                    <span className="auth-link" onClick={onSwitch}>
+                        Зарегистрироваться
+                    </span>
+                </>
+            }
+        >
+            {error && <div className="error-message">{error}</div>}
+            <AuthForm
+                onSubmit={handleSubmit}
+                emailData={{field: email, setField: setEmail, label: "email", type: "email",}}
+                passwordData={{field: password, setField: setPassword, label: "password", type: "password",}}
+                buttonContent="Войти"
+            />
+        </AuthCard>
     )
 }

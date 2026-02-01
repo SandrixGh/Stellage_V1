@@ -1,10 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "./store/useAuthStore";
 import { LoginPage } from "./pages/LoginPage";
 import "./App.css";
+import { RegisterPage } from "./pages/RegisterPage";
 
 function App() {
   const { checkAuth, isInitialized, isAuthenticated, user, logout } = useAuthStore();
+
+  const [isLoginView, setIsLoginView] = useState(true);
 
   useEffect(() => {
     checkAuth();
@@ -19,7 +22,9 @@ function App() {
   }
 
   if (!isAuthenticated) {
-    return <LoginPage />;
+    return isLoginView
+      ? <LoginPage onSwitch={() => setIsLoginView(false)}/>
+      : <RegisterPage onSwitch={() => setIsLoginView(true)}/>
   }
 
   return (
