@@ -59,16 +59,16 @@ class UserService:
             )
         )
 
-        if not exist_user.is_verified:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Exist user is not verified",
-            )
-
         if is_invalid_exist_user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Wrong email or password",
+            )
+
+        if not exist_user.is_verified:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Exist user is not verified",
             )
 
         token, session_id = await self.handler.create_access_token(
