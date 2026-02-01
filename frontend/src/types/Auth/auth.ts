@@ -1,16 +1,10 @@
-interface UserWithId {
+export interface UserVerifySchema {
     id: string;
-}
-
-interface UserWithEmail {
     email: string;
-}
-
-export interface UserVerifySchema extends UserWithId, UserWithEmail{
     session_id?: string | null;
 }
 
-export interface UserReturnData extends UserWithId, UserWithEmail{
+export interface UserReturnData extends UserVerifySchema {
     is_active: boolean;
     is_verified: boolean;
     is_superuser: boolean;
