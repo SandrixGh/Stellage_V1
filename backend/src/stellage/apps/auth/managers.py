@@ -58,7 +58,8 @@ class UserManager:
             query = select(
                 self.model.id,
                 self.model.email,
-                self.model.hashed_password
+                self.model.hashed_password,
+                self.model.is_verified,
             ).where(self.model.email == email)
 
             result = await session.execute(query)
