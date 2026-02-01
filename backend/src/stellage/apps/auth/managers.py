@@ -2,7 +2,7 @@ import uuid
 
 from dns.e164 import query
 from fastapi import Depends, HTTPException, status
-from sqlalchemy import insert, update, select
+from sqlalchemy import insert, update, select, delete
 from sqlalchemy.exc import IntegrityError
 
 from stellage.apps.auth.schemas import CreateUser, UserReturnData, GetUserWithIDAndEmail, UserVerifySchema
@@ -119,3 +119,14 @@ class UserManager:
     ) -> None:
         async with self.redis.get_client() as client:
             return await client.delete(f"{user_id}:{session_id}")
+
+
+    async def delete_account(
+        self,
+        user_id: uuid.UUID | str,
+    ) -> None:
+        async with self.db.db_session() as session:
+            query = delete(self.model).where(self.model.id == user_id)
+
+            await session.execute(query)
+            await session.commit()
