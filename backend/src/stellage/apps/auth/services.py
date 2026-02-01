@@ -51,12 +51,6 @@ class UserService:
     async def login_user(self, user: AuthUser) -> JSONResponse:
         exist_user = await self.manager.get_user_by_email(email=str(user.email))
 
-        if not exist_user.is_verified:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Exist user is not verified",
-            )
-
         is_invalid_exist_user: bool = (
             not exist_user
             or not await self.handler.verify_password(
@@ -64,6 +58,12 @@ class UserService:
                 hashed_password=exist_user.hashed_password,
             )
         )
+
+        if not exist_user.is_verified:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Exist user is not verified",
+            )
 
         if is_invalid_exist_user:
             raise HTTPException(
@@ -105,4 +105,20 @@ class UserService:
         response = JSONResponse(content={"message": "Logged out"})
         response.delete_cookie(key="Authorization")
 
+        return response
+
+
+    async def delete_account(
+        self,
+        user: UserVerifySchema,
+    ) -> JSONResponse:
+        await self.manager.revoke_access_token(
+            user_id=user.id,
+            session_id=user.session_id,
+        )
+        await self.manager.delete_account(
+            user_id=user.id,
+        )
+
+        response = JSONResponse(content={"message": "Deleting the account was successful"})
         return response
