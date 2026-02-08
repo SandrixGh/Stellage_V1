@@ -6,12 +6,12 @@ import { RegisterPage } from "./pages/Auth/RegisterPage";
 import { MainPage } from "./pages/Main/MainPage";
 
 function App() {
-  const { checkAuth, isInitialized, isAuthenticated, user, logout } = useAuthStore();
+  const { getUser, isInitialized, isAuthenticated, user, logout } = useAuthStore();
 
   const [isLoginView, setIsLoginView] = useState(true);
 
   useEffect(() => {
-    checkAuth();
+    getUser();
   }, []);
 
   if (!isInitialized) {

@@ -1,0 +1,93 @@
+.user-modal-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100vw;
+    height: 100vh;
+    background: transparent;
+    z-index: 999;
+}
+
+.user-modal-content {
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    width: 280px;
+    background-color: #1a2027;
+    border: 1px solid #362105;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0,0,0.5);
+    padding: 16px;
+    color: #e6e5d5;
+    animation: slideIn 0.2s ease-out forwards;
+    user-select: none;
+}
+
+.user-modal-content.slide-out {
+    animation: slideOut 0.2s ease-in forwards;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(193, 197, 168, 0.2);
+    padding-bottom: 8px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: #c1c5a8;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.user-info-section {
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+.modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.modal-btn {
+    background: none;
+    border: none;
+    background-color: #d1d4c1;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+    user-select: none;
+}
+
+.modal-btn:hover {
+    background-color: #bcc1a0;
+}
+
+.delete-btn { color: #6a0303; font-size: 12px; margin-top: 10px; opacity: 0.8; }
+
+.delete-btn:hover { background: rgba(239, 68, 68, 0.1); opacity: 1; }
+
+hr { border: 0; border-top: 1px solid rgba(193, 197, 168, 0.1); margin: 8px 0; }
