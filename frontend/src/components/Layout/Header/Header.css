@@ -1,9 +1,8 @@
 .header {
     width: 100%;
-    box-sizing: border-box;
+    height: 64px;
     background-color: #1a2027;
     padding: 0 24px;
-    height: 64px;
     display: flex;
     align-items: center;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
@@ -14,18 +13,35 @@
 
 .header-container {
     width: 100%;
-    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin: 0 auto;
+    /* Если хочешь ограничить ширину контента хедера, раскомментируй: */
+    /* max-width: 1400px; */
 }
 
-.header-logo {
-    text-decoration: none;
-    font-size: 22px;
+.header-logo-wrapper {
+     display: flex;
+     align-items: center;
+     gap: 12px;
+     text-decoration: none;
+     color:#e6e5d5;
+}
+
+.header-logo-title {
+    font-size: 28px;
     font-weight: 700;
-    color: #e6e5d5;
+    text-decoration: none;
+    line-height: 1;
     letter-spacing: 1px;
+    cursor: default;
+}
+
+.header-logo-icon {
+    display: block;
+    height: 42px;
+    width: auto;
 }
 
 .header-nav {
@@ -38,14 +54,14 @@
     text-decoration: none;
     font-weight: 600;
     font-size: 15px;
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
     padding: 8px 0;
     border-bottom: 2px solid transparent;
 }
 
 .nav-link:hover, .nav-link.active {
     color: #e8ebd0;
-    border-bottom-color: #362105;
+    border-bottom-color: #c1c5a8;
 }
 
 .header-actions {
@@ -58,8 +74,17 @@
     align-items: center;
     gap: 12px;
     background: rgba(230, 229, 213, 0.1);
-    padding: 6px 12px;
+    padding: 6px 28px;
     border-radius: 20px;
+    border: 1px solid rgba(193, 197, 168, 0.2);
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+}
+
+.user-profile:hover {
+    color: #fef2f2;
+    background: rgba(230, 229, 213, 0.2);
 }
 
 .user-email {
@@ -72,14 +97,19 @@
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 18px;
     color: #c1c5a8;
     display: flex;
     align-items: center;
     transition: transform 0.3s ease;
+    padding: 0;
 }
 
 .settings-btn:hover {
     color: #fef2f2;
-    transform: rotate(45deg);
+    transform: rotate(90deg);
+}
+.user-profile:hover .settings-btn {
+    color: #fef2f2;
+    transform: rotate(90deg);
 }

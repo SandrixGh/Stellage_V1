@@ -3,6 +3,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import './Auth.css';
 import { AuthCard } from "../../components/Auth/AuthCard";
 import { AuthForm } from "../../components/Auth/AuthForm";
+import { AuthLayout } from "../../components/Auth/AuthLayout";
 
 export const LoginPage = ({ onSwitch }: { onSwitch: () => void }) => {
     const [email, setEmail] = useState("");
@@ -24,23 +25,25 @@ export const LoginPage = ({ onSwitch }: { onSwitch: () => void }) => {
     }
 
     return (
-        <AuthCard 
-            title="Вход в Stellage"
-            footer={
-                <>Ещё нет аккаунта? 
-                    <span className="auth-link" onClick={onSwitch}>
-                        Зарегистрироваться
-                    </span>
-                </>
-            }
-        >
-            {error && <div className="error-message">{error}</div>}
-            <AuthForm
-                onSubmit={handleSubmit}
-                emailData={{field: email, setField: setEmail, label: "Email", type: "email",}}
-                passwordData={{field: password, setField: setPassword, label: "Пароль", type: "password",}}
-                buttonContent="Войти"
-            />
-        </AuthCard>
+        <AuthLayout>
+            <AuthCard
+                title="Вход"
+                footer={
+                    <>Ещё нет аккаунта?
+                        <span className="auth-link" onClick={onSwitch}>
+                            Зарегистрироваться
+                        </span>
+                    </>
+                }
+            >
+                {error && <div className="error-message">{error}</div>}
+                <AuthForm
+                    onSubmit={handleSubmit}
+                    emailData={{ field: email, setField: setEmail, label: "Email", type: "email", }}
+                    passwordData={{ field: password, setField: setPassword, label: "Пароль", type: "password", }}
+                    buttonContent="Войти"
+                />
+            </AuthCard>
+        </AuthLayout>
     )
 }

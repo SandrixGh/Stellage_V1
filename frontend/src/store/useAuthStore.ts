@@ -9,15 +9,16 @@ interface AuthState {
 
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
-    checkAuth: () => Promise<void>;
+    delete_account: () => Promise<void>;
+    getUser: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
     user: null,
     isAuthenticated: false,
     isInitialized: false,
 
-    checkAuth: async () => {
+    getUser: async () => {
         try {
             const res = await api.get<UserVerifySchema>("/auth/get-user");
             set({user: res.data, isAuthenticated: true, isInitialized: true});
@@ -28,13 +29,24 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     login: async (email, password) => {
         await api.post("/auth/login", {email, password});
-        const res = await api.get<UserVerifySchema>("/auth/get-user");
-        set({user: res.data, isAuthenticated: true})
+        await get().getUser();
     },
 
     logout: async () => {
-        await api.get('/auth/logout');
-        set({ user: null, isAuthenticated: false });
+        try {
+            await api.get('/auth/logout');
+        } finally {
+            set({ user: null, isAuthenticated: false });
+        }
+    },
+
+    delete_account: async () => {
+        const user = get();
+
+        if(user) {
+            await api.get("/auth/delete-account");
+            set({ user: null, isAuthenticated: false });
+        }
     },
 }))
 

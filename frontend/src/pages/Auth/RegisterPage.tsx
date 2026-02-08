@@ -2,8 +2,8 @@ import { useState } from "react"
 import { api } from "../../api/instance";
 import './Auth.css';
 import { AuthForm } from "../../components/Auth/AuthForm";
-import type { AuthInputProps } from "../../types/Auth/AuthInput";
 import { AuthCard } from "../../components/Auth/AuthCard";
+import { AuthLayout } from "../../components/Auth/AuthLayout";
 
 export const RegisterPage = ({ onSwitch }: { onSwitch: () => void }) => {
     const [email, setEmail] = useState("");
@@ -42,23 +42,23 @@ export const RegisterPage = ({ onSwitch }: { onSwitch: () => void }) => {
     }
 
     return (
-        <AuthCard
-            title="Регистрация в Stellage"
-            footer={
-                <>Ещё нет аккаунта? 
-                    <span className="auth-link" onClick={onSwitch}>
-                        Войти
-                    </span>
-                </>
-            }
-        >
-            {error && <div className="error-message">{error}</div>}
-            <AuthForm
-                onSubmit={handleSubmit}
-                emailData={{ field: email, setField: setEmail, label: "Еmail", type: "email", }}
-                passwordData={{ field: password, setField: setPassword, label: "Пароль", type: "password", }}
-                buttonContent="Зарегестрироваться"
-            />
-        </AuthCard>
-    )
+        <AuthLayout>
+            <AuthCard
+                title="Регистрация"
+                footer={
+                    <>Уже есть аккаунт? 
+                        <span className="auth-link" onClick={onSwitch}> Войти</span>
+                    </>
+                }
+            >
+                {error && <div className="error-message">{error}</div>}
+                <AuthForm
+                    onSubmit={handleSubmit}
+                    emailData={{ field: email, setField: setEmail, label: "Email", type: "email" }}
+                    passwordData={{ field: password, setField: setPassword, label: "Пароль", type: "password" }}
+                    buttonContent="Зарегистрироваться"
+                />
+            </AuthCard>
+        </AuthLayout>
+    );
 }
