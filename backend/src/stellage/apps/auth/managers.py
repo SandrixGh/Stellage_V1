@@ -1,6 +1,5 @@
 import uuid
 
-from dns.e164 import query
 from fastapi import Depends, HTTPException, status
 from sqlalchemy import insert, update, select, delete
 from sqlalchemy.exc import IntegrityError
