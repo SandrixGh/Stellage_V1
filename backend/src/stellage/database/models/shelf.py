@@ -30,5 +30,11 @@ class Shelf(IDMixin, TimestampMixin, Base):
         nullable=False,
     )
 
+    is_public: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        nullable=False,
+    )
+
     def __repr__(self):
         return f"<Shelf(title={self.title}, user_id={self.user_id}, is_main={self.is_main})>"
