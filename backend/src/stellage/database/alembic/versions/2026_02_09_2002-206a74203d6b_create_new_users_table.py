@@ -1,8 +1,8 @@
-"""Create shelves table
+"""Create new users table
 
-Revision ID: c81f26d2c2c0
+Revision ID: 206a74203d6b
 Revises: 5c76c026bdc7
-Create Date: 2026-02-08 22:09:09.439704
+Create Date: 2026-02-09 20:02:26.556797
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'c81f26d2c2c0'
+revision: str = '206a74203d6b'
 down_revision: Union[str, Sequence[str], None] = '5c76c026bdc7'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -33,17 +33,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
-    op.create_table('shelfs',
-    sa.Column('user_id', sa.UUID(), nullable=False),
-    sa.Column('title', sa.String(length=100), nullable=False),
-    sa.Column('is_main', sa.Boolean(), nullable=False),
-    sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_shelfs_user_id'), 'shelfs', ['user_id'], unique=False)
     op.drop_table('user')
     # ### end Alembic commands ###
 
@@ -63,7 +52,5 @@ def downgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('user_pkey')),
     sa.UniqueConstraint('email', name=op.f('user_email_key'), postgresql_include=[], postgresql_nulls_not_distinct=False)
     )
-    op.drop_index(op.f('ix_shelfs_user_id'), table_name='shelfs')
-    op.drop_table('shelfs')
     op.drop_table('users')
     # ### end Alembic commands ###
