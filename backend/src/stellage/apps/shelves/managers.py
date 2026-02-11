@@ -44,9 +44,10 @@ class ShelfManager:
                 result = await session.execute(query)
                 await session.commit()
                 shelf_data = result.scalar_one()
-                return ShelfReturnData(**shelf_data.__dict__)
+                return ShelfReturnData.model_validate(shelf_data)
 
             except IntegrityError:
+                await session.rollback()
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Shelf already exist"
