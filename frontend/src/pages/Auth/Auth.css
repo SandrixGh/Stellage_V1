@@ -66,7 +66,7 @@
 .btn-primary {
     width: 100%;
     padding: 0.75rem;
-    background-color: #362105;
+    background-color: #936639;
     color: rgb(245, 231, 211);
     border: none;
     border-radius: 12px;
@@ -78,7 +78,7 @@
 }
 
 .btn-primary:hover {
-    background-color: #261704;
+    background-color: #7f4f24;
 }
 
 .error-message {
