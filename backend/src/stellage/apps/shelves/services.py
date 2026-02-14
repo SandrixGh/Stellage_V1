@@ -23,9 +23,10 @@ class ShelfService:
         user: UserVerifySchema,
         shelf: CreateShelf,
     ) -> ShelfReturnData:
-        if shelf.is_main:
-            await self.manager.reset_main_shelf(
-                user_id=user.id,
+        is_main_shelf: bool = shelf.is_main
+        if is_main_shelf:
+            await self.manager.delete_main_shelf_cache(
+                user_id=user.id
             )
 
         created_shelf = await self.manager.create_shelf(
@@ -36,6 +37,9 @@ class ShelfService:
         await self.manager.store_shelf_to_redis(
             shelf=created_shelf
         )
+
+        if is_main_shelf:
+            await self.manager.store_main_shelf_to_redis(shelf=created_shelf)
 
         return created_shelf
 
