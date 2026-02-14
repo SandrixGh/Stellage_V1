@@ -2,16 +2,15 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, update
 from sqlalchemy.exc import IntegrityError
 
-from stellage.apps.auth.depends import get_current_user
-from stellage.apps.auth.schemas import UserVerifySchema
-from stellage.apps.shelves.schemas import CreateShelf, ShelfReturnData, GetShelfByTitle
+from stellage.apps.shelves.schemas import CreateShelf, ShelfReturnData, GetShelfByTitle, GetShelfIdAndTitleAndOwner
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.core.core_dependencies.redis_dependency import RedisDependency
 from stellage.database.models import Shelf
 
+from .utils import unpack_from_json, pack_to_json
 
 class ShelfManager:
     def __init__(
@@ -70,9 +69,28 @@ class ShelfManager:
 
     async def store_shelf_to_redis(
         self,
-        shelf_title: str,
-        user_id: uuid.UUID | str,
-        shelf_id: uuid.UUID | str,
+        shelf: ShelfReturnData,
     ) -> None:
         async with self.redis.get_client() as client:
-            return await client.set(f"{user_id}:{shelf_id}", shelf_title)
+            key = f"{shelf.user_id}:{shelf.id}"
+            return await client.set(key, pack_to_json(shelf), ex=3600)
+
+
+
+    async def reset_main_shelf(
+        self,
+        user_id: uuid.UUID | str ,
+    ) -> None:
+        async with self.db.db_session() as session:
+            query = (
+                update(self.model)
+                .where(
+                    self.model.user_id == user_id,
+                    self.model.is_main == True,
+                )
+                .values(is_main=False)
+            )
+            await session.execute(query)
+            await session.commit()
+
+
