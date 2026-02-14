@@ -3,7 +3,7 @@ from typing import Any
 from pydantic import BaseModel
 
 
-def pact_to_json(data: BaseModel) -> str:
+def pack_to_json(data: BaseModel) -> str:
     return data.model_dump_json()
 
 def unpack_from_json(
