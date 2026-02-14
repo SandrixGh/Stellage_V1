@@ -32,3 +32,23 @@ async def create_shelf(
         user=user,
         shelf=shelf,
     )
+
+
+@router.get(
+    path="/get-shelves",
+    status_code=status.HTTP_200_OK,
+    response_model=list[ShelfReturnData]
+)
+async def get_shelves(
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ],
+    service: Annotated[
+        ShelfService,
+        Depends(ShelfService)
+    ],
+) -> list[ShelfReturnData]:
+    return await service.get_shelves(
+        user=user,
+    )
