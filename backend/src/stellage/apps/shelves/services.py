@@ -36,3 +36,9 @@ class ShelfService:
 
         return created_shelf
 
+
+    async def get_shelves(
+        self,
+        user: UserVerifySchema
+    ) -> list[ShelfReturnData]:
+        return await self.manager.get_shelves(user_id=user.id)
