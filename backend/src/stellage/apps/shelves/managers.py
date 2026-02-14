@@ -2,7 +2,7 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
-from sqlalchemy import insert
+from sqlalchemy import insert, select
 from sqlalchemy.exc import IntegrityError
 
 from stellage.apps.auth.depends import get_current_user
@@ -52,6 +52,20 @@ class ShelfManager:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Shelf already exist"
                 )
+
+
+    async def get_shelves(
+        self,
+        user_id: uuid.UUID | str
+    ) -> list[ShelfReturnData]:
+        async with self.db.db_session() as session:
+            query = select(self.model).where(self.model.user_id == user_id)
+
+            result = await session.execute(query)
+
+            shelves = result.scalars().all()
+
+            return [ShelfReturnData.model_validate(shelf) for shelf in shelves]
 
 
     async def store_shelf_to_redis(
