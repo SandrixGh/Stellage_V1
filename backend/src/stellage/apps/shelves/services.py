@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 
 from stellage.apps.auth.schemas import UserVerifySchema
 from stellage.apps.shelves.managers import ShelfManager
@@ -49,3 +49,31 @@ class ShelfService:
         user: UserVerifySchema
     ) -> list[ShelfReturnData]:
         return await self.manager.get_shelves(user_id=user.id)
+
+
+    async def get_main_shelf(
+        self,
+        user: UserVerifySchema,
+    ) -> ShelfReturnData:
+        shelf_cached = await self.manager.get_main_shelf_from_cache(
+            user_id=user.id
+        )
+
+        if shelf_cached:
+            return shelf_cached
+
+        shelf_db = await self.manager.get_main_shelf(
+            user_id=user.id
+        )
+
+        if not shelf_db:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Main shelf not found or not exist"
+            )
+
+        await self.manager.store_main_shelf_to_redis(shelf=shelf_db)
+
+        await self.manager.store_shelf_to_redis(shelf=shelf_db)
+
+        return shelf_db
