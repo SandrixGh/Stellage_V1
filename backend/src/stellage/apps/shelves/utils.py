@@ -10,4 +10,4 @@ def unpack_from_json(
     json_str: str,
     schema: type[BaseModel]
 ) -> Any:
-    return schema.model_validate(json_str)
+    return schema.model_validate_json(json_str)

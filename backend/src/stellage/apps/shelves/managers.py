@@ -78,6 +78,40 @@ class ShelfManager:
             return [ShelfReturnData.model_validate(shelf) for shelf in shelves]
 
 
+    async def get_main_shelf(
+        self,
+        user_id: uuid.UUID | str,
+    ) -> ShelfReturnData | None:
+        async with self.db.db_session() as session:
+            query = (
+                select(self.model)
+                .where(
+                    self.model.user_id == user_id,
+                    self.model.is_main == True,
+                )
+            )
+
+            result = await session.execute(query)
+            shelf = result.scalar_one_or_none()
+
+            if shelf:
+                return ShelfReturnData.model_validate(shelf)
+
+            return None
+
+
+    async def get_main_shelf_from_cache(
+        self,
+        user_id: uuid.UUID | str,
+    ) -> ShelfReturnData | None:
+        async with self.redis.get_client() as client:
+            key = f"main_shelf:{user_id}"
+            data = await client.get(key)
+            if data:
+                return unpack_from_json(data, ShelfReturnData)
+            return None
+
+
     async def reset_main_shelf(
         self,
         user_id: uuid.UUID | str ,
