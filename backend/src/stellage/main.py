@@ -24,4 +24,4 @@ app.include_router(
 )
 
 def start():
-    uvicorn.run("stellage.main:app", reload=True)
+    uvicorn.run("stellage.main:app", reload=False)
