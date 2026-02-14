@@ -20,8 +20,16 @@ class GetShelfByTitle(BaseModel):
     ] = "Мой стеллаж"
 
 
+class GetShelfWithIdAndTitle(GetShelfByID, GetShelfByTitle):
+    pass
+
+
 class ShelfOwner(BaseModel):
     user_id: uuid.UUID
+
+
+class GetShelfIdAndTitleAndOwner(GetShelfWithIdAndTitle, ShelfOwner):
+    pass
 
 
 class ShelfFlags(BaseModel):
