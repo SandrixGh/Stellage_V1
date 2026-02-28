@@ -1,6 +1,9 @@
+import uuid
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
+from sqlalchemy.sql.functions import session_user
+from starlette.responses import JSONResponse
 
 from stellage.apps.auth.schemas import UserVerifySchema
 from stellage.apps.shelves.managers import ShelfManager
@@ -77,3 +80,64 @@ class ShelfService:
         await self.manager.store_shelf_to_redis(shelf=shelf_db)
 
         return shelf_db
+
+
+    async def get_shelf_by_id(
+        self,
+        user: UserVerifySchema,
+        shelf_id: uuid.UUID,
+    ) -> ShelfReturnData:
+        shelf_cached = await self.manager.get_shelf_from_cache(
+            user_id=user.id,
+            shelf_id=shelf_id
+        )
+
+        if shelf_cached:
+            return shelf_cached
+
+        shelf_db = await self.manager.get_shelf_by_id(
+            user_id=user.id,
+            shelf_id=shelf_id
+        )
+
+        if not shelf_db:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Shelf not found"
+            )
+
+        await self.manager.store_shelf_to_redis(
+            shelf=shelf_db
+        )
+
+        return shelf_db
+
+
+
+
+    async def delete_shelf(
+        self,
+        user: UserVerifySchema,
+        shelf_id: uuid.UUID
+    ) -> JSONResponse:
+
+
+        await self.manager.delete_main_shelf_cache(
+            user_id=user.id
+        )
+
+        await self.manager.delete_shelf_cache(
+            shelf_id=shelf_id,
+            user_id=user.id,
+        )
+
+        await self.manager.delete_shelf(
+            user_id=user.id,
+            shelf_id=shelf_id,
+        )
+
+        response = JSONResponse(
+            content={"detail": "Shelf was deleted successfully"}
+        )
+
+        return response
