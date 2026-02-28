@@ -1,9 +1,12 @@
+import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, status, Depends
+from starlette.responses import JSONResponse
 
 from stellage.apps.auth.depends import get_current_user
 from stellage.apps.auth.schemas import UserVerifySchema
+from stellage.apps.shelves.dependecies import get_current_main_shelf
 from stellage.apps.shelves.schemas import ShelfReturnData, CreateShelf
 from stellage.apps.shelves.services import ShelfService
 
@@ -60,6 +63,20 @@ async def get_shelves(
     response_model=ShelfReturnData
 )
 async def get_main_shelf(
+    main_shelf: Annotated[
+        ShelfReturnData,
+        Depends(get_current_main_shelf)
+    ]
+) -> ShelfReturnData:
+    return main_shelf
+
+
+@router.delete(
+    path="/delete-shelf",
+    status_code=status.HTTP_200_OK,
+)
+async def delete_shelf(
+    shelf_id: uuid.UUID | str,
     user: Annotated[
         UserVerifySchema,
         Depends(get_current_user)
@@ -68,7 +85,8 @@ async def get_main_shelf(
         ShelfService,
         Depends(ShelfService)
     ],
-) -> ShelfReturnData:
-    return await service.get_main_shelf(
-        user=user
+) -> JSONResponse:
+    return await service.delete_shelf(
+        user=user,
+        shelf_id=shelf_id,
     )
