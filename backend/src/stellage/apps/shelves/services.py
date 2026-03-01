@@ -2,7 +2,6 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
-from sqlalchemy.sql.functions import session_user
 from starlette.responses import JSONResponse
 
 from stellage.apps.auth.schemas import UserVerifySchema
@@ -21,32 +20,6 @@ class ShelfService:
         self.manager = manager
 
 
-    async def create_shelf(
-        self,
-        user: UserVerifySchema,
-        shelf: CreateShelf,
-    ) -> ShelfReturnData:
-        is_main_shelf: bool = shelf.is_main
-        if is_main_shelf:
-            await self.manager.delete_main_shelf_cache(
-                user_id=user.id
-            )
-
-        created_shelf = await self.manager.create_shelf(
-            user_id=user.id,
-            shelf=shelf
-        )
-
-        await self.manager.store_shelf_to_redis(
-            shelf=created_shelf
-        )
-
-        if is_main_shelf:
-            await self.manager.store_main_shelf_to_redis(shelf=created_shelf)
-
-        return created_shelf
-
-
     async def get_shelves(
         self,
         user: UserVerifySchema
@@ -54,32 +27,33 @@ class ShelfService:
         return await self.manager.get_shelves(user_id=user.id)
 
 
+    async def create_shelf(
+        self,
+        user: UserVerifySchema,
+        shelf: CreateShelf,
+    ) -> ShelfReturnData:
+        if len(await self.get_shelves(user=user)) >= 2:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="You already have 2 stellages"
+            )
+        return await self.manager.create_shelf(
+            user_id=user.id,
+            shelf=shelf
+        )
+
+
     async def get_main_shelf(
         self,
         user: UserVerifySchema,
     ) -> ShelfReturnData:
-        shelf_cached = await self.manager.get_main_shelf_from_cache(
-            user_id=user.id
-        )
-
-        if shelf_cached:
-            return shelf_cached
-
-        shelf_db = await self.manager.get_main_shelf(
-            user_id=user.id
-        )
-
-        if not shelf_db:
+        shelf = await self.manager.get_main_shelf(user=user)
+        if not shelf:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Main shelf not found or not exist"
             )
-
-        await self.manager.store_main_shelf_to_redis(shelf=shelf_db)
-
-        await self.manager.store_shelf_to_redis(shelf=shelf_db)
-
-        return shelf_db
+        return shelf
 
 
     async def get_shelf_by_id(
@@ -87,32 +61,18 @@ class ShelfService:
         user: UserVerifySchema,
         shelf_id: uuid.UUID,
     ) -> ShelfReturnData:
-        shelf_cached = await self.manager.get_shelf_from_cache(
+        shelf = await self.manager.get_shelf_by_id(
             user_id=user.id,
-            shelf_id=shelf_id
+            shelf_id=shelf_id,
         )
 
-        if shelf_cached:
-            return shelf_cached
-
-        shelf_db = await self.manager.get_shelf_by_id(
-            user_id=user.id,
-            shelf_id=shelf_id
-        )
-
-        if not shelf_db:
+        if not shelf:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Shelf not found"
             )
 
-        await self.manager.store_shelf_to_redis(
-            shelf=shelf_db
-        )
-
-        return shelf_db
-
-
+        return shelf
 
 
     async def delete_shelf(
@@ -120,17 +80,6 @@ class ShelfService:
         user: UserVerifySchema,
         shelf_id: uuid.UUID
     ) -> JSONResponse:
-
-
-        await self.manager.delete_main_shelf_cache(
-            user_id=user.id
-        )
-
-        await self.manager.delete_shelf_cache(
-            shelf_id=shelf_id,
-            user_id=user.id,
-        )
-
         await self.manager.delete_shelf(
             user_id=user.id,
             shelf_id=shelf_id,
