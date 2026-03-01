@@ -71,12 +71,34 @@ async def get_main_shelf(
     return main_shelf
 
 
+@router.get(
+    path="/get-shelf-by-id",
+    status_code=status.HTTP_200_OK,
+    response_model=ShelfReturnData
+)
+async def get_shelf_by_id(
+    shelf_id: uuid.UUID,
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ],
+    service: Annotated[
+        ShelfService,
+        Depends(ShelfService)
+    ],
+) -> ShelfReturnData:
+    return await service.get_shelf_by_id(
+        user=user,
+        shelf_id=shelf_id
+    )
+
+
 @router.delete(
     path="/delete-shelf",
     status_code=status.HTTP_200_OK,
 )
 async def delete_shelf(
-    shelf_id: uuid.UUID | str,
+    shelf_id: uuid.UUID,
     user: Annotated[
         UserVerifySchema,
         Depends(get_current_user)
