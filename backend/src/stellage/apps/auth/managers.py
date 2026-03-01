@@ -77,7 +77,7 @@ class UserManager:
         session_id: str,
     ) -> None:
         async with self.redis.get_client() as client:
-            await client.set(f"{user_id}:{session_id}", token)
+            await client.set(f"{user_id}:{session_id}", token, ex=3600)
 
 
     async def get_access_token(

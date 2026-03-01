@@ -58,7 +58,8 @@ class ProfileManager:
         async with self.redis.get_client() as client:
             return await client.set(
                 f"{confirmation_code_request.confirmation_code}",
-                confirmation_code_request.email
+                confirmation_code_request.email,
+                ex=3600
             )
 
 
