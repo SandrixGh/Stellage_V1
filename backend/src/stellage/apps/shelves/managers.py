@@ -2,219 +2,128 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
-from sqlalchemy import insert, select, update, delete
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from stellage.apps.shelves.schemas import CreateShelf, ShelfReturnData, GetShelfByTitle, GetShelfIdAndTitleAndOwner
-from stellage.core.core_dependencies.db_dependency import DBDependency
-from stellage.core.core_dependencies.redis_dependency import RedisDependency
-from stellage.database.models import Shelf
+from .cache_managers import ShelfCacheManager
+from .repositories import ShelfRepository
+from .schemas import CreateShelf, ShelfReturnData
+from ..auth.schemas import UserVerifySchema
 
-from .utils import unpack_from_json, pack_to_json
 
 class ShelfManager:
     def __init__(
         self,
-        db: Annotated[
-            DBDependency,
-            Depends(DBDependency)
+        repository: Annotated[
+            ShelfRepository,
+            Depends(ShelfRepository)
         ],
-        redis: Annotated[
-            RedisDependency,
-            Depends(RedisDependency)
-        ],
+        cache_manager: Annotated[
+            ShelfCacheManager,
+            Depends(ShelfCacheManager)
+        ]
     ) -> None:
-        self.db = db
-        self.redis = redis
-        self.model = Shelf
+        self.repository = repository
+        self.cache_manager = cache_manager
 
 
     async def create_shelf(
         self,
         user_id: uuid.UUID,
-        shelf: CreateShelf
+        shelf: CreateShelf,
     ) -> ShelfReturnData:
-        async with self.db.db_session() as session:
-            if shelf.is_main:
-                await self.reset_main_shelf(
-                    user_id=user_id,
-                    session=session,
-                )
+        is_main_shelf: bool = shelf.is_main
 
-            data = shelf.model_dump()
-            data["user_id"] = user_id
+        created_shelf = await self.repository.create_shelf(
+            user_id=user_id,
+            shelf=shelf
+        )
 
-            query = insert(self.model).values(**data).returning(self.model)
+        if is_main_shelf:
+            await self.cache_manager.refresh_main_shelf(
+                user_id=user_id,
+                shelf=created_shelf,
+            )
 
-            try:
-                result = await session.execute(query)
-                await session.commit()
-                shelf_data = result.scalar_one()
-                return ShelfReturnData.model_validate(shelf_data)
+        await self.cache_manager.store_shelf(shelf=created_shelf)
 
-            except IntegrityError:
-                await session.rollback()
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Shelf already exist"
-                )
-            except Exception as e:
-                await session.rollback()
-                raise e
+        return created_shelf
 
 
     async def get_shelves(
         self,
-        user_id: uuid.UUID | str
+        user_id: uuid.UUID,
     ) -> list[ShelfReturnData]:
-        async with self.db.db_session() as session:
-            query = select(self.model).where(self.model.user_id == user_id)
-
-            result = await session.execute(query)
-
-            shelves = result.scalars().all()
-
-            return [ShelfReturnData.model_validate(shelf) for shelf in shelves]
+        return await self.repository.get_shelves(user_id=user_id)
 
 
     async def get_main_shelf(
         self,
-        user_id: uuid.UUID | str,
+        user: UserVerifySchema,
     ) -> ShelfReturnData | None:
-        async with self.db.db_session() as session:
-            query = (
-                select(self.model)
-                .where(
-                    self.model.user_id == user_id,
-                    self.model.is_main == True,
-                )
-            )
+        shelf_cached = await self.cache_manager.get_main_shelf(
+            user_id=user.id
+        )
 
-            result = await session.execute(query)
-            shelf = result.scalar_one_or_none()
+        if shelf_cached:
+            return shelf_cached
 
-            if shelf:
-                return ShelfReturnData.model_validate(shelf)
+        shelf_db = await self.repository.get_main_shelf(
+            user_id=user.id
+        )
 
-            return None
+        if shelf_db:
+            await self.cache_manager.store_main_shelf(shelf=shelf_db)
+            await self.cache_manager.store_shelf(shelf=shelf_db)
+
+        return shelf_db
 
 
     async def get_shelf_by_id(
         self,
-        user_id: uuid.UUID | str,
-        shelf_id: uuid.UUID | str,
+        user_id: uuid.UUID,
+        shelf_id: uuid.UUID,
     ) -> ShelfReturnData | None:
-        async with self.db.db_session() as session:
-            query = (
-                select(self.model)
-                .where(
-                    self.model.user_id == user_id,
-                    self.model.id == shelf_id,
-                )
+        shelf_cached = await self.cache_manager.get_shelf(
+            user_id=user_id,
+            shelf_id=shelf_id
+        )
+
+        if shelf_cached:
+            return shelf_cached
+
+        shelf_db = await self.repository.get_shelf_by_id(
+            user_id=user_id,
+            shelf_id=shelf_id
+        )
+
+        if shelf_db:
+            await self.cache_manager.store_shelf(
+                shelf=shelf_db
             )
-            result = await session.execute(query)
 
-            shelf = result.scalar_one_or_none()
-
-            if shelf:
-                return ShelfReturnData.model_validate(shelf)
-
-            return None
+        return shelf_db
 
 
     async def delete_shelf(
         self,
-        user_id: uuid.UUID | str,
-        shelf_id: uuid.UUID | str
+        user_id: uuid.UUID,
+        shelf_id: uuid.UUID
     ) -> None:
-        async with self.db.db_session() as session:
-            query = (
-                delete(self.model)
-                .where(
-                    self.model.user_id == user_id,
-                    self.model.id == shelf_id,
-                )
-            )
-
-            await session.execute(query)
-            await session.commit()
-
-
-    async def reset_main_shelf(
-        self,
-        user_id: uuid.UUID | str ,
-        session: AsyncSession
-    ) -> None:
-        query = (
-            update(self.model)
-            .where(
-                self.model.user_id == user_id,
-                self.model.is_main == True,
-            )
-            .values(is_main=False)
+        await self.cache_manager.delete_main_shelf(
+            user_id=user_id
         )
 
-        await session.execute(query)
+        await self.cache_manager.delete_shelf(
+            shelf_id=shelf_id,
+            user_id=user_id,
+        )
 
+        new_main_id = await self.repository.delete_shelf(
+            user_id=user_id,
+            shelf_id=shelf_id,
+        )
 
-    async def get_main_shelf_from_cache(
-        self,
-        user_id: uuid.UUID | str,
-    ) -> ShelfReturnData | None:
-        async with self.redis.get_client() as client:
-            key = f"main_shelf:{user_id}"
-            data = await client.get(key)
-            if data:
-                return unpack_from_json(data, ShelfReturnData)
-            return None
-
-
-    async def get_shelf_from_cache(
-        self,
-        user_id: uuid.UUID | str,
-        shelf_id: uuid.UUID | str,
-    ) -> ShelfReturnData | None:
-        async with self.redis.get_client() as client:
-            key = f"shelf:{user_id}:{shelf_id}"
-            data = await client.get(key)
-            if data:
-                return unpack_from_json(data, ShelfReturnData)
-            return None
-
-
-    async def store_shelf_to_redis(
-        self,
-        shelf: ShelfReturnData,
-    ) -> None:
-        async with self.redis.get_client() as client:
-            key = f"shelf:{shelf.user_id}:{shelf.id}"
-            await client.set(key, pack_to_json(shelf), ex=3600)
-
-
-    async def store_main_shelf_to_redis(
-        self,
-        shelf: ShelfReturnData,
-    ) -> None:
-        async with self.redis.get_client() as client:
-            key = f"main_shelf:{shelf.user_id}"
-            await client.set(key, pack_to_json(shelf), ex=3600)
-
-
-    async def delete_shelf_cache(
-        self,
-        shelf_id: uuid.UUID | str,
-        user_id: uuid.UUID | str
-    ) -> None:
-        async with self.redis.get_client() as client:
-            key = f"shelf:{user_id}:{shelf_id}"
-            await client.delete(key)
-
-
-    async def delete_main_shelf_cache(
-        self,
-        user_id: uuid.UUID | str
-    ) -> None:
-        async with self.redis.get_client() as client:
-            key = f"main_shelf:{user_id}"
-            await client.delete(key)
+        if new_main_id:
+            await self.cache_manager.delete_shelf(
+                shelf_id=new_main_id,
+                user_id=user_id
+            )
