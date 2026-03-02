@@ -10,7 +10,8 @@ from stellage.database.mixins.timestamp_mixins import TimestampMixin
 from stellage.database.models import Base
 
 if TYPE_CHECKING:
-    from stellage.database.models import User
+    from stellage.database.models.user import User
+    from stellage.database.models.box import Box
 
 
 class Shelf(IDMixin, TimestampMixin, Base):
@@ -41,6 +42,12 @@ class Shelf(IDMixin, TimestampMixin, Base):
     )
 
     owner: Mapped["User"] = relationship("User", back_populates="shelves")
+
+    boxes: Mapped[list["Box"]] = relationship(
+        "Box",
+        back_populates="shelf",
+        cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         UniqueConstraint("user_id", "title", name="uq_user_shelf_title"),
