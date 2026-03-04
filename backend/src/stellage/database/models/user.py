@@ -9,6 +9,7 @@ from stellage.database.models.base import Base
 
 if TYPE_CHECKING:
     from stellage.database.models.shelf import Shelf
+    from stellage.database.models.box import Box
 
 class User(IDMixin, TimestampMixin, Base):
     __tablename__ = "users"
@@ -18,28 +19,39 @@ class User(IDMixin, TimestampMixin, Base):
         unique=True,
         nullable=False,
     )
+
     hashed_password: Mapped[Text] = mapped_column(
         Text,
         unique=False,
         nullable=False,
     )
+
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
         nullable=False,
     )
+
     is_superuser: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
         nullable=False,
     )
+
     is_verified: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
         nullable=False,
     )
+
     shelves: Mapped[list["Shelf"]] = relationship(
         "Shelf",
         back_populates="owner",
         cascade="all, delete-orphan",
+    )
+
+    boxes: Mapped[list["Box"]] = relationship(
+        "Box",
+        back_populates="owner",
+        cascade="all, delete-orphan"
     )

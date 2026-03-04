@@ -1,7 +1,9 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import uuid
 from decimal import Decimal
 
-from sqlalchemy import ForeignKey, String, Boolean, JSON, Numeric, Enum
+from sqlalchemy import ForeignKey, String, JSON, Numeric, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from stellage.database.enums.box_rarity import BoxRarity
@@ -13,6 +15,9 @@ from stellage.database.mixins.id_mixins import IDMixin
 from stellage.database.mixins.timestamp_mixins import TimestampMixin
 from stellage.database.models import Base
 
+if TYPE_CHECKING:
+    from .user import User
+    from .shelf import Shelf
 
 class Box(IDMixin, TimestampMixin, Base):
     __tablename__ = "boxes"
@@ -20,8 +25,9 @@ class Box(IDMixin, TimestampMixin, Base):
     shelf_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey(
             "shelves.id",
-            ondelete="CASCADE"
-        )
+            ondelete="SET NULL"
+        ),
+        nullable=True,
     )
 
     user_id: Mapped[uuid.UUID] = mapped_column(
@@ -79,4 +85,12 @@ class Box(IDMixin, TimestampMixin, Base):
 
     content: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
-    shelf = relationship("Shelf", back_populates="boxes")
+    shelf: Mapped[Shelf | None] = relationship(
+        "Shelf",
+        back_populates="boxes"
+    )
+
+    owner: Mapped["User"] = relationship(
+        "User",
+        back_populates="boxes",
+    )
