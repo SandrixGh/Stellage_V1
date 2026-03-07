@@ -2,10 +2,12 @@ __all__ = (
     "Base",
     "User",
     "Shelf",
-    "Box",
+    "BoxInstance",
+    "BoxTemplate",
 )
 
 from .base import Base
 from .user import User
 from .shelf import Shelf
-from .box import Box
+from .box_instance import BoxInstance
+from .box_template import BoxTemplate
