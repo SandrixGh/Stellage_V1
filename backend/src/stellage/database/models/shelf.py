@@ -10,7 +10,7 @@ from stellage.database.models import Base
 
 if TYPE_CHECKING:
     from stellage.database.models.user import User
-    from stellage.database.models.box import Box
+    from stellage.database.models.box_instance import BoxInstance
 
 
 class Shelf(IDMixin, TimestampMixin, Base):
@@ -42,8 +42,8 @@ class Shelf(IDMixin, TimestampMixin, Base):
 
     owner: Mapped["User"] = relationship("User", back_populates="shelves")
 
-    boxes: Mapped[list["Box"]] = relationship(
-        "Box",
+    boxes: Mapped[list["BoxInstance"]] = relationship(
+        "BoxInstance",
         back_populates="shelf",
     )
 

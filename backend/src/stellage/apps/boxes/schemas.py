@@ -124,3 +124,19 @@ class BoxReturnData(
     GetBoxTimestamps,
 ):
     model_config = ConfigDict(from_attributes=True)
+
+
+class BoxTemplateBase(BaseModel):
+    title: str
+    description: str | None = None
+    cover_image_url: str | None = None
+    rarity: BoxRarity = BoxRarity.COMMON
+    is_verified: VerifyEnum = VerifyEnum.NOT_VERIFIED
+
+
+class BoxInstanceBase(BaseModel):
+    template_id: uuid.UUID
+    user_id: uuid.UUID
+    shelf_id: uuid.UUID | None = None
+    is_sealed: SealingEnum = SealingEnum.SEALED
+    content: dict | None = None

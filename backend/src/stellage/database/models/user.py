@@ -9,7 +9,7 @@ from stellage.database.models.base import Base
 
 if TYPE_CHECKING:
     from stellage.database.models.shelf import Shelf
-    from stellage.database.models.box import Box
+    from stellage.database.models.box_instance import BoxInstance
 
 class User(IDMixin, TimestampMixin, Base):
     __tablename__ = "users"
@@ -50,8 +50,8 @@ class User(IDMixin, TimestampMixin, Base):
         cascade="all, delete-orphan",
     )
 
-    boxes: Mapped[list["Box"]] = relationship(
-        "Box",
+    boxes: Mapped[list["BoxInstance"]] = relationship(
+        "BoxInstance",
         back_populates="owner",
         cascade="all, delete-orphan"
     )
