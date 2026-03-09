@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 import datetime
 import uuid
 from decimal import Decimal
@@ -7,6 +8,8 @@ from pydantic import BaseModel, ConfigDict
 from stellage.database.enums.box_rarity import BoxRarity
 from stellage.database.enums.currency import CurrencyEnum
 
+if TYPE_CHECKING:
+    from stellage.apps.boxes.instance_schemas import BoxInstanceReturn
 
 class GetBoxTemplateById(BaseModel):
     id: uuid.UUID
@@ -33,3 +36,6 @@ class BoxTemplateReturn(GetBoxTemplateById, BoxTemplateBase, BoxTemplateTimeStam
     model_config = ConfigDict(
         from_attributes=True
     )
+
+class BoxTemplateReturnWithInstances(BoxTemplateReturn):
+    instances: list["BoxInstanceReturn"] = []
