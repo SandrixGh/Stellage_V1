@@ -60,5 +60,5 @@ class BoxInstanceUpdate(BaseModel):
     content: dict | None = None
 
 
-class BoxInstanceCreate(BoxInstanceBase, GetShelfId, GetOwnerId):
+class BoxInstanceCreate(BoxInstanceBase, GetParentsIds):
     pass
