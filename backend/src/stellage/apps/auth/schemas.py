@@ -1,9 +1,11 @@
 import datetime
 import uuid
-from typing import Annotated
+from typing import Annotated, TYPE_CHECKING
 
 from pydantic import BaseModel, EmailStr, StringConstraints
 
+if TYPE_CHECKING:
+    from stellage.apps.boxes.instances.schemas import BoxInstanceReturn
 
 class GetUserByID(BaseModel):
     id: uuid.UUID | str
@@ -41,3 +43,11 @@ class GetUserWithIDAndEmail(GetUserByID, CreateUser, VerificationStatus):
 
 class UserVerifySchema(GetUserByID, GetUserByEmail):
     session_id: str | uuid.UUID | None = None
+
+
+class UserWithBoxInstances(UserReturnData):
+    instances: list["BoxInstanceReturn"] = []
+
+
+from stellage.apps.boxes.instances.schemas import BoxInstanceReturn
+UserWithBoxInstances.model_rebuild()
