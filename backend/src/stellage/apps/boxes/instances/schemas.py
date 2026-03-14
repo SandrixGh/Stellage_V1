@@ -39,8 +39,8 @@ class BoxInstanceBase(BaseModel):
 
 
 class BoxInstanceTimeStamps(BaseModel):
-    created_at: datetime
-    updated_at: datetime
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
 
 
 class BoxInstanceReturn(

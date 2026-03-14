@@ -31,7 +31,7 @@ class BoxTemplateRepository:
         async with self.db.db_session() as session:
             query = (
                 insert(self.template_model)
-                .values(**data)
+                .values(**data.model_dump())
                 .returning(self.template_model)
             )
             try:
@@ -80,7 +80,7 @@ class BoxTemplateRepository:
             )
 
             result = await session.execute(query)
-            template = result.scalar_one_or_none()
+            template = result.unique().scalar_one_or_none()
 
             if template:
                 return BoxTemplateReturnWithInstances.model_validate(template)
