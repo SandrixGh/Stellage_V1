@@ -8,7 +8,7 @@ from stellage.apps.auth.depends import get_current_user
 from stellage.apps.auth.schemas import UserVerifySchema
 from stellage.apps.boxes.instances.schemas import BoxInstanceReturn, BoxInstanceCreate
 from stellage.apps.boxes.instances.services import InstanceService
-from stellage.apps.boxes.templates.schemas import BoxTemplateReturn, BoxTemplateCreate
+from stellage.apps.boxes.templates.schemas import BoxTemplateReturn, BoxTemplateCreate, BoxTemplateReturnWithInstances
 from stellage.apps.boxes.templates.services import TemplateService
 
 router = APIRouter(
@@ -72,7 +72,7 @@ async def get_box_instance(
 
 @router.get(
     path="/get-box-template",
-    response_model=BoxTemplateReturn,
+    response_model=BoxTemplateReturnWithInstances,
     status_code=status.HTTP_200_OK,
 )
 async def get_box_template(
@@ -81,7 +81,7 @@ async def get_box_template(
         Depends(TemplateService),
     ],
     template_id: uuid.UUID
-) -> BoxTemplateReturn:
+) -> BoxTemplateReturnWithInstances:
     return await service.get_template_with_instances(
         template_id=template_id,
     )
