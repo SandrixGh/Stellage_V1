@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException
 from starlette import status
 
 from stellage.apps.boxes.templates.managers import TemplateManager
-from stellage.apps.boxes.templates.schemas import BoxTemplateReturn, BoxTemplateCreate
+from stellage.apps.boxes.templates.schemas import BoxTemplateReturn, BoxTemplateCreate, BoxTemplateReturnWithInstances
 
 
 class TemplateService:
@@ -33,10 +33,11 @@ class TemplateService:
     ) -> list[BoxTemplateReturn]:
         return await self.manager.get_templates()
 
+
     async def get_template_with_instances(
         self,
         template_id: uuid.UUID
-    ) -> BoxTemplateReturn:
+    ) -> BoxTemplateReturnWithInstances:
         template = await self.manager.get_template_with_instances(
             template_id=template_id,
         )
