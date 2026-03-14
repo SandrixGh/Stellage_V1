@@ -33,7 +33,7 @@ class InstanceManager:
         self,
         user_id: uuid.UUID,
         instance_id: uuid.UUID,
-        shelf_id: uuid.UUID,
+        shelf_id: uuid.UUID | None,
     ) -> BoxInstanceReturn:
         return await self.repository.move_to_shelf(
             user_id=user_id,
