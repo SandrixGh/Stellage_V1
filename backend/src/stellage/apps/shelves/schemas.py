@@ -1,9 +1,11 @@
 import datetime
 import uuid
-from typing import Annotated
+from typing import Annotated, TYPE_CHECKING
 
 from pydantic import BaseModel, StringConstraints, ConfigDict
 
+if TYPE_CHECKING:
+    from stellage.apps.boxes.instances.schemas import BoxInstanceReturn
 
 class GetShelfByID(BaseModel):
     id: uuid.UUID
@@ -58,3 +60,11 @@ class ShelfReturnData(GetShelfByID, GetShelfByTitle, ShelfOwner, ShelfFlags):
     updated_at: datetime.datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ShelfWithBoxInstances(ShelfReturnData):
+    instances: list["BoxInstanceReturn"] = []
+
+
+from stellage.apps.boxes.instances.schemas import BoxInstanceReturn
+ShelfWithBoxInstances.model_rebuild()

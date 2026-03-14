@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 import datetime
 import uuid
 
@@ -7,6 +8,8 @@ from stellage.database.enums.box_sealing import SealingEnum
 from stellage.database.enums.verification import VerifyEnum
 from stellage.database.enums.visibility import VisibilityEnum
 
+if TYPE_CHECKING:
+    from stellage.apps.boxes.templates.schemas import BoxTemplateReturn
 
 class GetBoxInstanceById(BaseModel):
     id: uuid.UUID
@@ -53,6 +56,10 @@ class BoxInstanceReturn(
     model_config = ConfigDict(from_attributes=True)
 
 
+class BoxInstanceWithTemplate(BoxInstanceReturn):
+    template: ["BoxTemplateReturn"]
+
+
 class BoxInstanceUpdate(BaseModel):
     shelf_id: uuid.UUID | None = None
     is_sealed: SealingEnum | None = None
@@ -62,3 +69,7 @@ class BoxInstanceUpdate(BaseModel):
 
 class BoxInstanceCreate(BoxInstanceBase, GetParentsIds):
     pass
+
+
+from stellage.apps.boxes.templates.schemas import BoxTemplateReturn
+BoxInstanceWithTemplate.model_rebuild()
