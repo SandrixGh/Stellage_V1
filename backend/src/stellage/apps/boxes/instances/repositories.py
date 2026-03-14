@@ -6,7 +6,7 @@ from sqlalchemy import select, func, insert, update, delete
 from sqlalchemy.exc import IntegrityError
 from starlette import status
 
-from stellage.apps.boxes.instance_schemas import BoxInstanceReturn, BoxInstanceCreate
+from stellage.apps.boxes.instances.schemas import BoxInstanceReturn, BoxInstanceCreate
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.models import BoxInstance
 

@@ -9,7 +9,7 @@ from stellage.database.enums.box_rarity import BoxRarity
 from stellage.database.enums.currency import CurrencyEnum
 
 if TYPE_CHECKING:
-    from stellage.apps.boxes.instance_schemas import BoxInstanceReturn
+    from stellage.apps.boxes.instances.schemas import BoxInstanceReturn
 
 class GetBoxTemplateById(BaseModel):
     id: uuid.UUID
