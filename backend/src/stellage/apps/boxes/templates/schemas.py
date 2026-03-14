@@ -16,8 +16,8 @@ class GetBoxTemplateById(BaseModel):
 
 
 class BoxTemplateTimeStamps(BaseModel):
-    created_at: datetime
-    updated_at: datetime
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
 
 
 class BoxTemplateBase(BaseModel):
@@ -39,3 +39,7 @@ class BoxTemplateReturn(GetBoxTemplateById, BoxTemplateBase, BoxTemplateTimeStam
 
 class BoxTemplateReturnWithInstances(BoxTemplateReturn):
     instances: list["BoxInstanceReturn"] = []
+
+
+from stellage.apps.boxes.instances.schemas import BoxInstanceReturn
+BoxTemplateReturnWithInstances.model_rebuild()
