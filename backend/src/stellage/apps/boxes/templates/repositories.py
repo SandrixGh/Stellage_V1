@@ -69,7 +69,7 @@ class BoxTemplateRepository:
     async def get_template_with_instances(
         self,
         template_id: uuid.UUID
-    ) -> BoxTemplateReturnWithInstances:
+    ) -> BoxTemplateReturnWithInstances | None:
         async with self.db.db_session() as session:
             query = (
                 select(
@@ -82,11 +82,7 @@ class BoxTemplateRepository:
             result = await session.execute(query)
             template = result.scalar_one_or_none()
 
-            if not template:
-                await session.rollback()
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Template not found"
-                )
+            if template:
+                return BoxTemplateReturnWithInstances.model_validate(template)
 
-            return BoxTemplateReturnWithInstances.model_validate(template)
+            return None

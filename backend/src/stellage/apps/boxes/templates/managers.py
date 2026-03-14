@@ -36,7 +36,7 @@ class TemplateManager:
     async def get_template_with_instances(
         self,
         template_id: uuid.UUID,
-    ) -> BoxTemplateReturn:
+    ) -> BoxTemplateReturn | None:
         return await self.repository.get_template_with_instances(
             template_id=template_id,
         )
