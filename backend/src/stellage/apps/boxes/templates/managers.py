@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import Depends
 
 from stellage.apps.boxes.templates.repositories import BoxTemplateRepository
-from stellage.apps.boxes.templates.schemas import BoxTemplateCreate, BoxTemplateReturn
+from stellage.apps.boxes.templates.schemas import BoxTemplateCreate, BoxTemplateReturn, BoxTemplateReturnWithInstances
 
 
 class TemplateManager:
@@ -36,7 +36,7 @@ class TemplateManager:
     async def get_template_with_instances(
         self,
         template_id: uuid.UUID,
-    ) -> BoxTemplateReturn | None:
+    ) -> BoxTemplateReturnWithInstances | None:
         return await self.repository.get_template_with_instances(
             template_id=template_id,
         )
