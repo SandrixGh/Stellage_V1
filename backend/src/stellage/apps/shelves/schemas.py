@@ -63,7 +63,7 @@ class ShelfReturnData(GetShelfByID, GetShelfByTitle, ShelfOwner, ShelfFlags):
 
 
 class ShelfWithBoxInstances(ShelfReturnData):
-    instances: list["BoxInstanceReturn"] = []
+    boxes: list["BoxInstanceReturn"] = []
 
 
 from stellage.apps.boxes.instances.schemas import BoxInstanceReturn
