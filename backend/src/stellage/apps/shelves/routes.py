@@ -6,8 +6,8 @@ from starlette.responses import JSONResponse
 
 from stellage.apps.auth.depends import get_current_user
 from stellage.apps.auth.schemas import UserVerifySchema
-from stellage.apps.shelves.dependecies import get_current_main_shelf
-from stellage.apps.shelves.schemas import ShelfReturnData, CreateShelf
+from stellage.apps.shelves.dependecies import get_current_main_shelf, get_current_main_shelf_with_boxes
+from stellage.apps.shelves.schemas import ShelfReturnData, CreateShelf, ShelfWithBoxInstances
 from stellage.apps.shelves.services import ShelfService
 
 router = APIRouter(
@@ -72,6 +72,20 @@ async def get_main_shelf(
 
 
 @router.get(
+    path="/main-shelf-with-boxes",
+    status_code=status.HTTP_200_OK,
+    response_model=ShelfWithBoxInstances,
+)
+async def get_main_shelf_with_boxes(
+    main_shelf: Annotated[
+        get_current_main_shelf_with_boxes,
+        Depends(get_current_main_shelf_with_boxes)
+    ]
+) -> ShelfWithBoxInstances:
+    return main_shelf
+
+
+@router.get(
     path="/get-shelf-by-id",
     status_code=status.HTTP_200_OK,
     response_model=ShelfReturnData
@@ -88,6 +102,28 @@ async def get_shelf_by_id(
     ],
 ) -> ShelfReturnData:
     return await service.get_shelf_by_id(
+        user=user,
+        shelf_id=shelf_id
+    )
+
+
+@router.get(
+    path="/get-shelf-with-boxes",
+    status_code=status.HTTP_200_OK,
+    response_model=ShelfWithBoxInstances
+)
+async def get_shelf_by_id(
+    shelf_id: uuid.UUID,
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ],
+    service: Annotated[
+        ShelfService,
+        Depends(ShelfService)
+    ],
+) -> ShelfWithBoxInstances:
+    return await service.get_shelf_with_boxes(
         user=user,
         shelf_id=shelf_id
     )
