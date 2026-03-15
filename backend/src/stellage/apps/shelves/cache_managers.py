@@ -78,3 +78,22 @@ class ShelfCacheManager:
         async with self.redis.get_client() as client:
             key = f"shelf_full:{shelf.user_id}:{shelf.id}"
             await client.set(key, pack_to_json(shelf), ex=3600)
+
+
+    async def get_main_shelf_with_boxes(
+        self,
+        user_id: uuid.UUID,
+    ) -> ShelfWithBoxInstances | None:
+        async with self.redis.get_client() as client:
+            key = f"main_shelf_full:{user_id}"
+            data = await client.get(key)
+            return unpack_from_json(data, ShelfWithBoxInstances) if data else None
+
+
+    async def store_main_shelf_full(
+        self,
+        shelf: ShelfWithBoxInstances,
+    ) -> None:
+        async with self.redis.get_client() as client:
+            key = f"main_shelf_full:{shelf.user_id}"
+            await client.set(key, pack_to_json(shelf), ex=3600)
