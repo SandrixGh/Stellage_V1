@@ -6,7 +6,7 @@ from starlette.responses import JSONResponse
 
 from stellage.apps.auth.schemas import UserVerifySchema
 from stellage.apps.shelves.managers import ShelfManager
-from stellage.apps.shelves.schemas import CreateShelf, ShelfReturnData
+from stellage.apps.shelves.schemas import CreateShelf, ShelfReturnData, ShelfWithBoxInstances
 
 
 class ShelfService:
@@ -47,7 +47,22 @@ class ShelfService:
         self,
         user: UserVerifySchema,
     ) -> ShelfReturnData:
-        shelf = await self.manager.get_main_shelf(user=user)
+        shelf = await self.manager.get_main_shelf(user_id=user.id)
+        if not shelf:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Main shelf not found or not exist"
+            )
+        return shelf
+
+
+    async def get_main_shelf_with_boxes(
+        self,
+        user: UserVerifySchema,
+    ) -> ShelfWithBoxInstances:
+        shelf = await self.manager.get_main_shelf_with_boxes(
+            user_id=user.id,
+        )
         if not shelf:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -72,6 +87,23 @@ class ShelfService:
                 detail="Shelf not found"
             )
 
+        return shelf
+
+
+    async def get_shelf_with_boxes(
+        self,
+        user: UserVerifySchema,
+        shelf_id: uuid.UUID,
+    ) -> ShelfWithBoxInstances:
+        shelf = await self.manager.get_shelf_with_boxes(
+            user_id=user.id,
+            shelf_id=shelf_id,
+        )
+        if not shelf:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Shelf not found"
+            )
         return shelf
 
 
