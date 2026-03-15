@@ -5,11 +5,12 @@ from fastapi import Depends, HTTPException
 from sqlalchemy import update, insert, select, delete, asc
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 from starlette import status
 
-from stellage.apps.shelves.schemas import CreateShelf, ShelfReturnData
+from stellage.apps.shelves.schemas import CreateShelf, ShelfReturnData, ShelfWithBoxInstances
 from stellage.core.core_dependencies.db_dependency import DBDependency
-from stellage.database.models import Shelf
+from stellage.database.models import Shelf, BoxInstance
 
 
 class ShelfRepository:
@@ -21,6 +22,7 @@ class ShelfRepository:
         ) -> None:
         self.db = db
         self.model = Shelf
+        self.instance_model = BoxInstance
 
 
     async def reset_main_shelf(
@@ -111,6 +113,32 @@ class ShelfRepository:
             return None
 
 
+    async def get_main_shelf_with_instances(
+        self,
+        user_id: uuid.UUID,
+    ) -> ShelfWithBoxInstances | None:
+        async with self.db.db_session() as session:
+            query = (
+                select(self.model)
+                .where(
+                    self.model.user_id == user_id,
+                    self.model.is_main == True,
+                )
+                .options(
+                    joinedload(self.model.boxes)
+                    .joinedload(self.instance_model.template)
+                )
+            )
+
+            result = await session.execute(query)
+            shelf = result.unique().scalar_one_or_none()
+
+            if shelf:
+                return ShelfWithBoxInstances.model_validate(shelf)
+
+            return None
+
+
     async def get_shelf_by_id(
         self,
         user_id: uuid.UUID,
@@ -130,6 +158,33 @@ class ShelfRepository:
 
             if shelf:
                 return ShelfReturnData.model_validate(shelf)
+
+            return None
+
+
+    async def get_shelf_with_instances(
+        self,
+        user_id: uuid.UUID,
+        shelf_id: uuid.UUID,
+    ) -> ShelfWithBoxInstances | None:
+        async with self.db.db_session() as session:
+            query = (
+                select(self.model)
+                .where(
+                    self.model.user_id == user_id,
+                    self.model.id == shelf_id,
+                )
+                .options(
+                    joinedload(self.model.boxes)
+                    .joinedload(self.instance_model.template)
+                )
+            )
+
+            result = await session.execute(query)
+            shelf = result.unique().scalar_one_or_none()
+
+            if shelf:
+                return ShelfWithBoxInstances.model_validate(shelf)
 
             return None
 
