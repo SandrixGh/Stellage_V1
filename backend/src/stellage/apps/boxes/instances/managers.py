@@ -56,7 +56,7 @@ class InstanceManager:
         user_id: uuid.UUID,
         instance_id: uuid.UUID,
     ) -> BoxInstanceWithTemplate:
-        return await self.get_instance_by_id(
+        return await self.repository.get_box_instance_by_id(
             user_id=user_id,
             instance_id=instance_id,
         )
@@ -67,7 +67,7 @@ class InstanceManager:
         user_id: uuid.UUID,
         instance_id: uuid.UUID,
     ) -> None:
-        return await self.delete_instance(
+        return await self.repository.delete_box_instance(
             user_id=user_id,
             instance_id=instance_id,
         )

@@ -5,7 +5,7 @@ from typing import Annotated, TYPE_CHECKING
 from pydantic import BaseModel, StringConstraints, ConfigDict
 
 if TYPE_CHECKING:
-    from stellage.apps.boxes.instances.schemas import BoxInstanceReturn
+    from stellage.apps.boxes.instances.schemas import BoxInstanceWithTemplate
 
 class GetShelfByID(BaseModel):
     id: uuid.UUID
@@ -63,8 +63,8 @@ class ShelfReturnData(GetShelfByID, GetShelfByTitle, ShelfOwner, ShelfFlags):
 
 
 class ShelfWithBoxInstances(ShelfReturnData):
-    boxes: list["BoxInstanceReturn"] = []
+    boxes: list["BoxInstanceWithTemplate"] = []
 
 
-from stellage.apps.boxes.instances.schemas import BoxInstanceReturn
+from stellage.apps.boxes.instances.schemas import BoxInstanceWithTemplate
 ShelfWithBoxInstances.model_rebuild()
