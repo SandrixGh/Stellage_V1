@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import Depends
 
 from stellage.apps.boxes.instances.repositories import BoxInstanceRepository
-from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceReturn
+from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceReturn, BoxInstanceWithTemplate
 
 
 class InstanceManager:
@@ -45,7 +45,7 @@ class InstanceManager:
     async def get_instances(
         self,
         user_id: uuid.UUID,
-    ) -> list[BoxInstanceReturn]:
+    ) -> list[BoxInstanceWithTemplate]:
         return await self.repository.get_box_instances(
             user_id=user_id,
         )
@@ -55,7 +55,7 @@ class InstanceManager:
         self,
         user_id: uuid.UUID,
         instance_id: uuid.UUID,
-    ) -> BoxInstanceReturn:
+    ) -> BoxInstanceWithTemplate:
         return await self.get_instance_by_id(
             user_id=user_id,
             instance_id=instance_id,
