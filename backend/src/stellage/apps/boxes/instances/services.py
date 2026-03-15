@@ -5,7 +5,8 @@ from fastapi import Depends, HTTPException, status
 
 from stellage.apps.auth.schemas import UserVerifySchema
 from stellage.apps.boxes.instances.managers import InstanceManager
-from stellage.apps.boxes.instances.schemas import BoxInstanceReturn, BoxInstanceCreate, GetBoxInstanceById
+from stellage.apps.boxes.instances.schemas import BoxInstanceReturn, BoxInstanceCreate, GetBoxInstanceById, \
+    BoxInstanceWithTemplate
 
 
 class InstanceService:
@@ -46,7 +47,7 @@ class InstanceService:
     async def get_instances(
         self,
         user: UserVerifySchema,
-    ) -> list[BoxInstanceReturn]:
+    ) -> list[BoxInstanceWithTemplate]:
         return await self.manager.get_instances(
             user_id=user.id,
         )
@@ -56,7 +57,7 @@ class InstanceService:
         self,
         user: UserVerifySchema,
         instance_id: uuid.UUID
-    ) -> BoxInstanceReturn:
+    ) -> BoxInstanceWithTemplate:
         box = await self.manager.get_instance_by_id(
             user_id=user.id,
             instance_id=instance_id,

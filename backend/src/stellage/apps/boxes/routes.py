@@ -6,7 +6,7 @@ from starlette import status
 
 from stellage.apps.auth.depends import get_current_user
 from stellage.apps.auth.schemas import UserVerifySchema
-from stellage.apps.boxes.instances.schemas import BoxInstanceReturn, BoxInstanceCreate
+from stellage.apps.boxes.instances.schemas import BoxInstanceReturn, BoxInstanceCreate, BoxInstanceWithTemplate
 from stellage.apps.boxes.instances.services import InstanceService
 from stellage.apps.boxes.templates.schemas import BoxTemplateReturn, BoxTemplateCreate, BoxTemplateReturnWithInstances
 from stellage.apps.boxes.templates.services import TemplateService
@@ -18,7 +18,7 @@ router = APIRouter(
 
 @router.get(
     path="/get-box-instances",
-    response_model=list[BoxInstanceReturn],
+    response_model=list[BoxInstanceWithTemplate],
     status_code=status.HTTP_200_OK,
 )
 async def get_box_instances(
@@ -30,7 +30,7 @@ async def get_box_instances(
         InstanceService,
         Depends(InstanceService),
     ]
-) -> list[BoxInstanceReturn]:
+) -> list[BoxInstanceWithTemplate]:
     return await service.get_instances(user=user)
 
 
@@ -50,7 +50,7 @@ async def get_box_templates(
 
 @router.get(
     path="/get-box-instance",
-    response_model=BoxInstanceReturn,
+    response_model=BoxInstanceWithTemplate,
     status_code=status.HTTP_200_OK,
 )
 async def get_box_instance(
@@ -63,7 +63,7 @@ async def get_box_instance(
         Depends(InstanceService),
     ],
     instance_id: uuid.UUID
-) -> BoxInstanceReturn:
+) -> BoxInstanceWithTemplate:
     return await service.get_instance_by_id(
         user=user,
         instance_id=instance_id,
