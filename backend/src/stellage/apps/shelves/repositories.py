@@ -113,7 +113,7 @@ class ShelfRepository:
             return None
 
 
-    async def get_main_shelf_with_instances(
+    async def get_main_shelf_with_boxes(
         self,
         user_id: uuid.UUID,
     ) -> ShelfWithBoxInstances | None:
@@ -162,7 +162,7 @@ class ShelfRepository:
             return None
 
 
-    async def get_shelf_with_instances(
+    async def get_shelf_with_boxes(
         self,
         user_id: uuid.UUID,
         shelf_id: uuid.UUID,

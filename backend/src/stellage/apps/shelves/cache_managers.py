@@ -60,7 +60,7 @@ class ShelfCacheManager:
         await self.store_main_shelf(shelf=shelf)
 
 
-    async def get_shelf_with_instances(
+    async def get_shelf_with_boxes(
         self,
         user_id: uuid.UUID,
         shelf_id: uuid.UUID
