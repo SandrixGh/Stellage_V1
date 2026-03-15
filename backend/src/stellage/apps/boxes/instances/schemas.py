@@ -26,6 +26,7 @@ class GetOwnerId(BaseModel):
 class GetTemplateId(BaseModel):
     template_id: uuid.UUID
 
+
 class GetParentsIds(
     GetShelfId,
     GetOwnerId,
@@ -57,7 +58,7 @@ class BoxInstanceReturn(
 
 
 class BoxInstanceWithTemplate(BoxInstanceReturn):
-    template: ["BoxTemplateReturn"]
+    template: "BoxTemplateReturn"
 
 
 class BoxInstanceUpdate(BaseModel):
@@ -67,7 +68,7 @@ class BoxInstanceUpdate(BaseModel):
     content: dict | None = None
 
 
-class BoxInstanceCreate(BoxInstanceBase, GetParentsIds):
+class BoxInstanceCreate(BoxInstanceBase, GetTemplateId, GetShelfId):
     pass
 
 

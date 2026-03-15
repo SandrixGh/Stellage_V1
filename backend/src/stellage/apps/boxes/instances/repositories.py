@@ -4,9 +4,10 @@ from typing import Annotated
 from fastapi import Depends, HTTPException
 from sqlalchemy import select, func, insert, update, delete
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import joinedload
 from starlette import status
 
-from stellage.apps.boxes.instances.schemas import BoxInstanceReturn, BoxInstanceCreate
+from stellage.apps.boxes.instances.schemas import BoxInstanceReturn, BoxInstanceCreate, BoxInstanceWithTemplate
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.models import BoxInstance
 
@@ -122,18 +123,19 @@ class BoxInstanceRepository:
     async def get_box_instances(
         self,
         user_id: uuid.UUID
-    ) -> list[BoxInstanceReturn]:
+    ) -> list[BoxInstanceWithTemplate]:
         async with self.db.db_session() as session:
             query = (
                 select(self.instance_model)
                 .where(self.instance_model.user_id == user_id)
+                .options(joinedload(self.instance_model.template))
             )
 
             result = await session.execute(query)
 
             return[
-                BoxInstanceReturn.model_validate(box)
-                for box in result.scalars()
+                BoxInstanceWithTemplate.model_validate(box)
+                for box in result.unique().scalars()
             ]
 
 
@@ -141,7 +143,7 @@ class BoxInstanceRepository:
         self,
         user_id: uuid.UUID,
         instance_id: uuid.UUID
-    ) -> BoxInstanceReturn | None:
+    ) -> BoxInstanceWithTemplate | None:
         async with self.db.db_session() as session:
             query = (
                 select(self.instance_model)
@@ -149,14 +151,15 @@ class BoxInstanceRepository:
                     self.instance_model.user_id == user_id,
                     self.instance_model.id == instance_id,
                 )
+                .options(joinedload(self.instance_model.template))
             )
 
             result = await session.execute(query)
 
-            box = result.scalar_one_or_none()
+            box = result.unique().scalar_one_or_none()
 
             if box:
-                return BoxInstanceReturn.model_validate(box)
+                return BoxInstanceWithTemplate.model_validate(box)
 
             return None
 
