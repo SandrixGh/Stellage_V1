@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException, status
 
 from .cache_managers import ShelfCacheManager
 from .repositories import ShelfRepository
-from .schemas import CreateShelf, ShelfReturnData
+from .schemas import CreateShelf, ShelfReturnData, ShelfWithBoxInstances
 from ..auth.schemas import UserVerifySchema
 
 
@@ -57,17 +57,17 @@ class ShelfManager:
 
     async def get_main_shelf(
         self,
-        user: UserVerifySchema,
+        user_id: uuid.UUID,
     ) -> ShelfReturnData | None:
         shelf_cached = await self.cache_manager.get_main_shelf(
-            user_id=user.id
+            user_id=user_id
         )
 
         if shelf_cached:
             return shelf_cached
 
         shelf_db = await self.repository.get_main_shelf(
-            user_id=user.id
+            user_id=user_id
         )
 
         if shelf_db:
@@ -75,6 +75,32 @@ class ShelfManager:
             await self.cache_manager.store_shelf(shelf=shelf_db)
 
         return shelf_db
+
+
+    async def get_main_shelf_with_boxes(
+        self,
+        user_id: uuid.UUID,
+    ) -> ShelfWithBoxInstances | None:
+        cached = await self.cache_manager.get_main_shelf_with_boxes(
+            user_id=user_id,
+        )
+
+        if cached:
+            return cached
+
+        db_data = await self.repository.get_main_shelf_with_boxes(
+            user_id=user_id
+        )
+
+        if db_data:
+            await self.cache_manager.store_shelf_full(
+                shelf=db_data
+            )
+            await self.cache_manager.store_main_shelf_full(
+                shelf=db_data
+            )
+
+        return db_data
 
 
     async def get_shelf_by_id(
@@ -101,6 +127,30 @@ class ShelfManager:
             )
 
         return shelf_db
+
+
+    async def get_shelf_with_boxes(
+        self,
+        user_id: uuid.UUID,
+        shelf_id: uuid.UUID
+    ) -> ShelfWithBoxInstances | None:
+        cached = await self.cache_manager.get_shelf_with_boxes(
+            user_id=user_id,
+            shelf_id=shelf_id,
+        )
+
+        if cached:
+            return cached
+
+        db_data = await self.repository.get_shelf_with_boxes(
+            user_id=user_id,
+            shelf_id=shelf_id,
+        )
+
+        if db_data:
+            await self.cache_manager.store_shelf_full(db_data)
+
+        return db_data
 
 
     async def delete_shelf(
