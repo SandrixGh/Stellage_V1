@@ -46,7 +46,7 @@ class UserVerifySchema(GetUserByID, GetUserByEmail):
 
 
 class UserWithBoxInstances(UserReturnData):
-    instances: list["BoxInstanceReturn"] = []
+    boxes: list["BoxInstanceReturn"] = []
 
 
 from stellage.apps.boxes.instances.schemas import BoxInstanceReturn
