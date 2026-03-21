@@ -85,3 +85,31 @@ class ShelfCacheManager:
             )
 
 
+    async def get_main_shelf_id(
+        self,
+        user_id: uuid.UUID,
+    ) -> uuid.UUID | None:
+        async with self.redis.get_client() as client:
+            data = await client.get(f"main_shelf_id:{user_id}")
+            return uuid.UUID(data.decode()) if data else None
+
+
+    async def store_main_shelf_id(
+        self,
+        user_id: uuid.UUID,
+        shelf_id: uuid.UUID,
+    ) -> None:
+        async with self.redis.get_client() as client:
+            await client.set(
+                f"main_shelf_id:{user_id}",
+                str(shelf_id),
+                ex=3600,
+            )
+
+
+    async def delete_main_shelf_id(
+        self,
+        user_id: uuid.UUID,
+    ) -> None:
+        async with self.redis.get_client() as client:
+            await client.delete(f"main_shelf_id:{user_id}")
