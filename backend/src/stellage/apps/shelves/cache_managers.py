@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends
 
 from stellage.apps.shelves.schemas import ShelfReturnData, ShelfWithBoxInstances
-from stellage.apps.shelves.utils import unpack_from_json, pack_to_json
+from backend.utils.utils import unpack_from_json, pack_to_json
 from stellage.core.core_dependencies.redis_dependency import RedisDependency
 
 class ShelfCacheManager:
