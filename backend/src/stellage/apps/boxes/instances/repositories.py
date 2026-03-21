@@ -28,7 +28,7 @@ class BoxInstanceRepository:
         self,
         user_id: uuid.UUID,
         data: BoxInstanceCreate,
-    ) -> BoxInstanceReturn:
+    ) -> BoxInstanceWithTemplate:
         async with self.db.db_session() as session:
             serial_subquery = (
                 select(
@@ -52,14 +52,15 @@ class BoxInstanceRepository:
             create_query = (
                 insert(self.instance_model)
                 .values(**instance_data)
+                .options(joinedload(self.instance_model.template))
                 .returning(self.instance_model)
             )
 
             try:
                 result = await session.execute(create_query)
-                instance = result.scalar_one()
+                instance = result.unique().scalar_one()
                 await session.commit()
-                return BoxInstanceReturn.model_validate(instance)
+                return BoxInstanceWithTemplate.model_validate(instance)
 
             except IntegrityError:
                 await session.rollback()
@@ -78,7 +79,7 @@ class BoxInstanceRepository:
         user_id: uuid.UUID,
         instance_id: uuid.UUID,
         shelf_id: uuid.UUID | None,
-    ) -> BoxInstanceReturn:
+    ) -> BoxInstanceWithTemplate:
         async with self.db.db_session() as session:
             query = (
                 update(self.instance_model)
@@ -89,13 +90,14 @@ class BoxInstanceRepository:
                 .values(
                     shelf_id=shelf_id,
                 )
+                .options(joinedload(self.instance_model.template))
                 .returning(self.instance_model)
             )
 
             try:
                 result = await session.execute(query)
 
-                box = result.scalar_one_or_none()
+                box = result.unique().scalar_one_or_none()
 
                 if not box:
                     raise HTTPException(
@@ -105,7 +107,7 @@ class BoxInstanceRepository:
 
                 await session.commit()
 
-                return BoxInstanceReturn.model_validate(box)
+                return BoxInstanceWithTemplate.model_validate(box)
 
             except IntegrityError:
                 await session.rollback()
