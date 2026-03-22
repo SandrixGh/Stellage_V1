@@ -89,7 +89,7 @@ async def get_box_template(
 
 @router.post(
     path="/create-box-instance",
-    response_model=BoxInstanceReturn,
+    response_model=BoxInstanceWithTemplate,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_box_instance(
@@ -102,7 +102,7 @@ async def create_box_instance(
         Depends(InstanceService),
     ],
     data: BoxInstanceCreate
-) -> BoxInstanceReturn:
+) -> BoxInstanceWithTemplate:
     return await service.create_instance(
         user=user,
         data=data
@@ -128,7 +128,7 @@ async def create_box_template(
 
 @router.get(
     path="/move-box-to-shelf",
-    response_model=BoxInstanceReturn,
+    response_model=BoxInstanceWithTemplate,
     status_code=status.HTTP_200_OK,
 )
 async def move_to_shelf(
@@ -142,7 +142,7 @@ async def move_to_shelf(
     ],
     instance_id: uuid.UUID,
     shelf_id: uuid.UUID | None
-) -> BoxInstanceReturn:
+) -> BoxInstanceWithTemplate:
     return await service.move_to_shelf(
         user=user,
         instance_id=instance_id,
