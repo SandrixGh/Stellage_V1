@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from backend.utils.utils import unpack_from_json, pack_to_json
+from stellage.utils.utils import unpack_from_json, pack_to_json
 from stellage.apps.boxes.instances.schemas import BoxInstanceWithTemplate
 from stellage.core.core_dependencies.redis_dependency import RedisDependency
 
