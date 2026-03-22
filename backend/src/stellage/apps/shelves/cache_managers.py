@@ -91,7 +91,7 @@ class ShelfCacheManager:
     ) -> uuid.UUID | None:
         async with self.redis.get_client() as client:
             data = await client.get(f"main_shelf_id:{user_id}")
-            return uuid.UUID(data.decode()) if data else None
+            return uuid.UUID(data) if data else None
 
 
     async def store_main_shelf_id(

@@ -52,13 +52,23 @@ class BoxInstanceRepository:
             create_query = (
                 insert(self.instance_model)
                 .values(**instance_data)
-                .options(joinedload(self.instance_model.template))
-                .returning(self.instance_model)
+                .returning(self.instance_model.id)
             )
 
             try:
                 result = await session.execute(create_query)
-                instance = result.unique().scalar_one()
+                new_instance_id = result.scalar_one()
+
+                select_query = (
+                    select(self.instance_model)
+                    .where(self.instance_model.id == new_instance_id)
+                    .options(joinedload(self.instance_model.template))
+                )
+
+                final_result = await session.execute(select_query)
+
+                instance = final_result.unique().scalar_one()
+
                 await session.commit()
                 return BoxInstanceWithTemplate.model_validate(instance)
 
@@ -81,7 +91,7 @@ class BoxInstanceRepository:
         shelf_id: uuid.UUID | None,
     ) -> BoxInstanceWithTemplate:
         async with self.db.db_session() as session:
-            query = (
+            update_query = (
                 update(self.instance_model)
                 .where(
                     self.instance_model.user_id == user_id,
@@ -90,12 +100,18 @@ class BoxInstanceRepository:
                 .values(
                     shelf_id=shelf_id,
                 )
+            )
+
+            select_query = (
+                select(self.instance_model)
+                .where(self.instance_model.id == instance_id)
                 .options(joinedload(self.instance_model.template))
-                .returning(self.instance_model)
             )
 
             try:
-                result = await session.execute(query)
+                await session.execute(update_query)
+
+                result = await session.execute(select_query)
 
                 box = result.unique().scalar_one_or_none()
 
