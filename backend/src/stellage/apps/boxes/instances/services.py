@@ -24,7 +24,7 @@ class InstanceService:
         self,
         user: UserVerifySchema,
         data: BoxInstanceCreate
-    ) -> BoxInstanceReturn:
+    ) -> BoxInstanceWithTemplate:
         return await self.manager.create_instance(
             user_id=user.id,
             data=data,
@@ -36,7 +36,7 @@ class InstanceService:
         user: UserVerifySchema,
         instance_id: uuid.UUID,
         shelf_id: uuid.UUID | None,
-    ) -> BoxInstanceReturn:
+    ) -> BoxInstanceWithTemplate:
         return await self.manager.move_to_shelf(
             user_id=user.id,
             instance_id=instance_id,
