@@ -1,5 +1,5 @@
 import uuid
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends
 from starlette import status
@@ -141,7 +141,7 @@ async def move_to_shelf(
         Depends(InstanceService),
     ],
     instance_id: uuid.UUID,
-    shelf_id: uuid.UUID | None
+    shelf_id: Optional[uuid.UUID] = None
 ) -> BoxInstanceWithTemplate:
     return await service.move_to_shelf(
         user=user,
