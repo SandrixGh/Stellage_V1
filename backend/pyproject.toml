@@ -35,3 +35,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project.scripts]
 app = "stellage.main:start"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
