@@ -6,6 +6,7 @@ from starlette.responses import JSONResponse
 from stellage.apps.auth.depends import get_current_user
 from stellage.apps.auth.schemas import UserReturnData, AuthUser, UserVerifySchema
 from stellage.apps.auth.services import UserService
+from stellage.core.rate_limit import rate_limit
 
 auth_router = APIRouter(
     prefix="/auth",
@@ -16,6 +17,7 @@ auth_router = APIRouter(
     path="/register",
     response_model=UserReturnData,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit(max_calls=3, window_seconds=60))],
 )
 async def registration(
     user: AuthUser,
@@ -46,6 +48,7 @@ async def confirm_registration(
 @auth_router.post(
     path="/login",
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(max_calls=5, window_seconds=60))],
 )
 async def login_user(
     user: AuthUser,
