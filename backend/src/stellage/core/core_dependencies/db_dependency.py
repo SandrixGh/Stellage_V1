@@ -8,6 +8,9 @@ class DBDependency:
         self._engine = create_async_engine(
             url=settings.db_settings.db_url,
             echo=settings.db_settings.db_echo,
+            pool_size=10,
+            max_overflow=20,
+            pool_pre_ping=True,
         )
 
         self._session_factory = async_sessionmaker(

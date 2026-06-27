@@ -1,10 +1,20 @@
+import logging
+
 import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from stellage.apps import apps_router
+from stellage.core.logging_config import configure_logging
+from stellage.core.settings import settings
 
-app = FastAPI()
+configure_logging(level=logging.WARNING if settings.is_production else logging.INFO)
+
+app = FastAPI(
+    docs_url=None if settings.is_production else "/docs",
+    redoc_url=None if settings.is_production else "/redoc",
+    openapi_url=None if settings.is_production else "/openapi.json",
+)
 
 origins = [
     "http://localhost:5173", 

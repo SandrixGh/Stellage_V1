@@ -12,7 +12,7 @@ function App() {
 
   useEffect(() => {
     getUser();
-  }, []);
+  }, [getUser]);
 
   if (!isInitialized) {
     return (

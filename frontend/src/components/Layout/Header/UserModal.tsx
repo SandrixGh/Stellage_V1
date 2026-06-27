@@ -8,8 +8,8 @@ export const UserModal = ({ onClose }: UserModalProps) => {
 
     const [isClosing, setIsClosing] = useState(false);
 
-    const handleChangeEmail = () => console.log("Запрос на замену email");
-    const handleChangePassword = () => console.log("Запрос на замену password");
+    const handleChangeEmail = undefined;
+    const handleChangePassword = undefined;
 
     const handleDeleteAccount = () => {
         if (window.confirm("Вы уверены? Это действие необратимо!")) {
@@ -41,8 +41,8 @@ export const UserModal = ({ onClose }: UserModalProps) => {
                 </div>
 
                 <div className="modal-actions">
-                    <button onClick={handleChangeEmail} className="modal-btn">Сменить почту</button>
-                    <button onClick={handleChangePassword} className="modal-btn">Сменить пароль</button>
+                    <button onClick={handleChangeEmail} className="modal-btn" disabled>Сменить почту</button>
+                    <button onClick={handleChangePassword} className="modal-btn" disabled>Сменить пароль</button>
                     <hr />
                     <button onClick={logout} className="modal-btn logout-btn">Выйти из аккаунта</button>
                     <button onClick={handleDeleteAccount} className="modal-btn delete-btn">Удалить аккаунт</button>

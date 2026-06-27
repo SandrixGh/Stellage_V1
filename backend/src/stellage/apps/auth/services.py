@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import Depends, HTTPException, status
 from itsdangerous import URLSafeTimedSerializer, BadSignature
 from starlette.responses import JSONResponse
@@ -8,6 +10,8 @@ from stellage.apps.auth.schemas import AuthUser, CreateUser, UserReturnData, Use
 from stellage.core.settings import settings
 
 from .tasks import send_confirmation_email
+
+logger = logging.getLogger(__name__)
 
 class UserService:
     def __init__(
@@ -28,6 +32,7 @@ class UserService:
         )
 
         user_data = await self.manager.create_user(new_user)
+        logger.info("User registered: %s", user_data.email)
 
         confirmation_token = self.serializer.dumps(user_data.email)
         try:
@@ -66,12 +71,14 @@ class UserService:
         )
 
         if is_invalid_exist_user:
+            logger.warning("Failed login attempt for email: %s", user.email)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Wrong email or password",
             )
 
         if not exist_user.is_verified:
+            logger.warning("Login attempt by unverified user: %s", user.email)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Exist user is not verified",
@@ -87,6 +94,7 @@ class UserService:
             session_id=session_id,
         )
 
+        logger.info("User logged in: %s", exist_user.email)
         response = JSONResponse(content={"message": "Login is successful"})
 
         response.set_cookie(
@@ -127,6 +135,7 @@ class UserService:
         await self.manager.delete_account(
             user_id=user.id,
         )
+        logger.info("Account deleted: user_id=%s", user.id)
 
         response = JSONResponse(content={"message": "Deleting the account was successful"})
         return response
