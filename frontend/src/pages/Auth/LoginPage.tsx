@@ -15,7 +15,6 @@ export const LoginPage = ({ onSwitch }: { onSwitch: () => void }) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
-
         try {
             await login(email, password);
         } catch (err: any) {
@@ -39,8 +38,8 @@ export const LoginPage = ({ onSwitch }: { onSwitch: () => void }) => {
                 {error && <div className="error-message">{error}</div>}
                 <AuthForm
                     onSubmit={handleSubmit}
-                    emailData={{ field: email, setField: setEmail, label: "Email", type: "email", }}
-                    passwordData={{ field: password, setField: setPassword, label: "Пароль", type: "password", }}
+                    emailData={{ field: email, setField: setEmail, label: "Email", type: "email" }}
+                    passwordData={{ field: password, setField: setPassword, label: "Пароль", type: "password" }}
                     buttonContent="Войти"
                 />
             </AuthCard>

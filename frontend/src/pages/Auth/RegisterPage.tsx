@@ -18,7 +18,7 @@ export const RegisterPage = ({ onSwitch }: { onSwitch: () => void }) => {
             await api.post("/auth/register/", { email, password })
             setIsSent(true);
         } catch (err: any) {
-            setError(err.response?.data?.detail || "Ошибка  при регистрации");
+            setError(err.response?.data?.detail || "Ошибка при регистрации");
         }
     };
 
@@ -27,13 +27,10 @@ export const RegisterPage = ({ onSwitch }: { onSwitch: () => void }) => {
             <div className="auth-container">
                 <div className="auth-card">
                     <h2>Проверьте почту</h2>
-                    <div className="success-message">
+                    <p className="success-message">
                         Мы отправили письмо на <strong>{email}</strong> для подтверждения аккаунта.
-                    </div>
-                    <button
-                        onClick={onSwitch}
-                        className="btn-primary"
-                    >
+                    </p>
+                    <button onClick={onSwitch} className="btn-primary">
                         К логину
                     </button>
                 </div>

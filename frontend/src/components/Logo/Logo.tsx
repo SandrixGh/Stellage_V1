@@ -1,15 +1,15 @@
 import React from 'react';
-import logoSrc from './OFF-LOGO.png'; // Путь к вашей прозрачной PNG-картинке
+import logoSrc from './OFF-LOGO.png'; 
 
 interface LogoProps {
   size?: number | string;
-  color?: string;
+  color?: string; // Теперь сюда передаем ваш HEX
   className?: string;
 }
 
 export const Logo: React.FC<LogoProps> = ({
   size = 100,
-  color = '#FFFFFF', // Сюда можно передать любой HEX, RGB или 'currentColor'
+  color = '#D7D0B7', // Установили ваш новый цвет по умолчанию
   className
 }) => {
   return (
@@ -19,7 +19,6 @@ export const Logo: React.FC<LogoProps> = ({
         width: size,
         height: size,
         backgroundColor: color,
-        // Картинка используется как трафарет:
         WebkitMaskImage: `url(${logoSrc})`,
         maskImage: `url(${logoSrc})`,
         WebkitMaskSize: 'contain',

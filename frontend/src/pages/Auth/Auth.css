@@ -9,6 +9,7 @@
     font-family: -apple-system, system-ui, sans-serif;
     user-select: none;
     -webkit-user-select: none;
+    box-sizing: border-box; /* Это фикс скролла */
 }
 
 .auth-content-wrapper {
@@ -34,8 +35,8 @@
     width: auto;
     display: block;
     /* Управляем цветом через fill и color */
-    fill: #fefaf0; 
-    color: #fefaf0;
+    fill: #D7D0B7; 
+    color: #D7D0B7;
     /* Улучшаем видимость на черном фоне */
     filter: drop-shadow(0 0 12px rgba(254, 250, 240, 0.15));
 }
@@ -43,7 +44,7 @@
 .app-name {
     font-size: 40px; 
     font-weight: 700;
-    color: #fefaf0;
+    color: #D7D0B7;
     letter-spacing: 1px;
     margin: 0;
     line-height: 1;
@@ -51,14 +52,18 @@
 
 /* КАРТОЧКА */
 .auth-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     background: rgba(255, 255, 255, 0.03); 
     padding: 40px;
     border-radius: 28px;
     width: 100%;
+    max-width: 380px; /* Добавили сюда max-width из обертки */
     box-sizing: border-box;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(254, 250, 240, 0.1);
+    border: 1px solid rgba(215, 208, 179, 0.1); 
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
 }
 
@@ -66,7 +71,15 @@
     margin: 0 0 30px 0;
     font-size: 26px;
     font-weight: 600;
-    color: #fefaf0;
+    color: #D7D0B7;
+    text-align: center;
+}
+
+.auth-card p {
+    margin: 0 0 30px 0;
+    font-size: 20px;
+    font-weight: 200;
+    color: #D7D0B7;
     text-align: center;
 }
 
@@ -111,11 +124,12 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 14px;
     font-size: 16px;
-    color: #fefaf0 !important;
+    color: #D7D0B7 !important; 
     box-sizing: border-box;
     transition: all 0.2s ease;
     user-select: text;
     -webkit-user-select: text;
+    caret-color: #D7D0B7; /* Твой курсор в цвет текста */
 }
 
 .form-group input:focus {
@@ -143,7 +157,7 @@
     width: 100%;
     padding: 16px;
     background: rgba(254, 250, 240, 0.05);
-    color: #fefaf0;
+    color: #D7D0B7;
     border: 1px solid rgba(254, 250, 240, 0.2);
     border-radius: 14px;
     font-size: 16px;
@@ -173,7 +187,7 @@
 }
 
 .auth-link {
-    color: #fefaf0;
+    color: #D7D0B7;
     text-decoration: none;
     font-weight: 600;
     padding: 8px 14px;
@@ -188,8 +202,13 @@
     border-color: rgba(254, 250, 240, 0.3);
 }
 
-/* АВТОЗАПОЛНЕНИЕ */
-input:-webkit-autofill {
-    -webkit-text-fill-color: #fefaf0 !important;
-    -webkit-box-shadow: 0 0 0px 1000px #1a1a1a inset !important;
+/* АВТОЗАПОЛНЕНИЕ - Убрал лишние "!important" по максимуму */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #D7D0B7 !important;
+    -webkit-box-shadow: 0 0 0px 1000px #0a0a0a inset !important;
+    transition: background-color 5000s ease-in-out 0s;
 }
+
+/* Остальное оставляй как было в твоем оригинальном файле */
