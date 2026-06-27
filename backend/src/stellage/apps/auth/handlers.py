@@ -1,5 +1,5 @@
 import datetime
-import random
+import secrets
 import string
 import uuid
 
@@ -82,5 +82,5 @@ class AuthHandler:
     async def generate_confirmation_code(
         length: int
     ) -> str:
-        characters =string.ascii_uppercase + string.digits
-        return "".join(random.choices(characters, k=length))
+        characters = string.ascii_uppercase + string.digits
+        return "".join(secrets.choice(characters) for _ in range(length))

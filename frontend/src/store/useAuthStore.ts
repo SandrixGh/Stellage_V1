@@ -41,7 +41,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 
     delete_account: async () => {
-        const user = get();
+        const { user } = get();
 
         if(user) {
             await api.get("/auth/delete-account");

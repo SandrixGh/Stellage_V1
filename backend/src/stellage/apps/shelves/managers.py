@@ -41,7 +41,7 @@ class ShelfManager:
         if created_shelf.is_main:
             await self.cache_manager.store_main_shelf_id(
                 user_id=created_shelf.user_id,
-                shelf_id=created_shelf.user_id,
+                shelf_id=created_shelf.id,
             )
 
         return created_shelf
