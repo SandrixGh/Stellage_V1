@@ -130,7 +130,7 @@ async def create_box_template(
     )
 
 
-@router.get(
+@router.post(
     path="/move-box-to-shelf",
     response_model=BoxInstanceWithTemplate,
     status_code=status.HTTP_200_OK,

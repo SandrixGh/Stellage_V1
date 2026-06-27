@@ -60,7 +60,7 @@ export const useStellageStore = create<StellageState>((set, get) => ({
 
     moveBox: async (instanceId, shelfId) => {
         try {
-            await api.get("/boxes/move-box-to-shelf", {
+            await api.post("/boxes/move-box-to-shelf", null, {
                 params: { instance_id: instanceId, shelf_id: shelfId }
             });
             get().fetchMainShelf(); 

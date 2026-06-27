@@ -34,7 +34,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     logout: async () => {
         try {
-            await api.get('/auth/logout');
+            await api.post('/auth/logout');
         } finally {
             set({ user: null, isAuthenticated: false });
         }
@@ -44,7 +44,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const { user } = get();
 
         if(user) {
-            await api.get("/auth/delete-account");
+            await api.delete("/auth/delete-account");
             set({ user: null, isAuthenticated: false });
         }
     },

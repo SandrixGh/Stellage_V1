@@ -30,7 +30,13 @@ class UserService:
         user_data = await self.manager.create_user(new_user)
 
         confirmation_token = self.serializer.dumps(user_data.email)
-        send_confirmation_email.delay(user_data.email, confirmation_token)
+        try:
+            send_confirmation_email.delay(user_data.email, confirmation_token)
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Registration succeeded but confirmation email could not be sent. Please try again later.",
+            )
 
         return user_data
 

@@ -7,8 +7,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: "guest"
-      RABBITMQ_DEFAULT_PASS: "guest"
+      RABBITMQ_DEFAULT_USER: "${rabbitmq_user}"
+      RABBITMQ_DEFAULT_PASS: "${rabbitmq_password}"
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
 
@@ -46,8 +46,8 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.org
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: "${pgadmin_email}"
+      PGADMIN_DEFAULT_PASSWORD: "${pgadmin_password}"
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
       - "5050:80"

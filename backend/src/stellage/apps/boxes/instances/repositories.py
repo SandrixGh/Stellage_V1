@@ -79,10 +79,6 @@ class BoxInstanceRepository:
                     detail="Box already exist"
                 )
 
-            except Exception as e:
-                await session.rollback()
-                raise e
-
 
     async def move_to_shelf(
         self,
@@ -147,10 +143,6 @@ class BoxInstanceRepository:
                     detail="Box on that shelf already exist"
                 )
 
-            except Exception as e:
-                await session.rollback()
-                raise e
-
 
 
     async def get_box_instances(
@@ -211,10 +203,5 @@ class BoxInstanceRepository:
                 )
             )
 
-            try:
-                await session.execute(query)
-                await session.commit()
-
-            except Exception as e:
-                await session.rollback()
-                raise e
+            await session.execute(query)
+            await session.commit()

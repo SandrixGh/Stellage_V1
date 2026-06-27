@@ -43,10 +43,16 @@ class ProfileService:
             confirmation_code_request=confirmation_code_request
         )
 
-        send_confirmation_code.delay(
-            to_email=str(data.new_email),
-            confirmation_code=confirmation_code
-        )
+        try:
+            send_confirmation_code.delay(
+                to_email=str(data.new_email),
+                confirmation_code=confirmation_code
+            )
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Confirmation code could not be sent. Please try again later.",
+            )
 
         response = JSONResponse(
             content={

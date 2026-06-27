@@ -7,7 +7,11 @@ from jinja2 import Environment, FileSystemLoader
 from stellage.core.settings import settings
 
 
-@shared_task
+@shared_task(
+    autoretry_for=(Exception,),
+    max_retries=3,
+    default_retry_delay=60,
+)
 def send_confirmation_email(to_email, token):
     confirmation_url = (
         f"{settings.frontend_url}/auth/register_confirm?token={token}"

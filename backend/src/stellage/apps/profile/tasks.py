@@ -8,7 +8,11 @@ from jinja2 import Environment, FileSystemLoader
 from stellage.core.settings import settings
 
 
-@shared_task
+@shared_task(
+    autoretry_for=(Exception,),
+    max_retries=3,
+    default_retry_delay=60,
+)
 def send_confirmation_code(
     to_email: str,
     confirmation_code: str,

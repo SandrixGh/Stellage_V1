@@ -57,7 +57,7 @@ async def login_user(
     return await service.login_user(user=user)
 
 
-@auth_router.get(
+@auth_router.post(
     path="/logout",
     status_code=status.HTTP_200_OK,
 )
@@ -88,7 +88,7 @@ async def get_auth_user(
     return user
 
 
-@auth_router.get(
+@auth_router.delete(
     path="/delete-account",
     status_code=status.HTTP_200_OK
 )
