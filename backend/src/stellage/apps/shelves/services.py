@@ -34,7 +34,7 @@ class ShelfService:
     ) -> ShelfReturnData:
         if len(await self.get_shelves(user=user)) >= 2:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=status.HTTP_409_CONFLICT,
                 detail="You already have 2 stellages"
             )
         return await self.manager.create_shelf(

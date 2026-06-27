@@ -81,7 +81,7 @@ class ProfileService:
         )
 
         response = JSONResponse(
-            content="Email changing was successful"
+            content={"message": "Email changing was successful"}
         )
 
         return response
@@ -118,6 +118,6 @@ class ProfileService:
             hashed_password=new_hashed_password,
         )
 
-        response = JSONResponse(content="Changing password was successful")
+        response = JSONResponse(content={"message": "Changing password was successful"})
 
         return response

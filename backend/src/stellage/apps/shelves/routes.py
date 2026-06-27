@@ -112,7 +112,7 @@ async def get_shelf_by_id(
     status_code=status.HTTP_200_OK,
     response_model=ShelfWithBoxInstances
 )
-async def get_shelf_by_id(
+async def get_shelf_with_boxes(
     shelf_id: uuid.UUID,
     user: Annotated[
         UserVerifySchema,

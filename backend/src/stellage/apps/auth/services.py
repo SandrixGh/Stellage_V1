@@ -87,6 +87,8 @@ class UserService:
             key="Authorization",
             value=token,
             httponly=True,
+            secure=settings.cookie_secure,
+            samesite="lax",
             max_age=settings.access_token_expire,
         )
 

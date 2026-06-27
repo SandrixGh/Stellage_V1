@@ -62,4 +62,8 @@ class AppSettings(BaseAppSettings):
 
     confirmation_code_length: int
 
+    # Set to True in production (HTTPS) so the auth cookie is only sent
+    # over secure connections. Kept False by default for local http dev.
+    cookie_secure: bool = False
+
 settings = AppSettings()
