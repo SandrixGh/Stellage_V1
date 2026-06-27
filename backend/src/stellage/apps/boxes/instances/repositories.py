@@ -9,7 +9,7 @@ from starlette import status
 
 from stellage.apps.boxes.instances.schemas import BoxInstanceReturn, BoxInstanceCreate, BoxInstanceWithTemplate
 from stellage.core.core_dependencies.db_dependency import DBDependency
-from stellage.database.models import BoxInstance
+from stellage.database.models import BoxInstance, Shelf
 
 
 class BoxInstanceRepository:
@@ -91,6 +91,21 @@ class BoxInstanceRepository:
         shelf_id: uuid.UUID | None,
     ) -> BoxInstanceWithTemplate:
         async with self.db.db_session() as session:
+            if shelf_id is not None:
+                shelf_owner_query = (
+                    select(Shelf.id)
+                    .where(
+                        Shelf.id == shelf_id,
+                        Shelf.user_id == user_id,
+                    )
+                )
+                owned_shelf = await session.execute(shelf_owner_query)
+                if owned_shelf.scalar_one_or_none() is None:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Shelf not found or access denied"
+                    )
+
             update_query = (
                 update(self.instance_model)
                 .where(
