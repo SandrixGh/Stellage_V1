@@ -35,9 +35,10 @@
 }
 
 .header-logo-title {
-    font-size: 22px;
+    font-family: 'Syne', sans-serif;
+    font-size: 21px;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     line-height: 1;
 }
 
@@ -61,8 +62,10 @@
     position: relative;
     color: rgba(215, 208, 179, 0.5);
     text-decoration: none;
+    font-family: 'Space Grotesk', sans-serif;
     font-weight: 500;
-    font-size: 15px;
+    font-size: 14px;
+    letter-spacing: 0.1px;
     padding: 8px 2px;
     transition: color 0.2s ease;
 }

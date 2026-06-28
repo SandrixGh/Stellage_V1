@@ -4,94 +4,139 @@
 
 .feed-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 18px;
 }
 
 .feed-grid .empty-message {
     grid-column: 1 / -1;
 }
 
+/* ── Template card ── */
 .template-card {
     position: relative;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 10px;
-    padding: 28px 20px 22px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(215, 208, 179, 0.15);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
-    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.025);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(215, 208, 179, 0.13);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.25s ease,
+                box-shadow 0.25s ease;
+    cursor: pointer;
+    overflow: hidden;
 }
 
 .template-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(215, 208, 179, 0.35);
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45), 0 0 24px rgba(215, 208, 179, 0.06);
+    transform: translateY(-6px);
+    border-color: rgba(215, 208, 179, 0.3);
+    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), 0 0 32px rgba(215, 208, 179, 0.07);
 }
 
-.template-icon {
-    font-size: 42px;
-    line-height: 1;
-    filter: drop-shadow(0 0 12px rgba(215, 208, 179, 0.15));
+/* ── Card header: rarity + price ── */
+.template-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 0;
 }
 
+/* ── Rarity tags ── */
 .rarity-tag {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
     text-transform: uppercase;
-    padding: 3px 10px;
-    border-radius: 999px;
-    color: rgba(215, 208, 179, 0.7);
-    background: rgba(215, 208, 179, 0.08);
-    border: 1px solid rgba(215, 208, 179, 0.2);
+    padding: 3px 9px;
+    border-radius: 4px;
+    color: rgba(215, 208, 179, 0.6);
+    background: rgba(215, 208, 179, 0.07);
+    border: 1px solid rgba(215, 208, 179, 0.18);
 }
 
 .rarity-tag-rare {
     color: #9cc0ff;
-    border-color: rgba(120, 170, 255, 0.4);
-    background: rgba(120, 170, 255, 0.08);
+    border-color: rgba(120, 170, 255, 0.35);
+    background: rgba(120, 170, 255, 0.07);
 }
 
 .rarity-tag-golden {
     color: #e8cb82;
-    border-color: rgba(230, 200, 120, 0.45);
-    background: rgba(230, 200, 120, 0.08);
+    border-color: rgba(230, 200, 120, 0.4);
+    background: rgba(230, 200, 120, 0.07);
+}
+
+/* ── Price ── */
+.template-price {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(215, 208, 179, 0.75);
+    letter-spacing: -0.2px;
+}
+
+/* ── Visual area ── */
+.template-card-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 20px 20px;
+    background: radial-gradient(ellipse at center,
+        rgba(215, 208, 179, 0.055) 0%,
+        transparent 72%);
+    position: relative;
+}
+
+/* ── Footer ── */
+.template-card-footer {
+    padding: 0 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .template-title {
+    font-family: 'Syne', sans-serif;
     margin: 0;
-    font-size: 17px;
+    font-size: 15px;
     font-weight: 600;
     color: #D7D0B7;
+    letter-spacing: -0.1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .template-desc {
     margin: 0;
     font-size: 13px;
     line-height: 1.5;
-    color: rgba(215, 208, 179, 0.5);
+    color: rgba(215, 208, 179, 0.45);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.template-price {
-    margin-top: 6px;
-    font-size: 15px;
-    font-weight: 700;
-    color: #D7D0B7;
-}
-
-/* ===== RARITY CARD ACCENTS ===== */
+/* ── Rarity card accents ── */
 .template-card.rarity-golden {
-    border-color: rgba(230, 200, 120, 0.35);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35), 0 0 20px rgba(230, 200, 120, 0.07);
+    border-color: rgba(230, 200, 120, 0.28);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4), 0 0 24px rgba(230, 200, 120, 0.07);
+}
+
+.template-card.rarity-golden:hover {
+    border-color: rgba(230, 200, 120, 0.5);
+    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), 0 0 48px rgba(230, 200, 120, 0.12);
 }
 
 .template-card.rarity-rare {
-    border-color: rgba(120, 170, 255, 0.28);
+    border-color: rgba(120, 170, 255, 0.22);
+}
+
+.template-card.rarity-rare:hover {
+    border-color: rgba(120, 170, 255, 0.45);
+    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), 0 0 40px rgba(120, 170, 255, 0.08);
 }

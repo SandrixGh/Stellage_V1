@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
 import { BoxCard } from "../../components/Stellage/BoxCard";
+import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import "./MainPage.css";
 
 export const MyStellagePage = () => {
@@ -18,11 +19,16 @@ export const MyStellagePage = () => {
     if (!isAuthenticated) {
         return (
             <div className="stellage-gate">
-                <h1 className="page-title">Мой стеллаж</h1>
-                <p className="page-subtitle">
-                    Войдите в аккаунт, чтобы увидеть свои полки и коробки.
-                </p>
-                <Link to="/login" className="gate-btn">Войти</Link>
+                <div className="stellage-gate-visual">
+                    <WireframeBox size={280} />
+                </div>
+                <div className="stellage-gate-content">
+                    <h1 className="stellage-gate-title">Мой стеллаж</h1>
+                    <p className="stellage-gate-sub">
+                        Войдите, чтобы увидеть свои полки и коробки.
+                    </p>
+                    <Link to="/login" className="gate-btn">Войти</Link>
+                </div>
             </div>
         );
     }

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useStellageStore } from "../../store/useStellageStore";
 import type { BoxTemplate } from "../../types/Stellage/boxes";
+import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import "./FeedPage.css";
 
 const CURRENCY_SIGN: Record<string, string> = {
@@ -15,18 +16,35 @@ const formatPrice = (price: string, currency: string) => {
     return `${value.toFixed(2)} ${sign}`.trim();
 };
 
+const rarityGlowMap: Record<string, "rare" | "golden" | "dev" | null> = {
+    rare: "rare",
+    golden: "golden",
+    "developer's": "dev",
+    dev: "dev",
+};
+
 const TemplateCard = ({ template }: { template: BoxTemplate }) => {
-    const rarity = template.rarity?.toLowerCase();
+    const rarityKey = template.rarity?.toLowerCase();
+    const rarityGlow = rarityGlowMap[rarityKey] ?? null;
+
     return (
-        <div className={`template-card rarity-${rarity}`}>
-            <div className="template-icon">📦</div>
-            <span className={`rarity-tag rarity-tag-${rarity}`}>{template.rarity}</span>
-            <h3 className="template-title">{template.title}</h3>
-            {template.description && (
-                <p className="template-desc">{template.description}</p>
-            )}
-            <div className="template-price">
-                {formatPrice(template.price, template.currency)}
+        <div className={`template-card rarity-${rarityKey}`}>
+            <div className="template-card-header">
+                <span className={`rarity-tag rarity-tag-${rarityKey}`}>{template.rarity}</span>
+                <span className="template-price">
+                    {formatPrice(template.price, template.currency)}
+                </span>
+            </div>
+
+            <div className="template-card-visual">
+                <WireframeBox size={120} rarityGlow={rarityGlow} />
+            </div>
+
+            <div className="template-card-footer">
+                <h3 className="template-title">{template.title}</h3>
+                {template.description && (
+                    <p className="template-desc">{template.description}</p>
+                )}
             </div>
         </div>
     );
