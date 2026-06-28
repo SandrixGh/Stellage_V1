@@ -9,17 +9,21 @@ export const LoginPage = ({ onSwitch }: { onSwitch: () => void }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     const login = useAuthStore((state) => state.login)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+        setIsLoading(true);
         try {
             await login(email, password);
         } catch (err: any) {
             const message = err.response?.data?.detail || 'Произошла ошибка при входе'
             setError(message)
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -41,6 +45,7 @@ export const LoginPage = ({ onSwitch }: { onSwitch: () => void }) => {
                     emailData={{ field: email, setField: setEmail, label: "Email", type: "email" }}
                     passwordData={{ field: password, setField: setPassword, label: "Пароль", type: "password" }}
                     buttonContent="Войти"
+                    isLoading={isLoading}
                 />
             </AuthCard>
         </AuthLayout>

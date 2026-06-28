@@ -1,15 +1,89 @@
-/* ОБЩИЙ КОНТЕЙНЕР */
+/* ===== ANIMATIONS ===== */
+@keyframes orb-drift-1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%       { transform: translate(60px, -80px) scale(1.1); }
+    66%       { transform: translate(-40px, 40px) scale(0.95); }
+}
+@keyframes orb-drift-2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%       { transform: translate(-70px, 50px) scale(1.05); }
+    66%       { transform: translate(50px, -60px) scale(1.15); }
+}
+@keyframes orb-drift-3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%       { transform: translate(40px, 70px) scale(0.9); }
+}
+@keyframes card-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer-border {
+    0%, 100% { opacity: 0.15; }
+    50%       { opacity: 0.35; }
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+@keyframes label-float {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ===== CONTAINER ===== */
 .auth-container {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #0a0a0a;
+    background-color: #080808;
     padding: 20px;
     font-family: -apple-system, system-ui, sans-serif;
     user-select: none;
     -webkit-user-select: none;
-    box-sizing: border-box; /* Это фикс скролла */
+    box-sizing: border-box;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ===== BACKGROUND ORBS ===== */
+.auth-container::before,
+.auth-container::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+}
+.auth-container::before {
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, rgba(180, 160, 100, 0.12) 0%, transparent 70%);
+    top: -10%;
+    right: 5%;
+    animation: orb-drift-1 18s ease-in-out infinite;
+}
+.auth-container::after {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(120, 100, 160, 0.09) 0%, transparent 70%);
+    bottom: -5%;
+    left: 0%;
+    animation: orb-drift-2 22s ease-in-out infinite;
+}
+
+.auth-orb-3 {
+    position: fixed;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(80, 140, 120, 0.07) 0%, transparent 70%);
+    filter: blur(70px);
+    top: 50%;
+    left: -5%;
+    pointer-events: none;
+    z-index: 0;
+    animation: orb-drift-3 26s ease-in-out infinite;
 }
 
 .auth-content-wrapper {
@@ -17,32 +91,31 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 380px;
+    max-width: 400px;
+    position: relative;
+    z-index: 1;
 }
 
-/* ЛОГОТИП И ЗАГОЛОВОК */
+/* ===== LOGO & TITLE ===== */
 .app-title-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 16px; 
-    margin-bottom: 35px;
+    gap: 16px;
+    margin-bottom: 40px;
 }
 
-/* Фикс логотипа: убираем инверсию, принудительно ставим цвет */
 .app-title-wrapper svg {
-    height: 50px; 
+    height: 50px;
     width: auto;
     display: block;
-    /* Управляем цветом через fill и color */
-    fill: #D7D0B7; 
+    fill: #D7D0B7;
     color: #D7D0B7;
-    /* Улучшаем видимость на черном фоне */
-    filter: drop-shadow(0 0 12px rgba(254, 250, 240, 0.15));
+    filter: drop-shadow(0 0 16px rgba(215, 208, 179, 0.2));
 }
 
 .app-name {
-    font-size: 40px; 
+    font-size: 40px;
     font-weight: 700;
     color: #D7D0B7;
     letter-spacing: 1px;
@@ -50,29 +123,44 @@
     line-height: 1;
 }
 
-/* КАРТОЧКА */
+/* ===== CARD ===== */
 .auth-card {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.03); 
-    padding: 40px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 44px 40px 36px;
     border-radius: 28px;
     width: 100%;
-    max-width: 380px; /* Добавили сюда max-width из обертки */
+    max-width: 400px;
     box-sizing: border-box;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(215, 208, 179, 0.1); 
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(215, 208, 179, 0.15);
+    box-shadow:
+        0 30px 60px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(215, 208, 179, 0.05) inset;
+    animation: card-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    position: relative;
+}
+
+/* Shimmer on card border */
+.auth-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 28px;
+    border: 1px solid rgba(215, 208, 179, 0.25);
+    pointer-events: none;
+    animation: shimmer-border 4s ease-in-out infinite;
 }
 
 .auth-card h2 {
-    margin: 0 0 30px 0;
-    font-size: 26px;
+    margin: 0 0 36px 0;
+    font-size: 24px;
     font-weight: 600;
     color: #D7D0B7;
     text-align: center;
+    letter-spacing: 0.3px;
 }
 
 .auth-card p {
@@ -83,33 +171,24 @@
     text-align: center;
 }
 
-/* ОШИБКИ */
+/* ===== ERROR ===== */
 .error-message {
-    padding: 14px;
+    padding: 12px 16px;
     border-radius: 14px;
     margin-bottom: 20px;
-    font-size: 14px;
+    font-size: 13px;
     text-align: center;
-    background: rgba(255, 107, 107, 0.1);
-    color: #ffb3b3;
-    border: 1px solid rgba(255, 107, 107, 0.2);
-    backdrop-filter: blur(5px);
+    background: rgba(255, 80, 80, 0.08);
+    color: #ffaaaa;
+    border: 1px solid rgba(255, 80, 80, 0.18);
+    animation: card-in 0.25s ease both;
 }
 
-/* ПОЛЯ ВВОДА */
+/* ===== FLOATING LABEL INPUTS ===== */
 .form-group {
-    margin-bottom: 20px;
+    position: relative;
+    margin-bottom: 22px;
     width: 100%;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 12px;
-    font-weight: 500;
-    color: rgba(254, 250, 240, 0.4);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 .input-wrapper {
@@ -117,28 +196,68 @@
     width: 100%;
 }
 
+/* Label floats inside input */
+.input-wrapper label {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    font-weight: 400;
+    color: rgba(215, 208, 179, 0.35);
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+    background: transparent;
+    padding: 0 2px;
+}
+
+/* Float up when focused or has value */
+.input-wrapper input:focus ~ label,
+.input-wrapper input:not(:placeholder-shown) ~ label {
+    top: 0;
+    transform: translateY(-50%) scale(0.78);
+    left: 12px;
+    color: rgba(215, 208, 179, 0.65);
+    padding: 0 4px;
+    background: #080808;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+/* Input field */
 .form-group input {
     width: 100%;
-    padding: 14px 16px;
-    background: rgba(255, 255, 255, 0.05) !important;
+    padding: 18px 16px 6px;
+    background: rgba(255, 255, 255, 0.04) !important;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 14px;
-    font-size: 16px;
-    color: #D7D0B7 !important; 
+    font-size: 15px;
+    color: #D7D0B7 !important;
     box-sizing: border-box;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     user-select: text;
     -webkit-user-select: text;
-    caret-color: #D7D0B7; /* Твой курсор в цвет текста */
+    caret-color: #D7D0B7;
+    outline: none;
+    display: block;
 }
 
 .form-group input:focus {
-    outline: none;
-    border-color: rgba(254, 250, 240, 0.3);
-    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(215, 208, 179, 0.4);
+    background: rgba(255, 255, 255, 0.07) !important;
+    box-shadow:
+        0 0 0 3px rgba(215, 208, 179, 0.06),
+        0 0 20px rgba(215, 208, 179, 0.04);
 }
 
-/* КНОПКИ */
+/* Password input needs right padding for eye icon */
+.form-group input[type="password"],
+.form-group input[data-password="true"] {
+    padding-right: 48px;
+}
+
+/* ===== PASSWORD TOGGLE ===== */
 .password-toggle {
     position: absolute;
     right: 12px;
@@ -147,39 +266,83 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    color: rgba(254, 250, 240, 0.3);
+    color: rgba(215, 208, 179, 0.25);
     display: flex;
     padding: 5px;
     z-index: 10;
+    transition: color 0.2s ease;
+    border-radius: 8px;
 }
 
+.password-toggle:hover,
+.password-toggle.active {
+    color: rgba(215, 208, 179, 0.7);
+}
+
+/* ===== SUBMIT BUTTON ===== */
 .btn-primary {
     width: 100%;
     padding: 16px;
-    background: rgba(254, 250, 240, 0.05);
+    background: rgba(215, 208, 179, 0.07);
     color: #D7D0B7;
-    border: 1px solid rgba(254, 250, 240, 0.2);
+    border: 1px solid rgba(215, 208, 179, 0.2);
     border-radius: 14px;
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
     cursor: pointer;
-    margin-top: 10px;
+    margin-top: 8px;
     backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
 }
 
-.btn-primary:hover {
-    background: rgba(254, 250, 240, 0.12);
-    border-color: rgba(254, 250, 240, 0.4);
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: rgba(215, 208, 179, 0.13);
+    border-color: rgba(215, 208, 179, 0.38);
     transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
-/* ФУТЕР */
+.btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Loading spinner inside button */
+.btn-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(215, 208, 179, 0.3);
+    border-top-color: #D7D0B7;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+/* ===== FOOTER ===== */
 .auth-footer {
-    margin-top: 30px;
+    margin-top: 28px;
     text-align: center;
     font-size: 14px;
-    color: rgba(254, 250, 240, 0.3);
+    color: rgba(215, 208, 179, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -190,25 +353,63 @@
     color: #D7D0B7;
     text-decoration: none;
     font-weight: 600;
-    padding: 8px 14px;
-    border-radius: 12px;
+    padding: 6px 14px;
+    border-radius: 10px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .auth-link:hover {
     background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(254, 250, 240, 0.3);
+    border-color: rgba(215, 208, 179, 0.3);
+    transform: translateY(-1px);
 }
 
-/* АВТОЗАПОЛНЕНИЕ - Убрал лишние "!important" по максимуму */
+/* ===== AUTOFILL ===== */
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
+input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
     -webkit-text-fill-color: #D7D0B7 !important;
-    -webkit-box-shadow: 0 0 0px 1000px #0a0a0a inset !important;
+    -webkit-box-shadow: 0 0 0px 1000px #101010 inset !important;
     transition: background-color 5000s ease-in-out 0s;
 }
 
-/* Остальное оставляй как было в твоем оригинальном файле */
+/* Float label when browser autofills the input */
+.input-wrapper input:-webkit-autofill ~ label {
+    top: 0;
+    transform: translateY(-50%) scale(0.78);
+    left: 12px;
+    color: rgba(215, 208, 179, 0.65);
+    padding: 0 4px;
+    background: #080808;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+/* ===== HIDE SCROLLBAR ON AUTH PAGE ===== */
+/* normalize.css sets scrollbar-gutter: stable which reserves space → white stripe + off-center layout */
+html:has(.auth-container) {
+    overflow: hidden;
+    height: 100%;
+    scrollbar-gutter: auto;
+}
+body:has(.auth-container) {
+    overflow: hidden;
+    height: 100%;
+}
+
+/* ===== SUCCESS STATE ===== */
+.success-message {
+    font-size: 15px;
+    color: rgba(215, 208, 179, 0.65);
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.success-message strong {
+    color: #D7D0B7;
+    font-weight: 600;
+}

@@ -5,4 +5,5 @@ export interface AuthFormProps {
     emailData: AuthInputProps
     passwordData: AuthInputProps
     buttonContent: string
+    isLoading?: boolean
 }

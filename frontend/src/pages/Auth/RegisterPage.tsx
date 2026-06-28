@@ -10,21 +10,25 @@ export const RegisterPage = ({ onSwitch }: { onSwitch: () => void }) => {
     const [password, setPassword] = useState("");
     const [isSent, setIsSent] = useState(false);
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+        setIsLoading(true);
         try {
             await api.post("/auth/register/", { email, password })
             setIsSent(true);
         } catch (err: any) {
             setError(err.response?.data?.detail || "Ошибка при регистрации");
+        } finally {
+            setIsLoading(false);
         }
     };
 
     if (isSent) {
         return (
-            <div className="auth-container">
+            <AuthLayout>
                 <div className="auth-card">
                     <h2>Проверьте почту</h2>
                     <p className="success-message">
@@ -34,7 +38,7 @@ export const RegisterPage = ({ onSwitch }: { onSwitch: () => void }) => {
                         К логину
                     </button>
                 </div>
-            </div>
+            </AuthLayout>
         );
     }
 
@@ -43,7 +47,7 @@ export const RegisterPage = ({ onSwitch }: { onSwitch: () => void }) => {
             <AuthCard
                 title="Регистрация"
                 footer={
-                    <>Уже есть аккаунт? 
+                    <>Уже есть аккаунт?
                         <span className="auth-link" onClick={onSwitch}> Войти</span>
                     </>
                 }
@@ -54,6 +58,7 @@ export const RegisterPage = ({ onSwitch }: { onSwitch: () => void }) => {
                     emailData={{ field: email, setField: setEmail, label: "Email", type: "email" }}
                     passwordData={{ field: password, setField: setPassword, label: "Пароль", type: "password" }}
                     buttonContent="Зарегистрироваться"
+                    isLoading={isLoading}
                 />
             </AuthCard>
         </AuthLayout>
