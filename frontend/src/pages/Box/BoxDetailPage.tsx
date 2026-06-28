@@ -53,7 +53,7 @@ export const BoxDetailPage = () => {
                     <div className="box-detail-visual-inner">
                         <span className="box-detail-aura" aria-hidden="true" />
                         <WireframeBox
-                            size={300}
+                            size={380}
                             rarityGlow={rarityGlow}
                             color={boxColor}
                         />
