@@ -105,13 +105,15 @@
     margin-bottom: 40px;
 }
 
-.app-title-wrapper svg {
+.app-title-wrapper svg,
+.app-title-wrapper img {
     height: 50px;
-    width: auto;
+    width: 50px;
     display: block;
     fill: #D7D0B7;
     color: #D7D0B7;
     filter: drop-shadow(0 0 16px rgba(215, 208, 179, 0.2));
+    object-fit: contain;
 }
 
 .app-name {
