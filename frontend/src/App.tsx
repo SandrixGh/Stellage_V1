@@ -11,6 +11,7 @@ import { FeedPage } from "./pages/Feed/FeedPage";
 import { SearchPage } from "./pages/Search/SearchPage";
 import { MyStellagePage } from "./pages/Main/MainPage";
 import { ProfilePage } from "./pages/Profile/ProfilePage";
+import { RegisterConfirmPage } from "./pages/Auth/RegisterConfirmPage";
 
 function App() {
   const { getUser, isInitialized, isAuthenticated } = useAuthStore();
@@ -34,6 +35,7 @@ function App() {
         path="/register"
         element={isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />}
       />
+      <Route path="/auth/register_confirm" element={<RegisterConfirmPage />} />
 
       {/* App shell — publicly accessible */}
       <Route element={<AppLayout />}>
