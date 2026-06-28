@@ -1,0 +1,23 @@
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Env & secrets
+.env
+*.env
+
+# Temp / screenshots
+*.png
+*.jpg
+*.jpeg
+screenshot*.js
+verify-fixes.md
+test-*.html
+app-screenshot.png
+screenshot-verification.png
