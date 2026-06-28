@@ -41,7 +41,7 @@ export const HomePage = () => {
                 </div>
 
                 <div className="home-hero-visual">
-                    <WireframeBox size={420} />
+                    <WireframeBox size={400} />
                 </div>
             </section>
 

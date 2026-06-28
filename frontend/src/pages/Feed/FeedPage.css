@@ -31,9 +31,9 @@
 }
 
 .template-card:hover {
-    transform: translateY(-6px);
-    border-color: rgba(215, 208, 179, 0.3);
-    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), 0 0 32px rgba(215, 208, 179, 0.07);
+    transform: translateY(-3px);
+    border-color: rgba(215, 208, 179, 0.28);
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
 }
 
 /* ── Card header: rarity + price ── */
@@ -69,6 +69,12 @@
     background: rgba(230, 200, 120, 0.07);
 }
 
+.rarity-tag-developers {
+    color: #c882ff;
+    border-color: rgba(200, 130, 255, 0.4);
+    background: rgba(200, 130, 255, 0.07);
+}
+
 /* ── Price ── */
 .template-price {
     font-family: 'Space Grotesk', sans-serif;
@@ -83,11 +89,30 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 28px 20px 20px;
+    padding: 32px 20px 24px;
     background: radial-gradient(ellipse at center,
-        rgba(215, 208, 179, 0.055) 0%,
-        transparent 72%);
+        rgba(215, 208, 179, 0.05) 0%,
+        transparent 70%);
     position: relative;
+    min-height: 120px;
+}
+
+.rarity-rare .template-card-visual {
+    background: radial-gradient(ellipse at center,
+        rgba(120, 170, 255, 0.07) 0%,
+        transparent 70%);
+}
+
+.rarity-golden .template-card-visual {
+    background: radial-gradient(ellipse at center,
+        rgba(230, 200, 120, 0.08) 0%,
+        transparent 70%);
+}
+
+.rarity-developers .template-card-visual {
+    background: radial-gradient(ellipse at center,
+        rgba(200, 130, 255, 0.07) 0%,
+        transparent 70%);
 }
 
 /* ── Footer ── */
@@ -123,13 +148,11 @@
 
 /* ── Rarity card accents ── */
 .template-card.rarity-golden {
-    border-color: rgba(230, 200, 120, 0.28);
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4), 0 0 24px rgba(230, 200, 120, 0.07);
+    border-color: rgba(230, 200, 120, 0.26);
 }
 
 .template-card.rarity-golden:hover {
-    border-color: rgba(230, 200, 120, 0.5);
-    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), 0 0 48px rgba(230, 200, 120, 0.12);
+    border-color: rgba(230, 200, 120, 0.45);
 }
 
 .template-card.rarity-rare {
@@ -137,6 +160,13 @@
 }
 
 .template-card.rarity-rare:hover {
-    border-color: rgba(120, 170, 255, 0.45);
-    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), 0 0 40px rgba(120, 170, 255, 0.08);
+    border-color: rgba(120, 170, 255, 0.42);
+}
+
+.template-card.rarity-developers {
+    border-color: rgba(200, 130, 255, 0.22);
+}
+
+.template-card.rarity-developers:hover {
+    border-color: rgba(200, 130, 255, 0.42);
 }

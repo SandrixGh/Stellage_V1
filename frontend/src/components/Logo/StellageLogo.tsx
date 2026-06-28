@@ -19,8 +19,10 @@ export const StellageLogo: React.FC<StellageLogoProps> = ({
       alt="Stellage Logo"
       className={className}
       style={{
-        width: sizeValue,
+        // Drive height from `size`; width follows the asset's real
+        // aspect ratio so the mark is never squished into a square.
         height: sizeValue,
+        width: 'auto',
         display: 'inline-block',
         flexShrink: 0,
         objectFit: 'contain'

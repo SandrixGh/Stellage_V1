@@ -34,11 +34,6 @@
 }
 
 /* ===== AUTH GATE ===== */
-@keyframes gate-box-float {
-    0%, 100% { transform: translateY(0px); }
-    50%       { transform: translateY(-12px); }
-}
-
 .stellage-gate {
     display: flex;
     align-items: center;
@@ -50,8 +45,39 @@
 .stellage-gate-visual {
     flex: 0 0 auto;
     position: relative;
-    opacity: 0.6;
-    animation: gate-box-float 7s ease-in-out infinite;
+    animation: gate-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes gate-rise {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.stellage-gate-visual .wf-edge {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: wf-draw 1.6s cubic-bezier(0.65, 0, 0.35, 1) 0.2s forwards;
+}
+
+.stellage-gate-visual .wf-face {
+    animation: wf-face-in 1s ease 0.85s both;
+}
+
+@keyframes wf-draw {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes wf-face-in {
+    from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stellage-gate-visual,
+    .stellage-gate-visual .wf-edge,
+    .stellage-gate-visual .wf-face {
+        animation: none;
+        stroke-dashoffset: 0;
+    }
 }
 
 .stellage-gate-visual::before {

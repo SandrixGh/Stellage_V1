@@ -1,8 +1,6 @@
-import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../../store/useAuthStore";
 import "./Header.css";
-import { UserModal } from "./UserModal";
 import { Logo } from "../../Logo/Logo";
 
 const NAV_ITEMS = [
@@ -16,13 +14,11 @@ export const Header = () => {
     const { user, isAuthenticated } = useAuthStore();
     const navigate = useNavigate();
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
     return (
         <header className="header">
             <div className="header-container">
                 <NavLink to="/" className="header-logo-wrapper">
-                    <Logo className="header-logo-icon" size={30} />
+                    <Logo className="header-logo-icon" size={34} />
                     <span className="header-logo-title">Stellage</span>
                 </NavLink>
 
@@ -43,13 +39,17 @@ export const Header = () => {
 
                 <div className="header-actions">
                     {isAuthenticated ? (
-                        <div
-                            className="user-profile"
-                            onClick={() => setIsModalOpen((v) => !v)}
+                        <NavLink
+                            to="/profile"
+                            className={({ isActive }) =>
+                                `user-profile${isActive ? " active" : ""}`
+                            }
                         >
+                            <span className="user-avatar" aria-hidden="true">
+                                {user?.email?.trim()?.[0]?.toUpperCase() ?? "S"}
+                            </span>
                             <span className="user-email">{user?.email}</span>
-                            <span className="settings-icon">⚙</span>
-                        </div>
+                        </NavLink>
                     ) : (
                         <button
                             className="login-btn"
@@ -57,10 +57,6 @@ export const Header = () => {
                         >
                             Войти
                         </button>
-                    )}
-
-                    {isModalOpen && (
-                        <UserModal onClose={() => setIsModalOpen(false)} />
                     )}
                 </div>
             </div>

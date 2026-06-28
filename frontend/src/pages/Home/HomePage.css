@@ -110,22 +110,21 @@
     border-color: rgba(215, 208, 179, 0.25);
 }
 
-/* ── Hero visual: wireframe box ── */
-@keyframes box-float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    33%       { transform: translateY(-16px) rotate(0.3deg); }
-    66%       { transform: translateY(-8px) rotate(-0.2deg); }
-}
-
+/* ── Hero visual: wireframe box ──
+   One orchestrated moment instead of an endless float: the wireframe
+   draws itself in on load, then holds still. */
 .home-hero-visual {
     position: relative;
     flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: box-float 8s ease-in-out infinite;
-    /* let the big box bleed slightly past the container */
-    margin-right: -60px;
+    animation: hero-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes hero-rise {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 .home-hero-visual::before {
@@ -133,11 +132,43 @@
     position: absolute;
     inset: -40px;
     background: radial-gradient(ellipse at center,
-        rgba(215, 208, 179, 0.11) 0%,
-        rgba(215, 208, 179, 0.04) 40%,
+        rgba(215, 208, 179, 0.10) 0%,
+        rgba(215, 208, 179, 0.035) 40%,
         transparent 70%);
     pointer-events: none;
     z-index: -1;
+}
+
+/* Self-drawing wireframe edges */
+.home-hero-visual .wf-edge {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: wf-draw 1.7s cubic-bezier(0.65, 0, 0.35, 1) 0.2s forwards;
+}
+
+.home-hero-visual .wf-edge-hidden {
+    animation-duration: 2s;
+}
+
+.home-hero-visual .wf-face {
+    animation: wf-face-in 1.1s ease 0.9s both;
+}
+
+@keyframes wf-draw {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes wf-face-in {
+    from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-hero-visual,
+    .home-hero-visual .wf-edge,
+    .home-hero-visual .wf-face {
+        animation: none;
+        stroke-dashoffset: 0;
+    }
 }
 
 /* ===== DIVIDER ===== */

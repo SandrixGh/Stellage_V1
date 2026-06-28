@@ -1,7 +1,9 @@
 import axios from "axios";
 
 export const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000/api.v1',
+    // In dev, default to a same-origin relative path handled by the Vite proxy
+    // (keeps the session cookie first-party). In prod, set VITE_API_URL.
+    baseURL: import.meta.env.VITE_API_URL ?? '/api.v1',
 
     withCredentials: true,
 
