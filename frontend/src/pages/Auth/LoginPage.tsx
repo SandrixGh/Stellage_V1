@@ -1,16 +1,18 @@
 import { useState } from "react"
+import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import './Auth.css';
 import { AuthCard } from "../../components/Auth/AuthCard";
 import { AuthForm } from "../../components/Auth/AuthForm";
 import { AuthLayout } from "../../components/Auth/AuthLayout";
 
-export const LoginPage = ({ onSwitch }: { onSwitch: () => void }) => {
+export const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
+    const navigate = useNavigate();
     const login = useAuthStore((state) => state.login)
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -19,6 +21,7 @@ export const LoginPage = ({ onSwitch }: { onSwitch: () => void }) => {
         setIsLoading(true);
         try {
             await login(email, password);
+            navigate("/");
         } catch (err: any) {
             const message = err.response?.data?.detail || 'Произошла ошибка при входе'
             setError(message)
@@ -33,9 +36,9 @@ export const LoginPage = ({ onSwitch }: { onSwitch: () => void }) => {
                 title="Вход"
                 footer={
                     <>Ещё нет аккаунта?
-                        <span className="auth-link" onClick={onSwitch}>
+                        <Link className="auth-link" to="/register">
                             Зарегистрироваться
-                        </span>
+                        </Link>
                     </>
                 }
             >

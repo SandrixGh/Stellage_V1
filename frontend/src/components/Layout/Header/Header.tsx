@@ -1,37 +1,69 @@
 import { useState } from "react";
-import { useAuthStore } from "../../../store/useAuthStore"
-import "./Header.css"
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../../store/useAuthStore";
+import "./Header.css";
 import { UserModal } from "./UserModal";
 import { Logo } from "../../Logo/Logo";
 
+const NAV_ITEMS = [
+    { to: "/", label: "Главная", end: true },
+    { to: "/feed", label: "Лента", end: false },
+    { to: "/search", label: "Поиск", end: false },
+    { to: "/my-stellage", label: "Мой стеллаж", end: false },
+];
+
 export const Header = () => {
-    const user = useAuthStore((state) => state.user);
+    const { user, isAuthenticated } = useAuthStore();
+    const navigate = useNavigate();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     return (
         <header className="header">
             <div className="header-container">
-                <a href="/" className="header-logo-wrapper">
-                    <Logo className="header-logo-icon" size={28} />
+                <NavLink to="/" className="header-logo-wrapper">
+                    <Logo className="header-logo-icon" size={30} />
                     <span className="header-logo-title">Stellage</span>
-                </a>
+                </NavLink>
+
                 <nav className="header-nav">
-                    <a href="/" className="nav-link active">Главная</a>
-                    <a href="/shelves" className="nav-link">Стеллаж</a>
+                    {NAV_ITEMS.map((item) => (
+                        <NavLink
+                            key={item.to}
+                            to={item.to}
+                            end={item.end}
+                            className={({ isActive }) =>
+                                `nav-link${isActive ? " active" : ""}`
+                            }
+                        >
+                            {item.label}
+                        </NavLink>
+                    ))}
                 </nav>
 
                 <div className="header-actions">
-                    <div className="user-profile" onClick={() => setIsModalOpen(!isModalOpen)}>
-                        <span className="user-email">{user?.email || "Гость"}</span>
-                        <button className="settings-btn" title="Настройки аккаунта">
-                            <div className="settings-icon">⚙</div>
+                    {isAuthenticated ? (
+                        <div
+                            className="user-profile"
+                            onClick={() => setIsModalOpen((v) => !v)}
+                        >
+                            <span className="user-email">{user?.email}</span>
+                            <span className="settings-icon">⚙</span>
+                        </div>
+                    ) : (
+                        <button
+                            className="login-btn"
+                            onClick={() => navigate("/login")}
+                        >
+                            Войти
                         </button>
-                    </div>
+                    )}
 
-                    {isModalOpen && <UserModal onClose={() => setIsModalOpen(false)} />}
+                    {isModalOpen && (
+                        <UserModal onClose={() => setIsModalOpen(false)} />
+                    )}
                 </div>
             </div>
         </header>
-    )
-}
+    );
+};

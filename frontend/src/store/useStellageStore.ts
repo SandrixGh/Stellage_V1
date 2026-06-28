@@ -1,19 +1,21 @@
 import { create } from "zustand";
 import { api } from "../api/instance";
 import type { Shelf } from "../types/Stellage/shelves";
-import type { Box } from "../types/Stellage/boxes";
+import type { Box, BoxTemplate } from "../types/Stellage/boxes";
 
 interface StellageState {
     shelves: Shelf[];
     mainShelf: Shelf | null;
     currentBoxes: Box[];
+    templates: BoxTemplate[];
     isLoading: boolean;
     error: string | null;
 
     fetchShelves: () => Promise<void>;
     fetchMainShelf: () => Promise<void>;
     fetchShelfWithBoxes: (shelfId: string) => Promise<void>;
-    
+    fetchTemplates: () => Promise<void>;
+
     moveBox: (instanceId: string, shelfId: string | null) => Promise<void>;
     deleteBox: (instanceId: string) => Promise<void>;
 }
@@ -22,6 +24,7 @@ export const useStellageStore = create<StellageState>((set, get) => ({
     shelves: [],
     mainShelf: null,
     currentBoxes: [],
+    templates: [],
     isLoading: false,
     error: null,
 
@@ -55,6 +58,16 @@ export const useStellageStore = create<StellageState>((set, get) => ({
             set({ currentBoxes: res.data.boxes, isLoading: false });
         } catch (err: any) {
             set({ error: "Не удалось загрузить содержимое полки", isLoading: false });
+        }
+    },
+
+    fetchTemplates: async () => {
+        set({ isLoading: true, error: null });
+        try {
+            const res = await api.get<BoxTemplate[]>("/boxes/get-box-templates");
+            set({ templates: res.data, isLoading: false });
+        } catch (err: any) {
+            set({ error: "Не удалось загрузить ленту", isLoading: false });
         }
     },
 

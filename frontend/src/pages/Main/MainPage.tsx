@@ -1,54 +1,62 @@
 import { useEffect } from "react";
-import { Header } from "../../components/Layout/Header/Header";
+import { Link } from "react-router-dom";
+import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
-// Импортируем компонент карточки, когда его создашь
-// import { BoxCard } from "../../components/Stellage/BoxCard"; 
+import { BoxCard } from "../../components/Stellage/BoxCard";
 import "./MainPage.css";
 
-export const MainPage = () => {
-    // Достаем всё необходимое из стора
+export const MyStellagePage = () => {
+    const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
     const { mainShelf, fetchMainShelf, isLoading, error } = useStellageStore();
 
-    // Запрашиваем данные при первом рендере
     useEffect(() => {
-        fetchMainShelf();
-    }, [fetchMainShelf]);
+        if (isAuthenticated) {
+            fetchMainShelf();
+        }
+    }, [isAuthenticated, fetchMainShelf]);
+
+    if (!isAuthenticated) {
+        return (
+            <div className="stellage-gate">
+                <h1 className="page-title">Мой стеллаж</h1>
+                <p className="page-subtitle">
+                    Войдите в аккаунт, чтобы увидеть свои полки и коробки.
+                </p>
+                <Link to="/login" className="gate-btn">Войти</Link>
+            </div>
+        );
+    }
 
     return (
-        <div className="main-page">
-            <Header />
-            <main className="main-content">
-                {/* Обработка состояний загрузки и ошибки */}
-                {isLoading && <div className="status-info">Загрузка коллекции...</div>}
-                {error && <div className="status-info error">{error}</div>}
+        <section className="stellage-section">
+            {isLoading && <div className="status-info">Загрузка коллекции...</div>}
+            {error && <div className="status-info error">{error}</div>}
 
-                {!isLoading && !error && (
-                    <section className="stellage-section">
-                        <header className="shelf-info">
-                            <h1 className="shelf-title">
+            {!isLoading && !error && (
+                <>
+                    <header className="shelf-info">
+                        <div>
+                            <h1 className="page-title">
                                 {mainShelf?.title || "Твоя главная полка"}
                             </h1>
-                            {mainShelf?.is_public && <span className="badge">Публичная</span>}
-                        </header>
-
-                        <div className="boxes-grid">
-                            {mainShelf?.boxes && mainShelf.boxes.length > 0 ? (
-                                mainShelf.boxes.map((box) => (
-                                    <div key={box.id} className="box-wrapper">
-                                        {/* Пока нет BoxCard, выведем просто название */}
-                                        <div className="box-placeholder">
-                                            {box.template.title}
-                                            <span className="serial">#{box.serial_number}</span>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <p className="empty-message">Пока здесь пусто. Время добавить первую коробку!</p>
-                            )}
+                            <p className="page-subtitle">Личная коллекция коробок</p>
                         </div>
-                    </section>
-                )}
-            </main>
-        </div>
+                        {mainShelf?.is_public && <span className="badge">Публичная</span>}
+                    </header>
+
+                    <div className="boxes-grid">
+                        {mainShelf?.boxes && mainShelf.boxes.length > 0 ? (
+                            mainShelf.boxes.map((box) => (
+                                <BoxCard key={box.id} box={box} />
+                            ))
+                        ) : (
+                            <p className="empty-message">
+                                Пока здесь пусто. Время добавить первую коробку!
+                            </p>
+                        )}
+                    </div>
+                </>
+            )}
+        </section>
     );
 };

@@ -1,0 +1,25 @@
+.profile-page {
+    display: flex;
+    justify-content: center;
+    padding: 64px 0;
+}
+
+.profile-stub {
+    text-align: center;
+    padding: 56px 48px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(215, 208, 179, 0.12);
+}
+
+.profile-stub-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.8;
+}
+
+.profile-stub .page-subtitle {
+    margin-bottom: 0;
+}

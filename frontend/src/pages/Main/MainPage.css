@@ -1,15 +1,59 @@
-.main-page {
+.stellage-section {
     width: 100%;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: rgb(230, 229, 213);
 }
 
-.main-content {
-    flex: 1;
-    padding: 24px;
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
+.shelf-info {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.badge {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: #D7D0B7;
+    background: rgba(215, 208, 179, 0.1);
+    border: 1px solid rgba(215, 208, 179, 0.25);
+}
+
+.boxes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.boxes-grid .empty-message {
+    grid-column: 1 / -1;
+}
+
+/* ===== AUTH GATE ===== */
+.stellage-gate {
+    text-align: center;
+    padding: 80px 0;
+}
+
+.gate-btn {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 14px 32px;
+    background: rgba(215, 208, 179, 0.07);
+    color: #D7D0B7;
+    border: 1px solid rgba(215, 208, 179, 0.2);
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+
+.gate-btn:hover {
+    background: rgba(215, 208, 179, 0.13);
+    border-color: rgba(215, 208, 179, 0.4);
+    box-shadow: 0 0 24px rgba(215, 208, 179, 0.12);
 }

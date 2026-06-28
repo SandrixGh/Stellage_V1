@@ -9,7 +9,6 @@ interface StellageLogoProps {
 
 export const StellageLogo: React.FC<StellageLogoProps> = ({
   size = 100,
-  color,
   className
 }) => {
   const sizeValue = typeof size === 'number' ? `${size}px` : size;

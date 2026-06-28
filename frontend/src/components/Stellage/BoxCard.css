@@ -1,0 +1,94 @@
+.box-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(215, 208, 179, 0.15);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.box-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(215, 208, 179, 0.35);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45), 0 0 24px rgba(215, 208, 179, 0.06);
+}
+
+.box-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.box-header .serial {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(215, 208, 179, 0.5);
+    letter-spacing: 0.5px;
+}
+
+.box-header .verified {
+    font-size: 13px;
+    color: #8fd49a;
+}
+
+.box-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0;
+}
+
+.box-icon {
+    font-size: 40px;
+    line-height: 1;
+    filter: drop-shadow(0 0 12px rgba(215, 208, 179, 0.15));
+}
+
+.box-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #D7D0B7;
+    text-align: center;
+}
+
+.box-footer {
+    display: flex;
+    justify-content: center;
+}
+
+.box-footer .status {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(215, 208, 179, 0.18);
+    color: rgba(215, 208, 179, 0.7);
+}
+
+.box-footer .status.sealed {
+    color: #d7c89a;
+    border-color: rgba(215, 200, 154, 0.3);
+}
+
+/* ===== RARITY ACCENTS ===== */
+.box-card.rarity-rare {
+    border-color: rgba(120, 170, 255, 0.3);
+}
+
+.box-card.rarity-golden {
+    border-color: rgba(230, 200, 120, 0.4);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35), 0 0 20px rgba(230, 200, 120, 0.08);
+}
+
+.box-card.rarity-developer\'s,
+.box-card.rarity-dev {
+    border-color: rgba(200, 130, 255, 0.4);
+}

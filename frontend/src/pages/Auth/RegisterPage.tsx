@@ -1,11 +1,13 @@
 import { useState } from "react"
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../api/instance";
 import './Auth.css';
 import { AuthForm } from "../../components/Auth/AuthForm";
 import { AuthCard } from "../../components/Auth/AuthCard";
 import { AuthLayout } from "../../components/Auth/AuthLayout";
 
-export const RegisterPage = ({ onSwitch }: { onSwitch: () => void }) => {
+export const RegisterPage = () => {
+    const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isSent, setIsSent] = useState(false);
@@ -34,7 +36,7 @@ export const RegisterPage = ({ onSwitch }: { onSwitch: () => void }) => {
                     <p className="success-message">
                         Мы отправили письмо на <strong>{email}</strong> для подтверждения аккаунта.
                     </p>
-                    <button onClick={onSwitch} className="btn-primary">
+                    <button onClick={() => navigate("/login")} className="btn-primary">
                         К логину
                     </button>
                 </div>
@@ -48,7 +50,7 @@ export const RegisterPage = ({ onSwitch }: { onSwitch: () => void }) => {
                 title="Регистрация"
                 footer={
                     <>Уже есть аккаунт?
-                        <span className="auth-link" onClick={onSwitch}> Войти</span>
+                        <Link className="auth-link" to="/login"> Войти</Link>
                     </>
                 }
             >

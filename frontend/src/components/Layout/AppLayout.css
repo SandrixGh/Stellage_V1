@@ -1,0 +1,89 @@
+/* ===== APP SHELL (shared dark theme, matches Auth.css) ===== */
+.app-shell {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #080808;
+    font-family: -apple-system, system-ui, sans-serif;
+    overflow-x: hidden;
+}
+
+/* ===== BACKGROUND ORBS ===== */
+.app-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.app-orb-1 {
+    width: 560px;
+    height: 560px;
+    background: radial-gradient(circle, rgba(215, 208, 179, 0.08) 0%, transparent 65%);
+    top: -120px;
+    right: -60px;
+}
+
+.app-orb-2 {
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, rgba(215, 208, 179, 0.05) 0%, transparent 65%);
+    bottom: -80px;
+    left: -80px;
+}
+
+.app-orb-3 {
+    width: 380px;
+    height: 380px;
+    background: radial-gradient(circle, rgba(215, 208, 179, 0.04) 0%, transparent 65%);
+    top: 40%;
+    left: 45%;
+}
+
+/* ===== CONTENT ===== */
+.app-content {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 40px 24px 64px;
+    box-sizing: border-box;
+}
+
+/* ===== SHARED PAGE PRIMITIVES ===== */
+.page-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: #D7D0B7;
+    letter-spacing: 0.4px;
+    margin: 0 0 6px 0;
+}
+
+.page-subtitle {
+    font-size: 15px;
+    font-weight: 300;
+    color: rgba(215, 208, 179, 0.55);
+    margin: 0 0 32px 0;
+}
+
+.status-info {
+    color: rgba(215, 208, 179, 0.6);
+    font-size: 15px;
+    text-align: center;
+    padding: 48px 0;
+}
+
+.status-info.error {
+    color: #ffaaaa;
+}
+
+.empty-message {
+    color: rgba(215, 208, 179, 0.4);
+    font-size: 15px;
+    text-align: center;
+    padding: 64px 0;
+}

@@ -1,115 +1,176 @@
 .header {
-    width: 100%;
-    height: 64px;
-    background-color: #1a2027;
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     position: sticky;
     top: 0;
     z-index: 100;
+    width: 100%;
+    height: 68px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    background: rgba(12, 12, 12, 0.72);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(215, 208, 179, 0.12);
 }
 
 .header-container {
     width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 0 auto;
-    /* Если хочешь ограничить ширину контента хедера, раскомментируй: */
-    /* max-width: 1400px; */
+    gap: 24px;
 }
 
+/* ===== LOGO ===== */
 .header-logo-wrapper {
-     display: flex;
-     align-items: center;
-     gap: 12px;
-     text-decoration: none;
-     color:#e6e5d5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #D7D0B7;
+    flex-shrink: 0;
 }
 
 .header-logo-title {
-    font-size: 28px;
+    font-size: 22px;
     font-weight: 700;
-    text-decoration: none;
-    line-height: 1;
     letter-spacing: 1px;
-    cursor: default;
+    line-height: 1;
 }
 
 .header-logo-icon {
     display: block;
-    height: 42px;
-    width: auto;
+    height: 30px;
+    width: 30px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 12px rgba(215, 208, 179, 0.2));
 }
 
+/* ===== NAV ===== */
 .header-nav {
     display: flex;
-    gap: 32px;
+    gap: 28px;
+    flex: 1;
+    justify-content: center;
 }
 
 .nav-link {
-    color: #c1c5a8;
+    position: relative;
+    color: rgba(215, 208, 179, 0.5);
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 15px;
-    transition: all 0.2s ease;
-    padding: 8px 0;
-    border-bottom: 2px solid transparent;
+    padding: 8px 2px;
+    transition: color 0.2s ease;
 }
 
-.nav-link:hover, .nav-link.active {
-    color: #e8ebd0;
-    border-bottom-color: #c1c5a8;
+.nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: #D7D0B7;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.nav-link:hover {
+    color: rgba(215, 208, 179, 0.85);
+}
+
+.nav-link.active {
+    color: #D7D0B7;
+}
+
+.nav-link.active::after {
+    transform: scaleX(1);
+}
+
+/* ===== ACTIONS ===== */
 .header-actions {
     display: flex;
     align-items: center;
+    position: relative;
+    flex-shrink: 0;
 }
 
 .user-profile {
     display: flex;
     align-items: center;
-    gap: 12px;
-    background: rgba(230, 229, 213, 0.1);
-    padding: 6px 28px;
-    border-radius: 20px;
-    border: 1px solid rgba(193, 197, 168, 0.2);
-    user-select: none;
-    -webkit-user-select: none;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 8px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(215, 208, 179, 0.15);
     cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
 }
 
 .user-profile:hover {
-    color: #fef2f2;
-    background: rgba(230, 229, 213, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(215, 208, 179, 0.35);
 }
 
 .user-email {
-    color: #c1c5a8;
+    color: #D7D0B7;
     font-size: 14px;
     font-weight: 500;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.settings-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 18px;
-    color: #c1c5a8;
-    display: flex;
-    align-items: center;
+.settings-icon {
+    color: rgba(215, 208, 179, 0.7);
+    font-size: 15px;
+    line-height: 1;
     transition: transform 0.3s ease;
-    padding: 0;
 }
 
-.settings-btn:hover {
-    color: #fef2f2;
+.user-profile:hover .settings-icon {
     transform: rotate(90deg);
 }
-.user-profile:hover .settings-btn {
-    color: #fef2f2;
-    transform: rotate(90deg);
+
+/* ===== LOGIN BUTTON (guest) ===== */
+.login-btn {
+    padding: 10px 22px;
+    background: rgba(215, 208, 179, 0.07);
+    color: #D7D0B7;
+    border: 1px solid rgba(215, 208, 179, 0.2);
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.login-btn:hover {
+    background: rgba(215, 208, 179, 0.13);
+    border-color: rgba(215, 208, 179, 0.4);
+    box-shadow: 0 0 20px rgba(215, 208, 179, 0.1);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 720px) {
+    .header-nav {
+        gap: 16px;
+    }
+    .nav-link {
+        font-size: 13px;
+    }
+    .header-logo-title {
+        display: none;
+    }
+    .user-email {
+        max-width: 90px;
+    }
 }

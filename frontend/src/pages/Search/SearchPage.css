@@ -1,0 +1,104 @@
+.search-page {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.search-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 18px;
+    font-size: 16px;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    padding: 16px 18px 16px 48px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(215, 208, 179, 0.15);
+    border-radius: 16px;
+    font-size: 16px;
+    color: #D7D0B7;
+    box-sizing: border-box;
+    outline: none;
+    caret-color: #D7D0B7;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.search-input::placeholder {
+    color: rgba(215, 208, 179, 0.35);
+}
+
+.search-input:focus {
+    border-color: rgba(215, 208, 179, 0.4);
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow: 0 0 0 3px rgba(215, 208, 179, 0.06);
+}
+
+.search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(215, 208, 179, 0.12);
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.search-result-item:hover {
+    border-color: rgba(215, 208, 179, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.search-result-icon {
+    font-size: 24px;
+}
+
+.search-result-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.search-result-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #D7D0B7;
+}
+
+.search-result-desc {
+    font-size: 13px;
+    color: rgba(215, 208, 179, 0.5);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-result-rarity {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(215, 208, 179, 0.6);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(215, 208, 179, 0.2);
+}
