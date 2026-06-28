@@ -5,6 +5,8 @@ import { Logo } from "../Logo/Logo";
 export const AuthLayout = ({ children }: AuthLayoutProps) => {
     return (
         <div className="auth-container">
+            <div className="auth-orb auth-orb-1" />
+            <div className="auth-orb auth-orb-2" />
             <div className="auth-orb-3" />
             <div className="auth-content-wrapper">
                 <div className="app-title-wrapper">

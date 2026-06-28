@@ -1,32 +1,14 @@
 /* ===== ANIMATIONS ===== */
-@keyframes orb-drift-1 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33%       { transform: translate(60px, -80px) scale(1.1); }
-    66%       { transform: translate(-40px, 40px) scale(0.95); }
-}
-@keyframes orb-drift-2 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33%       { transform: translate(-70px, 50px) scale(1.05); }
-    66%       { transform: translate(50px, -60px) scale(1.15); }
-}
-@keyframes orb-drift-3 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50%       { transform: translate(40px, 70px) scale(0.9); }
-}
 @keyframes card-in {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-@keyframes shimmer-border {
-    0%, 100% { opacity: 0.15; }
-    50%       { opacity: 0.35; }
+@keyframes field-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes spin {
     to { transform: rotate(360deg); }
-}
-@keyframes label-float {
-    from { opacity: 0; }
-    to   { opacity: 1; }
 }
 
 /* ===== CONTAINER ===== */
@@ -46,44 +28,41 @@
 }
 
 /* ===== BACKGROUND ORBS ===== */
-.auth-container::before,
-.auth-container::after {
-    content: '';
+.auth-orb {
     position: fixed;
     border-radius: 50%;
-    filter: blur(80px);
+    filter: blur(90px);
     pointer-events: none;
     z-index: 0;
 }
-.auth-container::before {
-    width: 420px;
-    height: 420px;
-    background: radial-gradient(circle, rgba(180, 160, 100, 0.12) 0%, transparent 70%);
-    top: -10%;
-    right: 5%;
-    animation: orb-drift-1 18s ease-in-out infinite;
+
+.auth-orb-1 {
+    width: 560px;
+    height: 560px;
+    background: radial-gradient(circle, rgba(215, 208, 179, 0.09) 0%, transparent 65%);
+    top: -80px;
+    right: -40px;
 }
-.auth-container::after {
-    width: 350px;
-    height: 350px;
-    background: radial-gradient(circle, rgba(120, 100, 160, 0.09) 0%, transparent 70%);
-    bottom: -5%;
-    left: 0%;
-    animation: orb-drift-2 22s ease-in-out infinite;
+
+.auth-orb-2 {
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, rgba(215, 208, 179, 0.06) 0%, transparent 65%);
+    bottom: -60px;
+    left: -60px;
 }
 
 .auth-orb-3 {
     position: fixed;
-    width: 280px;
-    height: 280px;
+    width: 380px;
+    height: 380px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(80, 140, 120, 0.07) 0%, transparent 70%);
-    filter: blur(70px);
-    top: 50%;
-    left: -5%;
+    background: radial-gradient(circle, rgba(215, 208, 179, 0.05) 0%, transparent 65%);
+    filter: blur(80px);
+    top: 35%;
+    left: -80px;
     pointer-events: none;
     z-index: 0;
-    animation: orb-drift-3 26s ease-in-out infinite;
 }
 
 .auth-content-wrapper {
@@ -141,19 +120,8 @@
     box-shadow:
         0 30px 60px rgba(0, 0, 0, 0.6),
         0 0 0 1px rgba(215, 208, 179, 0.05) inset;
-    animation: card-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
     position: relative;
-}
-
-/* Shimmer on card border */
-.auth-card::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: 28px;
-    border: 1px solid rgba(215, 208, 179, 0.25);
-    pointer-events: none;
-    animation: shimmer-border 4s ease-in-out infinite;
 }
 
 .auth-card h2 {
@@ -189,16 +157,22 @@
 /* ===== FLOATING LABEL INPUTS ===== */
 .form-group {
     position: relative;
-    margin-bottom: 22px;
+    padding-top: 22px;
+    margin-bottom: 16px;
     width: 100%;
+    overflow: visible;
+    animation: field-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+.form-group:nth-child(1) { animation-delay: 0.12s; }
+.form-group:nth-child(2) { animation-delay: 0.22s; }
 
 .input-wrapper {
     position: relative;
     width: 100%;
 }
 
-/* Label floats inside input */
+/* Label starts inside the input */
 .input-wrapper label {
     position: absolute;
     left: 16px;
@@ -206,31 +180,35 @@
     transform: translateY(-50%);
     font-size: 15px;
     font-weight: 400;
-    color: rgba(215, 208, 179, 0.35);
+    color: rgba(215, 208, 179, 0.4);
     pointer-events: none;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: top 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+                left 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.22s ease,
+                font-size 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1;
     background: transparent;
-    padding: 0 2px;
+    padding: 0;
+    transform-origin: left center;
+    white-space: nowrap;
 }
 
-/* Float up when focused or has value */
+/* Label floats above the input when focused or has value */
 .input-wrapper input:focus ~ label,
 .input-wrapper input:not(:placeholder-shown) ~ label {
-    top: 0;
-    transform: translateY(-50%) scale(0.78);
-    left: 12px;
-    color: rgba(215, 208, 179, 0.65);
-    padding: 0 4px;
-    background: #080808;
-    font-weight: 500;
-    letter-spacing: 0.3px;
+    top: -26px;
+    left: 4px;
+    transform: scale(0.82);
+    transform-origin: left center;
+    color: rgba(215, 208, 179, 0.7);
+    font-size: 15px;
 }
 
 /* Input field */
 .form-group input {
     width: 100%;
-    padding: 18px 16px 6px;
+    padding: 14px 16px;
     background: rgba(255, 255, 255, 0.04) !important;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 14px;
@@ -293,7 +271,7 @@
     font-weight: 600;
     letter-spacing: 0.4px;
     cursor: pointer;
-    margin-top: 8px;
+    margin-top: 10px;
     backdrop-filter: blur(10px);
     transition: all 0.25s ease;
     display: flex;
@@ -315,12 +293,12 @@
 .btn-primary:hover:not(:disabled) {
     background: rgba(215, 208, 179, 0.13);
     border-color: rgba(215, 208, 179, 0.38);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 24px rgba(215, 208, 179, 0.12), 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 .btn-primary:active:not(:disabled) {
-    transform: translateY(0);
+    transform: scale(0.98);
+    box-shadow: none;
 }
 
 .btn-primary:disabled {
@@ -378,20 +356,15 @@ input:-webkit-autofill:focus {
     transition: background-color 5000s ease-in-out 0s;
 }
 
-/* Float label when browser autofills the input */
 .input-wrapper input:-webkit-autofill ~ label {
-    top: 0;
-    transform: translateY(-50%) scale(0.78);
-    left: 12px;
-    color: rgba(215, 208, 179, 0.65);
-    padding: 0 4px;
-    background: #080808;
-    font-weight: 500;
-    letter-spacing: 0.3px;
+    top: -26px;
+    left: 4px;
+    transform: scale(0.82);
+    transform-origin: left center;
+    color: rgba(215, 208, 179, 0.7);
 }
 
 /* ===== HIDE SCROLLBAR ON AUTH PAGE ===== */
-/* normalize.css sets scrollbar-gutter: stable which reserves space → white stripe + off-center layout */
 html:has(.auth-container) {
     overflow: hidden;
     height: 100%;
