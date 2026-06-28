@@ -1,0 +1,354 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Box detail page — premium dark glassmorphism, 50/50 split layout.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.box-detail {
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    color: #D7D0B7;
+}
+
+/* ── Back link ── */
+.box-detail-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    color: rgba(215, 208, 179, 0.55);
+    text-decoration: none;
+    padding: 8px 14px 8px 12px;
+    margin-bottom: 28px;
+    border-radius: 10px;
+    border: 1px solid rgba(215, 208, 179, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+    transition: color 0.22s ease, border-color 0.22s ease,
+                transform 0.22s ease, background 0.22s ease;
+}
+
+.box-detail-back:hover {
+    color: #D7D0B7;
+    border-color: rgba(215, 208, 179, 0.24);
+    background: rgba(255, 255, 255, 0.04);
+    transform: translateX(-2px);
+}
+
+/* ── Split layout ── */
+.box-detail-split {
+    display: flex;
+    align-items: flex-start;
+    gap: 56px;
+}
+
+.box-detail-visual,
+.box-detail-info {
+    flex: 1 1 50%;
+    min-width: 0;
+}
+
+/* ── LEFT: sticky wireframe stage with ambient aura ── */
+.box-detail-visual {
+    position: sticky;
+    top: 88px;
+}
+
+.box-detail-visual-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 420px;
+    border-radius: 28px;
+    border: 1px solid rgba(215, 208, 179, 0.12);
+    background: rgba(255, 255, 255, 0.025);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+}
+
+/* Ambient radial glow behind the box — rarity-tinted (default beige). */
+.box-detail-aura {
+    position: absolute;
+    width: 460px;
+    height: 460px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(215, 208, 179, 0.16) 0%,
+        rgba(215, 208, 179, 0.05) 38%,
+        transparent 70%
+    );
+    filter: blur(8px);
+    pointer-events: none;
+}
+
+.box-detail.rarity-rare .box-detail-aura {
+    background: radial-gradient(
+        circle,
+        rgba(120, 170, 255, 0.2) 0%,
+        rgba(120, 170, 255, 0.06) 38%,
+        transparent 70%
+    );
+}
+
+.box-detail.rarity-golden .box-detail-aura {
+    background: radial-gradient(
+        circle,
+        rgba(230, 200, 120, 0.22) 0%,
+        rgba(230, 200, 120, 0.07) 38%,
+        transparent 70%
+    );
+}
+
+.box-detail.rarity-developers .box-detail-aura {
+    background: radial-gradient(
+        circle,
+        rgba(200, 130, 255, 0.2) 0%,
+        rgba(200, 130, 255, 0.06) 38%,
+        transparent 70%
+    );
+}
+
+.box-detail-visual-inner svg {
+    position: relative;
+    z-index: 1;
+}
+
+/* ── RIGHT: vertical info stack ── */
+.box-detail-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    padding-top: 8px;
+}
+
+/* Rarity tag (shared visual language with the feed) */
+.box-detail-info .rarity-tag {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 5px;
+    color: rgba(215, 208, 179, 0.6);
+    background: rgba(215, 208, 179, 0.07);
+    border: 1px solid rgba(215, 208, 179, 0.18);
+}
+
+.box-detail-info .rarity-tag-rare {
+    color: #9cc0ff;
+    border-color: rgba(120, 170, 255, 0.35);
+    background: rgba(120, 170, 255, 0.07);
+}
+
+.box-detail-info .rarity-tag-golden {
+    color: #e8cb82;
+    border-color: rgba(230, 200, 120, 0.4);
+    background: rgba(230, 200, 120, 0.07);
+}
+
+.box-detail-info .rarity-tag-developers {
+    color: #c882ff;
+    border-color: rgba(200, 130, 255, 0.4);
+    background: rgba(200, 130, 255, 0.07);
+}
+
+/* Title */
+.box-detail-title {
+    font-family: 'Syne', sans-serif;
+    margin: 0;
+    font-size: clamp(34px, 4vw, 48px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -1px;
+    color: #EDE7D2;
+}
+
+/* Price */
+.box-detail-price {
+    font-family: 'Space Grotesk', sans-serif;
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.4px;
+    color: rgba(215, 208, 179, 0.92);
+}
+
+/* Divider */
+.box-detail-divider {
+    width: 100%;
+    height: 1px;
+    border: none;
+    margin: 0;
+    background: rgba(215, 208, 179, 0.08);
+}
+
+/* Description */
+.box-detail-description {
+    font-family: 'Space Grotesk', sans-serif;
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.65;
+    color: rgba(215, 208, 179, 0.62);
+}
+
+/* ── Metadata ── */
+.box-detail-meta {
+    width: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.box-detail-meta-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.box-detail-meta-row dt {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: rgba(215, 208, 179, 0.38);
+}
+
+.box-detail-meta-row dd {
+    font-family: 'Space Grotesk', sans-serif;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: right;
+    color: rgba(215, 208, 179, 0.85);
+}
+
+/* ── Content block (public) ── */
+.box-detail-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.box-detail-content-title {
+    font-family: 'Syne', sans-serif;
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: #D7D0B7;
+}
+
+.box-detail-content-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+.box-detail-tile {
+    aspect-ratio: 16 / 10;
+    border-radius: 16px;
+    border: 1px solid rgba(215, 208, 179, 0.1);
+    background:
+        linear-gradient(
+            135deg,
+            rgba(215, 208, 179, 0.06) 0%,
+            rgba(215, 208, 179, 0.015) 100%
+        );
+    position: relative;
+    overflow: hidden;
+}
+
+.box-detail-tile::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        circle at 30% 25%,
+        rgba(215, 208, 179, 0.07) 0%,
+        transparent 60%
+    );
+}
+
+.box-detail-content-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.box-detail-line {
+    height: 12px;
+    border-radius: 6px;
+    background: rgba(215, 208, 179, 0.07);
+}
+
+.box-detail-line.short {
+    width: 60%;
+}
+
+/* ── Locked state (private) ── */
+.box-detail-locked {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 22px 24px;
+    border-radius: 18px;
+    border: 1px solid rgba(215, 208, 179, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.box-detail-lock {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    color: rgba(215, 208, 179, 0.6);
+    background: rgba(215, 208, 179, 0.05);
+    border: 1px solid rgba(215, 208, 179, 0.14);
+}
+
+.box-detail-locked-text {
+    font-family: 'Space Grotesk', sans-serif;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(215, 208, 179, 0.6);
+}
+
+/* ── Responsive: stack below ~860px ── */
+@media (max-width: 860px) {
+    .box-detail-split {
+        flex-direction: column;
+        gap: 36px;
+    }
+
+    .box-detail-visual {
+        position: static;
+        top: auto;
+        width: 100%;
+    }
+
+    .box-detail-visual,
+    .box-detail-info {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    .box-detail-visual-inner {
+        min-height: 340px;
+    }
+}

@@ -12,6 +12,7 @@ import { SearchPage } from "./pages/Search/SearchPage";
 import { MyStellagePage } from "./pages/Main/MainPage";
 import { ProfilePage } from "./pages/Profile/ProfilePage";
 import { RegisterConfirmPage } from "./pages/Auth/RegisterConfirmPage";
+import { BoxDetailPage } from "./pages/Box/BoxDetailPage";
 
 function App() {
   const { getUser, isInitialized, isAuthenticated } = useAuthStore();
@@ -41,6 +42,7 @@ function App() {
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/feed" element={<FeedPage />} />
+        <Route path="/box/:id" element={<BoxDetailPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/my-stellage" element={<MyStellagePage />} />
         <Route path="/profile" element={<ProfilePage />} />
