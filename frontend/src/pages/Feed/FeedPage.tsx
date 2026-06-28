@@ -40,7 +40,7 @@ const TemplateCard = ({
             }}
         >
             <div className="template-card-visual">
-                <WireframeBox size={180} rarityGlow={rarityGlow} color={boxColor} />
+                <WireframeBox size={220} rarityGlow={rarityGlow} color={boxColor} />
             </div>
 
             <div className="template-card-footer">
