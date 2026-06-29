@@ -5,8 +5,7 @@ from fastapi import Depends, HTTPException, status
 
 from stellage.apps.auth.schemas import UserVerifySchema
 from stellage.apps.boxes.instances.managers import InstanceManager
-from stellage.apps.boxes.instances.schemas import BoxInstanceReturn, BoxInstanceCreate, GetBoxInstanceById, \
-    BoxInstanceWithTemplate
+from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate
 
 
 class InstanceService:

@@ -32,7 +32,7 @@ async def change_email_request(
     path="/confirm-new-email",
     status_code=status.HTTP_200_OK,
 )
-async def change_email_request(
+async def confirm_new_email(
     confirmation_code: str,
     service: Annotated[
         ProfileService,

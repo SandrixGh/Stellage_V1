@@ -78,7 +78,7 @@ async def get_main_shelf(
 )
 async def get_main_shelf_with_boxes(
     main_shelf: Annotated[
-        get_current_main_shelf_with_boxes,
+        ShelfWithBoxInstances,
         Depends(get_current_main_shelf_with_boxes)
     ]
 ) -> ShelfWithBoxInstances:

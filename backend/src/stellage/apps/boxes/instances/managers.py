@@ -5,7 +5,7 @@ from fastapi import Depends
 
 from stellage.apps.boxes.instances.cache_managers import InstanceCacheManager
 from stellage.apps.boxes.instances.repositories import BoxInstanceRepository
-from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceReturn, BoxInstanceWithTemplate
+from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate
 from stellage.apps.shelves.cache_managers import ShelfCacheManager
 
 

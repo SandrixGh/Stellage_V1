@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 from starlette import status
 
-from stellage.apps.boxes.instances.schemas import BoxInstanceReturn, BoxInstanceCreate, BoxInstanceWithTemplate
+from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.models import BoxInstance, Shelf
 

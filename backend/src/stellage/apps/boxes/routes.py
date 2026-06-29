@@ -6,7 +6,7 @@ from starlette import status
 
 from stellage.apps.auth.depends import get_current_user
 from stellage.apps.auth.schemas import UserVerifySchema
-from stellage.apps.boxes.instances.schemas import BoxInstanceReturn, BoxInstanceCreate, BoxInstanceWithTemplate
+from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate
 from stellage.apps.boxes.instances.services import InstanceService
 from stellage.apps.boxes.templates.schemas import BoxTemplateReturn, BoxTemplateCreate, BoxTemplateReturnWithInstances
 from stellage.apps.boxes.templates.services import TemplateService
