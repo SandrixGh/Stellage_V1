@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
+import { useStellageStore } from "../../store/useStellageStore";
 import {
     MOCK_TEMPLATES,
     MOCK_BOX_EXTRAS,
@@ -30,9 +32,29 @@ const formatDate = (iso: string): string => {
 
 export const BoxDetailPage = () => {
     const { id } = useParams<{ id: string }>();
+    const { templates, fetchTemplates } = useStellageStore();
+    const [triedFetch, setTriedFetch] = useState(false);
 
-    const template = MOCK_TEMPLATES.find((t) => t.id === id);
+    // Direct-URL navigation may skip the feed, so make sure the catalogue is loaded
+    // before deciding a box is missing (otherwise a valid backend box bounces back).
+    useEffect(() => {
+        if (templates.length === 0) {
+            fetchTemplates().finally(() => setTriedFetch(true));
+        } else {
+            setTriedFetch(true);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Resolve the box from the same source the feed used, falling back to the demo data.
+    const source = templates.length > 0 ? templates : MOCK_TEMPLATES;
+    const template = source.find((t) => t.id === id);
+
     if (!template) {
+        // Still fetching — don't bounce a valid box back to the feed prematurely.
+        if (!triedFetch) {
+            return <div className="status-info">Загрузка коробки...</div>;
+        }
         return <Navigate to="/feed" replace />;
     }
 
