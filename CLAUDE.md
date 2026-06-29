@@ -45,7 +45,7 @@ backend/app/
 
 ## Skills Available
 
-Use `/new-page`, `/new-endpoint`, `/new-component`, `/new-form`, `/new-card`, `/git-commit` for scaffolding tasks.
+Use `/new-page`, `/new-endpoint`, `/new-component`, `/new-form`, `/new-card`, `/git-commit` for scaffolding tasks. Use `/token-audit` to check for token burn risks.
 
 ## Avoid Reading
 
