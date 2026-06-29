@@ -13,6 +13,7 @@ import { MyStellagePage } from "./pages/Main/MainPage";
 import { ProfilePage } from "./pages/Profile/ProfilePage";
 import { RegisterConfirmPage } from "./pages/Auth/RegisterConfirmPage";
 import { BoxDetailPage } from "./pages/Box/BoxDetailPage";
+import { PublicShelfPage } from "./pages/Stellage/PublicShelfPage";
 
 function App() {
   const { getUser, isInitialized, isAuthenticated } = useAuthStore();
@@ -45,6 +46,7 @@ function App() {
         <Route path="/box/:id" element={<BoxDetailPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/my-stellage" element={<MyStellagePage />} />
+        <Route path="/stellage/:shelfId" element={<PublicShelfPage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Route>
 

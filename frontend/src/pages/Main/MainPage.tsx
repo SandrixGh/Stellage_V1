@@ -2,13 +2,14 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
-import { BoxCard } from "../../components/Stellage/BoxCard";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
+import { ShelfView } from "../../components/Stellage/ShelfView";
 import "./MainPage.css";
 
 export const MyStellagePage = () => {
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-    const { mainShelf, fetchMainShelf, isLoading, error } = useStellageStore();
+    const { mainShelf, fetchMainShelf, updateBoxPosition, isLoading, error } =
+        useStellageStore();
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -50,17 +51,7 @@ export const MyStellagePage = () => {
                         {mainShelf?.is_public && <span className="badge">Публичная</span>}
                     </header>
 
-                    <div className="boxes-grid">
-                        {mainShelf?.boxes && mainShelf.boxes.length > 0 ? (
-                            mainShelf.boxes.map((box) => (
-                                <BoxCard key={box.id} box={box} />
-                            ))
-                        ) : (
-                            <p className="empty-message">
-                                Пока здесь пусто. Время добавить первую коробку!
-                            </p>
-                        )}
-                    </div>
+                    <ShelfView shelf={mainShelf} editable onMove={updateBoxPosition} />
                 </>
             )}
         </section>
