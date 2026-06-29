@@ -32,12 +32,14 @@ class AuthHandler:
 
     async def create_access_token(
         self,
-        user_id: uuid.UUID
+        user_id: uuid.UUID,
+        session_id: str | None = None,
     ) -> CreateTokenTuple:
         expire = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
             seconds=settings.access_token_expire,
         )
-        session_id: str = str(uuid.uuid4())
+        if session_id is None:
+            session_id = str(uuid.uuid4())
 
         data = {
             "exp": expire,

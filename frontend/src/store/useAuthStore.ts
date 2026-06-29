@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import axios from "axios";
 import type { UserVerifySchema } from "../types/Auth/auth";
 import { api } from "../api/instance";
 
@@ -23,8 +24,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
             const res = await api.get<UserVerifySchema>("/auth/get-user");
             set({user: res.data, isAuthenticated: true, isInitialized: true});
-        } catch {
-            set({ user: null, isAuthenticated: false, isInitialized: true });
+        } catch (error) {
+            // Only treat a real 401 (no/invalid session) as logged out.
+            // Transient/network errors must not flip an authenticated user out.
+            if (axios.isAxiosError(error) && error.response?.status === 401) {
+                set({ user: null, isAuthenticated: false, isInitialized: true });
+            } else {
+                set({ isInitialized: true });
+            }
         }
     },
 

@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from stellage.apps.auth.schemas import CreateUser, UserReturnData, GetUserWithIDAndEmail, UserVerifySchema
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.core.core_dependencies.redis_dependency import RedisDependency
+from stellage.core.settings import settings
 from stellage.database.models import User
 
 
@@ -77,7 +78,11 @@ class UserManager:
         session_id: str,
     ) -> None:
         async with self.redis.get_client() as client:
-            await client.set(f"{user_id}:{session_id}", token, ex=3600)
+            await client.set(
+                f"{user_id}:{session_id}",
+                token,
+                ex=settings.access_token_expire,
+            )
 
 
     async def get_access_token(
