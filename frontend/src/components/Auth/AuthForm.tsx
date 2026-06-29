@@ -8,7 +8,7 @@ export const AuthForm = ({ onSubmit, usernameData, emailData, passwordData, butt
             {usernameData && <AuthInput {...usernameData}/>}
             <AuthInput {...emailData}/>
             <AuthInput {...passwordData}/>
-            <button className="btn-primary" disabled={isLoading}>
+            <button type="submit" className="btn-primary" disabled={isLoading}>
                 {isLoading && <span className="btn-spinner" />}
                 {buttonContent}
             </button>
