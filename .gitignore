@@ -12,6 +12,9 @@ frontend/dist/
 .env
 *.env
 
+# Local runtime logs (dev stack: celery / uvicorn / vite)
+.local-logs/
+
 # Temp / screenshots
 *.png
 *.jpg
