@@ -6,9 +6,11 @@ import type { Box, BoxTemplate } from "../types/Stellage/boxes";
 interface StellageState {
     shelves: Shelf[];
     mainShelf: Shelf | null;
+    selectedShelf: Shelf | null;
     publicShelf: Shelf | null;
     currentBoxes: Box[];
     templates: BoxTemplate[];
+    instances: Box[];
     isLoading: boolean;
     error: string | null;
 
@@ -17,6 +19,10 @@ interface StellageState {
     fetchShelfWithBoxes: (shelfId: string) => Promise<void>;
     fetchPublicShelf: (shelfId: string) => Promise<void>;
     fetchTemplates: () => Promise<void>;
+    fetchInstances: () => Promise<void>;
+
+    createShelf: (title: string, isPublic: boolean) => Promise<Shelf | null>;
+    acquireBox: (templateId: string) => Promise<void>;
 
     moveBox: (instanceId: string, shelfId: string | null) => Promise<void>;
     updateBoxPosition: (instanceId: string, shelf_row: number, shelf_col: number) => Promise<void>;
@@ -26,9 +32,11 @@ interface StellageState {
 export const useStellageStore = create<StellageState>((set, get) => ({
     shelves: [],
     mainShelf: null,
+    selectedShelf: null,
     publicShelf: null,
     currentBoxes: [],
     templates: [],
+    instances: [],
     isLoading: false,
     error: null,
 
@@ -59,7 +67,7 @@ export const useStellageStore = create<StellageState>((set, get) => ({
             const res = await api.get<Shelf>("/shelf/get-shelf-with-boxes", {
                 params: { shelf_id: shelfId }
             });
-            set({ currentBoxes: res.data.boxes, isLoading: false });
+            set({ selectedShelf: res.data, currentBoxes: res.data.boxes, isLoading: false });
         } catch (err: any) {
             set({ error: "Не удалось загрузить содержимое полки", isLoading: false });
         }
@@ -88,12 +96,57 @@ export const useStellageStore = create<StellageState>((set, get) => ({
         }
     },
 
+    // Инвентарь пользователя: все его инстансы коробок (как на полке, так и без).
+    fetchInstances: async () => {
+        try {
+            const res = await api.get<Box[]>("/boxes/get-box-instances");
+            set({ instances: res.data });
+        } catch (err: any) {
+            set({ error: "Не удалось загрузить инвентарь" });
+        }
+    },
+
+    // Получить (создать) инстанс коробки из шаблона. Кладём в инвентарь
+    // (shelf_id = null), откуда пользователь сам ставит её на полку.
+    acquireBox: async (templateId: string) => {
+        try {
+            await api.post("/boxes/create-box-instance", {
+                template_id: templateId,
+                shelf_id: null,
+            });
+            await get().fetchInstances();
+        } catch (err: any) {
+            set({ error: "Не удалось получить коробку" });
+        }
+    },
+
+    createShelf: async (title: string, isPublic: boolean) => {
+        set({ isLoading: true, error: null });
+        try {
+            // is_main не передаём: бэкенд сам делает первую полку главной.
+            const res = await api.post<Shelf>("/shelf/create-shelf", {
+                title,
+                is_public: isPublic,
+            });
+            // Ресинхронизируем состояние, чтобы новая (возможно главная) полка
+            // сразу попала в shelves/mainShelf и пережила перезаход.
+            await Promise.all([get().fetchShelves(), get().fetchMainShelf()]);
+            set({ isLoading: false });
+            return res.data;
+        } catch (err: any) {
+            set({ error: "Не удалось создать стеллаж", isLoading: false });
+            return null;
+        }
+    },
+
     moveBox: async (instanceId, shelfId) => {
         try {
             await api.post("/boxes/move-box-to-shelf", null, {
                 params: { instance_id: instanceId, shelf_id: shelfId }
             });
-            get().fetchMainShelf(); 
+            await get().fetchMainShelf();
+            // Обновляем лоток инвентаря: поставленная коробка теперь с shelf_id.
+            get().fetchInstances();
         } catch (err) {
             console.error("Move error", err);
         }

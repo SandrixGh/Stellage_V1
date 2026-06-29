@@ -310,3 +310,113 @@
         font-size: 36px;
     }
 }
+
+/* ── Переключатель полок ──────────────────────────────────────────── */
+.shelf-switcher {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0 0 20px 0;
+}
+
+.shelf-switcher-tab {
+    padding: 8px 18px;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(215, 208, 179, 0.7);
+    border: 1px solid rgba(215, 208, 179, 0.15);
+    border-radius: 999px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(24px);
+}
+
+.shelf-switcher-tab:hover {
+    border-color: rgba(215, 208, 179, 0.4);
+    color: #D7D0B7;
+}
+
+.shelf-switcher-tab.active {
+    background: rgba(215, 208, 179, 0.12);
+    border-color: rgba(215, 208, 179, 0.5);
+    color: #D7D0B7;
+}
+
+.shelf-switcher-main {
+    color: #D7D0B7;
+}
+
+/* ── Лоток инвентаря ──────────────────────────────────────────────── */
+.inventory-tray {
+    margin: 0 0 24px 0;
+    padding: 20px 22px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(215, 208, 179, 0.15);
+    border-radius: 28px;
+    backdrop-filter: blur(24px);
+}
+
+.inventory-tray-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #D7D0B7;
+    margin: 0 0 4px 0;
+}
+
+.inventory-tray-hint {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    color: rgba(215, 208, 179, 0.45);
+    margin: 0 0 16px 0;
+}
+
+.inventory-tray-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.inventory-tray-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: 160px;
+    padding: 14px 16px;
+    background: rgba(215, 208, 179, 0.04);
+    border: 1px solid rgba(215, 208, 179, 0.2);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.inventory-tray-item:hover:not(:disabled) {
+    border-color: rgba(215, 208, 179, 0.5);
+    background: rgba(215, 208, 179, 0.08);
+    box-shadow: 0 0 24px rgba(215, 208, 179, 0.08);
+}
+
+.inventory-tray-item:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.inventory-tray-item-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #D7D0B7;
+}
+
+.inventory-tray-item-cta {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: rgba(215, 208, 179, 0.55);
+}

@@ -9,8 +9,23 @@ import "./MainPage.css";
 export const MyStellagePage = () => {
     const navigate = useNavigate();
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-    const { mainShelf, fetchMainShelf, updateBoxPosition, createShelf, isLoading } =
-        useStellageStore();
+    const {
+        shelves,
+        mainShelf,
+        selectedShelf,
+        fetchShelves,
+        fetchMainShelf,
+        fetchShelfWithBoxes,
+        updateBoxPosition,
+        createShelf,
+        instances,
+        fetchInstances,
+        moveBox,
+        isLoading,
+    } = useStellageStore();
+
+    // id выбранной во переключателе полки (null = главная).
+    const [activeShelfId, setActiveShelfId] = useState<string | null>(null);
 
     // Модалка создания нового стеллажа.
     const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -37,9 +52,32 @@ export const MyStellagePage = () => {
 
     useEffect(() => {
         if (isAuthenticated) {
+            fetchShelves();
             fetchMainShelf();
+            fetchInstances();
         }
-    }, [isAuthenticated, fetchMainShelf]);
+    }, [isAuthenticated, fetchShelves, fetchMainShelf, fetchInstances]);
+
+    // Полка, активная сейчас на доске: главная либо выбранная в переключателе.
+    const currentShelf =
+        activeShelfId && activeShelfId !== mainShelf?.id ? selectedShelf : mainShelf;
+
+    const handleSelectShelf = (shelfId: string) => {
+        if (shelfId === mainShelf?.id) {
+            setActiveShelfId(null);
+        } else {
+            setActiveShelfId(shelfId);
+            fetchShelfWithBoxes(shelfId);
+        }
+    };
+
+    // Коробки в инвентаре — ещё не поставленные на полку.
+    const trayBoxes = instances.filter((b) => b.shelf_id === null);
+
+    const handlePlaceOnShelf = (instanceId: string) => {
+        if (!currentShelf) return;
+        moveBox(instanceId, currentShelf.id);
+    };
 
     if (!isAuthenticated) {
         return (
@@ -67,12 +105,12 @@ export const MyStellagePage = () => {
                     <header className="shelf-info">
                         <div>
                             <h1 className="page-title">
-                                {mainShelf?.title || "Твоя главная полка"}
+                                {currentShelf?.title || "Твоя главная полка"}
                             </h1>
                             <p className="page-subtitle">Личная коллекция коробок</p>
                         </div>
                         <div className="shelf-info-actions">
-                            {mainShelf?.is_public && <span className="badge">Публичная</span>}
+                            {currentShelf?.is_public && <span className="badge">Публичная</span>}
                             <button
                                 type="button"
                                 className="create-shelf-btn"
@@ -83,8 +121,60 @@ export const MyStellagePage = () => {
                         </div>
                     </header>
 
-                    {mainShelf ? (
-                        <ShelfView shelf={mainShelf} editable onMove={updateBoxPosition} />
+                    {/* Переключатель полок — показываем только если их больше одной. */}
+                    {shelves.length > 1 && (
+                        <div className="shelf-switcher">
+                            {shelves.map((s) => {
+                                const isActive =
+                                    s.id === (currentShelf?.id ?? mainShelf?.id);
+                                return (
+                                    <button
+                                        key={s.id}
+                                        type="button"
+                                        className={`shelf-switcher-tab${isActive ? " active" : ""}`}
+                                        onClick={() => handleSelectShelf(s.id)}
+                                    >
+                                        {s.title}
+                                        {s.is_main && <span className="shelf-switcher-main"> ★</span>}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* Лоток инвентаря: полученные коробки, ещё не на полке. */}
+                    {trayBoxes.length > 0 && (
+                        <div className="inventory-tray">
+                            <h2 className="inventory-tray-title">
+                                Инвентарь ({trayBoxes.length})
+                            </h2>
+                            <p className="inventory-tray-hint">
+                                Нажми на коробку, чтобы поставить её на стеллаж.
+                            </p>
+                            <div className="inventory-tray-items">
+                                {trayBoxes.map((box) => (
+                                    <button
+                                        key={box.id}
+                                        type="button"
+                                        className="inventory-tray-item"
+                                        onClick={() => handlePlaceOnShelf(box.id)}
+                                        disabled={!currentShelf}
+                                        title="Поставить на полку"
+                                    >
+                                        <span className="inventory-tray-item-name">
+                                            {box.template.title}
+                                        </span>
+                                        <span className="inventory-tray-item-cta">
+                                            На полку →
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {currentShelf ? (
+                        <ShelfView shelf={currentShelf} editable onMove={updateBoxPosition} />
                     ) : (
                         <div className="shelf-empty-state">
                             <p>У тебя пока нет стеллажа. Создай первый!</p>
