@@ -7,9 +7,10 @@ from fastapi import HTTPException
 from starlette.responses import JSONResponse
 
 from stellage.apps.shelves.services import ShelfService
+from stellage.apps.shelves.schemas import CreateShelf
 from stellage.apps.shelves.dependecies import get_current_main_shelf, get_current_main_shelf_with_boxes
 from stellage.main import app
-from tests.conftest import TEST_SHELF_ID, TEST_USER_ID
+from tests.conftest import TEST_SHELF_ID, TEST_USER_ID, run
 
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
@@ -159,3 +160,60 @@ def test_delete_shelf_success(auth_client, mock_shelf_service):
 def test_delete_shelf_unauthenticated_returns_401(client):
     resp = client.delete(f"/api.v1/shelf/delete-shelf?shelf_id={TEST_SHELF_ID}")
     assert resp.status_code == 401
+
+
+# ── First shelf auto-becomes main (service-level) ─────────────────────────────
+
+def _service_with_mock_manager(test_shelf):
+    """Build a ShelfService whose manager is mocked, returning the created
+    shelf untouched so we can inspect what flag the service forced on it."""
+    manager = AsyncMock()
+    manager.get_shelves = AsyncMock(return_value=[])
+
+    async def _create_shelf(user_id, shelf):
+        # Echo the (possibly mutated) is_main flag back via test_shelf copy.
+        return test_shelf.model_copy(update={"is_main": shelf.is_main})
+
+    manager.create_shelf = AsyncMock(side_effect=_create_shelf)
+    return ShelfService(manager=manager), manager
+
+
+def test_first_shelf_auto_becomes_main(test_user, test_shelf):
+    """No main shelf yet → service forces is_main=True regardless of request."""
+    service, manager = _service_with_mock_manager(test_shelf)
+    manager.get_main_shelf = AsyncMock(return_value=None)
+
+    created = run(
+        service.create_shelf(
+            user=test_user,
+            shelf=CreateShelf(title="First Shelf", is_main=False, is_public=True),
+        )
+    )
+    assert created.is_main is True
+
+
+def test_second_shelf_is_not_main(test_user, test_shelf):
+    """A main shelf already exists → the new shelf stays non-main."""
+    service, manager = _service_with_mock_manager(test_shelf)
+    manager.get_main_shelf = AsyncMock(return_value=test_shelf)
+
+    created = run(
+        service.create_shelf(
+            user=test_user,
+            shelf=CreateShelf(title="Second Shelf", is_main=False, is_public=True),
+        )
+    )
+    assert created.is_main is False
+
+
+# ── owner_username regression ─────────────────────────────────────────────────
+
+def test_main_shelf_with_boxes_returns_owner_username(auth_client, test_shelf_with_boxes):
+    """Regression: /main-shelf-with-boxes must expose owner_username."""
+    shelf = test_shelf_with_boxes.model_copy(update={"owner_username": "stargazer"})
+    app.dependency_overrides[get_current_main_shelf_with_boxes] = lambda: shelf
+
+    resp = auth_client.get("/api.v1/shelf/main-shelf-with-boxes")
+    assert resp.status_code == 200
+    assert resp.json()["owner_username"] == "stargazer"
+    app.dependency_overrides.pop(get_current_main_shelf_with_boxes, None)

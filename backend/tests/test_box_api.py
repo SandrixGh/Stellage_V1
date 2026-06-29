@@ -120,6 +120,29 @@ def test_create_box_instance_success(auth_client, mock_instance_service):
     app.dependency_overrides.pop(InstanceService, None)
 
 
+def test_acquire_free_box_into_inventory_then_place(auth_client, mock_instance_service):
+    """Free box flow: create instance with shelf_id=null (inventory), then
+    move it onto a shelf. Mirrors the frontend acquire → place sequence."""
+    app.dependency_overrides[InstanceService] = lambda: mock_instance_service
+
+    # Acquire: lands in the inventory (no shelf), owned by current user.
+    acquire = auth_client.post(
+        "/api.v1/boxes/create-box-instance",
+        json={"template_id": str(TEST_TEMPLATE_ID), "shelf_id": None},
+    )
+    assert acquire.status_code == 201
+    data = acquire.json()
+    assert data["user_id"] == str(TEST_USER_ID)
+    assert data["shelf_id"] is None
+
+    # Place: move the inventory box onto a shelf.
+    place = auth_client.post(
+        f"/api.v1/boxes/move-box-to-shelf?instance_id={TEST_INSTANCE_ID}&shelf_id={TEST_SHELF_ID}"
+    )
+    assert place.status_code == 200
+    app.dependency_overrides.pop(InstanceService, None)
+
+
 def test_create_box_instance_unauthenticated_returns_401(client):
     resp = client.post(
         "/api.v1/boxes/create-box-instance",
