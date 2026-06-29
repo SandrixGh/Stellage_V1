@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 import uuid
 
 from sqlalchemy.dialects.postgresql import ENUM as PostgresEnum
-from sqlalchemy import ForeignKey, JSON, Integer, CheckConstraint
+from sqlalchemy import ForeignKey, JSON, Integer, CheckConstraint, Index, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from stellage.database.enums.box_sealing import SealingEnum
@@ -78,6 +78,16 @@ class BoxInstance(IDMixin, TimestampMixin, Base):
 
     content: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
+    shelf_row: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    shelf_col: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
     template: Mapped["BoxTemplate"] = relationship(
         "BoxTemplate",
         back_populates="instances"
@@ -95,4 +105,12 @@ class BoxInstance(IDMixin, TimestampMixin, Base):
 
     __table_args__ = (
         CheckConstraint('serial_number > 0', name='check_serial_number_positive'),
+        Index(
+            'uq_box_instances_shelf_position',
+            'shelf_id',
+            'shelf_row',
+            'shelf_col',
+            unique=True,
+            postgresql_where=text("shelf_id IS NOT NULL"),
+        ),
     )
