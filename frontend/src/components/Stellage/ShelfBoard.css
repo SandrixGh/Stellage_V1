@@ -37,8 +37,8 @@
     display: flex;
     align-items: flex-end; /* коробка «стоит» на линии полки */
     justify-content: center;
-    /* По высоте оставляем место под линию (нижние ~26px ячейки). */
-    padding-bottom: 26px;
+    /* Коробка стоит на линии полки: метка прилегает к самому низу ячейки. */
+    padding-bottom: 2px;
     transition: left 0.18s cubic-bezier(0.22, 1, 0.36, 1),
                 top 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -94,7 +94,7 @@
 }
 
 .shelf-box-rarity {
-    font-family: "Space Grotesk", sans-serif;
+    font-family: "Syne", sans-serif;
     font-size: 8px;
     font-weight: 600;
     letter-spacing: 0.8px;
@@ -109,7 +109,7 @@
     height: fit-content;
     text-align: center;
     color: rgba(215, 208, 179, 0.45);
-    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-family: "Syne", system-ui, sans-serif;
     font-size: 15px;
     padding: 0 24px;
     pointer-events: none;
