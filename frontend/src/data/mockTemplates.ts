@@ -64,6 +64,16 @@ export const MOCK_TEMPLATES: BoxTemplate[] = [
     t("33", "Storm Front",         "Драматичные кадры гроз и штормового неба",                  "69.99",  "usd", "Rare"),
     t("34", "Royal Archive",       "Цифровая реконструкция королевских регалий",                "459.99", "gbp", "Golden"),
     t("35", "Shader Garden",       "Коллекция процедурных шейдеров и эффектов",                 "229.99", "usd", "Developer's"),
+    t("36", "Botanica",            "Гербарий и ботанические иллюстрации в винтажном стиле",      "16.99",  "usd", "Common"),
+    t("37", "Ghost Frequencies",   "Эфирные эмбиент-текстуры и полевые записи",                 "57.99",  "eur", "Rare"),
+    t("38", "Amber Vault",         "Янтарные реликвии и окаменелости древних эпох",             "189.99", "usd", "Golden"),
+    t("39", "Kernel Panic",        "Низкоуровневые системные хаки и драйверы",                  "319.00", "usd", "Developer's"),
+    t("40", "Concrete Poems",      "Типографские эксперименты и конкретная поэзия",             "8.49",   "usd", "Common"),
+    t("41", "Migratory",           "Маршруты перелётных птиц в инфографике и фото",             "62.50",  "usd", "Rare"),
+    t("42", "Gilded Frames",       "Золочёные рамы и детали барочных интерьеров",               "144.99", "gbp", "Golden"),
+    t("43", "Async Rituals",       "Паттерны конкурентного программирования",                   "264.99", "usd", "Developer's"),
+    t("44", "Ferro Dreams",        "Феррожидкости и магнитные скульптуры в движении",           "73.99",  "usd", "Rare"),
+    t("45", "Tin Toys",            "Коллекция жестяных игрушек середины века",                  "0",      "usd", "Common"),
 ];
 
 /* ── Extra per-box metadata, keyed by template id — owner / shelf / visibility.
@@ -111,6 +121,16 @@ export const MOCK_BOX_EXTRAS: Record<string, BoxExtra> = {
     "33": { owner: "stormchase", stellage: "Стихии",              is_public: "public" },
     "34": { owner: "regalia",    stellage: "Сокровищница",          is_public: "private" },
     "35": { owner: "devguild",   stellage: "Шейдеры",             is_public: "public" },
+    "36": { owner: "flora",      stellage: "Гербарий",            is_public: "public" },
+    "37": { owner: "waveform",   stellage: null,                   is_public: "public" },
+    "38": { owner: "historia",   stellage: "Реликвии",            is_public: "private" },
+    "39": { owner: "devguild",   stellage: "Системное",            is_public: "private" },
+    "40": { owner: "minimal",    stellage: null,                   is_public: "public" },
+    "41": { owner: "wildlens",   stellage: "Дикая природа",        is_public: "public" },
+    "42": { owner: "classix",    stellage: "Классика",            is_public: "public" },
+    "43": { owner: "devguild",   stellage: "Эксперименты",          is_public: "public" },
+    "44": { owner: "ferro",      stellage: "Кинетика",            is_public: "public" },
+    "45": { owner: "retro8",     stellage: null,                   is_public: "public" },
 };
 
 /* ── Rarity helpers (shared by feed + detail) ── */
