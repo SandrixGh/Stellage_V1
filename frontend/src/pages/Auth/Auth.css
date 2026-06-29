@@ -121,6 +121,9 @@
     letter-spacing: 1px;
     margin: 0;
     line-height: 1;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
 }
 
 /* ===== CARD ===== */
