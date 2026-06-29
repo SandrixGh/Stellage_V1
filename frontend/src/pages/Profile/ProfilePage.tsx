@@ -1,11 +1,20 @@
+import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 import { useAuthStore } from "../../store/useAuthStore";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
+import { onlineStatus, isOnline } from "../../utils/onlineStatus";
 import "./ProfilePage.css";
 
 export const ProfilePage = () => {
     const navigate = useNavigate();
-    const { user, isAuthenticated, logout, delete_account } = useAuthStore();
+    const { user, isAuthenticated, logout, delete_account, updateProfile } = useAuthStore();
+
+    const [username, setUsername] = useState(user?.username ?? "");
+    const [nickname, setNickname] = useState(user?.nickname ?? "");
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [saved, setSaved] = useState(false);
 
     if (!isAuthenticated || !user) {
         return (
@@ -24,8 +33,9 @@ export const ProfilePage = () => {
         );
     }
 
-    const monogram = user.email?.trim()?.[0]?.toUpperCase() ?? "S";
-    const shortId = user.id ? `${user.id.slice(0, 8)}…` : "—";
+    const displayName = user.nickname?.trim() || user.email;
+    const monogram = displayName?.trim()?.[0]?.toUpperCase() ?? "S";
+    const online = isOnline(user.last_seen_at);
 
     const handleLogout = async () => {
         await logout();
@@ -39,6 +49,28 @@ export const ProfilePage = () => {
         }
     };
 
+    const handleSave = async (e: FormEvent) => {
+        e.preventDefault();
+        setError(null);
+        setSaved(false);
+        setSaving(true);
+        try {
+            await updateProfile({
+                username: username.trim() || undefined,
+                nickname: nickname.trim() || undefined,
+            });
+            setSaved(true);
+        } catch (err) {
+            if (axios.isAxiosError(err) && err.response?.status === 409) {
+                setError("Этот username уже занят. Выберите другой.");
+            } else {
+                setError("Не удалось сохранить профиль. Попробуйте позже.");
+            }
+        } finally {
+            setSaving(false);
+        }
+    };
+
     return (
         <div className="profile-page">
             <header className="profile-hero">
@@ -47,15 +79,68 @@ export const ProfilePage = () => {
                 </div>
                 <div className="profile-identity">
                     <p className="profile-eyebrow">Аккаунт</p>
-                    <h1 className="profile-email">{user.email}</h1>
+                    <h1 className="profile-email">{displayName}</h1>
+                    {user.nickname?.trim() && (
+                        <p className="profile-subline">{user.email}</p>
+                    )}
                     <div className="profile-meta">
-                        <span className="profile-chip profile-chip-id">ID&nbsp;·&nbsp;{shortId}</span>
-                        <span className="profile-chip profile-chip-status">Активен</span>
+                        {user.username ? (
+                            <span className="profile-chip profile-chip-username">@{user.username}</span>
+                        ) : (
+                            <span className="profile-chip profile-chip-muted">username не задан</span>
+                        )}
+                        <span className={`profile-chip ${online ? "profile-chip-status" : "profile-chip-offline"}`}>
+                            {onlineStatus(user.last_seen_at)}
+                        </span>
                     </div>
                 </div>
             </header>
 
             <div className="profile-layout">
+                <section className="profile-card">
+                    <h2 className="profile-card-title">Профиль</h2>
+                    <form className="profile-form" onSubmit={handleSave}>
+                        <label className="profile-field">
+                            <span className="profile-field-label">Username</span>
+                            <div className="profile-input-wrap">
+                                <span className="profile-input-prefix">@</span>
+                                <input
+                                    className="profile-input profile-input-prefixed"
+                                    type="text"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value.toLowerCase())}
+                                    placeholder="username"
+                                    pattern="[a-z0-9_]+"
+                                    minLength={3}
+                                    maxLength={30}
+                                    autoComplete="off"
+                                    spellCheck={false}
+                                />
+                            </div>
+                            <span className="profile-field-hint">Латиница в нижнем регистре, цифры и _</span>
+                        </label>
+
+                        <label className="profile-field">
+                            <span className="profile-field-label">Никнейм</span>
+                            <input
+                                className="profile-input"
+                                type="text"
+                                value={nickname}
+                                onChange={(e) => setNickname(e.target.value)}
+                                placeholder="Отображаемое имя"
+                                maxLength={50}
+                            />
+                        </label>
+
+                        {error && <p className="profile-form-error">{error}</p>}
+                        {saved && !error && <p className="profile-form-ok">Профиль сохранён.</p>}
+
+                        <button className="profile-link-btn" type="submit" disabled={saving}>
+                            {saving ? "Сохранение…" : "Сохранить"}
+                        </button>
+                    </form>
+                </section>
+
                 <section className="profile-card">
                     <h2 className="profile-card-title">Безопасность</h2>
 

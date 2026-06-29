@@ -11,6 +11,7 @@ interface AuthState {
     logout: () => Promise<void>;
     delete_account: () => Promise<void>;
     getUser: () => Promise<void>;
+    updateProfile: (data: { username?: string; nickname?: string }) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -38,6 +39,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         } finally {
             set({ user: null, isAuthenticated: false });
         }
+    },
+
+    updateProfile: async (data) => {
+        await api.patch("/profile/update", data);
+        await get().getUser();
     },
 
     delete_account: async () => {

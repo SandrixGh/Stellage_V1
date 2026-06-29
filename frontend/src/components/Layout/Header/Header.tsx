@@ -46,9 +46,11 @@ export const Header = () => {
                             }
                         >
                             <span className="user-avatar" aria-hidden="true">
-                                {user?.email?.trim()?.[0]?.toUpperCase() ?? "S"}
+                                {(user?.nickname?.trim() || user?.email)?.trim()?.[0]?.toUpperCase() ?? "S"}
                             </span>
-                            <span className="user-email">{user?.email}</span>
+                            <span className="user-email">
+                                {user?.username ? `@${user.username}` : user?.email}
+                            </span>
                         </NavLink>
                     ) : (
                         <button

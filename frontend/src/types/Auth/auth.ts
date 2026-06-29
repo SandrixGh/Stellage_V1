@@ -2,6 +2,9 @@ export interface UserVerifySchema {
     id: string;
     email: string;
     session_id?: string | null;
+    username?: string | null;
+    nickname?: string | null;
+    last_seen_at?: string | null;
 }
 
 export interface UserReturnData extends UserVerifySchema {
