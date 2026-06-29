@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { useStellageStore } from "../../store/useStellageStore";
+import { useAuthStore } from "../../store/useAuthStore";
 import {
     MOCK_TEMPLATES,
     MOCK_BOX_EXTRAS,
@@ -32,8 +33,11 @@ const formatDate = (iso: string): string => {
 
 export const BoxDetailPage = () => {
     const { id } = useParams<{ id: string }>();
-    const { templates, fetchTemplates } = useStellageStore();
+    const { templates, fetchTemplates, acquireBox } = useStellageStore();
+    const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
     const [triedFetch, setTriedFetch] = useState(false);
+    const [isAcquiring, setIsAcquiring] = useState(false);
+    const [acquired, setAcquired] = useState(false);
 
     // Direct-URL navigation may skip the feed, so make sure the catalogue is loaded
     // before deciding a box is missing (otherwise a valid backend box bounces back).
@@ -62,6 +66,17 @@ export const BoxDetailPage = () => {
     const { rarityGlow, boxColor } = resolveRarityVisual(template.rarity);
     const rarityClass = getRarityClass(template.rarity);
     const isPublic = extras.is_public === "public";
+
+    // Платную коробку пока получить нельзя (платёжка не выбрана) — кнопка задизейблена.
+    const isFree = Number(template.price) === 0;
+
+    const handleAcquire = async () => {
+        if (!isFree || isAcquiring || acquired) return;
+        setIsAcquiring(true);
+        await acquireBox(template.id);
+        setIsAcquiring(false);
+        setAcquired(true);
+    };
 
     return (
         <div className={`box-detail rarity-${rarityClass}`}>
@@ -93,6 +108,32 @@ export const BoxDetailPage = () => {
                     <p className="box-detail-price">
                         {formatPrice(template.price, template.currency)}
                     </p>
+
+                    {isFree ? (
+                        <button
+                            type="button"
+                            className="box-detail-acquire"
+                            onClick={handleAcquire}
+                            disabled={!isAuthenticated || isAcquiring || acquired}
+                        >
+                            {!isAuthenticated
+                                ? "Войдите, чтобы получить"
+                                : acquired
+                                    ? "Получено ✓"
+                                    : isAcquiring
+                                        ? "Получаем…"
+                                        : "Получить бесплатно"}
+                        </button>
+                    ) : (
+                        <button
+                            type="button"
+                            className="box-detail-acquire"
+                            disabled
+                            title="Оплата пока недоступна"
+                        >
+                            Покупка скоро
+                        </button>
+                    )}
 
                     <hr className="box-detail-divider" />
 

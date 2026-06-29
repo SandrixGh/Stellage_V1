@@ -12,7 +12,7 @@ export interface BoxTemplate {
 export interface Box {
     id: string;
     user_id: string;
-    shelf_id: string;
+    shelf_id: string | null; // null = коробка в инвентаре, не на полке
     template_id: string;
     serial_number: number;
     shelf_row: number | null; // позиция на стеллаже: индекс полки-линии
