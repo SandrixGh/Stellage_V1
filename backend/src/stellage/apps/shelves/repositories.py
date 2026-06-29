@@ -213,9 +213,14 @@ class ShelfRepository:
                 return None
 
             shelf_data = ShelfWithBoxInstances.model_validate(shelf)
-            shelf_data.owner_username = (
-                shelf.owner.email if shelf.owner else None
-            )
+            # Prefer a real username; fall back to the email local-part so the
+            # full email (PII) is never exposed on the public endpoint.
+            if shelf.owner:
+                shelf_data.owner_username = (
+                    shelf.owner.username or shelf.owner.email.split("@")[0]
+                )
+            else:
+                shelf_data.owner_username = None
             return shelf_data
 
 

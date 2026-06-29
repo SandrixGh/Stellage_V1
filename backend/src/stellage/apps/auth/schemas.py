@@ -24,10 +24,16 @@ class AuthUser(GetUserByEmail):
         min_length=8,
         max_length=128,
     )]
+    username: Annotated[str | None, StringConstraints(
+        min_length=3,
+        max_length=30,
+        strip_whitespace=True,
+    )] = None
 
 
 class CreateUser(GetUserByEmail):
     hashed_password: str
+    username: str | None = None
 
 
 class UserReturnData(GetUserByID, GetUserByEmail, VerificationStatus):

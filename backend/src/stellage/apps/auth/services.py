@@ -29,6 +29,7 @@ class UserService:
         new_user = CreateUser(
             email=user.email,
             hashed_password=hashed_password,
+            username=user.username,
         )
 
         user_data = await self.manager.create_user(new_user)
