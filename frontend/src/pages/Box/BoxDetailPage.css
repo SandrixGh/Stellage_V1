@@ -14,7 +14,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Syne', sans-serif;
     font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.2px;
@@ -129,7 +129,7 @@
 
 /* Rarity tag (shared visual language with the feed) */
 .box-detail-info .rarity-tag {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Syne', sans-serif;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.7px;
@@ -172,7 +172,7 @@
 
 /* Price */
 .box-detail-price {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Syne', sans-serif;
     margin: 0;
     font-size: 22px;
     font-weight: 600;
@@ -191,7 +191,7 @@
 
 /* Description */
 .box-detail-description {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Syne', sans-serif;
     margin: 0;
     font-size: 16px;
     line-height: 1.65;
@@ -215,7 +215,7 @@
 }
 
 .box-detail-meta-row dt {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Syne', sans-serif;
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.8px;
@@ -224,7 +224,7 @@
 }
 
 .box-detail-meta-row dd {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Syne', sans-serif;
     margin: 0;
     font-size: 15px;
     font-weight: 500;
@@ -322,7 +322,7 @@
 }
 
 .box-detail-locked-text {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Syne', sans-serif;
     margin: 0;
     font-size: 15px;
     font-weight: 500;
@@ -362,7 +362,7 @@
     color: #D7D0B7;
     border: 1px solid rgba(215, 208, 179, 0.3);
     border-radius: 12px;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Syne', sans-serif;
     font-size: 14px;
     font-weight: 600;
     letter-spacing: 0.4px;

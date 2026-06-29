@@ -11,7 +11,7 @@
     width: 100%;
     box-sizing: border-box;
     padding: 16px 22px;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Syne', sans-serif;
     font-size: 15px;
     color: #D7D0B7;
     letter-spacing: -0.2px;
@@ -117,7 +117,7 @@
 }
 
 .feed-filter-label {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Syne', sans-serif;
     font-size: 13.5px;
     letter-spacing: -0.1px;
     color: rgba(215, 208, 179, 0.55);
@@ -132,7 +132,7 @@
 .feed-reset-button {
     width: 100%;
     padding: 11px 14px;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Syne', sans-serif;
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.6px;
