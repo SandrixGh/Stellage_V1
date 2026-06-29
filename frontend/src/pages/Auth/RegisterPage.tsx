@@ -8,6 +8,7 @@ import { AuthLayout } from "../../components/Auth/AuthLayout";
 
 export const RegisterPage = () => {
     const navigate = useNavigate();
+    const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isSent, setIsSent] = useState(false);
@@ -19,7 +20,9 @@ export const RegisterPage = () => {
         setError("");
         setIsLoading(true);
         try {
-            await api.post("/auth/register/", { email, password })
+            const payload: { email: string; password: string; username?: string } = { email, password };
+            if (username.trim()) payload.username = username.trim();
+            await api.post("/auth/register/", payload)
             setIsSent(true);
         } catch (err: any) {
             setError(err.response?.data?.detail || "Ошибка при регистрации");
@@ -57,6 +60,7 @@ export const RegisterPage = () => {
                 {error && <div className="error-message">{error}</div>}
                 <AuthForm
                     onSubmit={handleSubmit}
+                    usernameData={{ field: username, setField: setUsername, label: "Имя пользователя", type: "text" }}
                     emailData={{ field: email, setField: setEmail, label: "Email", type: "email" }}
                     passwordData={{ field: password, setField: setPassword, label: "Пароль", type: "password" }}
                     buttonContent="Зарегистрироваться"
