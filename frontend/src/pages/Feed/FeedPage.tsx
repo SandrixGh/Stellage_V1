@@ -1,13 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStellageStore } from "../../store/useStellageStore";
-import type { BoxTemplate } from "../../types/Stellage/boxes";
-import { WireframeBox } from "../../components/Stellage/WireframeBox";
-import {
-    MOCK_TEMPLATES,
-    formatPrice,
-    resolveRarityVisual,
-} from "../../data/mockTemplates";
+import { TemplateCard } from "../../components/Stellage/TemplateCard";
+import { MOCK_TEMPLATES } from "../../data/mockTemplates";
 import "./FeedPage.css";
 
 /* ── Rarity filter definitions (label + matching value + dot color) ── */
@@ -17,46 +12,6 @@ const RARITY_FILTERS: { label: string; value: string; dot: string }[] = [
     { label: "Golden", value: "golden", dot: "#E8CB82" },
     { label: "Developer's", value: "developer's", dot: "#C882FF" },
 ];
-
-const TemplateCard = ({
-    template,
-    onClick,
-}: {
-    template: BoxTemplate;
-    onClick: () => void;
-}) => {
-    const { rarityGlow, rarityClass, boxColor } = resolveRarityVisual(
-        template.rarity ?? "common",
-    );
-
-    return (
-        <div
-            className={`template-card rarity-${rarityClass}`}
-            onClick={onClick}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") onClick();
-            }}
-        >
-            <div className="template-card-visual">
-                <WireframeBox size={220} rarityGlow={rarityGlow} color={boxColor} />
-            </div>
-
-            <div className="template-card-footer">
-                <h3 className="template-title">{template.title}</h3>
-                <div className="template-meta">
-                    <span className={`rarity-tag rarity-tag-${rarityClass}`}>
-                        {template.rarity}
-                    </span>
-                    <span className="template-price">
-                        {formatPrice(template.price, template.currency)}
-                    </span>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 export const FeedPage = () => {
     const navigate = useNavigate();

@@ -7,17 +7,63 @@ interface WireframeBoxProps {
 
 type Point = { x: number; y: number };
 
-/* ── Cuboid vertices (front face + back face offset by (+40, -30)) ── */
-const V = {
-    A: { x: 18, y: 38 },   // front  top-left
-    B: { x: 118, y: 38 },  // front  top-right
-    C: { x: 118, y: 104 }, // front  bottom-right
-    D: { x: 18, y: 104 },  // front  bottom-left
-    E: { x: 58, y: 8 },    // back   top-left
-    F: { x: 158, y: 8 },   // back   top-right
-    G: { x: 158, y: 74 },  // back   bottom-right
-    H: { x: 58, y: 74 },   // back   bottom-left (hidden corner)
+/* ── Layout parameters for isometric box ── */
+const LAYOUT = {
+    // viewBox dimensions with safe margins for strokes
+    viewBoxWidth: 200,
+    viewBoxHeight: 150,
+
+    // Front face dimensions
+    frontWidth: 90,
+    frontHeight: 60,
+
+    // Isometric offset (back face relative to front)
+    offsetX: 35,
+    offsetY: -25,
+
+    // Margins from viewBox edges
+    marginLeft: 20,
+    marginTop: 30,
 } as const;
+
+// Calculate vertices from layout parameters
+const createVertices = () => {
+    const { frontWidth, frontHeight, offsetX, offsetY, marginLeft, marginTop } = LAYOUT;
+
+    const frontLeft = marginLeft;
+    const frontTop = marginTop;
+    const backLeft = frontLeft + offsetX;
+    const backTop = frontTop + offsetY;
+
+    return {
+        A: { x: frontLeft, y: frontTop },                           // front top-left
+        B: { x: frontLeft + frontWidth, y: frontTop },              // front top-right
+        C: { x: frontLeft + frontWidth, y: frontTop + frontHeight }, // front bottom-right
+        D: { x: frontLeft, y: frontTop + frontHeight },             // front bottom-left
+        E: { x: backLeft, y: backTop },                             // back top-left
+        F: { x: backLeft + frontWidth, y: backTop },                // back top-right
+        G: { x: backLeft + frontWidth, y: backTop + frontHeight },  // back bottom-right
+        H: { x: backLeft, y: backTop + frontHeight },               // back bottom-left
+    };
+};
+
+const V = createVertices();
+
+/* Tight viewBox around the cube's actual content bounds (+ stroke padding) so the
+   box fills the SVG instead of floating inside ~40% of empty margin. */
+const BOX_PAD = 4;
+const VB = (() => {
+    const xs = Object.values(V).map((p) => p.x);
+    const ys = Object.values(V).map((p) => p.y);
+    const minX = Math.min(...xs);
+    const minY = Math.min(...ys);
+    return {
+        x: minX - BOX_PAD,
+        y: minY - BOX_PAD,
+        w: Math.max(...xs) - minX + BOX_PAD * 2,
+        h: Math.max(...ys) - minY + BOX_PAD * 2,
+    };
+})();
 
 const norm = (dx: number, dy: number) => {
     const len = Math.hypot(dx, dy) || 1;
@@ -62,16 +108,17 @@ const roundedPath = (pts: Point[], r: number, closed = false) => {
 
 const seg = (a: Point, b: Point) => `M ${a.x},${a.y} L ${b.x},${b.y}`;
 
-const R = 7;
+// Corner radius (smaller = tighter corners, fewer artifacts)
+const CORNER_RADIUS = 1.5;
 
 // Outer silhouette of the cube (single closed, rounded loop).
-const SILHOUETTE = roundedPath([V.D, V.A, V.E, V.F, V.G, V.C], R, true);
+const SILHOUETTE = roundedPath([V.D, V.A, V.E, V.F, V.G, V.C], CORNER_RADIUS, true);
 // Visible interior edges that meet at the front-top-right corner B.
-const INTERIOR = `${roundedPath([V.A, V.B, V.C], R)} ${seg(V.B, V.F)}`;
+const INTERIOR = `${roundedPath([V.A, V.B, V.C], CORNER_RADIUS)} ${seg(V.B, V.F)}`;
 // The three hidden edges that meet at the back-bottom-left corner H.
-const HIDDEN = `${roundedPath([V.D, V.H, V.E], R)} ${seg(V.H, V.G)}`;
+const HIDDEN = `${roundedPath([V.D, V.H, V.E], CORNER_RADIUS)} ${seg(V.H, V.G)}`;
 // Front face for the glassy fill (rounded rectangle).
-const FRONT_FILL = roundedPath([V.A, V.B, V.C, V.D], R, true);
+const FRONT_FILL = roundedPath([V.A, V.B, V.C, V.D], CORNER_RADIUS, true);
 const TOP_FILL = `M ${V.A.x},${V.A.y} L ${V.E.x},${V.E.y} L ${V.F.x},${V.F.y} L ${V.B.x},${V.B.y} Z`;
 const RIGHT_FILL = `M ${V.B.x},${V.B.y} L ${V.F.x},${V.F.y} L ${V.G.x},${V.G.y} L ${V.C.x},${V.C.y} Z`;
 
@@ -95,12 +142,13 @@ export const WireframeBox = ({
     return (
         <svg
             width={size}
-            height={size * 0.72}
-            viewBox="0 0 180 130"
+            height={size * (VB.h / VB.w)}
+            viewBox={`${VB.x} ${VB.y} ${VB.w} ${VB.h}`}
+            preserveAspectRatio="xMidYMid meet"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className={className}
-            style={{ color }}
+            style={{ color, maxWidth: "100%", height: "auto" }}
         >
             {glowColor && (
                 <defs>

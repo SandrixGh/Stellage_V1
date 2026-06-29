@@ -1,5 +1,9 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
+import { TemplateCard } from "../../components/Stellage/TemplateCard";
+import { useStellageStore } from "../../store/useStellageStore";
+import { MOCK_TEMPLATES } from "../../data/mockTemplates";
 import "./HomePage.css";
 
 const FEATURES = [
@@ -21,6 +25,17 @@ const FEATURES = [
 ];
 
 export const HomePage = () => {
+    const navigate = useNavigate();
+    const { templates, fetchTemplates } = useStellageStore();
+
+    useEffect(() => {
+        if (templates.length === 0) fetchTemplates();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const source = templates.length > 0 ? templates : MOCK_TEMPLATES;
+    const teaser = source.slice(0, 4);
+
     return (
         <div className="home-page">
             <section className="home-hero">
@@ -57,6 +72,25 @@ export const HomePage = () => {
                         </div>
                     </div>
                 ))}
+            </section>
+
+            <section className="home-teaser">
+                <div className="home-teaser-head">
+                    <h2 className="home-teaser-title">В ленте сейчас</h2>
+                    <Link to="/feed" className="home-teaser-link">
+                        Открыть Ленту →
+                    </Link>
+                </div>
+                <div className="home-teaser-grid">
+                    {teaser.map((tpl) => (
+                        <TemplateCard
+                            key={tpl.id}
+                            template={tpl}
+                            size={180}
+                            onClick={() => navigate(`/box/${tpl.id}`)}
+                        />
+                    ))}
+                </div>
             </section>
         </div>
     );
