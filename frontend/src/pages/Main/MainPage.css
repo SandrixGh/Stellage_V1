@@ -420,3 +420,68 @@
     text-transform: uppercase;
     color: rgba(215, 208, 179, 0.55);
 }
+
+/* ── Новый заголовок со переключателем полок ──────────────────────── */
+.shelf-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.shelf-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+}
+
+.shelf-header-title {
+    margin: 0;
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: #D7D0B7;
+    letter-spacing: -0.5px;
+}
+
+.shelf-dropdown-wrapper {
+    position: relative;
+}
+
+.shelf-dropdown {
+    padding: 8px 14px;
+    background: rgba(215, 208, 179, 0.05);
+    color: #D7D0B7;
+    border: 1px solid rgba(215, 208, 179, 0.2);
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+    padding-right: 28px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23D7D0B7' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 12px 8px;
+}
+
+.shelf-dropdown:hover {
+    border-color: rgba(215, 208, 179, 0.4);
+    background-color: rgba(215, 208, 179, 0.08);
+}
+
+.shelf-dropdown:focus {
+    outline: none;
+    border-color: rgba(215, 208, 179, 0.5);
+}
+
+.shelf-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}

@@ -118,15 +118,31 @@ export const MyStellagePage = () => {
 
             {!isLoading && (
                 <>
-                    <header className="shelf-info">
-                        <div>
-                            <h1 className="page-title">
+                    {/* Шапка со переключателем полок и кнопками действий. */}
+                    <header className="shelf-header">
+                        <div className="shelf-header-left">
+                            <h1 className="shelf-header-title">
                                 {currentShelf?.title || "Твоя главная полка"}
                             </h1>
-                            <p className="page-subtitle">Личная коллекция коробок</p>
+                            {shelves.length > 1 && (
+                                <div className="shelf-dropdown-wrapper">
+                                    <select
+                                        className="shelf-dropdown"
+                                        value={activeShelfId || mainShelf?.id || ""}
+                                        onChange={(e) => handleSelectShelf(e.target.value)}
+                                    >
+                                        {shelves.map((s) => (
+                                            <option key={s.id} value={s.id}>
+                                                {s.title}
+                                                {s.is_main ? " ★" : ""}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
                         </div>
-                        <div className="shelf-info-actions">
-                            {currentShelf?.is_public && <span className="badge">Публичная</span>}
+                        <div className="shelf-header-right">
+                            {currentShelf?.is_public && <span className="badge">ПУБЛИЧНАЯ</span>}
                             <button
                                 type="button"
                                 className="create-shelf-btn"
@@ -136,27 +152,6 @@ export const MyStellagePage = () => {
                             </button>
                         </div>
                     </header>
-
-                    {/* Переключатель полок — показываем только если их больше одной. */}
-                    {shelves.length > 1 && (
-                        <div className="shelf-switcher">
-                            {shelves.map((s) => {
-                                const isActive =
-                                    s.id === (currentShelf?.id ?? mainShelf?.id);
-                                return (
-                                    <button
-                                        key={s.id}
-                                        type="button"
-                                        className={`shelf-switcher-tab${isActive ? " active" : ""}`}
-                                        onClick={() => handleSelectShelf(s.id)}
-                                    >
-                                        {s.title}
-                                        {s.is_main && <span className="shelf-switcher-main"> ★</span>}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    )}
 
                     {/* Лоток инвентаря: полученные коробки, ещё не на полке. */}
                     {trayBoxes.length > 0 && (
