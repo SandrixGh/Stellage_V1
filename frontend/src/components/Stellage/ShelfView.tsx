@@ -13,6 +13,9 @@ interface ShelfViewProps {
     onMove?: (id: string, row: number, col: number) => void;
     /** Правая колонка (например, список стеллажей с кнопкой создания). */
     rightPanel?: ReactNode;
+    /** Является ли открытая полка главной (для кнопки «назначить главным»). */
+    isMain?: boolean;
+    onMakeMain?: () => void;
 }
 
 /**
@@ -20,7 +23,7 @@ interface ShelfViewProps {
  * редкости, считает отфильтрованный список коробок и передаёт его в ShelfBoard.
  * Боковая панель при этом получает ПОЛНЫЙ список коробок для статистики.
  */
-export const ShelfView = ({ shelf, editable, onMove, rightPanel }: ShelfViewProps) => {
+export const ShelfView = ({ shelf, editable, onMove, rightPanel, isMain, onMakeMain }: ShelfViewProps) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeRarities, setActiveRarities] = useState<string[]>([]);
 
@@ -60,6 +63,8 @@ export const ShelfView = ({ shelf, editable, onMove, rightPanel }: ShelfViewProp
                 onToggleRarity={toggleRarity}
                 isPublic={shelf?.is_public ?? false}
                 editable={editable}
+                isMain={isMain}
+                onMakeMain={onMakeMain}
             />
             <div className="shelf-view-board">
                 <ShelfBoard

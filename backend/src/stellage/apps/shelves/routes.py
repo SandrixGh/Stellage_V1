@@ -57,6 +57,28 @@ async def get_shelves(
     )
 
 
+@router.post(
+    path="/set-main-shelf",
+    status_code=status.HTTP_200_OK,
+    response_model=ShelfReturnData,
+)
+async def set_main_shelf(
+    shelf_id: uuid.UUID,
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ],
+    service: Annotated[
+        ShelfService,
+        Depends(ShelfService)
+    ],
+) -> ShelfReturnData:
+    return await service.set_main_shelf(
+        user=user,
+        shelf_id=shelf_id,
+    )
+
+
 @router.get(
     path="/main-shelf",
     status_code=status.HTTP_200_OK,

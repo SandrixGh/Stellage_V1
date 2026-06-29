@@ -50,6 +50,23 @@ class ShelfService:
         )
 
 
+    async def set_main_shelf(
+        self,
+        user: UserVerifySchema,
+        shelf_id: uuid.UUID,
+    ) -> ShelfReturnData:
+        shelf = await self.manager.set_main_shelf(
+            user_id=user.id,
+            shelf_id=shelf_id,
+        )
+        if not shelf:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Shelf not found"
+            )
+        return shelf
+
+
     async def get_main_shelf(
         self,
         user: UserVerifySchema,

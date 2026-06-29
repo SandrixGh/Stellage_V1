@@ -42,6 +42,37 @@ class ShelfRepository:
         await session.execute(query)
 
 
+    async def set_main_shelf(
+        self,
+        user_id: uuid.UUID,
+        shelf_id: uuid.UUID,
+    ) -> ShelfReturnData | None:
+        async with self.db.db_session() as session:
+            # Убеждаемся, что полка существует и принадлежит пользователю.
+            check = await session.execute(
+                select(self.model).where(
+                    self.model.user_id == user_id,
+                    self.model.id == shelf_id,
+                )
+            )
+            if check.scalar_one_or_none() is None:
+                return None
+
+            # Снимаем флаг с прежней главной и ставим его на выбранную полку.
+            await self.reset_main_shelf(user_id=user_id, session=session)
+            await session.execute(
+                update(self.model)
+                .where(self.model.id == shelf_id)
+                .values(is_main=True)
+            )
+            await session.commit()
+
+            refreshed = await session.execute(
+                select(self.model).where(self.model.id == shelf_id)
+            )
+            return ShelfReturnData.model_validate(refreshed.scalar_one())
+
+
     async def create_shelf(
         self,
         user_id: uuid.UUID,

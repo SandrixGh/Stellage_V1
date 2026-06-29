@@ -32,19 +32,20 @@
     text-align: center;
 }
 
-/* ----- Actions (badge + create button) ----- */
+/* ----- Actions (status badge + make-main button) ----- */
 .shelf-sidebar-actions {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: center;
+    gap: 12px;
     padding-top: 14px;
     border-top: 1px solid rgba(215, 208, 179, 0.1);
 }
 
 .shelf-sidebar-actions .badge {
     display: inline-block;
-    align-self: flex-start;
-    padding: 5px 12px;
+    align-self: center;
+    padding: 5px 14px;
     border-radius: 4px;
     font-size: 11px;
     font-weight: 600;
@@ -55,7 +56,13 @@
     border: 1px solid rgba(215, 208, 179, 0.2);
 }
 
-.shelf-sidebar-actions .create-shelf-btn {
+.shelf-sidebar-actions .badge--private {
+    color: rgba(215, 208, 179, 0.45);
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(215, 208, 179, 0.12);
+}
+
+.shelf-sidebar-actions .make-main-btn {
     width: 100%;
     padding: 10px 18px;
     background: rgba(215, 208, 179, 0.08);
@@ -71,7 +78,7 @@
     text-align: center;
 }
 
-.shelf-sidebar-actions .create-shelf-btn:hover {
+.shelf-sidebar-actions .make-main-btn:hover {
     background: rgba(215, 208, 179, 0.14);
     border-color: rgba(215, 208, 179, 0.45);
     box-shadow: 0 0 24px rgba(215, 208, 179, 0.1);
@@ -138,8 +145,7 @@
 .shelf-rarity-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
+    justify-content: space-between;
     font-size: 13px;
 }
 

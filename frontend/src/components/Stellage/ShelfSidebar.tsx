@@ -14,6 +14,9 @@ interface ShelfSidebarProps {
     onToggleRarity: (rarity: string) => void;
     isPublic?: boolean;
     editable?: boolean;
+    /** Является ли полка главной (тогда кнопку «назначить главным» не показываем). */
+    isMain?: boolean;
+    onMakeMain?: () => void;
 }
 
 /** Аккуратное форматирование суммы цены полки. */
@@ -30,6 +33,9 @@ export const ShelfSidebar = ({
     activeRarities,
     onToggleRarity,
     isPublic,
+    editable,
+    isMain,
+    onMakeMain,
 }: ShelfSidebarProps) => {
     // Группируем по редкости и считаем общую стоимость за один проход.
     const { rarityCounts, totalPrice, currency } = useMemo(() => {
@@ -57,9 +63,20 @@ export const ShelfSidebar = ({
         <aside className="shelf-sidebar">
             <h2 className="shelf-sidebar-title">{shelf?.title ?? "Stellage Info"}</h2>
 
-            {isPublic && (
+            {shelf && (
                 <div className="shelf-sidebar-actions">
-                    <span className="badge">Публичная</span>
+                    <span className={`badge ${isPublic ? "badge--public" : "badge--private"}`}>
+                        {isPublic ? "Публичная" : "Приватная"}
+                    </span>
+                    {editable && onMakeMain && !isMain && (
+                        <button
+                            type="button"
+                            className="make-main-btn"
+                            onClick={onMakeMain}
+                        >
+                            Назначить главным
+                        </button>
+                    )}
                 </div>
             )}
 

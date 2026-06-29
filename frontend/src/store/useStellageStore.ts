@@ -22,6 +22,7 @@ interface StellageState {
     fetchInstances: () => Promise<void>;
 
     createShelf: (title: string, isPublic: boolean) => Promise<Shelf | null>;
+    setMainShelf: (shelfId: string) => Promise<void>;
     acquireBox: (templateId: string) => Promise<void>;
 
     moveBox: (instanceId: string, shelfId: string | null) => Promise<void>;
@@ -136,6 +137,19 @@ export const useStellageStore = create<StellageState>((set, get) => ({
         } catch (err: any) {
             set({ error: "Не удалось создать стеллаж", isLoading: false });
             return null;
+        }
+    },
+
+    setMainShelf: async (shelfId: string) => {
+        try {
+            await api.post("/shelf/set-main-shelf", null, {
+                params: { shelf_id: shelfId }
+            });
+            // Перечитываем список и главную полку, чтобы новый главный
+            // (со звёздочкой) сразу переехал наверх и переотрисовался.
+            await Promise.all([get().fetchShelves(), get().fetchMainShelf()]);
+        } catch (err: any) {
+            set({ error: "Не удалось назначить главный стеллаж" });
         }
     },
 

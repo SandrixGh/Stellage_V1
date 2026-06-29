@@ -19,6 +19,7 @@ export const MyStellagePage = () => {
         fetchShelfWithBoxes,
         updateBoxPosition,
         createShelf,
+        setMainShelf,
         instances,
         fetchInstances,
         moveBox,
@@ -183,6 +184,8 @@ export const MyStellagePage = () => {
                             shelf={currentShelf}
                             editable
                             onMove={(id, row, col) => updateBoxPosition(id, row, col, currentShelf!.id)}
+                            isMain={currentShelf.id === mainShelfId}
+                            onMakeMain={() => setMainShelf(currentShelf.id)}
                             rightPanel={
                                 <div className="shelf-rail">
                                     <button

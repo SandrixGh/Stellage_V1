@@ -54,6 +54,39 @@ class ShelfManager:
         return await self.repository.get_shelves(user_id=user_id)
 
 
+    async def set_main_shelf(
+        self,
+        user_id: uuid.UUID,
+        shelf_id: uuid.UUID,
+    ) -> ShelfReturnData | None:
+        updated = await self.repository.set_main_shelf(
+            user_id=user_id,
+            shelf_id=shelf_id,
+        )
+
+        if updated is None:
+            return None
+
+        # Сбрасываем кэш прежней и новой главной полки, чтобы is_main
+        # перечитался из БД, и обновляем указатель на главную полку.
+        old_main_id = await self.cache_manager.get_main_shelf_id(user_id=user_id)
+        if old_main_id:
+            await self.cache_manager.delete_shelf(
+                user_id=user_id,
+                shelf_id=old_main_id,
+            )
+        await self.cache_manager.delete_shelf(
+            user_id=user_id,
+            shelf_id=shelf_id,
+        )
+        await self.cache_manager.store_main_shelf_id(
+            user_id=user_id,
+            shelf_id=shelf_id,
+        )
+
+        return updated
+
+
     async def get_main_shelf(
         self,
         user_id: uuid.UUID,
