@@ -58,37 +58,48 @@
     transform: scale(1.04) rotate(-1.5deg);
 }
 
-/* Внутренний контейнер: коробка + ярлык редкости под ней. */
+/* Внутренний контейнер: голый wireframe коробки + бирка под ней на линии полки. */
 .shelf-cell-inner {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     width: 100%;
-    max-width: 130px;
     transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Фиксируем высоту самой карточки, чтобы все коробки были одного размера. */
-.shelf-cell-inner .box-card {
-    height: 92px;
-    width: 100%;
+/* Бирка под коробкой: тёмный прямоугольник, прилегающий к линии полки. */
+.shelf-box-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 3px 8px 4px;
+    background: rgba(8, 8, 8, 0.72);
+    border: 1px solid rgba(215, 208, 179, 0.13);
+    border-radius: 6px;
+    pointer-events: none;
+    max-width: 100%;
 }
 
-/* Ярлык редкости (как «BASE / COMMON» на эскизе). */
-.shelf-rarity-tag {
-    font-family: "Space Grotesk", system-ui, sans-serif;
-    font-size: 9px;
+.shelf-box-name {
+    font-family: "Syne", sans-serif;
+    font-size: 10px;
     font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: rgba(215, 208, 179, 0.6);
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(215, 208, 179, 0.14);
-    border-radius: 999px;
-    padding: 2px 9px;
+    color: #D7D0B7;
     white-space: nowrap;
-    pointer-events: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90px;
+}
+
+.shelf-box-rarity {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: rgba(215, 208, 179, 0.55);
 }
 
 .shelf-board-empty {

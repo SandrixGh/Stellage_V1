@@ -4,6 +4,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { ShelfView } from "../../components/Stellage/ShelfView";
+import { placeBoxes } from "../../components/Stellage/ShelfBoard";
 import "./MainPage.css";
 
 export const MyStellagePage = () => {
@@ -74,9 +75,24 @@ export const MyStellagePage = () => {
     // Коробки в инвентаре — ещё не поставленные на полку.
     const trayBoxes = instances.filter((b) => b.shelf_id === null);
 
-    const handlePlaceOnShelf = (instanceId: string) => {
+    const handlePlaceOnShelf = async (instanceId: string) => {
         if (!currentShelf) return;
-        moveBox(instanceId, currentShelf.id);
+        const targetShelfId = currentShelf.id;
+        await moveBox(instanceId, targetShelfId);
+
+        // После перемещения читаем уже ресинхронизированную полку из стора и
+        // вычисляем ячейку, которую коробка заняла визуально, чтобы сразу
+        // сохранить её координаты — иначе после перезахода позиция «плавает».
+        const state = useStellageStore.getState();
+        const isMain = !activeShelfId || activeShelfId === state.mainShelf?.id;
+        const shelf = isMain ? state.mainShelf : state.selectedShelf;
+        if (!shelf) return;
+
+        const placed = placeBoxes(shelf.boxes, 5, 8);
+        const slot = placed.find((p) => p.box.id === instanceId);
+        if (slot) {
+            updateBoxPosition(instanceId, slot.row, slot.col, targetShelfId);
+        }
     };
 
     if (!isAuthenticated) {
@@ -174,7 +190,11 @@ export const MyStellagePage = () => {
                     )}
 
                     {currentShelf ? (
-                        <ShelfView shelf={currentShelf} editable onMove={updateBoxPosition} />
+                        <ShelfView
+                            shelf={currentShelf}
+                            editable
+                            onMove={(id, row, col) => updateBoxPosition(id, row, col, currentShelf!.id)}
+                        />
                     ) : (
                         <div className="shelf-empty-state">
                             <p>У тебя пока нет стеллажа. Создай первый!</p>

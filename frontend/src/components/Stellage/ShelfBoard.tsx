@@ -1,8 +1,16 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import type { Box } from "../../types/Stellage/boxes";
-import { BoxCard } from "./BoxCard";
+import { WireframeBox } from "./WireframeBox";
 import "./ShelfBoard.css";
+
+/** Сопоставление редкости коробки с цветом свечения wireframe. */
+const rarityGlowMap: Record<string, "rare" | "golden" | "dev" | null> = {
+    rare: "rare",
+    golden: "golden",
+    "developer's": "dev",
+    dev: "dev",
+};
 
 interface ShelfBoardProps {
     boxes: Box[];
@@ -29,7 +37,7 @@ const cellKey = (row: number, col: number) => `${row}:${col}`;
  * выходящими за пределы / конфликтующими координатами получают первую свободную
  * ячейку в порядке row-major. Гарантирует, что две коробки не делят ячейку.
  */
-function placeBoxes(boxes: Box[], rowCount: number, colCount: number): PlacedBox[] {
+export function placeBoxes(boxes: Box[], rowCount: number, colCount: number): PlacedBox[] {
     const occupied = new Set<string>();
     const placed: PlacedBox[] = [];
     const needsCell: Box[] = [];
@@ -191,6 +199,8 @@ export const ShelfBoard = ({
             {/* Коробки. */}
             {placed.map((p) => {
                 const isDragging = drag?.id === p.box.id;
+                const rarityKey = p.box.template.rarity?.toLowerCase() ?? "";
+                const rarityGlow = rarityGlowMap[rarityKey] ?? null;
                 const style: React.CSSProperties = isDragging
                     ? {
                           left: drag!.x - drag!.grabDx,
@@ -212,10 +222,15 @@ export const ShelfBoard = ({
                         onPointerDown={(e) => handlePointerDown(e, p)}
                     >
                         <div className="shelf-cell-inner">
-                            <BoxCard box={p.box} />
-                            <span className="shelf-rarity-tag">
-                                {p.box.template.rarity}
-                            </span>
+                            <WireframeBox size={80} rarityGlow={rarityGlow} />
+                            <div className="shelf-box-label">
+                                <span className="shelf-box-name">
+                                    {p.box.template.title}
+                                </span>
+                                <span className={`shelf-box-rarity rarity-tag-${rarityKey}`}>
+                                    {p.box.template.rarity}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 );

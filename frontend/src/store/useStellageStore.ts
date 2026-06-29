@@ -25,7 +25,7 @@ interface StellageState {
     acquireBox: (templateId: string) => Promise<void>;
 
     moveBox: (instanceId: string, shelfId: string | null) => Promise<void>;
-    updateBoxPosition: (instanceId: string, shelf_row: number, shelf_col: number) => Promise<void>;
+    updateBoxPosition: (instanceId: string, shelf_row: number, shelf_col: number, shelfId?: string) => Promise<void>;
     deleteBox: (instanceId: string) => Promise<void>;
 }
 
@@ -144,19 +144,29 @@ export const useStellageStore = create<StellageState>((set, get) => ({
             await api.post("/boxes/move-box-to-shelf", null, {
                 params: { instance_id: instanceId, shelf_id: shelfId }
             });
-            await get().fetchMainShelf();
-            // Обновляем лоток инвентаря: поставленная коробка теперь с shelf_id.
-            get().fetchInstances();
+            // Ресинхронизируем все затронутые срезы. Если коробку поставили на
+            // не-главную полку — дополнительно перечитываем её содержимое, иначе
+            // selectedShelf останется устаревшим и коробка не появится на доске.
+            const { mainShelf } = get();
+            const isNonMain = shelfId && shelfId !== mainShelf?.id;
+            await Promise.all([
+                get().fetchMainShelf(),
+                get().fetchInstances(),
+                ...(isNonMain && shelfId ? [get().fetchShelfWithBoxes(shelfId)] : []),
+            ]);
         } catch (err) {
             console.error("Move error", err);
         }
     },
 
     // Сохраняем позицию коробки на сетке стеллажа. Оптимистично обновляем
-    // mainShelf.boxes: если целевая ячейка занята другой коробкой — меняем их
-    // координаты местами (бэкенд тоже выполняет SWAP). При ошибке откатываемся.
-    updateBoxPosition: async (instanceId, shelf_row, shelf_col) => {
-        const prevShelf = get().mainShelf;
+    // активную полку (главную ИЛИ выбранную тематическую): если целевая ячейка
+    // занята другой коробкой — меняем их координаты местами (бэкенд тоже
+    // выполняет SWAP). При ошибке откатываемся.
+    updateBoxPosition: async (instanceId, shelf_row, shelf_col, shelfId) => {
+        const { mainShelf, selectedShelf } = get();
+        const isMain = !shelfId || shelfId === mainShelf?.id;
+        const prevShelf = isMain ? mainShelf : selectedShelf;
         if (!prevShelf) return;
 
         const moving = prevShelf.boxes.find((b) => b.id === instanceId);
@@ -180,10 +190,10 @@ export const useStellageStore = create<StellageState>((set, get) => ({
             return b;
         });
 
-        set({
-            mainShelf: { ...prevShelf, boxes: nextBoxes },
-            currentBoxes: nextBoxes,
-        });
+        set(isMain
+            ? { mainShelf: { ...prevShelf, boxes: nextBoxes }, currentBoxes: nextBoxes }
+            : { selectedShelf: { ...prevShelf, boxes: nextBoxes }, currentBoxes: nextBoxes }
+        );
 
         try {
             await api.post("/boxes/update-box-position",
@@ -191,11 +201,10 @@ export const useStellageStore = create<StellageState>((set, get) => ({
                 { params: { instance_id: instanceId } }
             );
         } catch (err) {
-            set({
-                mainShelf: prevShelf,
-                currentBoxes: prevShelf.boxes,
-                error: "Не удалось сохранить позицию коробки",
-            });
+            set(isMain
+                ? { mainShelf: prevShelf, currentBoxes: prevShelf.boxes, error: "Не удалось сохранить позицию коробки" }
+                : { selectedShelf: prevShelf, currentBoxes: prevShelf.boxes, error: "Не удалось сохранить позицию коробки" }
+            );
         }
     },
 
