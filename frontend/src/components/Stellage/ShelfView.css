@@ -1,0 +1,20 @@
+/* ===== SHELF VIEW (sidebar + board layout) ===== */
+.shelf-view {
+    display: flex;
+    align-items: flex-start;
+    gap: 28px;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.shelf-view-board {
+    flex: 1;
+    min-width: 0; /* позволяет доске сжиматься внутри flex-контейнера */
+}
+
+@media (max-width: 900px) {
+    .shelf-view {
+        flex-direction: column;
+    }
+}

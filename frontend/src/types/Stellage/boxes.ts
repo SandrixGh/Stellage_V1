@@ -15,6 +15,8 @@ export interface Box {
     shelf_id: string;
     template_id: string;
     serial_number: number;
+    shelf_row: number | null; // позиция на стеллаже: индекс полки-линии
+    shelf_col: number | null; // позиция на стеллаже: индекс слота в ряду
     is_sealed: 'sealed' | 'unsealed'; // строго типизируем статусы
     is_public: 'public' | 'private';
     is_verified: 'verified' | 'not verified';

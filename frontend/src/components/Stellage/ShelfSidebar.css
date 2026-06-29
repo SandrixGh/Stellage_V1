@@ -1,0 +1,180 @@
+/* ===== SHELF SIDEBAR (Stellage Info) ===== */
+.shelf-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    align-self: flex-start;
+    position: sticky;
+    top: 88px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding: 26px 22px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(215, 208, 179, 0.15);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow:
+        0 30px 60px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(215, 208, 179, 0.04) inset;
+    color: #D7D0B7;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+}
+
+.shelf-sidebar-title {
+    margin: 0;
+    font-family: "Syne", system-ui, sans-serif;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: #D7D0B7;
+}
+
+/* ----- Stats ----- */
+.shelf-stats {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.shelf-stat-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.shelf-stat-row dt {
+    font-size: 13px;
+    color: rgba(215, 208, 179, 0.55);
+}
+
+.shelf-stat-row dd {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #D7D0B7;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    word-break: break-word;
+}
+
+/* ----- Sections ----- */
+.shelf-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(215, 208, 179, 0.1);
+}
+
+.shelf-section-title {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(215, 208, 179, 0.45);
+}
+
+/* ----- Rarity breakdown ----- */
+.shelf-rarity-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.shelf-rarity-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+}
+
+.shelf-rarity-name {
+    color: rgba(215, 208, 179, 0.8);
+    text-transform: capitalize;
+}
+
+.shelf-rarity-count {
+    font-weight: 600;
+    color: #D7D0B7;
+    font-variant-numeric: tabular-nums;
+    min-width: 22px;
+    text-align: center;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: rgba(215, 208, 179, 0.08);
+    border: 1px solid rgba(215, 208, 179, 0.12);
+}
+
+/* ----- Search ----- */
+.shelf-search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #D7D0B7;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.shelf-search::placeholder {
+    color: rgba(215, 208, 179, 0.35);
+}
+
+.shelf-search:focus {
+    border-color: rgba(215, 208, 179, 0.4);
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow: 0 0 0 3px rgba(215, 208, 179, 0.06);
+}
+
+/* ----- Rarity filter chips ----- */
+.shelf-rarity-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.shelf-chip {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(215, 208, 179, 0.15);
+    color: rgba(215, 208, 179, 0.7);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    text-transform: capitalize;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shelf-chip:hover {
+    border-color: rgba(215, 208, 179, 0.4);
+    color: #D7D0B7;
+}
+
+.shelf-chip.is-active {
+    background: rgba(215, 208, 179, 0.13);
+    border-color: rgba(215, 208, 179, 0.5);
+    color: #D7D0B7;
+    box-shadow: 0 0 16px rgba(215, 208, 179, 0.12);
+}
+
+/* ----- Responsive ----- */
+@media (max-width: 900px) {
+    .shelf-sidebar {
+        width: 100%;
+        position: static;
+    }
+}

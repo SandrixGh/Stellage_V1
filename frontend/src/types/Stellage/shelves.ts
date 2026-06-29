@@ -4,6 +4,7 @@ export interface Shelf {
     // Основные идентификаторы
     id: string;
     user_id: string;
+    owner_username?: string | null; // имя владельца (для публичного просмотра)
     
     // Контент и метаданные
     title: string;

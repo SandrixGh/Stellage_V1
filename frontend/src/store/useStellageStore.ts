@@ -6,6 +6,7 @@ import type { Box, BoxTemplate } from "../types/Stellage/boxes";
 interface StellageState {
     shelves: Shelf[];
     mainShelf: Shelf | null;
+    publicShelf: Shelf | null;
     currentBoxes: Box[];
     templates: BoxTemplate[];
     isLoading: boolean;
@@ -14,15 +15,18 @@ interface StellageState {
     fetchShelves: () => Promise<void>;
     fetchMainShelf: () => Promise<void>;
     fetchShelfWithBoxes: (shelfId: string) => Promise<void>;
+    fetchPublicShelf: (shelfId: string) => Promise<void>;
     fetchTemplates: () => Promise<void>;
 
     moveBox: (instanceId: string, shelfId: string | null) => Promise<void>;
+    updateBoxPosition: (instanceId: string, shelf_row: number, shelf_col: number) => Promise<void>;
     deleteBox: (instanceId: string) => Promise<void>;
 }
 
 export const useStellageStore = create<StellageState>((set, get) => ({
     shelves: [],
     mainShelf: null,
+    publicShelf: null,
     currentBoxes: [],
     templates: [],
     isLoading: false,
@@ -61,6 +65,19 @@ export const useStellageStore = create<StellageState>((set, get) => ({
         }
     },
 
+    // Публичная (read-only) выдача полки вместе с коробками и именем владельца.
+    fetchPublicShelf: async (shelfId: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const res = await api.get<Shelf>("/shelf/public-shelf-with-boxes", {
+                params: { shelf_id: shelfId }
+            });
+            set({ publicShelf: res.data, currentBoxes: res.data.boxes, isLoading: false });
+        } catch (err: any) {
+            set({ error: "Публичная полка не найдена", isLoading: false });
+        }
+    },
+
     fetchTemplates: async () => {
         set({ isLoading: true, error: null });
         try {
@@ -79,6 +96,53 @@ export const useStellageStore = create<StellageState>((set, get) => ({
             get().fetchMainShelf(); 
         } catch (err) {
             console.error("Move error", err);
+        }
+    },
+
+    // Сохраняем позицию коробки на сетке стеллажа. Оптимистично обновляем
+    // mainShelf.boxes: если целевая ячейка занята другой коробкой — меняем их
+    // координаты местами (бэкенд тоже выполняет SWAP). При ошибке откатываемся.
+    updateBoxPosition: async (instanceId, shelf_row, shelf_col) => {
+        const prevShelf = get().mainShelf;
+        if (!prevShelf) return;
+
+        const moving = prevShelf.boxes.find((b) => b.id === instanceId);
+        if (!moving) return;
+
+        const fromRow = moving.shelf_row;
+        const fromCol = moving.shelf_col;
+
+        // Коробка, уже стоящая в целевой ячейке (если есть).
+        const occupant = prevShelf.boxes.find(
+            (b) => b.id !== instanceId && b.shelf_row === shelf_row && b.shelf_col === shelf_col
+        );
+
+        const nextBoxes = prevShelf.boxes.map((b) => {
+            if (b.id === instanceId) {
+                return { ...b, shelf_row, shelf_col };
+            }
+            if (occupant && b.id === occupant.id) {
+                return { ...b, shelf_row: fromRow, shelf_col: fromCol };
+            }
+            return b;
+        });
+
+        set({
+            mainShelf: { ...prevShelf, boxes: nextBoxes },
+            currentBoxes: nextBoxes,
+        });
+
+        try {
+            await api.post("/boxes/update-box-position",
+                { shelf_row, shelf_col },
+                { params: { instance_id: instanceId } }
+            );
+        } catch (err) {
+            set({
+                mainShelf: prevShelf,
+                currentBoxes: prevShelf.boxes,
+                error: "Не удалось сохранить позицию коробки",
+            });
         }
     },
 

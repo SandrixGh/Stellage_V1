@@ -1,0 +1,105 @@
+/* ===== SHELF BOARD ===== */
+/* Доска со стеллажными линиями; коробки абсолютно позиционируются по сетке. */
+.shelf-board {
+    position: relative;
+    width: 100%;
+    min-height: 200px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(215, 208, 179, 0.1);
+    overflow: hidden;
+    touch-action: none; /* чтобы pointer-drag не конфликтовал со скроллом на тач-экранах */
+}
+
+/* Горизонтальная линия полки. */
+.shelf-line {
+    position: absolute;
+    left: 4%;
+    right: 4%;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(215, 208, 179, 0.35) 12%,
+        rgba(215, 208, 179, 0.35) 88%,
+        transparent
+    );
+    box-shadow: 0 6px 18px -6px rgba(215, 208, 179, 0.25);
+    pointer-events: none;
+}
+
+/* Ячейка-обёртка вокруг коробки (абсолютно позиционируется). */
+.shelf-cell {
+    position: absolute;
+    box-sizing: border-box;
+    padding: 0 10px;
+    display: flex;
+    align-items: flex-end; /* коробка «стоит» на линии полки */
+    justify-content: center;
+    /* По высоте оставляем место под линию (нижние ~26px ячейки). */
+    padding-bottom: 26px;
+    transition: left 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+                top 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.shelf-board.is-editable .shelf-cell {
+    cursor: grab;
+}
+
+.shelf-cell.is-dragging {
+    transition: none;
+    cursor: grabbing;
+    z-index: 50;
+    filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.55));
+}
+
+.shelf-cell.is-dragging .shelf-cell-inner {
+    transform: scale(1.04) rotate(-1.5deg);
+}
+
+/* Внутренний контейнер: коробка + ярлык редкости под ней. */
+.shelf-cell-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 130px;
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Фиксируем высоту самой карточки, чтобы все коробки были одного размера. */
+.shelf-cell-inner .box-card {
+    height: 92px;
+    width: 100%;
+}
+
+/* Ярлык редкости (как «BASE / COMMON» на эскизе). */
+.shelf-rarity-tag {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(215, 208, 179, 0.6);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(215, 208, 179, 0.14);
+    border-radius: 999px;
+    padding: 2px 9px;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.shelf-board-empty {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    height: fit-content;
+    text-align: center;
+    color: rgba(215, 208, 179, 0.45);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: 15px;
+    padding: 0 24px;
+    pointer-events: none;
+}
