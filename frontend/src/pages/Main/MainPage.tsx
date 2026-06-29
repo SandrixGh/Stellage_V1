@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
@@ -25,8 +25,23 @@ export const MyStellagePage = () => {
         isLoading,
     } = useStellageStore();
 
-    // id выбранной во переключателе полки (null = главная).
+    // id активной (открытой на доске) полки. null = ещё не выбрана.
     const [activeShelfId, setActiveShelfId] = useState<string | null>(null);
+
+    // id главной полки: помеченная is_main, иначе первая из списка
+    // (запасной вариант на случай, если в БД ни одна не отмечена главной).
+    const mainShelfId = useMemo(
+        () => shelves.find((s) => s.is_main)?.id ?? shelves[0]?.id ?? null,
+        [shelves]
+    );
+
+    // Список полок для правой колонки: главная первой, остальные — следом.
+    const orderedShelves = useMemo(() => {
+        if (!mainShelfId) return shelves;
+        const main = shelves.find((s) => s.id === mainShelfId);
+        const rest = shelves.filter((s) => s.id !== mainShelfId);
+        return main ? [main, ...rest] : rest;
+    }, [shelves, mainShelfId]);
 
     // Модалка создания нового стеллажа.
     const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -59,18 +74,32 @@ export const MyStellagePage = () => {
         }
     }, [isAuthenticated, fetchShelves, fetchMainShelf, fetchInstances]);
 
-    // Полка, активная сейчас на доске: главная либо выбранная в переключателе.
-    const currentShelf =
-        activeShelfId && activeShelfId !== mainShelf?.id ? selectedShelf : mainShelf;
-
     const handleSelectShelf = (shelfId: string) => {
-        if (shelfId === mainShelf?.id) {
-            setActiveShelfId(null);
-        } else {
-            setActiveShelfId(shelfId);
+        setActiveShelfId(shelfId);
+        // Главная полка уже загружена с коробками через fetchMainShelf; для
+        // остальных (или если главной нет в сторе) подгружаем содержимое.
+        if (shelfId !== mainShelf?.id) {
             fetchShelfWithBoxes(shelfId);
         }
     };
+
+    // Как только список полок загружен — автоматически открываем главную.
+    useEffect(() => {
+        if (!activeShelfId && mainShelfId) {
+            handleSelectShelf(mainShelfId);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [mainShelfId]);
+
+    // Полка, активная сейчас на доске.
+    const currentShelf =
+        activeShelfId == null
+            ? null
+            : activeShelfId === mainShelf?.id
+                ? mainShelf
+                : selectedShelf?.id === activeShelfId
+                    ? selectedShelf
+                    : null;
 
     // Коробки в инвентаре — ещё не поставленные на полку.
     const trayBoxes = instances.filter((b) => b.shelf_id === null);
@@ -118,41 +147,6 @@ export const MyStellagePage = () => {
 
             {!isLoading && (
                 <>
-                    {/* Шапка со переключателем полок и кнопками действий. */}
-                    <header className="shelf-header">
-                        <div className="shelf-header-left">
-                            <h1 className="shelf-header-title">
-                                {currentShelf?.title || "Твоя главная полка"}
-                            </h1>
-                            {shelves.length > 1 && (
-                                <div className="shelf-dropdown-wrapper">
-                                    <select
-                                        className="shelf-dropdown"
-                                        value={activeShelfId || mainShelf?.id || ""}
-                                        onChange={(e) => handleSelectShelf(e.target.value)}
-                                    >
-                                        {shelves.map((s) => (
-                                            <option key={s.id} value={s.id}>
-                                                {s.title}
-                                                {s.is_main ? " ★" : ""}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-                        </div>
-                        <div className="shelf-header-right">
-                            {currentShelf?.is_public && <span className="badge">ПУБЛИЧНАЯ</span>}
-                            <button
-                                type="button"
-                                className="create-shelf-btn"
-                                onClick={() => setIsCreateOpen(true)}
-                            >
-                                + Создать стеллаж
-                            </button>
-                        </div>
-                    </header>
-
                     {/* Лоток инвентаря: полученные коробки, ещё не на полке. */}
                     {trayBoxes.length > 0 && (
                         <div className="inventory-tray">
@@ -189,6 +183,32 @@ export const MyStellagePage = () => {
                             shelf={currentShelf}
                             editable
                             onMove={(id, row, col) => updateBoxPosition(id, row, col, currentShelf!.id)}
+                            rightPanel={
+                                <div className="shelf-rail">
+                                    <button
+                                        type="button"
+                                        className="create-shelf-btn shelf-rail-create"
+                                        onClick={() => setIsCreateOpen(true)}
+                                    >
+                                        + Создать стеллаж
+                                    </button>
+                                    {orderedShelves.map((s) => {
+                                        const isActive = s.id === currentShelf.id;
+                                        const isMain = s.id === mainShelfId;
+                                        return (
+                                            <button
+                                                key={s.id}
+                                                type="button"
+                                                className={`shelf-rail-item${isActive ? " active" : ""}`}
+                                                onClick={() => handleSelectShelf(s.id)}
+                                            >
+                                                <span className="shelf-rail-item-title">{s.title}</span>
+                                                {isMain && <span className="shelf-rail-star">★</span>}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            }
                         />
                     ) : (
                         <div className="shelf-empty-state">

@@ -208,3 +208,33 @@ svg * {
     scroll-behavior: auto !important;
   }
 }
+
+/* ===== CUSTOM SCROLLBAR ===== */
+/* Auth pages use overflow:hidden (Auth.css) so these rules never apply there. */
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(215, 208, 179, 0.22);
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(215, 208, 179, 0.42);
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(215, 208, 179, 0.22) transparent;
+}

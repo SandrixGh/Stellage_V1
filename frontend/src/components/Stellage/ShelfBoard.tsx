@@ -165,7 +165,9 @@ export const ShelfBoard = ({
         const el = boardRef.current;
         if (!el) return;
         const rect = el.getBoundingClientRect();
-        setDrag({ ...drag, x: e.clientX - rect.left, y: e.clientY - rect.top });
+        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+        setDrag({ ...drag, x, y });
     };
 
     const endDrag = (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -204,11 +206,14 @@ export const ShelfBoard = ({
                 const isDragging = drag?.id === p.box.id;
                 const rarityKey = p.box.template.rarity?.toLowerCase() ?? "";
                 const rarityGlow = rarityGlowMap[rarityKey] ?? null;
+                const boardW = cellWidth * colCount;
+                const boardH = rowCount * ROW_HEIGHT;
+                const cellW = cellWidth || 0;
                 const style: React.CSSProperties = isDragging
                     ? {
-                          left: drag!.x - drag!.grabDx,
-                          top: drag!.y - drag!.grabDy,
-                          width: cellWidth || undefined,
+                          left: Math.max(0, Math.min(drag!.x - drag!.grabDx, boardW - cellW)),
+                          top: Math.max(0, Math.min(drag!.y - drag!.grabDy, boardH - ROW_HEIGHT)),
+                          width: cellW || undefined,
                           height: ROW_HEIGHT,
                       }
                     : {

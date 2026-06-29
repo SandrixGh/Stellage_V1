@@ -1,20 +1,44 @@
-/* ===== SHELF VIEW (sidebar + board layout) ===== */
+/* ===== SHELF VIEW (sidebar + board + rail layout) ===== */
 .shelf-view {
     display: flex;
     align-items: flex-start;
+    justify-content: center;
     gap: 28px;
     width: 100%;
-    max-width: 1400px;
     margin: 0 auto;
 }
 
+/* Доска фиксированной ширины — не растягивается вместе с экраном. */
 .shelf-view-board {
-    flex: 1;
-    min-width: 0; /* позволяет доске сжиматься внутри flex-контейнера */
+    flex: 0 0 auto;
+    width: 820px;
+    max-width: 100%;
+}
+
+/* Правая колонка со списком стеллажей. */
+.shelf-view-rail {
+    flex: 0 0 auto;
+    width: 220px;
+}
+
+@media (max-width: 1180px) {
+    .shelf-view {
+        flex-wrap: wrap;
+    }
+    .shelf-view-board {
+        order: 3;
+        width: 100%;
+    }
 }
 
 @media (max-width: 900px) {
     .shelf-view {
         flex-direction: column;
+        flex-wrap: nowrap;
+    }
+    .shelf-view-board,
+    .shelf-view-rail {
+        order: 0;
+        width: 100%;
     }
 }

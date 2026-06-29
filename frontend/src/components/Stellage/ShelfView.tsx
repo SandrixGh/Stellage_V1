@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import type { Shelf } from "../../types/Stellage/shelves";
 import type { Box } from "../../types/Stellage/boxes";
 import { ShelfSidebar } from "./ShelfSidebar";
@@ -10,6 +11,8 @@ interface ShelfViewProps {
     /** Доступно ли перетаскивание (своя полка) или это публичный read-only вид. */
     editable: boolean;
     onMove?: (id: string, row: number, col: number) => void;
+    /** Правая колонка (например, список стеллажей с кнопкой создания). */
+    rightPanel?: ReactNode;
 }
 
 /**
@@ -17,7 +20,7 @@ interface ShelfViewProps {
  * редкости, считает отфильтрованный список коробок и передаёт его в ShelfBoard.
  * Боковая панель при этом получает ПОЛНЫЙ список коробок для статистики.
  */
-export const ShelfView = ({ shelf, editable, onMove }: ShelfViewProps) => {
+export const ShelfView = ({ shelf, editable, onMove, rightPanel }: ShelfViewProps) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeRarities, setActiveRarities] = useState<string[]>([]);
 
@@ -55,6 +58,8 @@ export const ShelfView = ({ shelf, editable, onMove }: ShelfViewProps) => {
                 onSearchChange={setSearchQuery}
                 activeRarities={activeRarities}
                 onToggleRarity={toggleRarity}
+                isPublic={shelf?.is_public ?? false}
+                editable={editable}
             />
             <div className="shelf-view-board">
                 <ShelfBoard
@@ -63,6 +68,7 @@ export const ShelfView = ({ shelf, editable, onMove }: ShelfViewProps) => {
                     onMove={onMove}
                 />
             </div>
+            {rightPanel && <div className="shelf-view-rail">{rightPanel}</div>}
         </div>
     );
 };

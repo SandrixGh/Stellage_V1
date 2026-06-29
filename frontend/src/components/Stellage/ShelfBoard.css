@@ -3,33 +3,35 @@
 .shelf-board {
     position: relative;
     width: 100%;
-    min-height: 200px;
+    min-height: calc(100vh - 220px);
     border-radius: 28px;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(215, 208, 179, 0.1);
-    overflow: hidden;
+    overflow: visible;
     touch-action: none; /* чтобы pointer-drag не конфликтовал со скроллом на тач-экранах */
 }
 
 /* Горизонтальная линия полки. */
 .shelf-line {
     position: absolute;
-    left: 4%;
-    right: 4%;
+    left: 1%;
+    right: 1%;
     height: 2px;
     border-radius: 2px;
     background: linear-gradient(
         90deg,
         transparent,
-        rgba(215, 208, 179, 0.35) 12%,
-        rgba(215, 208, 179, 0.35) 88%,
+        rgba(215, 208, 179, 0.35) 6%,
+        rgba(215, 208, 179, 0.35) 94%,
         transparent
     );
     box-shadow: 0 6px 18px -6px rgba(215, 208, 179, 0.25);
     pointer-events: none;
 }
 
-/* Ячейка-обёртка вокруг коробки (абсолютно позиционируется). */
+/* Ячейка-обёртка вокруг коробки (абсолютно позиционируется).
+   pointer-events отключены, чтобы пустое пространство над коробкой не
+   перехватывало захват — кликабельна только сама коробка (.shelf-cell-inner). */
 .shelf-cell {
     position: absolute;
     box-sizing: border-box;
@@ -37,19 +39,23 @@
     display: flex;
     align-items: flex-end; /* коробка «стоит» на линии полки */
     justify-content: center;
+    pointer-events: none;
     transition: left 0.18s cubic-bezier(0.22, 1, 0.36, 1),
                 top 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.shelf-board.is-editable .shelf-cell {
+.shelf-board.is-editable .shelf-cell-inner {
     cursor: grab;
 }
 
 .shelf-cell.is-dragging {
     transition: none;
-    cursor: grabbing;
     z-index: 50;
     filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.55));
+}
+
+.shelf-board.is-editable .shelf-cell.is-dragging .shelf-cell-inner {
+    cursor: grabbing;
 }
 
 .shelf-cell.is-dragging .shelf-cell-inner {
@@ -63,6 +69,7 @@
     align-items: center;
     justify-content: flex-end;
     width: 100%;
+    pointer-events: auto; /* захват возможен только по самой коробке */
     transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
 

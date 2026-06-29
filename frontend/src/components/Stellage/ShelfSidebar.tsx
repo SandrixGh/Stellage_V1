@@ -12,6 +12,8 @@ interface ShelfSidebarProps {
     /** Активные фильтры по редкости (пустой набор = показывать все). */
     activeRarities: string[];
     onToggleRarity: (rarity: string) => void;
+    isPublic?: boolean;
+    editable?: boolean;
 }
 
 /** Аккуратное форматирование суммы цены полки. */
@@ -27,6 +29,7 @@ export const ShelfSidebar = ({
     onSearchChange,
     activeRarities,
     onToggleRarity,
+    isPublic,
 }: ShelfSidebarProps) => {
     // Группируем по редкости и считаем общую стоимость за один проход.
     const { rarityCounts, totalPrice, currency } = useMemo(() => {
@@ -52,7 +55,13 @@ export const ShelfSidebar = ({
 
     return (
         <aside className="shelf-sidebar">
-            <h2 className="shelf-sidebar-title">Stellage Info</h2>
+            <h2 className="shelf-sidebar-title">{shelf?.title ?? "Stellage Info"}</h2>
+
+            {isPublic && (
+                <div className="shelf-sidebar-actions">
+                    <span className="badge">Публичная</span>
+                </div>
+            )}
 
             <dl className="shelf-stats">
                 <div className="shelf-stat-row">

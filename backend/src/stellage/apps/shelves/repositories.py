@@ -183,6 +183,7 @@ class ShelfRepository:
                     self.model.id == shelf_id,
                 )
                 .options(
+                    joinedload(self.model.owner),
                     joinedload(self.model.boxes)
                     .joinedload(self.instance_model.template)
                 )
@@ -192,7 +193,14 @@ class ShelfRepository:
             shelf = result.unique().scalar_one_or_none()
 
             if shelf:
-                return ShelfWithBoxInstances.model_validate(shelf)
+                shelf_data = ShelfWithBoxInstances.model_validate(shelf)
+                # Prefer a real username; fall back to the email local-part so the
+                # full email (PII) is never exposed.
+                if shelf.owner:
+                    shelf_data.owner_username = (
+                        shelf.owner.username or shelf.owner.email.split("@")[0]
+                    )
+                return shelf_data
 
             return None
 
