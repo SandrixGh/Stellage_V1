@@ -37,6 +37,13 @@ class ShelfService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail="You already have 2 stellages"
             )
+
+        # Первый стеллаж пользователя всегда становится главным — флагу из
+        # запроса не доверяем. Если главной полки ещё нет, форсим is_main=True.
+        existing_main = await self.manager.get_main_shelf(user_id=user.id)
+        if existing_main is None:
+            shelf.is_main = True
+
         return await self.manager.create_shelf(
             user_id=user.id,
             shelf=shelf
