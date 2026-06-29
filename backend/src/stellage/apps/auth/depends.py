@@ -53,17 +53,18 @@ async def get_current_user(
             detail="User not found"
         )
 
+    try:
+        async with manager.redis.get_client() as client:
+            last_seen_key = f"last_seen:{user_id}"
+            if not await client.get(last_seen_key):
+                now = datetime.datetime.now(datetime.timezone.utc)
+                await profile_manager.update_user_fields(
+                    user_id=user_id,
+                    last_seen_at=now,
+                )
+                await client.set(last_seen_key, "1", ex=LAST_SEEN_THROTTLE_SECONDS)
+    except Exception:
+        pass
+
     user.session_id = session_id
-
-    async with manager.redis.get_client() as client:
-        last_seen_key = f"last_seen:{user_id}"
-        if not await client.get(last_seen_key):
-            now = datetime.datetime.now(datetime.timezone.utc)
-            await profile_manager.update_user_fields(
-                user_id=user_id,
-                last_seen_at=now,
-            )
-            user.last_seen_at = now
-            await client.set(last_seen_key, "1", ex=LAST_SEEN_THROTTLE_SECONDS)
-
     return user
