@@ -39,6 +39,9 @@ class CreateUser(GetUserByEmail):
 class UserReturnData(GetUserByID, GetUserByEmail, VerificationStatus):
     is_active: bool = False
     is_superuser: bool = False
+    username: str | None = None
+    nickname: str | None = None
+    last_seen_at: datetime.datetime | None = None
     created_at: datetime.datetime
     updated_at: datetime.datetime
 
@@ -49,6 +52,9 @@ class GetUserWithIDAndEmail(GetUserByID, CreateUser, VerificationStatus):
 
 class UserVerifySchema(GetUserByID, GetUserByEmail):
     session_id: str | uuid.UUID | None = None
+    username: str | None = None
+    nickname: str | None = None
+    last_seen_at: datetime.datetime | None = None
 
 
 class UserWithBoxInstances(UserReturnData):

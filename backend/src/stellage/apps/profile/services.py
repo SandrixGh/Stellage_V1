@@ -5,7 +5,12 @@ from starlette.responses import JSONResponse
 from stellage.apps.auth.handlers import AuthHandler
 from stellage.apps.auth.schemas import UserVerifySchema
 from stellage.apps.profile.managers import ProfileManager
-from stellage.apps.profile.schemas import ChangeEmailRequest, ConfirmationCodeRequest, ChangePasswordRequest
+from stellage.apps.profile.schemas import (
+    ChangeEmailRequest,
+    ConfirmationCodeRequest,
+    ChangePasswordRequest,
+    UpdateProfileRequest,
+)
 from stellage.apps.profile.tasks import send_confirmation_code
 from stellage.core.settings import settings
 
@@ -125,5 +130,32 @@ class ProfileService:
         )
 
         response = JSONResponse(content={"message": "Changing password was successful"})
+
+        return response
+
+
+    async def update_profile(
+        self,
+        data: UpdateProfileRequest,
+        user: UserVerifySchema,
+    ) -> JSONResponse:
+        if data.username is not None and await self.manager.is_username_taken(
+            username=data.username,
+            exclude_user_id=user.id,
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Username already taken",
+            )
+
+        fields = data.model_dump(exclude_none=True)
+
+        if fields:
+            await self.manager.update_user_fields(
+                user_id=user.id,
+                **fields,
+            )
+
+        response = JSONResponse(content={"message": "Profile updated successfully"})
 
         return response

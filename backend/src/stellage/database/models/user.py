@@ -1,6 +1,7 @@
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import String, Text, Boolean
+from sqlalchemy import String, Text, Boolean, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from stellage.database.mixins.id_mixins import IDMixin
@@ -23,6 +24,16 @@ class User(IDMixin, TimestampMixin, Base):
     username: Mapped[str | None] = mapped_column(
         String(30),
         unique=True,
+        nullable=True,
+    )
+
+    nickname: Mapped[str | None] = mapped_column(
+        String(50),
+        nullable=True,
+    )
+
+    last_seen_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
         nullable=True,
     )
 

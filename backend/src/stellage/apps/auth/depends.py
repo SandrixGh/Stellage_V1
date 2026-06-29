@@ -1,3 +1,4 @@
+import datetime
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
@@ -6,6 +7,10 @@ from stellage.apps.auth.handlers import AuthHandler
 from stellage.apps.auth.managers import UserManager
 from stellage.apps.auth.schemas import UserVerifySchema
 from stellage.apps.auth.utils import get_token_from_cookies
+from stellage.apps.profile.managers import ProfileManager
+
+
+LAST_SEEN_THROTTLE_SECONDS = 60
 
 
 async def get_current_user(
@@ -20,6 +25,10 @@ async def get_current_user(
     manager: Annotated[
         UserManager,
         Depends(UserManager)
+    ],
+    profile_manager: Annotated[
+        ProfileManager,
+        Depends(ProfileManager)
     ],
 ) -> UserVerifySchema:
     decoded_token = await handler.decode_access_token(token)
@@ -45,5 +54,16 @@ async def get_current_user(
         )
 
     user.session_id = session_id
+
+    async with manager.redis.get_client() as client:
+        last_seen_key = f"last_seen:{user_id}"
+        if not await client.get(last_seen_key):
+            now = datetime.datetime.now(datetime.timezone.utc)
+            await profile_manager.update_user_fields(
+                user_id=user_id,
+                last_seen_at=now,
+            )
+            user.last_seen_at = now
+            await client.set(last_seen_key, "1", ex=LAST_SEEN_THROTTLE_SECONDS)
 
     return user

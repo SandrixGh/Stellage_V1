@@ -36,6 +36,23 @@ class ProfileManager:
             await session.commit()
 
 
+    async def is_username_taken(
+        self,
+        username: str,
+        exclude_user_id: uuid.UUID | str,
+    ) -> bool:
+        async with self.db.db_session() as session:
+            query = (
+                select(self.user_model.id)
+                .where(
+                    self.user_model.username == username,
+                    self.user_model.id != exclude_user_id,
+                )
+            )
+            result = await session.execute(query)
+            return result.scalar() is not None
+
+
     async def get_user_hashed_password(
         self,
         user_id: uuid.UUID | None

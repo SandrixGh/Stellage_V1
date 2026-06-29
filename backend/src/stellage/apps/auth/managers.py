@@ -98,6 +98,9 @@ class UserManager:
                 select(
                     self.model.id,
                     self.model.email,
+                    self.model.username,
+                    self.model.nickname,
+                    self.model.last_seen_at,
                 )
                 .where(self.model.id == user_id)
             )

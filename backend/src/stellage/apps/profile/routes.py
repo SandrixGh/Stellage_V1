@@ -6,7 +6,7 @@ from starlette.responses import JSONResponse
 
 from stellage.apps.auth.depends import get_current_user
 from stellage.apps.auth.schemas import UserVerifySchema
-from stellage.apps.profile.schemas import ChangeEmailRequest, ChangePasswordRequest
+from stellage.apps.profile.schemas import ChangeEmailRequest, ChangePasswordRequest, UpdateProfileRequest
 from stellage.apps.profile.services import ProfileService
 
 profile_router = APIRouter(
@@ -65,6 +65,27 @@ async def change_password(
     ]
 ) -> JSONResponse:
     return await service.change_password(
+        data=data,
+        user=user,
+    )
+
+
+@profile_router.patch(
+    path="/update",
+    status_code=status.HTTP_200_OK,
+)
+async def update_profile(
+    data: UpdateProfileRequest,
+    service: Annotated[
+        ProfileService,
+        Depends(ProfileService)
+    ],
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ]
+) -> JSONResponse:
+    return await service.update_profile(
         data=data,
         user=user,
     )

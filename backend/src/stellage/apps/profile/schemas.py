@@ -11,6 +11,25 @@ class ConfirmationCodeRequest(BaseModel):
     confirmation_code: str
 
 
+class UpdateProfileRequest(BaseModel):
+    username: Annotated[
+        str | None,
+        StringConstraints(
+            min_length=3,
+            max_length=30,
+            strip_whitespace=True,
+            pattern=r'^[a-z0-9_]+$',
+        )
+    ] = None
+    nickname: Annotated[
+        str | None,
+        StringConstraints(
+            max_length=50,
+            strip_whitespace=True,
+        )
+    ] = None
+
+
 class ChangePasswordRequest(BaseModel):
     old_password: Annotated[
         str,
