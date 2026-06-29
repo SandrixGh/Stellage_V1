@@ -6,7 +6,7 @@ from starlette import status
 
 from stellage.apps.auth.depends import get_current_user
 from stellage.apps.auth.schemas import UserVerifySchema
-from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate
+from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate, BoxPositionUpdate
 from stellage.apps.boxes.instances.services import InstanceService
 from stellage.apps.boxes.templates.schemas import BoxTemplateReturn, BoxTemplateCreate, BoxTemplateReturnWithInstances
 from stellage.apps.boxes.templates.services import TemplateService
@@ -151,6 +151,30 @@ async def move_to_shelf(
         user=user,
         instance_id=instance_id,
         shelf_id=shelf_id,
+    )
+
+
+@router.post(
+    path="/update-box-position",
+    response_model=BoxInstanceWithTemplate,
+    status_code=status.HTTP_200_OK,
+)
+async def update_box_position(
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user),
+    ],
+    service: Annotated[
+        InstanceService,
+        Depends(InstanceService),
+    ],
+    data: BoxPositionUpdate,
+    instance_id: uuid.UUID,
+) -> BoxInstanceWithTemplate:
+    return await service.update_position(
+        user=user,
+        instance_id=instance_id,
+        data=data,
     )
 
 

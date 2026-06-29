@@ -5,7 +5,7 @@ from fastapi import Depends
 
 from stellage.apps.boxes.instances.cache_managers import InstanceCacheManager
 from stellage.apps.boxes.instances.repositories import BoxInstanceRepository
-from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate
+from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate, BoxPositionUpdate
 from stellage.apps.shelves.cache_managers import ShelfCacheManager
 
 
@@ -102,6 +102,44 @@ class InstanceManager:
             await self.shelf_cache_manager.delete_shelf(
                 user_id=user_id,
                 shelf_id=shelf_id,
+            )
+
+        await self.instance_cache_manager.store_instance(
+            instance=updated_instance
+        )
+
+        return updated_instance
+
+
+    async def update_position(
+        self,
+        user_id: uuid.UUID,
+        instance_id: uuid.UUID,
+        data: BoxPositionUpdate,
+    ) -> BoxInstanceWithTemplate:
+        # Drop the stale cached shelf + instance before persisting the move.
+        await self.refresh_old_shelf(
+            user_id=user_id,
+            instance_id=instance_id,
+        )
+
+        await self.instance_cache_manager.delete_instance(
+            instance_id=instance_id,
+            user_id=user_id,
+        )
+
+        updated_instance = await self.repository.update_position(
+            user_id=user_id,
+            instance_id=instance_id,
+            data=data,
+        )
+
+        # A swap may have moved a second box on the same shelf, so invalidate
+        # the shelf cache again now that positions are committed.
+        if updated_instance.shelf_id:
+            await self.shelf_cache_manager.delete_shelf(
+                user_id=user_id,
+                shelf_id=updated_instance.shelf_id,
             )
 
         await self.instance_cache_manager.store_instance(

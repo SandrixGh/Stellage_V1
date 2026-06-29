@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 from starlette import status
 
-from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate
+from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate, BoxPositionUpdate
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.models import BoxInstance, Shelf
 
@@ -143,6 +143,91 @@ class BoxInstanceRepository:
                     detail="Box on that shelf already exist"
                 )
 
+
+    async def update_position(
+        self,
+        user_id: uuid.UUID,
+        instance_id: uuid.UUID,
+        data: BoxPositionUpdate,
+    ) -> BoxInstanceWithTemplate:
+        async with self.db.db_session() as session:
+            dragged_query = (
+                select(self.instance_model)
+                .where(
+                    self.instance_model.user_id == user_id,
+                    self.instance_model.id == instance_id,
+                )
+            )
+            dragged_result = await session.execute(dragged_query)
+            dragged = dragged_result.scalar_one_or_none()
+
+            if dragged is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Box not found or access denied"
+                )
+
+            if dragged.shelf_id is None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Box is not placed on a shelf"
+                )
+
+            prev_row = dragged.shelf_row
+            prev_col = dragged.shelf_col
+
+            occupant_query = (
+                select(self.instance_model)
+                .where(
+                    self.instance_model.shelf_id == dragged.shelf_id,
+                    self.instance_model.shelf_row == data.shelf_row,
+                    self.instance_model.shelf_col == data.shelf_col,
+                    self.instance_model.id != dragged.id,
+                )
+            )
+            occupant_result = await session.execute(occupant_query)
+            occupant = occupant_result.scalar_one_or_none()
+
+            try:
+                if occupant is not None:
+                    # Swap: park the occupant on a NULL sentinel first so the
+                    # partial unique index never trips at a flush boundary,
+                    # then move the dragged box, then settle the occupant on
+                    # the dragged box's previous cell.
+                    occupant.shelf_row = None
+                    occupant.shelf_col = None
+                    await session.flush()
+
+                    dragged.shelf_row = data.shelf_row
+                    dragged.shelf_col = data.shelf_col
+                    await session.flush()
+
+                    occupant.shelf_row = prev_row
+                    occupant.shelf_col = prev_col
+                    await session.flush()
+                else:
+                    dragged.shelf_row = data.shelf_row
+                    dragged.shelf_col = data.shelf_col
+                    await session.flush()
+
+                select_query = (
+                    select(self.instance_model)
+                    .where(self.instance_model.id == instance_id)
+                    .options(joinedload(self.instance_model.template))
+                )
+                result = await session.execute(select_query)
+                box = result.unique().scalar_one()
+
+                await session.commit()
+
+                return BoxInstanceWithTemplate.model_validate(box)
+
+            except IntegrityError:
+                await session.rollback()
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Box on that position already exist"
+                )
 
 
     async def get_box_instances(
