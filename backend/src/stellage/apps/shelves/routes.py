@@ -129,6 +129,23 @@ async def get_shelf_with_boxes(
     )
 
 
+@router.get(
+    path="/public-shelf-with-boxes",
+    status_code=status.HTTP_200_OK,
+    response_model=ShelfWithBoxInstances
+)
+async def get_public_shelf_with_boxes(
+    shelf_id: uuid.UUID,
+    service: Annotated[
+        ShelfService,
+        Depends(ShelfService)
+    ],
+) -> ShelfWithBoxInstances:
+    return await service.get_public_shelf_with_boxes(
+        shelf_id=shelf_id
+    )
+
+
 @router.delete(
     path="/delete-shelf",
     status_code=status.HTTP_200_OK,

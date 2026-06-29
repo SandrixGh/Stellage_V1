@@ -174,6 +174,17 @@ class ShelfManager:
         return db_data
 
 
+    async def get_public_shelf_with_boxes(
+        self,
+        shelf_id: uuid.UUID,
+    ) -> ShelfWithBoxInstances | None:
+        # No per-user cache here: the shelf cache keys are user-scoped and an
+        # anonymous reader has no user context, so read straight from the DB.
+        return await self.repository.get_public_shelf_with_boxes(
+            shelf_id=shelf_id,
+        )
+
+
     async def delete_shelf(
         self,
         user_id: uuid.UUID,

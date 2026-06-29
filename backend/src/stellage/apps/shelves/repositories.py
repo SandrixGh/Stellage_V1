@@ -189,6 +189,36 @@ class ShelfRepository:
             return None
 
 
+    async def get_public_shelf_with_boxes(
+        self,
+        shelf_id: uuid.UUID,
+    ) -> ShelfWithBoxInstances | None:
+        async with self.db.db_session() as session:
+            query = (
+                select(self.model)
+                .where(
+                    self.model.id == shelf_id,
+                )
+                .options(
+                    joinedload(self.model.owner),
+                    joinedload(self.model.boxes)
+                    .joinedload(self.instance_model.template),
+                )
+            )
+
+            result = await session.execute(query)
+            shelf = result.unique().scalar_one_or_none()
+
+            if not shelf:
+                return None
+
+            shelf_data = ShelfWithBoxInstances.model_validate(shelf)
+            shelf_data.owner_username = (
+                shelf.owner.email if shelf.owner else None
+            )
+            return shelf_data
+
+
     async def delete_shelf(
         self,
         user_id: uuid.UUID,

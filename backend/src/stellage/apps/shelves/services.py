@@ -107,6 +107,23 @@ class ShelfService:
         return shelf
 
 
+    async def get_public_shelf_with_boxes(
+        self,
+        shelf_id: uuid.UUID,
+    ) -> ShelfWithBoxInstances:
+        shelf = await self.manager.get_public_shelf_with_boxes(
+            shelf_id=shelf_id,
+        )
+
+        if not shelf or not shelf.is_public:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Shelf not found"
+            )
+
+        return shelf
+
+
     async def delete_shelf(
         self,
         user: UserVerifySchema,
