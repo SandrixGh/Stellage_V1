@@ -54,11 +54,18 @@ class BoxInstanceReturn(
     BoxInstanceTimeStamps
 ):
     serial_number: int
+    shelf_row: int | None = None
+    shelf_col: int | None = None
     model_config = ConfigDict(from_attributes=True)
 
 
 class BoxInstanceWithTemplate(BoxInstanceReturn):
     template: "BoxTemplateReturn"
+
+
+class BoxPositionUpdate(BaseModel):
+    shelf_row: int
+    shelf_col: int
 
 
 class BoxInstanceUpdate(BaseModel):

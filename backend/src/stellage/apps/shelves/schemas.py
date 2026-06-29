@@ -58,6 +58,7 @@ class UpdateShelf(BaseModel):
 class ShelfReturnData(GetShelfByID, GetShelfByTitle, ShelfOwner, ShelfFlags):
     created_at: datetime.datetime
     updated_at: datetime.datetime
+    owner_username: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
