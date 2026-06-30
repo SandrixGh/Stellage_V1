@@ -3,13 +3,15 @@ import { api } from "../api/instance";
 import type { Shelf } from "../types/Stellage/shelves";
 import type { Box, BoxTemplate } from "../types/Stellage/boxes";
 
-/** Данные формы создания пользовательской коробки (редкость всегда Common). */
+/** Данные формы создания пользовательской коробки.
+ *  rarity применяется только для суперюзеров (обычным форсится Common на бэке). */
 export interface CreateBoxInput {
     title: string;
     description?: string;
     price?: number;
     currency?: string;
     content?: Record<string, unknown>;
+    rarity?: string;
 }
 
 interface StellageState {
@@ -153,6 +155,7 @@ export const useStellageStore = create<StellageState>((set, get) => ({
                 price: data.price ?? 0,
                 currency: (data.currency ?? "RUB").toLowerCase(),
                 content: data.content ?? null,
+                rarity: data.rarity ?? null,
             });
             await get().fetchInstances();
             set({ isLoading: false });

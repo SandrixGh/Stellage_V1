@@ -55,6 +55,7 @@ class UserVerifySchema(GetUserByID, GetUserByEmail):
     username: str | None = None
     nickname: str | None = None
     last_seen_at: datetime.datetime | None = None
+    is_superuser: bool = False
 
 
 class UserWithBoxInstances(UserReturnData):

@@ -5,6 +5,7 @@ export interface UserVerifySchema {
     username?: string | null;
     nickname?: string | null;
     last_seen_at?: string | null;
+    is_superuser?: boolean;
 }
 
 export interface UserReturnData extends UserVerifySchema {

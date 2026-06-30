@@ -9,15 +9,26 @@ import "./CreateBoxPage.css";
 const CURRENCIES = ["RUB", "USD", "EUR", "GBP", "CNY", "JPY", "KZT", "BYN", "TRY"];
 const CURRENCY_OPTIONS = CURRENCIES.map((c) => ({ value: c, label: c }));
 
+// Значения совпадают с BoxRarity на бэкенде. Доступно только суперюзерам —
+// обычным пользователям сервер всё равно форсит COMMON.
+const RARITY_OPTIONS = [
+    { value: "common", label: "Common" },
+    { value: "rare", label: "Rare" },
+    { value: "golden", label: "Golden" },
+    { value: "developer's", label: "Developer's" },
+];
+
 export const CreateBoxPage = () => {
     const navigate = useNavigate();
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+    const isSuperuser = useAuthStore((s) => s.user?.is_superuser ?? false);
     const createBox = useStellageStore((s) => s.createBox);
 
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("0");
     const [currency, setCurrency] = useState("RUB");
+    const [rarity, setRarity] = useState("common");
     const [content, setContent] = useState("");
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -51,6 +62,7 @@ export const CreateBoxPage = () => {
             price: Number(price) || 0,
             currency,
             content: text ? { text } : undefined,
+            rarity: isSuperuser ? rarity : undefined,
         });
 
         setSaving(false);
@@ -70,7 +82,8 @@ export const CreateBoxPage = () => {
                 <div>
                     <h1 className="create-box-title">Создать коробку</h1>
                     <p className="create-box-sub">
-                        Новая коробка попадёт в твой инвентарь. Редкость — Common.
+                        Новая коробка попадёт в твой инвентарь.
+                        {!isSuperuser && " Редкость — Common."}
                     </p>
                 </div>
             </header>
@@ -123,6 +136,18 @@ export const CreateBoxPage = () => {
                         />
                     </div>
                 </div>
+
+                {isSuperuser && (
+                    <div className="create-box-field">
+                        <span className="create-box-label">Редкость</span>
+                        <Select
+                            value={rarity}
+                            options={RARITY_OPTIONS}
+                            onChange={setRarity}
+                            ariaLabel="Редкость"
+                        />
+                    </div>
+                )}
 
                 <label className="create-box-field">
                     <span className="create-box-label">Содержимое</span>

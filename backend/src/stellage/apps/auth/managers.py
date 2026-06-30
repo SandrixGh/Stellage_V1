@@ -106,6 +106,7 @@ class UserManager:
                     self.model.username,
                     self.model.nickname,
                     self.model.last_seen_at,
+                    self.model.is_superuser,
                 )
                 .where(self.model.id == user_id)
             )

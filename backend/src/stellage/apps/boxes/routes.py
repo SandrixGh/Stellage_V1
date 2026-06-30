@@ -135,15 +135,17 @@ async def create_box(
     ],
     data: CustomBoxCreate,
 ) -> BoxInstanceWithTemplate:
-    # Создаём новый шаблон под коробку — редкость всегда COMMON (форсится сервером,
-    # см. модерацию в CLAUDE.md), затем кладём один экземпляр в инвентарь владельца.
+    # Создаём новый шаблон под коробку, затем кладём один экземпляр в инвентарь.
+    # Редкость: суперюзеры могут задать любую (data.rarity); обычным пользователям
+    # сервер форсит COMMON (см. модерацию в CLAUDE.md).
+    rarity = data.rarity if (user.is_superuser and data.rarity) else BoxRarity.COMMON
     template = await template_service.create_template(
         data=BoxTemplateCreate(
             title=data.title,
             description=data.description,
             price=data.price,
             currency=data.currency,
-            rarity=BoxRarity.COMMON,
+            rarity=rarity,
             creator_id=user.id,
         )
     )

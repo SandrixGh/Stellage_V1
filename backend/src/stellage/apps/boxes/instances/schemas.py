@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
 
+from stellage.database.enums.box_rarity import BoxRarity
 from stellage.database.enums.box_sealing import SealingEnum
 from stellage.database.enums.currency import CurrencyEnum
 from stellage.database.enums.verification import VerifyEnum
@@ -84,14 +85,16 @@ class BoxInstanceCreate(BoxInstanceBase, GetTemplateId, GetShelfId):
 class CustomBoxCreate(BaseModel):
     """Создание пользовательской коробки: новый шаблон + 1 экземпляр в инвентарь.
 
-    Редкость не принимается от клиента — новые коробки всегда COMMON (форсится
-    на бэкенде). Готовый экземпляр кладётся в инвентарь (shelf_id=None).
+    Редкость по умолчанию COMMON. Запрошенная клиентом rarity применяется только
+    для суперюзеров — обычным пользователям бэкенд форсит COMMON (см. роут).
+    Готовый экземпляр кладётся в инвентарь (shelf_id=None).
     """
     title: str
     description: str | None = None
     price: Decimal = Decimal("0")
     currency: CurrencyEnum = CurrencyEnum.RUB
     content: dict | None = None
+    rarity: BoxRarity | None = None
 
 
 from stellage.apps.boxes.templates.schemas import BoxTemplateReturn
