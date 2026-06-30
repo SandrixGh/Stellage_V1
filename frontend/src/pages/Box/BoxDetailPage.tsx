@@ -149,12 +149,8 @@ export const BoxDetailPage = () => {
                             <dd>{formatDate(template.created_at)}</dd>
                         </div>
                         <div className="box-detail-meta-row">
-                            <dt>Стеллаж</dt>
-                            <dd>{extras.stellage ?? "Не на стеллаже"}</dd>
-                        </div>
-                        <div className="box-detail-meta-row">
                             <dt>Владелец</dt>
-                            <dd>{extras.owner}</dd>
+                            <dd>{template.owner_username ?? "Stellage"}</dd>
                         </div>
                     </dl>
 

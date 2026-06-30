@@ -144,6 +144,7 @@ async def create_box(
             price=data.price,
             currency=data.currency,
             rarity=BoxRarity.COMMON,
+            creator_id=user.id,
         )
     )
     return await instance_service.create_instance(

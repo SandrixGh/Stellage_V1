@@ -58,12 +58,21 @@ class BoxTemplateRepository:
         async with self.db.db_session() as session:
             query = (
                 select(self.template_model)
+                .options(joinedload(self.template_model.creator))
             )
             result = await session.execute(query)
-            return[
-                BoxTemplateReturn.model_validate(template)
-                for template in result.scalars()
-            ]
+            templates = []
+            for template in result.unique().scalars():
+                data = BoxTemplateReturn.model_validate(template)
+                # Автор коробки: предпочитаем username, иначе local-part email
+                # (полный email — PII — наружу не отдаём). None = коробка платформы.
+                if template.creator:
+                    data.owner_username = (
+                        template.creator.username
+                        or template.creator.email.split("@")[0]
+                    )
+                templates.append(data)
+            return templates
 
 
     async def get_template_with_instances(

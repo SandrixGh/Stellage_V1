@@ -5,6 +5,8 @@ export interface BoxTemplate {
     price: string;
     currency: string;
     rarity: string;
+    // Автор коробки: username/имя создателя, либо null для коробок платформы.
+    owner_username?: string | null;
     created_at: string;
     updated_at: string;
 }

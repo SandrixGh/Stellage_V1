@@ -4,7 +4,9 @@ from decimal import Decimal
 
 from sqlalchemy.dialects.postgresql import ENUM as PostgresEnum
 
-from sqlalchemy import String, Numeric
+import uuid
+
+from sqlalchemy import String, Numeric, ForeignKey
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from stellage.database.enums.box_rarity import BoxRarity
@@ -15,6 +17,7 @@ from stellage.database.models import Base
 
 if TYPE_CHECKING:
     from .box_instance import BoxInstance
+    from .user import User
 
 class BoxTemplate(IDMixin, TimestampMixin, Base):
     __tablename__ = "box_templates"
@@ -57,6 +60,18 @@ class BoxTemplate(IDMixin, TimestampMixin, Base):
         ),
         default=BoxRarity.COMMON,
     )
+
+    # Автор шаблона. NULL = шаблон платформы (каталожная коробка); для коробок,
+    # созданных пользователем, указывает на создателя.
+    creator_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey(
+            "users.id",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
+    )
+
+    creator: Mapped["User | None"] = relationship("User")
 
     instances: Mapped[list["BoxInstance"]] = relationship(
         "BoxInstance",

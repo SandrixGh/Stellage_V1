@@ -29,10 +29,14 @@ class BoxTemplateBase(BaseModel):
 
 
 class BoxTemplateCreate(BoxTemplateBase):
-    pass
+    # NULL = шаблон платформы; иначе id пользователя-создателя коробки.
+    creator_id: uuid.UUID | None = None
 
 
 class BoxTemplateReturn(GetBoxTemplateById, BoxTemplateBase, BoxTemplateTimeStamps):
+    # Имя автора коробки (username или local-part email). None — коробка платформы.
+    owner_username: str | None = None
+
     model_config = ConfigDict(
         from_attributes=True
     )
