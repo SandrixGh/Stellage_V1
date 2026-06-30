@@ -38,9 +38,14 @@ interface StellageState {
     moveBox: (instanceId: string, shelfId: string | null) => Promise<void>;
     updateBoxPosition: (instanceId: string, shelf_row: number, shelf_col: number, shelfId?: string) => Promise<void>;
     deleteBox: (instanceId: string) => Promise<void>;
+
+    /** Сбросить всё пользовательское состояние (вызывается при смене аккаунта). */
+    reset: () => void;
 }
 
-export const useStellageStore = create<StellageState>((set, get) => ({
+// Изолируем дефолтные значения, чтобы reset() возвращал стор к чистому виду
+// и данные прошлого аккаунта не «протекали» в профиль нового пользователя.
+const INITIAL_STATE = {
     shelves: [],
     mainShelf: null,
     selectedShelf: null,
@@ -50,6 +55,12 @@ export const useStellageStore = create<StellageState>((set, get) => ({
     instances: [],
     isLoading: false,
     error: null,
+};
+
+export const useStellageStore = create<StellageState>((set, get) => ({
+    ...INITIAL_STATE,
+
+    reset: () => set({ ...INITIAL_STATE }),
 
     fetchShelves: async () => {
         set({ isLoading: true });

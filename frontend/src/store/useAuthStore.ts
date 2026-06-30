@@ -2,6 +2,7 @@ import { create } from "zustand";
 import axios from "axios";
 import type { UserVerifySchema } from "../types/Auth/auth";
 import { api } from "../api/instance";
+import { useStellageStore } from "./useStellageStore";
 
 interface AuthState {
     user: UserVerifySchema | null;
@@ -36,6 +37,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 
     login: async (email, password) => {
+        // Чистим стеллаж-стор до запроса, чтобы коробки/полки прошлого
+        // аккаунта не отрисовались под новым пользователем.
+        useStellageStore.getState().reset();
         await api.post("/auth/login", {email, password});
         await get().getUser();
     },
@@ -45,6 +49,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             await api.post('/auth/logout');
         } finally {
             set({ user: null, isAuthenticated: false });
+            useStellageStore.getState().reset();
         }
     },
 
@@ -59,6 +64,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if(user) {
             await api.delete("/auth/delete-account");
             set({ user: null, isAuthenticated: false });
+            useStellageStore.getState().reset();
         }
     },
 }))
