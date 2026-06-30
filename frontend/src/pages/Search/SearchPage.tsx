@@ -1,32 +1,50 @@
-import { useEffect, useMemo, useState } from "react";
-import { useStellageStore } from "../../store/useStellageStore";
-import { WireframeBox } from "../../components/Stellage/WireframeBox";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { api } from "../../api/instance";
+import { onlineStatus, isOnline } from "../../utils/onlineStatus";
+import type { PublicUser } from "../../types/Profile/profile";
 import "./SearchPage.css";
 
+const monogramOf = (u: PublicUser): string => {
+    const base = u.nickname?.trim() || u.username?.trim() || "?";
+    return base[0]?.toUpperCase() ?? "?";
+};
+
 export const SearchPage = () => {
-    const { templates, fetchTemplates } = useStellageStore();
     const [query, setQuery] = useState("");
+    const [results, setResults] = useState<PublicUser[]>([]);
+    const [loading, setLoading] = useState(false);
 
+    // Дебаунсим запрос, чтобы не дёргать бэкенд на каждый символ.
     useEffect(() => {
-        if (templates.length === 0) {
-            fetchTemplates();
+        const q = query.trim();
+        if (!q) {
+            setResults([]);
+            setLoading(false);
+            return;
         }
-    }, [templates.length, fetchTemplates]);
 
-    const results = useMemo(() => {
-        const q = query.trim().toLowerCase();
-        if (!q) return [];
-        return templates.filter(
-            (t) =>
-                t.title.toLowerCase().includes(q) ||
-                t.description?.toLowerCase().includes(q)
-        );
-    }, [query, templates]);
+        setLoading(true);
+        const handle = setTimeout(async () => {
+            try {
+                const res = await api.get<PublicUser[]>("/profile/search", {
+                    params: { q },
+                });
+                setResults(res.data);
+            } catch {
+                setResults([]);
+            } finally {
+                setLoading(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(handle);
+    }, [query]);
 
     return (
         <div className="search-page">
             <h1 className="page-title">Поиск</h1>
-            <p className="page-subtitle">Найдите коробку по названию или описанию</p>
+            <p className="page-subtitle">Найдите пользователя по нику или юзернейму</p>
 
             <div className="search-bar">
                 <svg className="search-icon-svg" viewBox="0 0 20 20" fill="none">
@@ -36,7 +54,7 @@ export const SearchPage = () => {
                 <input
                     type="text"
                     className="search-input"
-                    placeholder="Введите запрос..."
+                    placeholder="Имя или @юзернейм..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     autoFocus
@@ -45,25 +63,45 @@ export const SearchPage = () => {
 
             {query.trim() && (
                 <div className="search-results">
-                    {results.length > 0 ? (
-                        results.map((t) => (
-                            <div key={t.id} className="search-result-item">
-                                <div className="search-result-box-icon">
-                                    <WireframeBox size={44} />
+                    {loading ? (
+                        <p className="empty-message">Ищем…</p>
+                    ) : results.length > 0 ? (
+                        results.map((u) => {
+                            const title = u.nickname?.trim() || u.username || "Без имени";
+                            const online = isOnline(u.last_seen_at ?? undefined);
+                            const inner = (
+                                <>
+                                    <div className="search-result-avatar" aria-hidden="true">
+                                        <span>{monogramOf(u)}</span>
+                                    </div>
+                                    <div className="search-result-info">
+                                        <span className="search-result-title">{title}</span>
+                                        {u.username && (
+                                            <span className="search-result-desc">@{u.username}</span>
+                                        )}
+                                    </div>
+                                    <span className={`search-result-status${online ? " is-online" : ""}`}>
+                                        {onlineStatus(u.last_seen_at ?? undefined)}
+                                    </span>
+                                </>
+                            );
+
+                            return u.username ? (
+                                <Link
+                                    key={u.id}
+                                    to={`/u/${u.username}`}
+                                    className="search-result-item"
+                                >
+                                    {inner}
+                                </Link>
+                            ) : (
+                                <div key={u.id} className="search-result-item">
+                                    {inner}
                                 </div>
-                                <div className="search-result-info">
-                                    <span className="search-result-title">{t.title}</span>
-                                    {t.description && (
-                                        <span className="search-result-desc">{t.description}</span>
-                                    )}
-                                </div>
-                                <span className={`search-result-rarity rarity-${t.rarity?.toLowerCase()}`}>
-                                    {t.rarity}
-                                </span>
-                            </div>
-                        ))
+                            );
+                        })
                     ) : (
-                        <p className="empty-message">Ничего не найдено по запросу «{query}».</p>
+                        <p className="empty-message">Никого не найдено по запросу «{query}».</p>
                     )}
                 </div>
             )}

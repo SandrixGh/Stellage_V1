@@ -89,6 +89,36 @@
     align-items: center;
 }
 
+/* ── User avatar monogram ── */
+.search-result-avatar {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(215, 208, 179, 0.08);
+    border: 1px solid rgba(215, 208, 179, 0.18);
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #D7D0B7;
+}
+
+/* ── Online status pill ── */
+.search-result-status {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(215, 208, 179, 0.4);
+    white-space: nowrap;
+}
+
+.search-result-status.is-online {
+    color: #8fd19e;
+}
+
 .search-result-info {
     display: flex;
     flex-direction: column;

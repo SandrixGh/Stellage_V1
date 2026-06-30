@@ -1,5 +1,10 @@
-from typing import Annotated
-from pydantic import EmailStr, BaseModel, StringConstraints
+import datetime
+import uuid
+from typing import Annotated, TYPE_CHECKING
+from pydantic import EmailStr, BaseModel, StringConstraints, ConfigDict
+
+if TYPE_CHECKING:
+    from stellage.apps.shelves.schemas import ShelfWithBoxInstances
 
 
 class ChangeEmailRequest(BaseModel):
@@ -45,3 +50,22 @@ class ChangePasswordRequest(BaseModel):
             max_length=128,
         )
     ]
+
+
+class PublicUser(BaseModel):
+    """Публичная карточка пользователя — без email и прочей PII."""
+    id: uuid.UUID
+    username: str | None = None
+    nickname: str | None = None
+    last_seen_at: datetime.datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PublicProfile(PublicUser):
+    """Публичный профиль: карточка пользователя + его главный публичный стеллаж."""
+    shelf: "ShelfWithBoxInstances | None" = None
+
+
+from stellage.apps.shelves.schemas import ShelfWithBoxInstances
+PublicProfile.model_rebuild()

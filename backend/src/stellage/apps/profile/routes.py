@@ -6,13 +6,49 @@ from starlette.responses import JSONResponse
 
 from stellage.apps.auth.depends import get_current_user
 from stellage.apps.auth.schemas import UserVerifySchema
-from stellage.apps.profile.schemas import ChangeEmailRequest, ChangePasswordRequest, UpdateProfileRequest
+from stellage.apps.profile.schemas import (
+    ChangeEmailRequest,
+    ChangePasswordRequest,
+    PublicProfile,
+    PublicUser,
+    UpdateProfileRequest,
+)
 from stellage.apps.profile.services import ProfileService
 
 profile_router = APIRouter(
     prefix="/profile",
     tags=["profile"]
 )
+
+
+@profile_router.get(
+    path="/search",
+    status_code=status.HTTP_200_OK,
+    response_model=list[PublicUser],
+)
+async def search_users(
+    q: str,
+    service: Annotated[
+        ProfileService,
+        Depends(ProfileService)
+    ],
+) -> list[PublicUser]:
+    return await service.search_users(query=q)
+
+
+@profile_router.get(
+    path="/public/{username}",
+    status_code=status.HTTP_200_OK,
+    response_model=PublicProfile,
+)
+async def get_public_profile(
+    username: str,
+    service: Annotated[
+        ProfileService,
+        Depends(ProfileService)
+    ],
+) -> PublicProfile:
+    return await service.get_public_profile(username=username)
 
 @profile_router.post(
     path="/change-email-request",

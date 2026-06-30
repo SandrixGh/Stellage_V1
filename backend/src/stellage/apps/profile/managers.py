@@ -1,7 +1,7 @@
 import uuid
 
 from fastapi import Depends
-from sqlalchemy import update, select
+from sqlalchemy import update, select, or_
 
 from stellage.apps.profile.schemas import ConfirmationCodeRequest
 from stellage.core.core_dependencies.db_dependency import DBDependency
@@ -34,6 +34,42 @@ class ProfileManager:
             )
             await session.execute(query)
             await session.commit()
+
+
+    async def search_users(
+        self,
+        query: str,
+        limit: int = 20,
+    ) -> list[User]:
+        # Поиск по username и nickname (регистронезависимо, по подстроке).
+        pattern = f"%{query}%"
+        async with self.db.db_session() as session:
+            stmt = (
+                select(self.user_model)
+                .where(
+                    or_(
+                        self.user_model.username.ilike(pattern),
+                        self.user_model.nickname.ilike(pattern),
+                    )
+                )
+                .order_by(self.user_model.username.asc())
+                .limit(limit)
+            )
+            result = await session.execute(stmt)
+            return list(result.scalars().all())
+
+
+    async def get_user_by_username(
+        self,
+        username: str,
+    ) -> User | None:
+        async with self.db.db_session() as session:
+            stmt = (
+                select(self.user_model)
+                .where(self.user_model.username == username)
+            )
+            result = await session.execute(stmt)
+            return result.scalar_one_or_none()
 
 
     async def is_username_taken(

@@ -12,6 +12,7 @@ import { MyStellagePage } from "./pages/Main/MainPage";
 import { InventoryPage } from "./pages/Inventory/InventoryPage";
 import { CreateBoxPage } from "./pages/CreateBox/CreateBoxPage";
 import { ProfilePage } from "./pages/Profile/ProfilePage";
+import { PublicProfilePage } from "./pages/Profile/PublicProfilePage";
 import { SettingsPage } from "./pages/Settings/SettingsPage";
 import { RegisterConfirmPage } from "./pages/Auth/RegisterConfirmPage";
 import { BoxDetailPage } from "./pages/Box/BoxDetailPage";
@@ -53,6 +54,7 @@ function App() {
         <Route path="/my-stellage" element={<MyStellagePage />} />
         <Route path="/stellage/:shelfId" element={<PublicShelfPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/u/:username" element={<PublicProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
 

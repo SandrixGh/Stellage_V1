@@ -9,9 +9,12 @@ from stellage.apps.profile.schemas import (
     ChangeEmailRequest,
     ConfirmationCodeRequest,
     ChangePasswordRequest,
+    PublicProfile,
+    PublicUser,
     UpdateProfileRequest,
 )
 from stellage.apps.profile.tasks import send_confirmation_code
+from stellage.apps.shelves.managers import ShelfManager
 from stellage.core.settings import settings
 
 
@@ -26,9 +29,49 @@ class ProfileService:
             AuthHandler,
             Depends(AuthHandler),
         ],
+        shelf_manager: Annotated[
+            ShelfManager,
+            Depends(ShelfManager),
+        ],
     ) -> None:
         self.manager = manager
         self.handler = handler
+        self.shelf_manager = shelf_manager
+
+
+    async def search_users(
+        self,
+        query: str,
+    ) -> list[PublicUser]:
+        cleaned = query.strip()
+        if not cleaned:
+            return []
+
+        users = await self.manager.search_users(query=cleaned)
+        return [PublicUser.model_validate(user) for user in users]
+
+
+    async def get_public_profile(
+        self,
+        username: str,
+    ) -> PublicProfile:
+        user = await self.manager.get_user_by_username(username=username)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+            )
+
+        # Показываем главный стеллаж только если он публичный.
+        shelf = await self.shelf_manager.get_main_shelf_with_boxes(
+            user_id=user.id,
+        )
+        if shelf is not None and not shelf.is_public:
+            shelf = None
+
+        profile = PublicProfile.model_validate(user)
+        profile.shelf = shelf
+        return profile
 
 
     async def change_email_request(
