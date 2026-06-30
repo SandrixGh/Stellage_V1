@@ -33,7 +33,7 @@ and report the error to the user.
 ### 3. Run database migrations
 
 ```
-docker compose --env-file backend/.env exec backend alembic -c src/stellage/database/alembic/alembic.ini upgrade head
+docker compose --env-file backend/.env exec backend alembic upgrade head
 ```
 
 Skip this step if the user says migrations are already up to date.
