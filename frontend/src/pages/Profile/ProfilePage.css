@@ -427,6 +427,31 @@
     border-color: rgba(215, 208, 179, 0.45);
 }
 
+/* ===== READ-ONLY SHELF SECTION ===== */
+.profile-shelf-section {
+    margin-top: 8px;
+}
+
+.profile-shelf-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #D7D0B7;
+    margin: 0 0 18px 0;
+}
+
+.profile-shelf-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 32px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed rgba(215, 208, 179, 0.18);
+    color: rgba(215, 208, 179, 0.55);
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 720px) {
     .profile-hero {

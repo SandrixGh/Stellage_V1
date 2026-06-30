@@ -5,6 +5,9 @@ import { useStellageStore } from "../../store/useStellageStore";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { ShelfView } from "../../components/Stellage/ShelfView";
 import { placeBoxes } from "../../components/Stellage/ShelfBoard";
+import { InventoryPickerModal } from "../../components/Stellage/InventoryPickerModal";
+import { BoxDetailModal } from "../Box/BoxDetailModal";
+import type { Box } from "../../types/Stellage/boxes";
 import "./MainPage.css";
 
 export const MyStellagePage = () => {
@@ -43,6 +46,10 @@ export const MyStellagePage = () => {
         const rest = shelves.filter((s) => s.id !== mainShelfId);
         return main ? [main, ...rest] : rest;
     }, [shelves, mainShelfId]);
+
+    // Модалка-пикер инвентаря («Добавить коробку») и просмотр коробки.
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
+    const [openedBox, setOpenedBox] = useState<Box | null>(null);
 
     // Модалка создания нового стеллажа.
     const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -108,6 +115,7 @@ export const MyStellagePage = () => {
     const handlePlaceOnShelf = async (instanceId: string) => {
         if (!currentShelf) return;
         const targetShelfId = currentShelf.id;
+        setIsPickerOpen(false);
         await moveBox(instanceId, targetShelfId);
 
         // После перемещения читаем уже ресинхронизированную полку из стора и
@@ -148,46 +156,23 @@ export const MyStellagePage = () => {
 
             {!isLoading && (
                 <>
-                    {/* Лоток инвентаря: полученные коробки, ещё не на полке. */}
-                    {trayBoxes.length > 0 && (
-                        <div className="inventory-tray">
-                            <h2 className="inventory-tray-title">
-                                Инвентарь ({trayBoxes.length})
-                            </h2>
-                            <p className="inventory-tray-hint">
-                                Нажми на коробку, чтобы поставить её на стеллаж.
-                            </p>
-                            <div className="inventory-tray-items">
-                                {trayBoxes.map((box) => (
-                                    <button
-                                        key={box.id}
-                                        type="button"
-                                        className="inventory-tray-item"
-                                        onClick={() => handlePlaceOnShelf(box.id)}
-                                        disabled={!currentShelf}
-                                        title="Поставить на полку"
-                                    >
-                                        <span className="inventory-tray-item-name">
-                                            {box.template.title}
-                                        </span>
-                                        <span className="inventory-tray-item-cta">
-                                            На полку →
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
                     {currentShelf ? (
                         <ShelfView
                             shelf={currentShelf}
                             editable
                             onMove={(id, row, col) => updateBoxPosition(id, row, col, currentShelf!.id)}
+                            onOpen={setOpenedBox}
                             isMain={currentShelf.id === mainShelfId}
                             onMakeMain={() => setMainShelf(currentShelf.id)}
                             rightPanel={
                                 <div className="shelf-rail">
+                                    <button
+                                        type="button"
+                                        className="add-box-btn shelf-rail-add"
+                                        onClick={() => setIsPickerOpen(true)}
+                                    >
+                                        + Добавить коробку
+                                    </button>
                                     <button
                                         type="button"
                                         className="create-shelf-btn shelf-rail-create"
@@ -270,6 +255,17 @@ export const MyStellagePage = () => {
                     </div>
                 </div>
             )}
+
+            {isPickerOpen && (
+                <InventoryPickerModal
+                    boxes={trayBoxes}
+                    onPick={handlePlaceOnShelf}
+                    onClose={() => setIsPickerOpen(false)}
+                    disabled={!currentShelf}
+                />
+            )}
+
+            <BoxDetailModal box={openedBox} onClose={() => setOpenedBox(null)} />
         </section>
     );
 };

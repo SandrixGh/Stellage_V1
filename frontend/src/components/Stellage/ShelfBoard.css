@@ -43,6 +43,11 @@
                 top 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Коробку всегда можно открыть по клику. */
+.shelf-cell-inner {
+    cursor: pointer;
+}
+
 .shelf-board.is-editable .shelf-cell-inner {
     cursor: grab;
 }

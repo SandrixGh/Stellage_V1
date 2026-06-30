@@ -3,6 +3,15 @@ import { api } from "../api/instance";
 import type { Shelf } from "../types/Stellage/shelves";
 import type { Box, BoxTemplate } from "../types/Stellage/boxes";
 
+/** Данные формы создания пользовательской коробки (редкость всегда Common). */
+export interface CreateBoxInput {
+    title: string;
+    description?: string;
+    price?: number;
+    currency?: string;
+    content?: Record<string, unknown>;
+}
+
 interface StellageState {
     shelves: Shelf[];
     mainShelf: Shelf | null;
@@ -24,6 +33,7 @@ interface StellageState {
     createShelf: (title: string, isPublic: boolean) => Promise<Shelf | null>;
     setMainShelf: (shelfId: string) => Promise<void>;
     acquireBox: (templateId: string) => Promise<void>;
+    createBox: (data: CreateBoxInput) => Promise<Box | null>;
 
     moveBox: (instanceId: string, shelfId: string | null) => Promise<void>;
     updateBoxPosition: (instanceId: string, shelf_row: number, shelf_col: number, shelfId?: string) => Promise<void>;
@@ -118,6 +128,27 @@ export const useStellageStore = create<StellageState>((set, get) => ({
             await get().fetchInstances();
         } catch (err: any) {
             set({ error: "Не удалось получить коробку" });
+        }
+    },
+
+    // Создать пользовательскую коробку (новый шаблон + экземпляр в инвентарь).
+    // Бэкенд форсит редкость COMMON. Возвращаем созданный экземпляр.
+    createBox: async (data: CreateBoxInput) => {
+        set({ isLoading: true, error: null });
+        try {
+            const res = await api.post<Box>("/boxes/create-box", {
+                title: data.title,
+                description: data.description ?? null,
+                price: data.price ?? 0,
+                currency: data.currency ?? "RUB",
+                content: data.content ?? null,
+            });
+            await get().fetchInstances();
+            set({ isLoading: false });
+            return res.data;
+        } catch (err: any) {
+            set({ error: "Не удалось создать коробку", isLoading: false });
+            return null;
         }
     },
 

@@ -18,6 +18,8 @@ interface ShelfBoardProps {
     rowCount?: number;
     colCount?: number;
     onMove?: (id: string, row: number, col: number) => void;
+    /** Открыть коробку (клик без перетаскивания). Работает и на read-only полке. */
+    onOpen?: (box: Box) => void;
 }
 
 interface PlacedBox {
@@ -29,8 +31,13 @@ interface PlacedBox {
 /** Высота одной полки в пикселях (включает зону для коробки + полку под ней). */
 const ROW_HEIGHT = 128;
 
-/** Запас под последней линией, чтобы бирка нижнего ряда не обрезалась. */
-const LABEL_SPACE = 42;
+/** Запас под последней линией, чтобы бирка нижнего ряда не обрезалась
+ * (оставляем 3–4px от нижней бирки до края канваса). */
+const LABEL_SPACE = 50;
+
+/** Порог смещения курсора (px), после которого жест считается перетаскиванием,
+ * а не кликом-открытием коробки. */
+const DRAG_THRESHOLD = 5;
 
 const cellKey = (row: number, col: number) => `${row}:${col}`;
 
@@ -91,6 +98,11 @@ interface DragState {
     // Текущая позиция курсора в координатах доски.
     x: number;
     y: number;
+    // Точка нажатия (для отличения клика от перетаскивания).
+    startX: number;
+    startY: number;
+    // Сдвинулся ли курсор дальше порога — тогда это перетаскивание, а не клик.
+    moved: boolean;
 }
 
 export const ShelfBoard = ({
@@ -99,6 +111,7 @@ export const ShelfBoard = ({
     rowCount = 5,
     colCount = 8,
     onMove,
+    onOpen,
 }: ShelfBoardProps) => {
     const boardRef = useRef<HTMLDivElement>(null);
     const [drag, setDrag] = useState<DragState | null>(null);
@@ -140,7 +153,8 @@ export const ShelfBoard = ({
     );
 
     const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>, p: PlacedBox) => {
-        if (!editable) return;
+        // Жест начинаем всегда — даже на read-only полке, чтобы по клику
+        // (без перетаскивания) можно было открыть коробку.
         e.preventDefault();
         const el = boardRef.current;
         if (!el) return;
@@ -157,6 +171,9 @@ export const ShelfBoard = ({
             grabDy: y - boxTop,
             x,
             y,
+            startX: x,
+            startY: y,
+            moved: false,
         });
     };
 
@@ -167,17 +184,29 @@ export const ShelfBoard = ({
         const rect = el.getBoundingClientRect();
         const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
         const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
-        setDrag({ ...drag, x, y });
+        const moved =
+            drag.moved ||
+            Math.hypot(x - drag.startX, y - drag.startY) > DRAG_THRESHOLD;
+        // Визуально таскаем коробку только на редактируемой полке.
+        setDrag({ ...drag, x: editable ? x : drag.x, y: editable ? y : drag.y, moved });
     };
 
     const endDrag = (e: ReactPointerEvent<HTMLDivElement>) => {
         if (!drag || e.pointerId !== drag.pointerId) return;
-        const { row, col } = pointToCell(e.clientX, e.clientY);
         const id = drag.id;
+        const moved = drag.moved;
+        const current = placed.find((p) => p.box.id === id);
         setDrag(null);
 
-        const current = placed.find((p) => p.box.id === id);
-        // Сообщаем родителю только при реальном изменении ячейки.
+        // Клик без перетаскивания — открываем коробку.
+        if (!moved) {
+            if (current) onOpen?.(current.box);
+            return;
+        }
+
+        // Перетаскивание: сохраняем новую ячейку только на редактируемой полке.
+        if (!editable) return;
+        const { row, col } = pointToCell(e.clientX, e.clientY);
         if (current && (current.row !== row || current.col !== col)) {
             onMove?.(id, row, col);
         }
@@ -203,7 +232,7 @@ export const ShelfBoard = ({
 
             {/* Коробки. */}
             {placed.map((p) => {
-                const isDragging = drag?.id === p.box.id;
+                const isDragging = editable && drag?.id === p.box.id && drag.moved;
                 const rarityKey = p.box.template.rarity?.toLowerCase() ?? "";
                 const rarityGlow = rarityGlowMap[rarityKey] ?? null;
                 const boardW = cellWidth * colCount;

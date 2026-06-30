@@ -11,6 +11,8 @@ interface ShelfViewProps {
     /** Доступно ли перетаскивание (своя полка) или это публичный read-only вид. */
     editable: boolean;
     onMove?: (id: string, row: number, col: number) => void;
+    /** Открыть коробку по клику (просмотр контента/информации). */
+    onOpen?: (box: Box) => void;
     /** Правая колонка (например, список стеллажей с кнопкой создания). */
     rightPanel?: ReactNode;
     /** Является ли открытая полка главной (для кнопки «назначить главным»). */
@@ -23,7 +25,7 @@ interface ShelfViewProps {
  * редкости, считает отфильтрованный список коробок и передаёт его в ShelfBoard.
  * Боковая панель при этом получает ПОЛНЫЙ список коробок для статистики.
  */
-export const ShelfView = ({ shelf, editable, onMove, rightPanel, isMain, onMakeMain }: ShelfViewProps) => {
+export const ShelfView = ({ shelf, editable, onMove, onOpen, rightPanel, isMain, onMakeMain }: ShelfViewProps) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeRarities, setActiveRarities] = useState<string[]>([]);
 
@@ -71,6 +73,7 @@ export const ShelfView = ({ shelf, editable, onMove, rightPanel, isMain, onMakeM
                     boxes={filteredBoxes}
                     editable={editable}
                     onMove={onMove}
+                    onOpen={onOpen}
                 />
             </div>
             {rightPanel && <div className="shelf-view-rail">{rightPanel}</div>}

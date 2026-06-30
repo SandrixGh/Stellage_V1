@@ -1,12 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useStellageStore } from "../../store/useStellageStore";
 import { ShelfView } from "../../components/Stellage/ShelfView";
+import { BoxDetailModal } from "../Box/BoxDetailModal";
+import type { Box } from "../../types/Stellage/boxes";
 import "../Main/MainPage.css";
 
 export const PublicShelfPage = () => {
     const { shelfId } = useParams<{ shelfId: string }>();
     const { publicShelf, fetchPublicShelf, isLoading, error } = useStellageStore();
+    const [openedBox, setOpenedBox] = useState<Box | null>(null);
 
     useEffect(() => {
         if (shelfId) {
@@ -31,10 +34,13 @@ export const PublicShelfPage = () => {
                         </div>
                     </header>
 
-                    {/* Публичный просмотр — перетаскивание отключено. */}
-                    <ShelfView shelf={publicShelf} editable={false} />
+                    {/* Публичный просмотр — перетаскивание отключено, но коробку
+                        можно открыть по клику. */}
+                    <ShelfView shelf={publicShelf} editable={false} onOpen={setOpenedBox} />
                 </>
             )}
+
+            <BoxDetailModal box={openedBox} onClose={() => setOpenedBox(null)} />
         </section>
     );
 };

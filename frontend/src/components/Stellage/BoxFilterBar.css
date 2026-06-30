@@ -1,0 +1,78 @@
+.box-filter-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.box-filter-top {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.box-filter-search {
+    flex: 1;
+    min-width: 200px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(215, 208, 179, 0.15);
+    color: #D7D0B7;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.box-filter-search::placeholder {
+    color: rgba(215, 208, 179, 0.35);
+}
+
+.box-filter-search:focus {
+    border-color: rgba(215, 208, 179, 0.4);
+}
+
+.box-filter-sort {
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(215, 208, 179, 0.15);
+    color: #D7D0B7;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+}
+
+.box-filter-sort option {
+    background: #121212;
+    color: #D7D0B7;
+}
+
+.box-filter-rarities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.box-filter-chip {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 999px;
+    color: rgba(215, 208, 179, 0.6);
+    background: rgba(215, 208, 179, 0.05);
+    border: 1px solid rgba(215, 208, 179, 0.18);
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.box-filter-chip:hover {
+    border-color: rgba(215, 208, 179, 0.4);
+}
+
+.box-filter-chip.active {
+    background: rgba(215, 208, 179, 0.14);
+    border-color: rgba(215, 208, 179, 0.5);
+    color: #D7D0B7;
+}
