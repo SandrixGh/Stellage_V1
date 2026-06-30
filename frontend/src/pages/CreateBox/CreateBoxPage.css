@@ -86,23 +86,6 @@
     min-height: 56px;
 }
 
-select.create-box-input {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-color: rgba(255, 255, 255, 0.05);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23D7D0B7' stroke-opacity='0.5' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 40px;
-    cursor: pointer;
-}
-
-select.create-box-input option {
-    background: #1a1916;
-    color: #D7D0B7;
-}
-
 .create-box-input[type="number"] {
     -moz-appearance: textfield;
 }

@@ -1,7 +1,13 @@
 import type { BoxSort } from "../../utils/boxFilters";
 import { SORT_LABELS } from "../../utils/boxFilters";
 import { rarityKey } from "../../utils/rarity";
+import { Select } from "../UI/Select";
 import "./BoxFilterBar.css";
+
+const SORT_OPTIONS = (Object.keys(SORT_LABELS) as BoxSort[]).map((s) => ({
+    value: s,
+    label: SORT_LABELS[s],
+}));
 
 interface BoxFilterBarProps {
     query: string;
@@ -33,15 +39,13 @@ export const BoxFilterBar = ({
                     value={query}
                     onChange={(e) => onQueryChange(e.target.value)}
                 />
-                <select
-                    className="box-filter-sort"
+                <Select
+                    className="box-filter-sort-select"
                     value={sort}
-                    onChange={(e) => onSortChange(e.target.value as BoxSort)}
-                >
-                    {(Object.keys(SORT_LABELS) as BoxSort[]).map((s) => (
-                        <option key={s} value={s}>{SORT_LABELS[s]}</option>
-                    ))}
-                </select>
+                    options={SORT_OPTIONS}
+                    onChange={(v) => onSortChange(v as BoxSort)}
+                    ariaLabel="Сортировка"
+                />
             </div>
 
             {rarities.length > 0 && (

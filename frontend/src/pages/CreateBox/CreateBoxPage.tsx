@@ -3,9 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
+import { Select } from "../../components/UI/Select";
 import "./CreateBoxPage.css";
 
 const CURRENCIES = ["RUB", "USD", "EUR", "GBP", "CNY", "JPY", "KZT", "BYN", "TRY"];
+const CURRENCY_OPTIONS = CURRENCIES.map((c) => ({ value: c, label: c }));
 
 export const CreateBoxPage = () => {
     const navigate = useNavigate();
@@ -111,18 +113,15 @@ export const CreateBoxPage = () => {
                             onChange={(e) => setPrice(e.target.value)}
                         />
                     </label>
-                    <label className="create-box-field">
+                    <div className="create-box-field">
                         <span className="create-box-label">Валюта</span>
-                        <select
-                            className="create-box-input"
+                        <Select
                             value={currency}
-                            onChange={(e) => setCurrency(e.target.value)}
-                        >
-                            {CURRENCIES.map((c) => (
-                                <option key={c} value={c}>{c}</option>
-                            ))}
-                        </select>
-                    </label>
+                            options={CURRENCY_OPTIONS}
+                            onChange={setCurrency}
+                            ariaLabel="Валюта"
+                        />
+                    </div>
                 </div>
 
                 <label className="create-box-field">
