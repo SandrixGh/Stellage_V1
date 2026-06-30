@@ -10,6 +10,7 @@ RUN poetry config virtualenvs.create false \
     && poetry install --no-root --only main
 
 COPY alembic.ini ./
+COPY templates/ ./templates/
 COPY src/ ./src/
 
 ENV PYTHONPATH=/app/src
