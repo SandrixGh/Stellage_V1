@@ -56,6 +56,7 @@ export const InventoryPickerModal = ({ boxes, onPick, onClose, disabled }: Inven
                     onSortChange={setSort}
                 />
 
+                <div className="picker-body">
                 {visible.length > 0 ? (
                     <div className="picker-grid">
                         {visible.map((box) => {
@@ -87,6 +88,7 @@ export const InventoryPickerModal = ({ boxes, onPick, onClose, disabled }: Inven
                             : "Ничего не найдено по заданным фильтрам."}
                     </div>
                 )}
+                </div>
             </div>
         </div>
     );

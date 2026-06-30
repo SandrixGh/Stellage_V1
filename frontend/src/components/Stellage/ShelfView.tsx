@@ -49,8 +49,11 @@ export const ShelfView = ({ shelf, editable, onMove, onOpen, rightPanel, isMain,
 
             if (!q) return true;
             const title = box.template.title?.toLowerCase() ?? "";
-            const serial = String(box.serial_number);
-            return title.includes(q) || serial.includes(q);
+            // Серийный номер — точное совпадение (с опц. префиксом «#»), а не подстрока.
+            const serialQuery = q.replace(/^#/, "");
+            const serialMatch =
+                /^\d+$/.test(serialQuery) && String(box.serial_number) === serialQuery;
+            return title.includes(q) || serialMatch;
         });
     }, [allBoxes, searchQuery, activeRarities]);
 

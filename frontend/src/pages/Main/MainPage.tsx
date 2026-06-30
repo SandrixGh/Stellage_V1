@@ -200,7 +200,15 @@ export const MyStellagePage = () => {
                         />
                     ) : (
                         <div className="shelf-empty-state">
+                            <WireframeBox size={200} />
                             <p>У тебя пока нет стеллажа. Создай первый!</p>
+                            <button
+                                type="button"
+                                className="create-shelf-btn"
+                                onClick={() => setIsCreateOpen(true)}
+                            >
+                                + Создать стеллаж
+                            </button>
                         </div>
                     )}
                 </>

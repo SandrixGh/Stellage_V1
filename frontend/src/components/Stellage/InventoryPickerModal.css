@@ -13,18 +13,48 @@
 
 .picker-modal {
     width: 100%;
-    max-width: 640px;
-    max-height: 86vh;
-    overflow-y: auto;
+    max-width: 820px;
+    max-height: 88vh;
+    /* Скроллится только .picker-body — шапка/фильтры остаются на месте,
+       а бегунок живёт внутри панели, а не «рядом» в скруглённом углу. */
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding: 28px;
+    padding: 32px;
     border-radius: 28px;
     /* Непрозрачная тёмная панель. */
     background: #141310;
     border: 1px solid rgba(215, 208, 179, 0.2);
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+}
+
+/* Прокручиваемая область со списком коробок. */
+.picker-body {
+    flex: 1;
+    min-height: 280px;
+    overflow-y: auto;
+    /* Внутренний отступ под бегунок, чтобы он не наезжал на контент. */
+    padding-right: 6px;
+    scrollbar-gutter: stable;
+}
+
+.picker-body::-webkit-scrollbar {
+    width: 10px;
+}
+
+.picker-body::-webkit-scrollbar-thumb {
+    background: rgba(215, 208, 179, 0.25);
+    border-radius: 999px;
+    /* Прозрачная рамка через padding-box делает бегунок «вписанным» внутрь. */
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+.picker-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(215, 208, 179, 0.42);
+    background-clip: padding-box;
+    border: 3px solid transparent;
 }
 
 .picker-head {

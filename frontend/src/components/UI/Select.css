@@ -55,6 +55,8 @@
     list-style: none;
     max-height: 280px;
     overflow-y: auto;
+    /* Резервируем место под бегунок, чтобы он не «выпадал» в скруглённый угол. */
+    scrollbar-gutter: stable;
     border-radius: 14px;
     background: #14130f;
     border: 1px solid rgba(215, 208, 179, 0.22);
@@ -83,12 +85,20 @@
     font-weight: 600;
 }
 
-/* Тонкий бежевый скроллбар внутри длинного списка (валюты). */
+/* Тонкий бежевый скроллбар внутри длинного списка (валюты), вписанный в панель. */
 .ui-select-menu::-webkit-scrollbar {
-    width: 8px;
+    width: 10px;
 }
 
 .ui-select-menu::-webkit-scrollbar-thumb {
-    background: rgba(215, 208, 179, 0.2);
-    border-radius: 8px;
+    background: rgba(215, 208, 179, 0.25);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+.ui-select-menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(215, 208, 179, 0.42);
+    background-clip: padding-box;
+    border: 3px solid transparent;
 }

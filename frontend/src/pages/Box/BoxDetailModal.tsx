@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
-import { rarityGlow, rarityKey } from "../../utils/rarity";
+import { rarityKey } from "../../utils/rarity";
+import { resolveRarityVisual } from "../../data/mockTemplates";
 import "./BoxDetailModal.css";
 
 interface BoxDetailModalProps {
@@ -49,6 +50,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
 
     const { template } = box;
     const key = rarityKey(template.rarity);
+    const { rarityGlow: glow, boxColor } = resolveRarityVisual(template.rarity ?? "common");
     const contentEntries = Object.entries(box.content ?? {});
 
     return createPortal(
@@ -64,13 +66,16 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                 </button>
 
                 <div className="box-modal-visual">
-                    <WireframeBox size={150} rarityGlow={rarityGlow(template.rarity)} />
+                    <WireframeBox size={150} rarityGlow={glow} color={boxColor} />
                 </div>
 
                 <div className="box-modal-body">
                     <div className="box-modal-head">
                         <h2 className="box-modal-title">{template.title}</h2>
-                        <span className={`box-modal-rarity rarity-tag-${key}`}>
+                        <span
+                            className={`box-modal-rarity rarity-tag-${key}`}
+                            style={{ color: boxColor }}
+                        >
                             {template.rarity}
                         </span>
                     </div>

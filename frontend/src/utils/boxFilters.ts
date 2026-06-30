@@ -34,8 +34,12 @@ export const filterBoxes = (boxes: Box[], opts: BoxFilterOptions = {}): Box[] =>
         }
         if (!q) return true;
         const title = box.template.title?.toLowerCase() ?? "";
-        const serial = String(box.serial_number);
-        return title.includes(q) || serial.includes(q);
+        // Серийный номер ищем по ТОЧНОМУ совпадению (допускаем префикс «#»),
+        // иначе «1» выдавал бы все коробки, чей номер просто содержит 1.
+        const serialQuery = q.replace(/^#/, "");
+        const serialMatch =
+            /^\d+$/.test(serialQuery) && String(box.serial_number) === serialQuery;
+        return title.includes(q) || serialMatch;
     });
 
     const sorted = [...filtered];

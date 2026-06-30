@@ -2,15 +2,8 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "./WireframeBox";
+import { resolveRarityVisual } from "../../data/mockTemplates";
 import "./ShelfBoard.css";
-
-/** Сопоставление редкости коробки с цветом свечения wireframe. */
-const rarityGlowMap: Record<string, "rare" | "golden" | "dev" | null> = {
-    rare: "rare",
-    golden: "golden",
-    "developer's": "dev",
-    dev: "dev",
-};
 
 interface ShelfBoardProps {
     boxes: Box[];
@@ -237,7 +230,10 @@ export const ShelfBoard = ({
             {placed.map((p) => {
                 const isDragging = editable && drag?.id === p.box.id && drag.moved;
                 const rarityKey = p.box.template.rarity?.toLowerCase() ?? "";
-                const rarityGlow = rarityGlowMap[rarityKey] ?? null;
+                // Тот же визуал, что в ленте (TemplateCard): цвет линий + свечение.
+                const { rarityGlow, boxColor } = resolveRarityVisual(
+                    p.box.template.rarity ?? "common"
+                );
                 const boardW = cellWidth * colCount;
                 const boardH = rowCount * ROW_HEIGHT;
                 const cellW = cellWidth || 0;
@@ -262,13 +258,16 @@ export const ShelfBoard = ({
                         onPointerDown={(e) => handlePointerDown(e, p)}
                     >
                         <div className="shelf-cell-inner">
-                            <WireframeBox size={80} rarityGlow={rarityGlow} />
+                            <WireframeBox size={80} rarityGlow={rarityGlow} color={boxColor} />
                         </div>
                         <div className="shelf-box-label">
                             <span className="shelf-box-name">
                                 {p.box.template.title}
                             </span>
-                            <span className={`shelf-box-rarity rarity-tag-${rarityKey}`}>
+                            <span
+                                className={`shelf-box-rarity rarity-tag-${rarityKey}`}
+                                style={{ color: boxColor }}
+                            >
                                 {p.box.template.rarity}
                             </span>
                         </div>
