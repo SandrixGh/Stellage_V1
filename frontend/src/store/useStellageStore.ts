@@ -140,7 +140,7 @@ export const useStellageStore = create<StellageState>((set, get) => ({
                 title: data.title,
                 description: data.description ?? null,
                 price: data.price ?? 0,
-                currency: data.currency ?? "RUB",
+                currency: (data.currency ?? "RUB").toLowerCase(),
                 content: data.content ?? null,
             });
             await get().fetchInstances();

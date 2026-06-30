@@ -38,8 +38,6 @@
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    padding-top: 14px;
-    border-top: 1px solid rgba(215, 208, 179, 0.1);
 }
 
 .shelf-sidebar-actions .badge {

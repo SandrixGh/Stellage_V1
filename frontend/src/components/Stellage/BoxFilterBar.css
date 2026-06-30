@@ -32,18 +32,31 @@
 }
 
 .box-filter-sort {
-    padding: 12px 16px;
+    padding: 12px 40px 12px 16px;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.03);
+    background-color: rgba(255, 255, 255, 0.05);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23D7D0B7' stroke-opacity='0.5' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
     border: 1px solid rgba(215, 208, 179, 0.15);
     color: #D7D0B7;
     font-size: 14px;
+    font-family: inherit;
     outline: none;
     cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    transition: border-color 0.2s ease;
+}
+
+.box-filter-sort:hover,
+.box-filter-sort:focus {
+    border-color: rgba(215, 208, 179, 0.4);
 }
 
 .box-filter-sort option {
-    background: #121212;
+    background: #1a1916;
     color: #D7D0B7;
 }
 

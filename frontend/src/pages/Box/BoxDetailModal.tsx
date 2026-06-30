@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { rarityGlow, rarityKey } from "../../utils/rarity";
@@ -50,7 +51,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const key = rarityKey(template.rarity);
     const contentEntries = Object.entries(box.content ?? {});
 
-    return (
+    return createPortal(
         <div className="box-modal-overlay" onClick={onClose}>
             <div className="box-modal" onClick={(e) => e.stopPropagation()}>
                 <button
@@ -116,6 +117,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

@@ -119,14 +119,13 @@
     border: 1px solid rgba(215, 208, 179, 0.15);
     color: rgba(215, 208, 179, 0.7);
     text-decoration: none;
-    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.4s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .settings-link:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(215, 208, 179, 0.35);
     color: #D7D0B7;
-    transform: rotate(45deg);
 }
 
 .settings-link.active {
@@ -137,6 +136,11 @@
 
 .settings-icon {
     display: block;
+    transition: transform 0.4s ease;
+}
+
+.settings-link:hover .settings-icon {
+    transform: rotate(45deg);
 }
 
 .user-profile {
