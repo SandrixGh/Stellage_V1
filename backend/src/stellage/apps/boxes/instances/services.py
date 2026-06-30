@@ -56,6 +56,21 @@ class InstanceService:
         )
 
 
+    async def update_box(
+        self,
+        user: UserVerifySchema,
+        instance_id: uuid.UUID,
+        content: dict | None,
+        update_content: bool,
+    ) -> BoxInstanceWithTemplate:
+        return await self.manager.update_box(
+            user_id=user.id,
+            instance_id=instance_id,
+            content=content,
+            update_content=update_content,
+        )
+
+
     async def get_instances(
         self,
         user: UserVerifySchema,

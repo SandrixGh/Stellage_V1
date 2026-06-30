@@ -10,10 +10,16 @@ from stellage.apps.boxes.instances.schemas import (
     BoxInstanceCreate,
     BoxInstanceWithTemplate,
     BoxPositionUpdate,
+    BoxUpdate,
     CustomBoxCreate,
 )
 from stellage.apps.boxes.instances.services import InstanceService
-from stellage.apps.boxes.templates.schemas import BoxTemplateReturn, BoxTemplateCreate, BoxTemplateReturnWithInstances
+from stellage.apps.boxes.templates.schemas import (
+    BoxTemplateReturn,
+    BoxTemplateCreate,
+    BoxTemplatePatch,
+    BoxTemplateReturnWithInstances,
+)
 from stellage.apps.boxes.templates.services import TemplateService
 from stellage.database.enums.box_rarity import BoxRarity
 
@@ -156,6 +162,59 @@ async def create_box(
             shelf_id=None,
             content=data.content,
         ),
+    )
+
+
+@router.patch(
+    path="/update-box",
+    response_model=BoxInstanceWithTemplate,
+    status_code=status.HTTP_200_OK,
+)
+async def update_box(
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user),
+    ],
+    template_service: Annotated[
+        TemplateService,
+        Depends(TemplateService),
+    ],
+    instance_service: Annotated[
+        InstanceService,
+        Depends(InstanceService),
+    ],
+    data: BoxUpdate,
+    instance_id: uuid.UUID,
+) -> BoxInstanceWithTemplate:
+    # Сначала убеждаемся, что коробка принадлежит пользователю (иначе 404).
+    box = await instance_service.get_instance_by_id(
+        user=user,
+        instance_id=instance_id,
+    )
+
+    # Поля шаблона правит только создатель коробки (update_template форсит
+    # creator_id == user.id). Редкость меняем только суперюзеру.
+    template_fields = data.model_dump(
+        include={"title", "description", "price", "currency", "rarity"},
+        exclude_none=True,
+    )
+    if not user.is_superuser:
+        template_fields.pop("rarity", None)
+
+    if template_fields:
+        await template_service.update_template(
+            template_id=box.template_id,
+            creator_id=user.id,
+            data=BoxTemplatePatch(**template_fields),
+        )
+
+    # content обновляем, только если он реально пришёл в запросе (иначе не трогаем).
+    update_content = "content" in data.model_fields_set
+    return await instance_service.update_box(
+        user=user,
+        instance_id=instance_id,
+        content=data.content,
+        update_content=update_content,
     )
 
 

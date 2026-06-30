@@ -4,7 +4,12 @@ from typing import Annotated
 from fastapi import Depends
 
 from stellage.apps.boxes.templates.repositories import BoxTemplateRepository
-from stellage.apps.boxes.templates.schemas import BoxTemplateCreate, BoxTemplateReturn, BoxTemplateReturnWithInstances
+from stellage.apps.boxes.templates.schemas import (
+    BoxTemplateCreate,
+    BoxTemplatePatch,
+    BoxTemplateReturn,
+    BoxTemplateReturnWithInstances,
+)
 
 
 class TemplateManager:
@@ -23,6 +28,19 @@ class TemplateManager:
         data: BoxTemplateCreate,
     ) -> BoxTemplateReturn:
         return await self.repository.create_template(
+            data=data,
+        )
+
+
+    async def update_template(
+        self,
+        template_id: uuid.UUID,
+        creator_id: uuid.UUID,
+        data: BoxTemplatePatch,
+    ) -> BoxTemplateReturn:
+        return await self.repository.update_template(
+            template_id=template_id,
+            creator_id=creator_id,
             data=data,
         )
 

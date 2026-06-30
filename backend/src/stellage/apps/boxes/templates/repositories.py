@@ -2,12 +2,17 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 from starlette import status
 
-from stellage.apps.boxes.templates.schemas import BoxTemplateCreate, BoxTemplateReturn, BoxTemplateReturnWithInstances
+from stellage.apps.boxes.templates.schemas import (
+    BoxTemplateCreate,
+    BoxTemplatePatch,
+    BoxTemplateReturn,
+    BoxTemplateReturnWithInstances,
+)
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.models import BoxTemplate
 
@@ -50,6 +55,48 @@ class BoxTemplateRepository:
             except Exception as e:
                 await session.rollback()
                 raise e
+
+
+    async def update_template(
+        self,
+        template_id: uuid.UUID,
+        creator_id: uuid.UUID,
+        data: BoxTemplatePatch,
+    ) -> BoxTemplateReturn:
+        """Обновляет поля шаблона. Менять можно только СВОЙ шаблон (creator_id):
+        каталожные/чужие шаблоны редактировать нельзя (404 — как будто не найден)."""
+        values = data.model_dump(exclude_none=True)
+
+        async with self.db.db_session() as session:
+            if values:
+                update_query = (
+                    update(self.template_model)
+                    .where(
+                        self.template_model.id == template_id,
+                        self.template_model.creator_id == creator_id,
+                    )
+                    .values(**values)
+                )
+                await session.execute(update_query)
+
+            select_query = (
+                select(self.template_model)
+                .where(
+                    self.template_model.id == template_id,
+                    self.template_model.creator_id == creator_id,
+                )
+            )
+            result = await session.execute(select_query)
+            template = result.scalar_one_or_none()
+
+            if not template:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Template not found or access denied",
+                )
+
+            await session.commit()
+            return BoxTemplateReturn.model_validate(template)
 
 
     async def get_templates(

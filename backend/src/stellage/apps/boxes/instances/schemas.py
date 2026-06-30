@@ -82,6 +82,18 @@ class BoxInstanceCreate(BoxInstanceBase, GetTemplateId, GetShelfId):
     pass
 
 
+class BoxUpdate(BaseModel):
+    """Частичное редактирование коробки владельцем: поля шаблона (title/description/
+    price/currency, rarity — только суперюзеру) + content экземпляра. Любое поле
+    опционально; content различаем по model_fields_set, чтобы не затереть его None."""
+    title: str | None = None
+    description: str | None = None
+    price: Decimal | None = None
+    currency: CurrencyEnum | None = None
+    rarity: BoxRarity | None = None
+    content: dict | None = None
+
+
 class CustomBoxCreate(BaseModel):
     """Создание пользовательской коробки: новый шаблон + 1 экземпляр в инвентарь.
 

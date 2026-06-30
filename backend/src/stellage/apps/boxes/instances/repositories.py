@@ -230,6 +230,43 @@ class BoxInstanceRepository:
                 )
 
 
+    async def update_content(
+        self,
+        user_id: uuid.UUID,
+        instance_id: uuid.UUID,
+        content: dict | None,
+    ) -> BoxInstanceWithTemplate:
+        """Обновляет content экземпляра (владелец) и возвращает свежий снимок
+        с подгруженным шаблоном — чтобы правки шаблона тоже сразу отразились."""
+        async with self.db.db_session() as session:
+            update_query = (
+                update(self.instance_model)
+                .where(
+                    self.instance_model.user_id == user_id,
+                    self.instance_model.id == instance_id,
+                )
+                .values(content=content)
+            )
+            await session.execute(update_query)
+
+            select_query = (
+                select(self.instance_model)
+                .where(self.instance_model.id == instance_id)
+                .options(joinedload(self.instance_model.template))
+            )
+            result = await session.execute(select_query)
+            box = result.unique().scalar_one_or_none()
+
+            if not box:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Box not found or access denied",
+                )
+
+            await session.commit()
+            return BoxInstanceWithTemplate.model_validate(box)
+
+
     async def get_box_instances(
         self,
         user_id: uuid.UUID

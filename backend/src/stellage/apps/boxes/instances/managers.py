@@ -1,7 +1,7 @@
 import uuid
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 
 from stellage.apps.boxes.instances.cache_managers import InstanceCacheManager
 from stellage.apps.boxes.instances.repositories import BoxInstanceRepository
@@ -147,6 +147,47 @@ class InstanceManager:
         )
 
         return updated_instance
+
+
+    async def update_box(
+        self,
+        user_id: uuid.UUID,
+        instance_id: uuid.UUID,
+        content: dict | None,
+        update_content: bool,
+    ) -> BoxInstanceWithTemplate:
+        """Сбрасывает кэши экземпляра/полки и возвращает свежий снимок. content
+        пишется только когда update_content=True (иначе правка шаблона не должна
+        затирать содержимое); при False — просто перечитываем актуальные данные."""
+        await self.refresh_old_shelf(
+            user_id=user_id,
+            instance_id=instance_id,
+        )
+        await self.instance_cache_manager.delete_instance(
+            instance_id=instance_id,
+            user_id=user_id,
+        )
+
+        if update_content:
+            box = await self.repository.update_content(
+                user_id=user_id,
+                instance_id=instance_id,
+                content=content,
+            )
+        else:
+            box = await self.repository.get_box_instance_by_id(
+                user_id=user_id,
+                instance_id=instance_id,
+            )
+
+        if not box:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Box not found or access denied",
+            )
+
+        await self.instance_cache_manager.store_instance(instance=box)
+        return box
 
 
     async def get_instances(
