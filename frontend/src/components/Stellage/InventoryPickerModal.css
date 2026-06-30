@@ -6,9 +6,9 @@
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: rgba(4, 4, 4, 0.72);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }
 
 .picker-modal {
@@ -21,11 +21,10 @@
     gap: 16px;
     padding: 28px;
     border-radius: 28px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(215, 208, 179, 0.15);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+    /* Непрозрачная тёмная панель. */
+    background: #141310;
+    border: 1px solid rgba(215, 208, 179, 0.2);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
 }
 
 .picker-head {

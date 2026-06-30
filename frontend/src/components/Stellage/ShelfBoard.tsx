@@ -163,7 +163,10 @@ export const ShelfBoard = ({
         const boxTop = p.row * ROW_HEIGHT;
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+        // Захват ставим на сам board (стабильный элемент), а не на e.target —
+        // иначе при ре-рендере коробки во время drag захват теряется и
+        // pointermove перестаёт приходить (перетаскивание «залипает»).
+        el.setPointerCapture?.(e.pointerId);
         setDrag({
             id: p.box.id,
             pointerId: e.pointerId,

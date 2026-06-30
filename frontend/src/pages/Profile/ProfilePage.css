@@ -15,9 +15,9 @@
     display: flex;
     align-items: center;
     gap: 28px;
-    padding: 8px 0 36px;
+    padding: 4px 0 20px;
     border-bottom: 1px solid rgba(215, 208, 179, 0.08);
-    margin-bottom: 32px;
+    margin-bottom: 18px;
 }
 
 .profile-avatar {
@@ -429,15 +429,7 @@
 
 /* ===== READ-ONLY SHELF SECTION ===== */
 .profile-shelf-section {
-    margin-top: 8px;
-}
-
-.profile-shelf-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: #D7D0B7;
-    margin: 0 0 18px 0;
+    margin-top: 0;
 }
 
 .profile-shelf-empty {

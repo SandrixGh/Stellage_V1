@@ -62,7 +62,6 @@ export const ProfilePage = () => {
             </header>
 
             <section className="profile-shelf-section">
-                <h2 className="profile-shelf-title">Стеллаж</h2>
                 {mainShelf ? (
                     <ShelfView
                         shelf={mainShelf}
