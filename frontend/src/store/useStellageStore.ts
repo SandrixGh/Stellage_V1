@@ -14,6 +14,17 @@ export interface CreateBoxInput {
     rarity?: string;
 }
 
+/** Частичное редактирование коробки владельцем. Любое поле опционально —
+ *  меняется только переданное (поля шаблона правит лишь создатель коробки). */
+export interface UpdateBoxInput {
+    title?: string;
+    description?: string | null;
+    price?: number;
+    currency?: string;
+    rarity?: string;
+    content?: Record<string, unknown> | null;
+}
+
 interface StellageState {
     shelves: Shelf[];
     mainShelf: Shelf | null;
@@ -36,6 +47,7 @@ interface StellageState {
     setMainShelf: (shelfId: string) => Promise<void>;
     acquireBox: (templateId: string) => Promise<void>;
     createBox: (data: CreateBoxInput) => Promise<Box | null>;
+    updateBox: (instanceId: string, data: UpdateBoxInput) => Promise<Box | null>;
 
     moveBox: (instanceId: string, shelfId: string | null) => Promise<void>;
     updateBoxPosition: (instanceId: string, shelf_row: number, shelf_col: number, shelfId?: string) => Promise<void>;
@@ -166,6 +178,32 @@ export const useStellageStore = create<StellageState>((set, get) => ({
         }
     },
 
+    updateBox: async (instanceId: string, data: UpdateBoxInput) => {
+        set({ isLoading: true, error: null });
+        try {
+            // Отправляем только реально переданные поля (PATCH-семантика).
+            const body: Record<string, unknown> = {};
+            if (data.title !== undefined) body.title = data.title;
+            if (data.description !== undefined) body.description = data.description;
+            if (data.price !== undefined) body.price = data.price;
+            if (data.currency !== undefined) body.currency = data.currency.toLowerCase();
+            if (data.rarity !== undefined) body.rarity = data.rarity;
+            if (data.content !== undefined) body.content = data.content;
+
+            const res = await api.patch<Box>("/boxes/update-box", body, {
+                params: { instance_id: instanceId },
+            });
+            // Ресинхронизируем инвентарь и главную полку, чтобы правки названия/
+            // редкости сразу отразились и на доске, и в карточках.
+            await Promise.all([get().fetchInstances(), get().fetchMainShelf()]);
+            set({ isLoading: false });
+            return res.data;
+        } catch (err: any) {
+            set({ error: "Не удалось сохранить изменения", isLoading: false });
+            return null;
+        }
+    },
+
     createShelf: async (title: string, isPublic: boolean) => {
         set({ isLoading: true, error: null });
         try {
@@ -272,10 +310,13 @@ export const useStellageStore = create<StellageState>((set, get) => ({
             await api.delete("/boxes/delete-box-instance", {
                 params: { instance_id: instanceId }
             });
-            
+
+            // Оптимистично убираем из текущей доски, затем ресинхронизируем
+            // инвентарь и главную полку (коробка могла стоять на стеллаже).
             set((state) => ({
                 currentBoxes: state.currentBoxes.filter(b => b.id !== instanceId)
             }));
+            await Promise.all([get().fetchInstances(), get().fetchMainShelf()]);
         } catch (err) {
             set({ error: "Сессия истекла или недостаточно прав" });
         }

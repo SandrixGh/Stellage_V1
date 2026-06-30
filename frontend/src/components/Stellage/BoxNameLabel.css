@@ -1,0 +1,109 @@
+.box-name-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.box-name-label > span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+/* Кнопка «открыть полностью» — компактная лупа рядом с обрезанным именем. */
+.box-name-expand {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    color: rgba(215, 208, 179, 0.55);
+    background: rgba(215, 208, 179, 0.06);
+    border: 1px solid rgba(215, 208, 179, 0.16);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.box-name-expand:hover {
+    color: #D7D0B7;
+    background: rgba(215, 208, 179, 0.12);
+    border-color: rgba(215, 208, 179, 0.32);
+}
+
+/* ── Попап с полным названием ── */
+.box-name-pop-overlay {
+    font-family: 'Syne', -apple-system, system-ui, sans-serif;
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    animation: box-name-pop-fade 0.16s ease;
+}
+
+@keyframes box-name-pop-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.box-name-pop {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 26px 26px 22px;
+    border-radius: 22px;
+    background: #141310;
+    border: 1px solid rgba(215, 208, 179, 0.2);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+}
+
+.box-name-pop-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(215, 208, 179, 0.45);
+}
+
+.box-name-pop-text {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.45;
+    color: #D7D0B7;
+    /* Длинное имя без пробелов не должно вылезать за пределы попапа. */
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.box-name-pop-close {
+    align-self: flex-end;
+    margin-top: 4px;
+    padding: 9px 18px;
+    border-radius: 10px;
+    background: rgba(215, 208, 179, 0.1);
+    border: 1px solid rgba(215, 208, 179, 0.25);
+    color: #D7D0B7;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.box-name-pop-close:hover {
+    background: rgba(215, 208, 179, 0.16);
+    border-color: rgba(215, 208, 179, 0.4);
+}

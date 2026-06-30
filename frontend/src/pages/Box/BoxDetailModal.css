@@ -83,6 +83,10 @@
     font-size: 24px;
     font-weight: 700;
     color: #D7D0B7;
+    /* Длинное имя без пробелов переносим, а не выпихиваем за край (был гор. скролл). */
+    min-width: 0;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .box-modal-rarity {
@@ -180,4 +184,122 @@
     font-size: 13px;
     color: rgba(215, 208, 179, 0.5);
     text-align: center;
+}
+
+/* ── Owner actions row ── */
+.box-modal-actions {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(215, 208, 179, 0.08);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.box-modal-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 11px 16px;
+    border-radius: 12px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease,
+        opacity 0.18s ease;
+}
+
+.box-modal-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.box-modal-btn.ghost {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(215, 208, 179, 0.2);
+    color: rgba(215, 208, 179, 0.85);
+}
+
+.box-modal-btn.ghost:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(215, 208, 179, 0.4);
+    color: #D7D0B7;
+}
+
+.box-modal-btn.primary {
+    background: rgba(215, 208, 179, 0.16);
+    border: 1px solid rgba(215, 208, 179, 0.4);
+    color: #D7D0B7;
+}
+
+.box-modal-btn.primary:hover:not(:disabled) {
+    background: rgba(215, 208, 179, 0.24);
+    border-color: rgba(215, 208, 179, 0.6);
+}
+
+.box-modal-btn.danger {
+    background: rgba(255, 92, 92, 0.08);
+    border: 1px solid rgba(255, 92, 92, 0.32);
+    color: #ff8d8d;
+}
+
+.box-modal-btn.danger:hover:not(:disabled) {
+    background: rgba(255, 92, 92, 0.16);
+    border-color: rgba(255, 92, 92, 0.55);
+    color: #ffb0b0;
+}
+
+/* ── Edit form ── */
+.box-modal-edit-title {
+    margin: 0 0 18px;
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #D7D0B7;
+}
+
+.box-modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 14px;
+}
+
+.box-modal-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.box-modal-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: rgba(215, 208, 179, 0.55);
+}
+
+.box-modal-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(215, 208, 179, 0.15);
+    color: #D7D0B7;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.box-modal-input:focus {
+    border-color: rgba(215, 208, 179, 0.4);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.box-modal-textarea {
+    resize: vertical;
+    min-height: 56px;
+    line-height: 1.5;
 }

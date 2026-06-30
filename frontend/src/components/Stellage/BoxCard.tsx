@@ -1,17 +1,13 @@
 import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "./WireframeBox";
+import { BoxNameLabel } from "./BoxNameLabel";
+import { resolveRarityVisual } from "../../data/mockTemplates";
 import "./BoxCard.css";
-
-const rarityGlowMap: Record<string, "rare" | "golden" | "dev" | null> = {
-    rare: "rare",
-    golden: "golden",
-    "developer's": "dev",
-    dev: "dev",
-};
 
 export const BoxCard = ({ box }: { box: Box }) => {
     const rarityKey = box.template.rarity?.toLowerCase();
-    const rarityGlow = rarityGlowMap[rarityKey] ?? null;
+    // Тот же визуал, что в ленте: цветные линии wireframe + свечение по редкости.
+    const { rarityGlow, boxColor } = resolveRarityVisual(box.template.rarity ?? "common");
 
     return (
         <div className={`box-card rarity-${rarityKey}`}>
@@ -23,13 +19,15 @@ export const BoxCard = ({ box }: { box: Box }) => {
             </div>
 
             <div className="box-card-visual">
-                <WireframeBox size={110} rarityGlow={rarityGlow} />
+                <WireframeBox size={110} rarityGlow={rarityGlow} color={boxColor} />
             </div>
 
             <div className="box-card-info">
-                <h3 className="box-title">{box.template.title}</h3>
+                <h3 className="box-title">
+                    <BoxNameLabel name={box.template.title} max={22} className="box-title-text" />
+                </h3>
                 <div className="box-card-meta">
-                    <span className={`rarity-tag rarity-tag-${rarityKey}`}>
+                    <span className={`rarity-tag rarity-tag-${rarityKey}`} style={{ color: boxColor }}>
                         {box.template.rarity}
                     </span>
                     <span className={`status-tag ${box.is_sealed}`}>

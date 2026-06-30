@@ -7,6 +7,9 @@ export interface BoxTemplate {
     rarity: string;
     // Автор коробки: username/имя создателя, либо null для коробок платформы.
     owner_username?: string | null;
+    // id создателя — фронт сравнивает с текущим юзером, чтобы показать
+    // редактирование (доступно только создателю коробки). null = коробка платформы.
+    creator_id?: string | null;
     created_at: string;
     updated_at: string;
 }
