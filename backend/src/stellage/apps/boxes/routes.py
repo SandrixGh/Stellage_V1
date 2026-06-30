@@ -6,10 +6,16 @@ from starlette import status
 
 from stellage.apps.auth.depends import get_current_user
 from stellage.apps.auth.schemas import UserVerifySchema
-from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate, BoxPositionUpdate
+from stellage.apps.boxes.instances.schemas import (
+    BoxInstanceCreate,
+    BoxInstanceWithTemplate,
+    BoxPositionUpdate,
+    CustomBoxCreate,
+)
 from stellage.apps.boxes.instances.services import InstanceService
 from stellage.apps.boxes.templates.schemas import BoxTemplateReturn, BoxTemplateCreate, BoxTemplateReturnWithInstances
 from stellage.apps.boxes.templates.services import TemplateService
+from stellage.database.enums.box_rarity import BoxRarity
 
 router = APIRouter(
     prefix="/boxes",
@@ -106,6 +112,47 @@ async def create_box_instance(
     return await service.create_instance(
         user=user,
         data=data
+    )
+
+
+@router.post(
+    path="/create-box",
+    response_model=BoxInstanceWithTemplate,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_box(
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user),
+    ],
+    template_service: Annotated[
+        TemplateService,
+        Depends(TemplateService),
+    ],
+    instance_service: Annotated[
+        InstanceService,
+        Depends(InstanceService),
+    ],
+    data: CustomBoxCreate,
+) -> BoxInstanceWithTemplate:
+    # Создаём новый шаблон под коробку — редкость всегда COMMON (форсится сервером,
+    # см. модерацию в CLAUDE.md), затем кладём один экземпляр в инвентарь владельца.
+    template = await template_service.create_template(
+        data=BoxTemplateCreate(
+            title=data.title,
+            description=data.description,
+            price=data.price,
+            currency=data.currency,
+            rarity=BoxRarity.COMMON,
+        )
+    )
+    return await instance_service.create_instance(
+        user=user,
+        data=BoxInstanceCreate(
+            template_id=template.id,
+            shelf_id=None,
+            content=data.content,
+        ),
     )
 
 

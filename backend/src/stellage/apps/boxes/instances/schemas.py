@@ -1,10 +1,12 @@
 from typing import TYPE_CHECKING
 import datetime
 import uuid
+from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
 
 from stellage.database.enums.box_sealing import SealingEnum
+from stellage.database.enums.currency import CurrencyEnum
 from stellage.database.enums.verification import VerifyEnum
 from stellage.database.enums.visibility import VisibilityEnum
 
@@ -77,6 +79,19 @@ class BoxInstanceUpdate(BaseModel):
 
 class BoxInstanceCreate(BoxInstanceBase, GetTemplateId, GetShelfId):
     pass
+
+
+class CustomBoxCreate(BaseModel):
+    """Создание пользовательской коробки: новый шаблон + 1 экземпляр в инвентарь.
+
+    Редкость не принимается от клиента — новые коробки всегда COMMON (форсится
+    на бэкенде). Готовый экземпляр кладётся в инвентарь (shelf_id=None).
+    """
+    title: str
+    description: str | None = None
+    price: Decimal = Decimal("0")
+    currency: CurrencyEnum = CurrencyEnum.RUB
+    content: dict | None = None
 
 
 from stellage.apps.boxes.templates.schemas import BoxTemplateReturn
