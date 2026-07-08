@@ -128,13 +128,15 @@ export const WireframeBox = ({
     size = 120,
     rarityGlow = null,
 }: WireframeBoxProps) => {
+    // Minimalist direction: keep just a faint tint of rarity light so the mark
+    // still reads as "rare/golden/dev", but drop the neon-cyberpunk bloom.
     const glowColor =
         rarityGlow === "golden"
-            ? "rgba(230, 200, 120, 0.55)"
+            ? "rgba(230, 200, 120, 0.22)"
             : rarityGlow === "rare"
-            ? "rgba(120, 170, 255, 0.55)"
+            ? "rgba(120, 170, 255, 0.22)"
             : rarityGlow === "dev"
-            ? "rgba(200, 130, 255, 0.55)"
+            ? "rgba(200, 130, 255, 0.22)"
             : null;
 
     const filterId = `glow-${rarityGlow ?? "default"}`;
@@ -153,7 +155,7 @@ export const WireframeBox = ({
             {glowColor && (
                 <defs>
                     <filter id={filterId} x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feGaussianBlur stdDeviation="1.1" result="blur" />
                         <feFlood floodColor={glowColor} result="color" />
                         <feComposite in="color" in2="blur" operator="in" result="glow" />
                         <feMerge>

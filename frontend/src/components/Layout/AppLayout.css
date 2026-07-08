@@ -4,42 +4,10 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background-color: #080808;
+    /* Minimalist direction: flat, calm warm-black ground — no blurred orbs. */
+    background-color: #0B0B0A;
     font-family: 'Syne', -apple-system, system-ui, sans-serif;
     overflow-x: hidden;
-}
-
-/* ===== BACKGROUND ORBS ===== */
-.app-orb {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(90px);
-    pointer-events: none;
-    z-index: 0;
-}
-
-.app-orb-1 {
-    width: 560px;
-    height: 560px;
-    background: radial-gradient(circle, rgba(215, 208, 179, 0.08) 0%, transparent 65%);
-    top: -120px;
-    right: -60px;
-}
-
-.app-orb-2 {
-    width: 480px;
-    height: 480px;
-    background: radial-gradient(circle, rgba(215, 208, 179, 0.05) 0%, transparent 65%);
-    bottom: -80px;
-    left: -80px;
-}
-
-.app-orb-3 {
-    width: 380px;
-    height: 380px;
-    background: radial-gradient(circle, rgba(215, 208, 179, 0.04) 0%, transparent 65%);
-    top: 40%;
-    left: 45%;
 }
 
 /* ===== CONTENT ===== */

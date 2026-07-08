@@ -8,10 +8,10 @@
     display: flex;
     align-items: center;
     box-sizing: border-box;
-    background: rgba(12, 12, 12, 0.72);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(215, 208, 179, 0.12);
+    background: rgba(11, 11, 10, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(215, 208, 179, 0.10);
 }
 
 .header-container {
@@ -38,7 +38,8 @@
     font-family: 'Syne', sans-serif;
     font-size: 22px;
     font-weight: 700;
-    letter-spacing: 0.4px;
+    /* Small, deliberate tracking between the letters of the wordmark. */
+    letter-spacing: 0.14em;
     line-height: 1.2;
 }
 
@@ -210,7 +211,6 @@
 .login-btn:hover {
     background: rgba(215, 208, 179, 0.13);
     border-color: rgba(215, 208, 179, 0.4);
-    box-shadow: 0 0 20px rgba(215, 208, 179, 0.1);
 }
 
 /* ===== RESPONSIVE ===== */

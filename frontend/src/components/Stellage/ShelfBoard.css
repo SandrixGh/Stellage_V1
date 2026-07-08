@@ -3,9 +3,9 @@
 .shelf-board {
     position: relative;
     width: 100%;
-    border-radius: 28px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(215, 208, 179, 0.1);
+    border-radius: 20px;
+    background: #100F0D;
+    border: 1px solid rgba(215, 208, 179, 0.09);
     overflow: visible;
     touch-action: none; /* чтобы pointer-drag не конфликтовал со скроллом на тач-экранах */
 }

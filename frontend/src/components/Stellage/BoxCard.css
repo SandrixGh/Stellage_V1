@@ -2,23 +2,21 @@
     display: flex;
     flex-direction: column;
     gap: 0;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.025);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(215, 208, 179, 0.13);
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-                border-color 0.25s ease,
-                box-shadow 0.25s ease;
+    border-radius: 16px;
+    /* Minimalist direction: flat surface, hairline border, no glass/glow. */
+    background: #141311;
+    border: 1px solid rgba(215, 208, 179, 0.10);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.2s ease,
+                background 0.2s ease;
     cursor: pointer;
     overflow: hidden;
 }
 
 .box-card:hover {
-    transform: translateY(-6px);
-    border-color: rgba(215, 208, 179, 0.3);
-    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), 0 0 32px rgba(215, 208, 179, 0.07);
+    transform: translateY(-2px);
+    border-color: rgba(215, 208, 179, 0.22);
+    background: #191714;
 }
 
 /* ── Serial / verified row ── */
@@ -50,9 +48,6 @@
     align-items: center;
     justify-content: center;
     padding: 28px 20px 20px;
-    background: radial-gradient(ellipse at center,
-        rgba(215, 208, 179, 0.055) 0%,
-        transparent 72%);
 }
 
 /* ── Info section ── */
@@ -132,25 +127,27 @@
 
 /* ── Rarity card accents ── */
 .box-card.rarity-rare {
-    border-color: rgba(120, 170, 255, 0.22);
+    border-color: rgba(120, 170, 255, 0.18);
 }
 
 .box-card.rarity-rare:hover {
-    border-color: rgba(120, 170, 255, 0.45);
-    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), 0 0 40px rgba(120, 170, 255, 0.08);
+    border-color: rgba(120, 170, 255, 0.38);
 }
 
 .box-card.rarity-golden {
-    border-color: rgba(230, 200, 120, 0.28);
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4), 0 0 24px rgba(230, 200, 120, 0.07);
+    border-color: rgba(230, 200, 120, 0.20);
 }
 
 .box-card.rarity-golden:hover {
-    border-color: rgba(230, 200, 120, 0.5);
-    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), 0 0 48px rgba(230, 200, 120, 0.12);
+    border-color: rgba(230, 200, 120, 0.42);
 }
 
 .box-card.rarity-developer\'s,
 .box-card.rarity-dev {
-    border-color: rgba(200, 130, 255, 0.28);
+    border-color: rgba(200, 130, 255, 0.20);
+}
+
+.box-card.rarity-developer\'s:hover,
+.box-card.rarity-dev:hover {
+    border-color: rgba(200, 130, 255, 0.40);
 }
