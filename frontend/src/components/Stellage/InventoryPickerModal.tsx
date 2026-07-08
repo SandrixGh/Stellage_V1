@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "./WireframeBox";
 import { BoxFilterBar } from "./BoxFilterBar";
-import { rarityGlow, rarityKey } from "../../utils/rarity";
+import { rarityKey } from "../../utils/rarity";
+import { resolveRarityVisual } from "../../data/mockTemplates";
 import { filterBoxes, collectRarities, type BoxSort } from "../../utils/boxFilters";
 import "./InventoryPickerModal.css";
 
@@ -61,6 +62,7 @@ export const InventoryPickerModal = ({ boxes, onPick, onClose, disabled }: Inven
                     <div className="picker-grid">
                         {visible.map((box) => {
                             const key = rarityKey(box.template.rarity);
+                            const { rarityGlow, boxColor } = resolveRarityVisual(box.template.rarity ?? "common");
                             return (
                                 <button
                                     key={box.id}
@@ -71,7 +73,7 @@ export const InventoryPickerModal = ({ boxes, onPick, onClose, disabled }: Inven
                                     title="Поставить на полку"
                                 >
                                     <div className="picker-item-visual">
-                                        <WireframeBox size={72} rarityGlow={rarityGlow(box.template.rarity)} />
+                                        <WireframeBox size={72} rarityGlow={rarityGlow} color={boxColor} />
                                     </div>
                                     <span className="picker-item-name">{box.template.title}</span>
                                     <span className={`picker-item-rarity rarity-tag-${key}`}>
