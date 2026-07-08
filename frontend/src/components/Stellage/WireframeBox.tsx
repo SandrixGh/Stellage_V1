@@ -128,17 +128,11 @@ export const WireframeBox = ({
     size = 120,
     rarityGlow = null,
 }: WireframeBoxProps) => {
-    // Minimalist direction: keep just a faint tint of rarity light so the mark
-    // still reads as "rare/golden/dev", but drop the neon-cyberpunk bloom.
-    const glowColor =
-        rarityGlow === "golden"
-            ? "rgba(230, 200, 120, 0.22)"
-            : rarityGlow === "rare"
-            ? "rgba(120, 170, 255, 0.22)"
-            : rarityGlow === "dev"
-            ? "rgba(200, 130, 255, 0.22)"
-            : null;
-
+    // Minimalist direction: no neon bloom at all — the box reads as crisp
+    // colored line-art. Rarity is carried by the stroke colour + faint face
+    // fills, not by a glow. (rarityGlow kept in the API for compatibility.)
+    void rarityGlow;
+    const glowColor: string | null = null;
     const filterId = `glow-${rarityGlow ?? "default"}`;
 
     return (
@@ -172,17 +166,17 @@ export const WireframeBox = ({
                 strokeLinecap="round"
                 strokeLinejoin="round"
             >
-                {/* ── Glassy faces (subtle, varied per face for depth) ── */}
-                <path className="wf-face" d={TOP_FILL} fill="currentColor" stroke="none" opacity="0.14" />
-                <path className="wf-face" d={RIGHT_FILL} fill="currentColor" stroke="none" opacity="0.08" />
-                <path className="wf-face" d={FRONT_FILL} fill="currentColor" stroke="none" opacity="0.18" />
+                {/* ── Faint faces (just enough to give the cube a body) ── */}
+                <path className="wf-face" d={TOP_FILL} fill="currentColor" stroke="none" opacity="0.09" />
+                <path className="wf-face" d={RIGHT_FILL} fill="currentColor" stroke="none" opacity="0.045" />
+                <path className="wf-face" d={FRONT_FILL} fill="currentColor" stroke="none" opacity="0.12" />
 
                 {/* ── Hidden edges (one element → no opacity build-up) ── */}
-                <path className="wf-edge wf-edge-hidden" d={HIDDEN} pathLength={1} fill="none" strokeWidth="1.4" opacity="0.38" />
+                <path className="wf-edge wf-edge-hidden" d={HIDDEN} pathLength={1} fill="none" strokeWidth="1.2" opacity="0.34" />
 
-                {/* ── Visible wireframe (cohesive, rounded) ── */}
-                <path className="wf-edge" d={SILHOUETTE} pathLength={1} fill="none" strokeWidth="2.2" />
-                <path className="wf-edge" d={INTERIOR} pathLength={1} fill="none" strokeWidth="2.2" />
+                {/* ── Visible wireframe (crisp, rounded) ── */}
+                <path className="wf-edge" d={SILHOUETTE} pathLength={1} fill="none" strokeWidth="1.8" />
+                <path className="wf-edge" d={INTERIOR} pathLength={1} fill="none" strokeWidth="1.8" />
             </g>
         </svg>
     );

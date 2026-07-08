@@ -15,14 +15,11 @@
     font-size: 15px;
     color: #D7D0B7;
     letter-spacing: -0.2px;
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(215, 208, 179, 0.15);
-    border-radius: 16px;
+    background: #141311;
+    border: 1px solid rgba(215, 208, 179, 0.10);
+    border-radius: 14px;
     outline: none;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease,
-        background 0.3s ease;
+    transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .feed-search-input::placeholder {
@@ -30,9 +27,8 @@
 }
 
 .feed-search-input:focus {
-    border-color: rgba(215, 208, 179, 0.35);
-    background: rgba(255, 255, 255, 0.045);
-    box-shadow: 0 0 0 3px rgba(215, 208, 179, 0.06);
+    border-color: rgba(215, 208, 179, 0.30);
+    background: #17150F;
 }
 
 /* ── Two-column layout: sidebar | content ── */
@@ -50,12 +46,9 @@
     top: 88px;
     box-sizing: border-box;
     padding: 22px 20px;
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(215, 208, 179, 0.15);
-    border-radius: 20px;
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+    background: #141311;
+    border: 1px solid rgba(215, 208, 179, 0.10);
+    border-radius: 16px;
 }
 
 .feed-sidebar-title {
@@ -113,7 +106,6 @@
 
 .feed-filter-option.is-active .feed-filter-dot {
     opacity: 1;
-    box-shadow: 0 0 8px 0 currentColor;
 }
 
 .feed-filter-label {

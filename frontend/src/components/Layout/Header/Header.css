@@ -196,21 +196,26 @@
 
 /* ===== LOGIN BUTTON (guest) ===== */
 .login-btn {
-    padding: 10px 22px;
-    background: rgba(215, 208, 179, 0.07);
-    color: #D7D0B7;
-    border: 1px solid rgba(215, 208, 179, 0.2);
-    border-radius: 14px;
+    padding: 10px 24px;
+    /* Signature accent: one confident solid-beige CTA on dark. */
+    background: #D7D0B7;
+    color: #0B0B0A;
+    border: 1px solid #D7D0B7;
+    border-radius: 12px;
     font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: background 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
 }
 
 .login-btn:hover {
-    background: rgba(215, 208, 179, 0.13);
-    border-color: rgba(215, 208, 179, 0.4);
+    background: #E4DEC8;
+    border-color: #E4DEC8;
+}
+
+.login-btn:active {
+    transform: scale(0.98);
 }
 
 /* ===== RESPONSIVE ===== */

@@ -3,9 +3,9 @@
     flex-direction: column;
     gap: 0;
     border-radius: 16px;
-    /* Minimalist direction: flat surface, hairline border, no glass/glow. */
-    background: #141311;
-    border: 1px solid rgba(215, 208, 179, 0.10);
+    /* Minimalist direction: flat warm panel, hairline border, no glass/glow. */
+    background: #17140F;
+    border: 1px solid rgba(215, 208, 179, 0.09);
     transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 0.2s ease,
                 background 0.2s ease;
@@ -16,7 +16,7 @@
 .box-card:hover {
     transform: translateY(-2px);
     border-color: rgba(215, 208, 179, 0.22);
-    background: #191714;
+    background: #1E1A13;
 }
 
 /* ── Serial / verified row ── */

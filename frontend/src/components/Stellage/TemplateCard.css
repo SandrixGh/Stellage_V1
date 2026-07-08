@@ -3,46 +3,20 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.025);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(215, 208, 179, 0.13);
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
-    transition: border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-        box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 16px;
+    /* Minimalist direction: flat warm panel, clearly elevated over the black
+       ground, hairline border, no glass/glow. */
+    background: #17140F;
+    border: 1px solid rgba(215, 208, 179, 0.09);
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
     cursor: pointer;
     overflow: hidden;
 }
 
-/* Top-edge highlight line, revealed on hover */
-.template-card::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(215, 208, 179, 0.25),
-        transparent
-    );
-    opacity: 0;
-    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    pointer-events: none;
-    z-index: 2;
-}
-
 .template-card:hover {
-    border-color: rgba(215, 208, 179, 0.3);
-    box-shadow: 0 28px 60px rgba(0, 0, 0, 0.5),
-        inset 0 0 40px rgba(215, 208, 179, 0.04);
-}
-
-.template-card:hover::after {
-    opacity: 1;
+    border-color: rgba(215, 208, 179, 0.22);
+    background: #1E1A13;
+    transform: translateY(-2px);
 }
 
 /* ── Visual area (hero box dominates the card) ── */
@@ -60,116 +34,8 @@
 .template-card-visual > svg {
     width: 100%;
     height: auto;
-}
-
-/* Layered radial glow that intensifies on hover */
-.template-card-visual::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-        ellipse at center,
-        rgba(215, 208, 179, 0.05) 0%,
-        transparent 68%
-    );
-    opacity: 1;
-    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    pointer-events: none;
-}
-
-.template-card-visual::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-        ellipse at center,
-        rgba(215, 208, 179, 0.16) 0%,
-        transparent 62%
-    );
-    opacity: 0;
-    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    pointer-events: none;
-}
-
-.template-card:hover .template-card-visual::after {
-    opacity: 1;
-}
-
-.template-card-visual svg {
     position: relative;
     z-index: 1;
-}
-
-/* Per-rarity glow tints */
-.rarity-rare .template-card-visual::before {
-    background: radial-gradient(
-        ellipse at center,
-        rgba(120, 170, 255, 0.07) 0%,
-        transparent 68%
-    );
-}
-.rarity-rare .template-card-visual::after {
-    background: radial-gradient(
-        ellipse at center,
-        rgba(120, 170, 255, 0.2) 0%,
-        transparent 62%
-    );
-}
-
-.rarity-golden .template-card-visual::before {
-    background: radial-gradient(
-        ellipse at center,
-        rgba(230, 200, 120, 0.08) 0%,
-        transparent 68%
-    );
-}
-.rarity-golden .template-card-visual::after {
-    background: radial-gradient(
-        ellipse at center,
-        rgba(230, 200, 120, 0.22) 0%,
-        transparent 62%
-    );
-}
-
-.rarity-developers .template-card-visual::before {
-    background: radial-gradient(
-        ellipse at center,
-        rgba(200, 130, 255, 0.07) 0%,
-        transparent 68%
-    );
-}
-.rarity-developers .template-card-visual::after {
-    background: radial-gradient(
-        ellipse at center,
-        rgba(200, 130, 255, 0.2) 0%,
-        transparent 62%
-    );
-}
-
-/* Rarity-tinted top-edge line */
-.rarity-rare.template-card::after {
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(120, 170, 255, 0.3),
-        transparent
-    );
-}
-.rarity-golden.template-card::after {
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(230, 200, 120, 0.32),
-        transparent
-    );
-}
-.rarity-developers.template-card::after {
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(200, 130, 255, 0.3),
-        transparent
-    );
 }
 
 /* ── Footer: title + meta row ── */
@@ -242,24 +108,24 @@
     letter-spacing: -0.2px;
 }
 
-/* ── Rarity card border accents ── */
+/* ── Rarity card border accents (subtle line tint only) ── */
 .template-card.rarity-golden {
-    border-color: rgba(230, 200, 120, 0.26);
+    border-color: rgba(230, 200, 120, 0.18);
 }
 .template-card.rarity-golden:hover {
-    border-color: rgba(230, 200, 120, 0.48);
+    border-color: rgba(230, 200, 120, 0.40);
 }
 
 .template-card.rarity-rare {
-    border-color: rgba(120, 170, 255, 0.22);
+    border-color: rgba(120, 170, 255, 0.16);
 }
 .template-card.rarity-rare:hover {
-    border-color: rgba(120, 170, 255, 0.45);
+    border-color: rgba(120, 170, 255, 0.38);
 }
 
 .template-card.rarity-developers {
-    border-color: rgba(200, 130, 255, 0.22);
+    border-color: rgba(200, 130, 255, 0.16);
 }
 .template-card.rarity-developers:hover {
-    border-color: rgba(200, 130, 255, 0.45);
+    border-color: rgba(200, 130, 255, 0.38);
 }
