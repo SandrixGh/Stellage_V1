@@ -134,7 +134,7 @@ body {
   /**
     Тёмный фон страницы — иначе дорожка скроллбара просвечивает белым
    */
-  background-color: #0B0B0A;
+  background-color: #E9E3D4;
 }
 
 /**
@@ -236,12 +236,12 @@ svg * {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(215, 208, 179, 0.22);
+    background: rgba(62, 52, 38, 0.22);
     border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(215, 208, 179, 0.42);
+    background: rgba(62, 52, 38, 0.42);
 }
 
 ::-webkit-scrollbar-corner {
@@ -250,5 +250,5 @@ svg * {
 
 * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(215, 208, 179, 0.22) transparent;
+    scrollbar-color: rgba(62, 52, 38, 0.22) transparent;
 }

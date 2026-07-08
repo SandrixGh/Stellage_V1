@@ -24,8 +24,8 @@
     padding: 32px;
     border-radius: 20px;
     /* Непрозрачная тёмная панель. */
-    background: #131210;
-    border: 1px solid rgba(215, 208, 179, 0.12);
+    background: #F7F3EA;
+    border: 1px solid rgba(62, 52, 38, 0.12);
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
 }
 
@@ -44,7 +44,7 @@
 }
 
 .picker-body::-webkit-scrollbar-thumb {
-    background: rgba(215, 208, 179, 0.25);
+    background: rgba(62, 52, 38, 0.25);
     border-radius: 999px;
     /* Прозрачная рамка через padding-box делает бегунок «вписанным» внутрь. */
     border: 3px solid transparent;
@@ -52,7 +52,7 @@
 }
 
 .picker-body::-webkit-scrollbar-thumb:hover {
-    background: rgba(215, 208, 179, 0.42);
+    background: rgba(62, 52, 38, 0.42);
     background-clip: padding-box;
     border: 3px solid transparent;
 }
@@ -68,7 +68,7 @@
     font-family: 'Syne', sans-serif;
     font-size: 22px;
     font-weight: 700;
-    color: #D7D0B7;
+    color: #2B2418;
 }
 
 .picker-close {
@@ -78,22 +78,22 @@
     align-items: center;
     justify-content: center;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(215, 208, 179, 0.15);
-    color: rgba(215, 208, 179, 0.7);
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(62, 52, 38, 0.15);
+    color: rgba(62, 52, 38, 0.7);
     cursor: pointer;
     transition: background 0.2s ease;
 }
 
 .picker-close:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #D7D0B7;
+    background: rgba(0, 0, 0, 0.08);
+    color: #2B2418;
 }
 
 .picker-hint {
     margin: -4px 0 0;
     font-size: 13px;
-    color: rgba(215, 208, 179, 0.5);
+    color: rgba(62, 52, 38, 0.5);
 }
 
 .picker-grid {
@@ -109,15 +109,15 @@
     gap: 8px;
     padding: 16px 12px;
     border-radius: 14px;
-    background: #1A1815;
-    border: 1px solid rgba(215, 208, 179, 0.10);
+    background: #FBF8F0;
+    border: 1px solid rgba(62, 52, 38, 0.10);
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease, transform 0.18s ease;
 }
 
 .picker-item:hover:not(:disabled) {
-    background: #201D19;
-    border-color: rgba(215, 208, 179, 0.24);
+    background: #FBF8F0;
+    border-color: rgba(62, 52, 38, 0.24);
     transform: translateY(-2px);
 }
 
@@ -133,7 +133,7 @@
 .picker-item-name {
     font-size: 13px;
     font-weight: 600;
-    color: #D7D0B7;
+    color: #2B2418;
     text-align: center;
 }
 
@@ -144,17 +144,17 @@
     text-transform: uppercase;
     padding: 2px 8px;
     border-radius: 4px;
-    color: rgba(215, 208, 179, 0.6);
-    background: rgba(215, 208, 179, 0.07);
-    border: 1px solid rgba(215, 208, 179, 0.18);
+    color: rgba(62, 52, 38, 0.6);
+    background: rgba(62, 52, 38, 0.07);
+    border: 1px solid rgba(62, 52, 38, 0.18);
 }
 
 .picker-empty {
     padding: 36px 24px;
     text-align: center;
     border-radius: 18px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px dashed rgba(215, 208, 179, 0.18);
-    color: rgba(215, 208, 179, 0.5);
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px dashed rgba(62, 52, 38, 0.18);
+    color: rgba(62, 52, 38, 0.5);
     font-size: 14px;
 }

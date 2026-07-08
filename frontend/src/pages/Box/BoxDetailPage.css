@@ -6,7 +6,7 @@
     width: 100%;
     max-width: 1180px;
     margin: 0 auto;
-    color: #D7D0B7;
+    color: #2B2418;
 }
 
 /* ── Back link ── */
@@ -18,21 +18,21 @@
     font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.2px;
-    color: rgba(215, 208, 179, 0.55);
+    color: rgba(62, 52, 38, 0.55);
     text-decoration: none;
     padding: 8px 14px 8px 12px;
     margin-bottom: 28px;
     border-radius: 10px;
-    border: 1px solid rgba(215, 208, 179, 0.1);
-    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(62, 52, 38, 0.1);
+    background: rgba(0, 0, 0, 0.02);
     transition: color 0.22s ease, border-color 0.22s ease,
                 transform 0.22s ease, background 0.22s ease;
 }
 
 .box-detail-back:hover {
-    color: #D7D0B7;
-    border-color: rgba(215, 208, 179, 0.24);
-    background: rgba(255, 255, 255, 0.04);
+    color: #2B2418;
+    border-color: rgba(62, 52, 38, 0.24);
+    background: rgba(0, 0, 0, 0.04);
     transform: translateX(-2px);
 }
 
@@ -62,8 +62,8 @@
     justify-content: center;
     min-height: 540px;
     border-radius: 28px;
-    border: 1px solid rgba(215, 208, 179, 0.12);
-    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(62, 52, 38, 0.12);
+    background: rgba(0, 0, 0, 0.025);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
@@ -78,8 +78,8 @@
     border-radius: 50%;
     background: radial-gradient(
         circle,
-        rgba(215, 208, 179, 0.16) 0%,
-        rgba(215, 208, 179, 0.05) 38%,
+        rgba(62, 52, 38, 0.16) 0%,
+        rgba(62, 52, 38, 0.05) 38%,
         transparent 70%
     );
     filter: blur(8px);
@@ -136,25 +136,25 @@
     text-transform: uppercase;
     padding: 5px 12px;
     border-radius: 5px;
-    color: rgba(215, 208, 179, 0.6);
-    background: rgba(215, 208, 179, 0.07);
-    border: 1px solid rgba(215, 208, 179, 0.18);
+    color: rgba(62, 52, 38, 0.6);
+    background: rgba(62, 52, 38, 0.07);
+    border: 1px solid rgba(62, 52, 38, 0.18);
 }
 
 .box-detail-info .rarity-tag-rare {
-    color: #9cc0ff;
+    color: #2E5FB8;
     border-color: rgba(120, 170, 255, 0.35);
     background: rgba(120, 170, 255, 0.07);
 }
 
 .box-detail-info .rarity-tag-golden {
-    color: #e8cb82;
+    color: #9A6E1A;
     border-color: rgba(230, 200, 120, 0.4);
     background: rgba(230, 200, 120, 0.07);
 }
 
 .box-detail-info .rarity-tag-developers {
-    color: #c882ff;
+    color: #7E3BB5;
     border-color: rgba(200, 130, 255, 0.4);
     background: rgba(200, 130, 255, 0.07);
 }
@@ -177,7 +177,7 @@
     font-size: 22px;
     font-weight: 600;
     letter-spacing: -0.4px;
-    color: rgba(215, 208, 179, 0.92);
+    color: rgba(62, 52, 38, 0.92);
 }
 
 /* Divider */
@@ -186,7 +186,7 @@
     height: 1px;
     border: none;
     margin: 0;
-    background: rgba(215, 208, 179, 0.08);
+    background: rgba(62, 52, 38, 0.08);
 }
 
 /* Description */
@@ -195,7 +195,7 @@
     margin: 0;
     font-size: 16px;
     line-height: 1.65;
-    color: rgba(215, 208, 179, 0.62);
+    color: rgba(62, 52, 38, 0.62);
 }
 
 /* ── Metadata ── */
@@ -220,7 +220,7 @@
     font-weight: 500;
     letter-spacing: 0.8px;
     text-transform: uppercase;
-    color: rgba(215, 208, 179, 0.38);
+    color: rgba(62, 52, 38, 0.38);
 }
 
 .box-detail-meta-row dd {
@@ -229,7 +229,7 @@
     font-size: 15px;
     font-weight: 500;
     text-align: right;
-    color: rgba(215, 208, 179, 0.85);
+    color: rgba(62, 52, 38, 0.85);
 }
 
 /* ── Content block (public) ── */
@@ -246,7 +246,7 @@
     font-size: 20px;
     font-weight: 600;
     letter-spacing: -0.3px;
-    color: #D7D0B7;
+    color: #2B2418;
 }
 
 .box-detail-content-tiles {
@@ -258,12 +258,12 @@
 .box-detail-tile {
     aspect-ratio: 16 / 10;
     border-radius: 16px;
-    border: 1px solid rgba(215, 208, 179, 0.1);
+    border: 1px solid rgba(62, 52, 38, 0.1);
     background:
         linear-gradient(
             135deg,
-            rgba(215, 208, 179, 0.06) 0%,
-            rgba(215, 208, 179, 0.015) 100%
+            rgba(62, 52, 38, 0.06) 0%,
+            rgba(62, 52, 38, 0.015) 100%
         );
     position: relative;
     overflow: hidden;
@@ -275,7 +275,7 @@
     inset: 0;
     background: radial-gradient(
         circle at 30% 25%,
-        rgba(215, 208, 179, 0.07) 0%,
+        rgba(62, 52, 38, 0.07) 0%,
         transparent 60%
     );
 }
@@ -289,7 +289,7 @@
 .box-detail-line {
     height: 12px;
     border-radius: 6px;
-    background: rgba(215, 208, 179, 0.07);
+    background: rgba(62, 52, 38, 0.07);
 }
 
 .box-detail-line.short {
@@ -304,8 +304,8 @@
     gap: 14px;
     padding: 22px 24px;
     border-radius: 18px;
-    border: 1px solid rgba(215, 208, 179, 0.1);
-    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(62, 52, 38, 0.1);
+    background: rgba(0, 0, 0, 0.02);
 }
 
 .box-detail-lock {
@@ -316,9 +316,9 @@
     height: 42px;
     flex-shrink: 0;
     border-radius: 12px;
-    color: rgba(215, 208, 179, 0.6);
-    background: rgba(215, 208, 179, 0.05);
-    border: 1px solid rgba(215, 208, 179, 0.14);
+    color: rgba(62, 52, 38, 0.6);
+    background: rgba(62, 52, 38, 0.05);
+    border: 1px solid rgba(62, 52, 38, 0.14);
 }
 
 .box-detail-locked-text {
@@ -326,7 +326,7 @@
     margin: 0;
     font-size: 15px;
     font-weight: 500;
-    color: rgba(215, 208, 179, 0.6);
+    color: rgba(62, 52, 38, 0.6);
 }
 
 /* ── Responsive: stack below ~860px ── */
@@ -358,9 +358,9 @@
     align-self: flex-start;
     margin-top: 18px;
     padding: 13px 30px;
-    background: rgba(215, 208, 179, 0.1);
-    color: #D7D0B7;
-    border: 1px solid rgba(215, 208, 179, 0.3);
+    background: rgba(62, 52, 38, 0.1);
+    color: #2B2418;
+    border: 1px solid rgba(62, 52, 38, 0.3);
     border-radius: 12px;
     font-family: 'Syne', sans-serif;
     font-size: 14px;
@@ -371,9 +371,9 @@
 }
 
 .box-detail-acquire:hover:not(:disabled) {
-    background: rgba(215, 208, 179, 0.18);
-    border-color: rgba(215, 208, 179, 0.55);
-    box-shadow: 0 0 28px rgba(215, 208, 179, 0.12);
+    background: rgba(62, 52, 38, 0.18);
+    border-color: rgba(62, 52, 38, 0.55);
+    box-shadow: 0 0 28px rgba(62, 52, 38, 0.12);
 }
 
 .box-detail-acquire:disabled {

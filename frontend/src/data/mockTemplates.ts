@@ -153,11 +153,13 @@ export const rarityGlowMap: Record<string, "rare" | "golden" | "dev" | null> = {
     dev: "dev",
 };
 
+// Light theme: darker, more saturated rarity inks so the wireframe reads
+// clearly on the warm paper ground.
 export const rarityBoxColorMap: Record<string, string> = {
-    common: "#D7D0B7",
-    rare: "#8BB8FF",
-    golden: "#E8CB82",
-    dev: "#C882FF",
+    common: "#4A4132",
+    rare: "#2E5FB8",
+    golden: "#B0801E",
+    dev: "#8E45C9",
 };
 
 /** Normalise a rarity label into a css-class-safe token: "Developer's" → "developers". */

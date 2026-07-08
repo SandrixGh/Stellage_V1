@@ -4,8 +4,8 @@
     gap: 0;
     border-radius: 16px;
     /* Minimalist direction: flat warm panel, hairline border, no glass/glow. */
-    background: #17140F;
-    border: 1px solid rgba(215, 208, 179, 0.09);
+    background: #F7F3EA;
+    border: 1px solid rgba(62, 52, 38, 0.09);
     transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 0.2s ease,
                 background 0.2s ease;
@@ -15,8 +15,8 @@
 
 .box-card:hover {
     transform: translateY(-2px);
-    border-color: rgba(215, 208, 179, 0.22);
-    background: #1E1A13;
+    border-color: rgba(62, 52, 38, 0.22);
+    background: #FBF8F0;
 }
 
 /* ── Serial / verified row ── */
@@ -31,14 +31,14 @@
     font-family: 'Syne', sans-serif;
     font-size: 11px;
     font-weight: 500;
-    color: rgba(215, 208, 179, 0.38);
+    color: rgba(62, 52, 38, 0.38);
     letter-spacing: 0.8px;
     text-transform: uppercase;
 }
 
 .verified-badge {
     font-size: 12px;
-    color: #8fd49a;
+    color: #3E9E58;
     font-weight: 600;
 }
 
@@ -63,7 +63,7 @@
     margin: 0;
     font-size: 15px;
     font-weight: 600;
-    color: #D7D0B7;
+    color: #2B2418;
     letter-spacing: -0.1px;
     white-space: nowrap;
     overflow: hidden;
@@ -85,26 +85,26 @@
     text-transform: uppercase;
     padding: 3px 9px;
     border-radius: 4px;
-    color: rgba(215, 208, 179, 0.6);
-    background: rgba(215, 208, 179, 0.07);
-    border: 1px solid rgba(215, 208, 179, 0.18);
+    color: rgba(62, 52, 38, 0.6);
+    background: rgba(62, 52, 38, 0.07);
+    border: 1px solid rgba(62, 52, 38, 0.18);
 }
 
 .rarity-tag-rare {
-    color: #9cc0ff;
+    color: #2E5FB8;
     border-color: rgba(120, 170, 255, 0.35);
     background: rgba(120, 170, 255, 0.07);
 }
 
 .rarity-tag-golden {
-    color: #e8cb82;
+    color: #9A6E1A;
     border-color: rgba(230, 200, 120, 0.4);
     background: rgba(230, 200, 120, 0.07);
 }
 
 .rarity-tag-developer\'s,
 .rarity-tag-dev {
-    color: #d9a8ff;
+    color: #7E3BB5;
     border-color: rgba(200, 130, 255, 0.35);
     background: rgba(200, 130, 255, 0.07);
 }
@@ -116,12 +116,12 @@
     letter-spacing: 0.4px;
     padding: 3px 9px;
     border-radius: 4px;
-    border: 1px solid rgba(215, 208, 179, 0.15);
-    color: rgba(215, 208, 179, 0.5);
+    border: 1px solid rgba(62, 52, 38, 0.15);
+    color: rgba(62, 52, 38, 0.5);
 }
 
 .status-tag.sealed {
-    color: #d7c89a;
+    color: #8A7A50;
     border-color: rgba(215, 200, 154, 0.28);
 }
 

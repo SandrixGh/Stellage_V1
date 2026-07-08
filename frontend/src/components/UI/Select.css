@@ -11,9 +11,9 @@
     width: 100%;
     padding: 12px 16px;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(215, 208, 179, 0.15);
-    color: #D7D0B7;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(62, 52, 38, 0.15);
+    color: #2B2418;
     font-size: 14px;
     font-family: 'Space Grotesk', sans-serif;
     text-align: left;
@@ -25,7 +25,7 @@
 .ui-select-trigger:hover,
 .ui-select-trigger:focus-visible,
 .ui-select-trigger.is-open {
-    border-color: rgba(215, 208, 179, 0.4);
+    border-color: rgba(62, 52, 38, 0.4);
 }
 
 .ui-select-value {
@@ -36,7 +36,7 @@
 
 .ui-select-chevron {
     flex-shrink: 0;
-    color: rgba(215, 208, 179, 0.5);
+    color: rgba(62, 52, 38, 0.5);
     transition: transform 0.2s ease;
 }
 
@@ -59,7 +59,7 @@
     scrollbar-gutter: stable;
     border-radius: 14px;
     background: #14130f;
-    border: 1px solid rgba(215, 208, 179, 0.22);
+    border: 1px solid rgba(62, 52, 38, 0.22);
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
@@ -69,19 +69,19 @@
     padding: 10px 12px;
     border-radius: 10px;
     font-size: 14px;
-    color: rgba(215, 208, 179, 0.75);
+    color: rgba(62, 52, 38, 0.75);
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
 }
 
 .ui-select-option:hover {
-    background: rgba(215, 208, 179, 0.1);
-    color: #D7D0B7;
+    background: rgba(62, 52, 38, 0.1);
+    color: #2B2418;
 }
 
 .ui-select-option.is-selected {
-    background: rgba(215, 208, 179, 0.16);
-    color: #D7D0B7;
+    background: rgba(62, 52, 38, 0.16);
+    color: #2B2418;
     font-weight: 600;
 }
 
@@ -91,14 +91,14 @@
 }
 
 .ui-select-menu::-webkit-scrollbar-thumb {
-    background: rgba(215, 208, 179, 0.25);
+    background: rgba(62, 52, 38, 0.25);
     border-radius: 999px;
     border: 3px solid transparent;
     background-clip: padding-box;
 }
 
 .ui-select-menu::-webkit-scrollbar-thumb:hover {
-    background: rgba(215, 208, 179, 0.42);
+    background: rgba(62, 52, 38, 0.42);
     background-clip: padding-box;
     border: 3px solid transparent;
 }
