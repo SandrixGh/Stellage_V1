@@ -22,17 +22,17 @@
     width: 20px;
     height: 20px;
     border-radius: 6px;
-    color: rgba(62, 52, 38, 0.55);
-    background: rgba(62, 52, 38, 0.06);
-    border: 1px solid rgba(62, 52, 38, 0.16);
+    color: rgba(var(--ink-rgb), 0.55);
+    background: rgba(var(--ink-rgb), 0.06);
+    border: 1px solid rgba(var(--ink-rgb), 0.16);
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .box-name-expand:hover {
-    color: #2B2418;
-    background: rgba(62, 52, 38, 0.12);
-    border-color: rgba(62, 52, 38, 0.32);
+    color: var(--ink);
+    background: rgba(var(--ink-rgb), 0.12);
+    border-color: rgba(var(--ink-rgb), 0.32);
 }
 
 /* ── Попап с полным названием ── */
@@ -64,8 +64,8 @@
     gap: 12px;
     padding: 26px 26px 22px;
     border-radius: 22px;
-    background: #F7F3EA;
-    border: 1px solid rgba(62, 52, 38, 0.2);
+    background: var(--surface);
+    border: 1px solid rgba(var(--ink-rgb), 0.2);
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
 }
 
@@ -74,7 +74,7 @@
     font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: rgba(62, 52, 38, 0.45);
+    color: rgba(var(--ink-rgb), 0.45);
 }
 
 .box-name-pop-text {
@@ -82,7 +82,7 @@
     font-size: 18px;
     font-weight: 600;
     line-height: 1.45;
-    color: #2B2418;
+    color: var(--ink);
     /* Длинное имя без пробелов не должно вылезать за пределы попапа. */
     word-break: break-word;
     overflow-wrap: anywhere;
@@ -93,9 +93,9 @@
     margin-top: 4px;
     padding: 9px 18px;
     border-radius: 10px;
-    background: rgba(62, 52, 38, 0.1);
-    border: 1px solid rgba(62, 52, 38, 0.25);
-    color: #2B2418;
+    background: rgba(var(--ink-rgb), 0.1);
+    border: 1px solid rgba(var(--ink-rgb), 0.25);
+    color: var(--ink);
     font-family: 'Syne', sans-serif;
     font-size: 13px;
     font-weight: 600;
@@ -104,6 +104,6 @@
 }
 
 .box-name-pop-close:hover {
-    background: rgba(62, 52, 38, 0.16);
-    border-color: rgba(62, 52, 38, 0.4);
+    background: rgba(var(--ink-rgb), 0.16);
+    border-color: rgba(var(--ink-rgb), 0.4);
 }

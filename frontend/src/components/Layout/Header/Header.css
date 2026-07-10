@@ -8,10 +8,10 @@
     display: flex;
     align-items: center;
     box-sizing: border-box;
-    background: rgba(247, 243, 234, 0.82);
+    background: rgba(var(--chrome-rgb), 0.82);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(62, 52, 38, 0.10);
+    border-bottom: 1px solid rgba(var(--ink-rgb), 0.10);
 }
 
 .header-container {
@@ -30,7 +30,7 @@
     align-items: center;
     gap: 11px;
     text-decoration: none;
-    color: #2B2418;
+    color: var(--ink);
     flex-shrink: 0;
 }
 
@@ -50,7 +50,7 @@
     height: 34px;
     width: auto;
     object-fit: contain;
-    filter: drop-shadow(0 0 14px rgba(62, 52, 38, 0.22));
+    filter: drop-shadow(0 0 14px rgba(var(--ink-rgb), 0.22));
 }
 
 /* ===== NAV ===== */
@@ -63,7 +63,7 @@
 
 .nav-link {
     position: relative;
-    color: rgba(62, 52, 38, 0.5);
+    color: rgba(var(--ink-rgb), 0.5);
     text-decoration: none;
     font-family: 'Syne', sans-serif;
     font-weight: 500;
@@ -80,18 +80,18 @@
     bottom: 0;
     width: 100%;
     height: 2px;
-    background: #2B2418;
+    background: var(--ink);
     transform: scaleX(0);
     transform-origin: left center;
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .nav-link:hover {
-    color: rgba(62, 52, 38, 0.85);
+    color: rgba(var(--ink-rgb), 0.85);
 }
 
 .nav-link.active {
-    color: #2B2418;
+    color: var(--ink);
 }
 
 .nav-link.active::after {
@@ -116,23 +116,23 @@
     height: 40px;
     flex-shrink: 0;
     border-radius: 12px;
-    background: rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(62, 52, 38, 0.15);
-    color: rgba(62, 52, 38, 0.7);
+    background: rgba(var(--glass-rgb), 0.04);
+    border: 1px solid rgba(var(--ink-rgb), 0.15);
+    color: rgba(var(--ink-rgb), 0.7);
     text-decoration: none;
     transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .settings-link:hover {
-    background: rgba(0, 0, 0, 0.08);
-    border-color: rgba(62, 52, 38, 0.35);
-    color: #2B2418;
+    background: rgba(var(--glass-rgb), 0.08);
+    border-color: rgba(var(--ink-rgb), 0.35);
+    color: var(--ink);
 }
 
 .settings-link.active {
-    border-color: rgba(62, 52, 38, 0.4);
-    background: rgba(0, 0, 0, 0.07);
-    color: #2B2418;
+    border-color: rgba(var(--ink-rgb), 0.4);
+    background: rgba(var(--glass-rgb), 0.07);
+    color: var(--ink);
 }
 
 .settings-icon {
@@ -148,10 +148,10 @@
     display: flex;
     align-items: center;
     gap: 9px;
-    background: rgba(0, 0, 0, 0.04);
+    background: rgba(var(--glass-rgb), 0.04);
     padding: 6px 14px 6px 6px;
     border-radius: 12px;
-    border: 1px solid rgba(62, 52, 38, 0.15);
+    border: 1px solid rgba(var(--ink-rgb), 0.15);
     cursor: pointer;
     user-select: none;
     text-decoration: none;
@@ -159,13 +159,13 @@
 }
 
 .user-profile:hover {
-    background: rgba(0, 0, 0, 0.08);
-    border-color: rgba(62, 52, 38, 0.35);
+    background: rgba(var(--glass-rgb), 0.08);
+    border-color: rgba(var(--ink-rgb), 0.35);
 }
 
 .user-profile.active {
-    border-color: rgba(62, 52, 38, 0.4);
-    background: rgba(0, 0, 0, 0.07);
+    border-color: rgba(var(--ink-rgb), 0.4);
+    background: rgba(var(--glass-rgb), 0.07);
 }
 
 .user-avatar {
@@ -176,8 +176,8 @@
     height: 28px;
     flex-shrink: 0;
     border-radius: 8px;
-    background: rgba(62, 52, 38, 0.12);
-    color: #2B2418;
+    background: rgba(var(--ink-rgb), 0.12);
+    color: var(--ink);
     font-family: 'Syne', sans-serif;
     font-size: 14px;
     font-weight: 700;
@@ -185,7 +185,7 @@
 }
 
 .user-email {
-    color: #2B2418;
+    color: var(--ink);
     font-size: 14px;
     font-weight: 500;
     max-width: 180px;
@@ -197,10 +197,10 @@
 /* ===== LOGIN BUTTON (guest) ===== */
 .login-btn {
     padding: 10px 24px;
-    /* Signature accent: one confident solid ink CTA on the paper ground. */
-    background: #2B2418;
-    color: #F2ECDD;
-    border: 1px solid #2B2418;
+    /* Signature accent: one confident solid CTA, inverted vs. the ground. */
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    border: 1px solid var(--btn-primary-bg);
     border-radius: 12px;
     font-size: 14px;
     font-weight: 700;
@@ -210,8 +210,8 @@
 }
 
 .login-btn:hover {
-    background: #3D3423;
-    border-color: #3D3423;
+    background: var(--btn-primary-bg-hover);
+    border-color: var(--btn-primary-bg-hover);
 }
 
 .login-btn:active {

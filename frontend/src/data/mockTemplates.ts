@@ -153,13 +153,14 @@ export const rarityGlowMap: Record<string, "rare" | "golden" | "dev" | null> = {
     dev: "dev",
 };
 
-// Light theme: darker, more saturated rarity inks so the wireframe reads
-// clearly on the warm paper ground.
+// Reference CSS custom properties (defined per-theme in styles/theme.css) so
+// the wireframe box recolors automatically when the theme toggles — no
+// re-render or theme-awareness needed here.
 export const rarityBoxColorMap: Record<string, string> = {
-    common: "#4A4132",
-    rare: "#2E5FB8",
-    golden: "#B0801E",
-    dev: "#8E45C9",
+    common: "var(--box-common)",
+    rare: "var(--box-rare)",
+    golden: "var(--box-golden)",
+    dev: "var(--box-dev)",
 };
 
 /** Normalise a rarity label into a css-class-safe token: "Developer's" → "developers". */
@@ -174,6 +175,6 @@ export const resolveRarityVisual = (rarity: string) => {
     const boxColor =
         rarityBoxColorMap[rarityClass] ??
         rarityBoxColorMap[rarityGlow ?? ""] ??
-        "#D7D0B7";
+        "var(--box-common)";
     return { rarityGlow, rarityClass, boxColor };
 };

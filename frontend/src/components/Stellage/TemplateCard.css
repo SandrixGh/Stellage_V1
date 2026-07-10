@@ -6,16 +6,16 @@
     border-radius: 16px;
     /* Minimalist direction: flat warm panel, clearly elevated over the black
        ground, hairline border, no glass/glow. */
-    background: #F7F3EA;
-    border: 1px solid rgba(62, 52, 38, 0.09);
+    background: var(--surface);
+    border: 1px solid rgba(var(--ink-rgb), 0.09);
     transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
     cursor: pointer;
     overflow: hidden;
 }
 
 .template-card:hover {
-    border-color: rgba(62, 52, 38, 0.22);
-    background: #FBF8F0;
+    border-color: rgba(var(--ink-rgb), 0.22);
+    background: var(--surface-hover);
     transform: translateY(-2px);
 }
 
@@ -52,7 +52,7 @@
     margin: 0;
     font-size: 16px;
     font-weight: 600;
-    color: #2B2418;
+    color: var(--ink);
     letter-spacing: -0.1px;
     text-align: center;
     max-width: 100%;
@@ -76,25 +76,25 @@
     text-transform: uppercase;
     padding: 3px 9px;
     border-radius: 4px;
-    color: rgba(62, 52, 38, 0.6);
-    background: rgba(62, 52, 38, 0.07);
-    border: 1px solid rgba(62, 52, 38, 0.18);
+    color: rgba(var(--ink-rgb), 0.6);
+    background: rgba(var(--ink-rgb), 0.07);
+    border: 1px solid rgba(var(--ink-rgb), 0.18);
 }
 
 .rarity-tag-rare {
-    color: #2E5FB8;
+    color: var(--tag-rare);
     border-color: rgba(120, 170, 255, 0.35);
     background: rgba(120, 170, 255, 0.07);
 }
 
 .rarity-tag-golden {
-    color: #9A6E1A;
+    color: var(--tag-golden);
     border-color: rgba(230, 200, 120, 0.4);
     background: rgba(230, 200, 120, 0.07);
 }
 
 .rarity-tag-developers {
-    color: #7E3BB5;
+    color: var(--tag-dev);
     border-color: rgba(200, 130, 255, 0.4);
     background: rgba(200, 130, 255, 0.07);
 }
@@ -104,7 +104,7 @@
     font-family: 'Syne', sans-serif;
     font-size: 13px;
     font-weight: 600;
-    color: rgba(62, 52, 38, 0.75);
+    color: rgba(var(--ink-rgb), 0.75);
     letter-spacing: -0.2px;
 }
 

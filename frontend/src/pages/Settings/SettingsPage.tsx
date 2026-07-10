@@ -2,12 +2,15 @@ import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { useAuthStore } from "../../store/useAuthStore";
+import { useThemeStore } from "../../store/useThemeStore";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import "../Profile/ProfilePage.css";
+import "./SettingsPage.css";
 
 export const SettingsPage = () => {
     const navigate = useNavigate();
     const { user, isAuthenticated, logout, delete_account, updateProfile } = useAuthStore();
+    const { theme, setTheme } = useThemeStore();
 
     const [username, setUsername] = useState(user?.username ?? "");
     const [nickname, setNickname] = useState(user?.nickname ?? "");
@@ -27,6 +30,9 @@ export const SettingsPage = () => {
                         Войдите в аккаунт, чтобы изменить настройки.
                     </p>
                     <Link to="/login" className="profile-gate-btn">Войти</Link>
+                    <div className="theme-toggle-standalone">
+                        <ThemeToggle theme={theme} onChange={setTheme} />
+                    </div>
                 </div>
             </div>
         );
@@ -125,6 +131,19 @@ export const SettingsPage = () => {
                 </section>
 
                 <section className="profile-card">
+                    <h2 className="profile-card-title">Оформление</h2>
+                    <div className="profile-row">
+                        <div className="profile-row-text">
+                            <span className="profile-row-label">Тема</span>
+                            <span className="profile-row-value">
+                                {theme === "light" ? "Светлая (бумага)" : "Тёмная"}
+                            </span>
+                        </div>
+                        <ThemeToggle theme={theme} onChange={setTheme} />
+                    </div>
+                </section>
+
+                <section className="profile-card">
                     <h2 className="profile-card-title">Безопасность</h2>
 
                     <div className="profile-row">
@@ -159,3 +178,32 @@ export const SettingsPage = () => {
         </div>
     );
 };
+
+const ThemeToggle = ({
+    theme,
+    onChange,
+}: {
+    theme: "light" | "dark";
+    onChange: (theme: "light" | "dark") => void;
+}) => (
+    <div className="theme-toggle" role="radiogroup" aria-label="Тема оформления">
+        <button
+            type="button"
+            role="radio"
+            aria-checked={theme === "light"}
+            className={`theme-toggle-option${theme === "light" ? " active" : ""}`}
+            onClick={() => onChange("light")}
+        >
+            Светлая
+        </button>
+        <button
+            type="button"
+            role="radio"
+            aria-checked={theme === "dark"}
+            className={`theme-toggle-option${theme === "dark" ? " active" : ""}`}
+            onClick={() => onChange("dark")}
+        >
+            Тёмная
+        </button>
+    </div>
+);

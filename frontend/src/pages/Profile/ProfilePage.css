@@ -27,11 +27,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.03);
+    background: rgba(var(--glass-rgb), 0.03);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(62, 52, 38, 0.18);
-    box-shadow: inset 0 0 40px rgba(62, 52, 38, 0.05),
+    border: 1px solid rgba(var(--ink-rgb), 0.18);
+    box-shadow: inset 0 0 40px rgba(var(--ink-rgb), 0.05),
                 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
@@ -39,7 +39,7 @@
     font-family: 'Syne', sans-serif;
     font-size: 38px;
     font-weight: 700;
-    color: #2B2418;
+    color: var(--ink);
     line-height: 1;
 }
 
@@ -53,7 +53,7 @@
     font-weight: 500;
     letter-spacing: 2.5px;
     text-transform: uppercase;
-    color: rgba(62, 52, 38, 0.3);
+    color: rgba(var(--ink-rgb), 0.3);
     margin: 0 0 10px 0;
 }
 
@@ -61,7 +61,7 @@
     font-family: 'Syne', sans-serif;
     font-size: 30px;
     font-weight: 700;
-    color: #2B2418;
+    color: var(--ink);
     letter-spacing: -0.5px;
     margin: 0 0 14px 0;
     line-height: 1.05;
@@ -82,9 +82,9 @@
     text-transform: uppercase;
     padding: 4px 10px;
     border-radius: 6px;
-    color: rgba(62, 52, 38, 0.6);
-    background: rgba(62, 52, 38, 0.06);
-    border: 1px solid rgba(62, 52, 38, 0.15);
+    color: rgba(var(--ink-rgb), 0.6);
+    background: rgba(var(--ink-rgb), 0.06);
+    border: 1px solid rgba(var(--ink-rgb), 0.15);
 }
 
 .profile-chip-status {
@@ -95,21 +95,21 @@
 }
 
 .profile-chip-offline {
-    color: rgba(62, 52, 38, 0.45);
-    border-color: rgba(62, 52, 38, 0.12);
-    background: rgba(62, 52, 38, 0.04);
+    color: rgba(var(--ink-rgb), 0.45);
+    border-color: rgba(var(--ink-rgb), 0.12);
+    background: rgba(var(--ink-rgb), 0.04);
     text-transform: none;
 }
 
 .profile-chip-username {
-    color: #2B2418;
-    border-color: rgba(62, 52, 38, 0.28);
-    background: rgba(62, 52, 38, 0.08);
+    color: var(--ink);
+    border-color: rgba(var(--ink-rgb), 0.28);
+    background: rgba(var(--ink-rgb), 0.08);
     text-transform: none;
 }
 
 .profile-chip-muted {
-    color: rgba(62, 52, 38, 0.4);
+    color: rgba(var(--ink-rgb), 0.4);
     font-style: italic;
     text-transform: none;
 }
@@ -117,7 +117,7 @@
 .profile-subline {
     font-family: 'Syne', sans-serif;
     font-size: 13px;
-    color: rgba(62, 52, 38, 0.45);
+    color: rgba(var(--ink-rgb), 0.45);
     margin: -6px 0 14px 0;
     word-break: break-word;
 }
@@ -140,40 +140,40 @@
     font-weight: 500;
     letter-spacing: 0.8px;
     text-transform: uppercase;
-    color: rgba(62, 52, 38, 0.4);
+    color: rgba(var(--ink-rgb), 0.4);
 }
 
 .profile-field-hint {
     font-size: 11px;
-    color: rgba(62, 52, 38, 0.32);
+    color: rgba(var(--ink-rgb), 0.32);
 }
 
 .profile-input-wrap {
     display: flex;
     align-items: center;
-    background: rgba(0, 0, 0, 0.03);
-    border: 1px solid rgba(62, 52, 38, 0.14);
+    background: rgba(var(--glass-rgb), 0.03);
+    border: 1px solid rgba(var(--ink-rgb), 0.14);
     border-radius: 10px;
     transition: border-color 0.2s ease;
 }
 
 .profile-input-wrap:focus-within {
-    border-color: rgba(62, 52, 38, 0.4);
+    border-color: rgba(var(--ink-rgb), 0.4);
 }
 
 .profile-input-prefix {
     font-family: 'Syne', sans-serif;
     font-size: 14px;
-    color: rgba(62, 52, 38, 0.5);
+    color: rgba(var(--ink-rgb), 0.5);
     padding: 0 4px 0 12px;
 }
 
 .profile-input {
     font-family: 'Syne', sans-serif;
     font-size: 14px;
-    color: rgba(62, 52, 38, 0.9);
-    background: rgba(0, 0, 0, 0.03);
-    border: 1px solid rgba(62, 52, 38, 0.14);
+    color: rgba(var(--ink-rgb), 0.9);
+    background: rgba(var(--glass-rgb), 0.03);
+    border: 1px solid rgba(var(--ink-rgb), 0.14);
     border-radius: 10px;
     padding: 11px 12px;
     width: 100%;
@@ -182,11 +182,11 @@
 }
 
 .profile-input::placeholder {
-    color: rgba(62, 52, 38, 0.28);
+    color: rgba(var(--ink-rgb), 0.28);
 }
 
 .profile-input:focus {
-    border-color: rgba(62, 52, 38, 0.4);
+    border-color: rgba(var(--ink-rgb), 0.4);
 }
 
 .profile-input-prefixed {
@@ -225,10 +225,10 @@
 }
 
 .profile-card {
-    background: rgba(0, 0, 0, 0.025);
+    background: rgba(var(--glass-rgb), 0.025);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(62, 52, 38, 0.12);
+    border: 1px solid rgba(var(--ink-rgb), 0.12);
     border-radius: 18px;
     padding: 24px 24px 26px;
     box-shadow: 0 18px 42px rgba(0, 0, 0, 0.32);
@@ -243,7 +243,7 @@
     font-family: 'Syne', sans-serif;
     font-size: 15px;
     font-weight: 600;
-    color: #2B2418;
+    color: var(--ink);
     letter-spacing: 0.2px;
     margin: 0 0 18px 0;
 }
@@ -251,7 +251,7 @@
 .profile-card-text {
     font-size: 13.5px;
     line-height: 1.6;
-    color: rgba(62, 52, 38, 0.5);
+    color: rgba(var(--ink-rgb), 0.5);
     margin: 0 0 20px 0;
 }
 
@@ -262,7 +262,7 @@
     justify-content: space-between;
     gap: 16px;
     padding: 14px 0;
-    border-top: 1px solid rgba(62, 52, 38, 0.07);
+    border-top: 1px solid rgba(var(--ink-rgb), 0.07);
 }
 
 .profile-row:last-child {
@@ -281,13 +281,13 @@
     font-weight: 500;
     letter-spacing: 0.8px;
     text-transform: uppercase;
-    color: rgba(62, 52, 38, 0.4);
+    color: rgba(var(--ink-rgb), 0.4);
 }
 
 .profile-row-value {
     font-family: 'Syne', sans-serif;
     font-size: 14px;
-    color: rgba(62, 52, 38, 0.85);
+    color: rgba(var(--ink-rgb), 0.85);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -302,9 +302,9 @@
     text-transform: uppercase;
     padding: 6px 12px;
     border-radius: 7px;
-    color: rgba(62, 52, 38, 0.35);
-    background: rgba(62, 52, 38, 0.04);
-    border: 1px solid rgba(62, 52, 38, 0.1);
+    color: rgba(var(--ink-rgb), 0.35);
+    background: rgba(var(--ink-rgb), 0.04);
+    border: 1px solid rgba(var(--ink-rgb), 0.1);
     cursor: not-allowed;
 }
 
@@ -326,14 +326,14 @@
 }
 
 .profile-link-btn {
-    background: rgba(62, 52, 38, 0.08);
-    color: #2B2418;
-    border: 1px solid rgba(62, 52, 38, 0.22);
+    background: rgba(var(--ink-rgb), 0.08);
+    color: var(--ink);
+    border: 1px solid rgba(var(--ink-rgb), 0.22);
 }
 
 .profile-link-btn:hover {
-    background: rgba(62, 52, 38, 0.14);
-    border-color: rgba(62, 52, 38, 0.4);
+    background: rgba(var(--ink-rgb), 0.14);
+    border-color: rgba(var(--ink-rgb), 0.4);
 }
 
 .profile-danger-actions {
@@ -343,14 +343,14 @@
 }
 
 .profile-btn.ghost {
-    background: rgba(62, 52, 38, 0.05);
-    color: rgba(62, 52, 38, 0.85);
-    border: 1px solid rgba(62, 52, 38, 0.18);
+    background: rgba(var(--ink-rgb), 0.05);
+    color: rgba(var(--ink-rgb), 0.85);
+    border: 1px solid rgba(var(--ink-rgb), 0.18);
 }
 
 .profile-btn.ghost:hover {
-    background: rgba(62, 52, 38, 0.1);
-    border-color: rgba(62, 52, 38, 0.35);
+    background: rgba(var(--ink-rgb), 0.1);
+    border-color: rgba(var(--ink-rgb), 0.35);
 }
 
 .profile-btn.danger {
@@ -384,7 +384,7 @@
     position: absolute;
     inset: -50px;
     background: radial-gradient(ellipse at center,
-        rgba(62, 52, 38, 0.08) 0%, transparent 70%);
+        rgba(var(--ink-rgb), 0.08) 0%, transparent 70%);
     z-index: -1;
 }
 
@@ -392,7 +392,7 @@
     font-family: 'Syne', sans-serif;
     font-size: 44px;
     font-weight: 800;
-    color: #2B2418;
+    color: var(--ink);
     letter-spacing: -1.5px;
     margin: 0 0 12px 0;
 }
@@ -400,7 +400,7 @@
 .profile-gate-sub {
     font-size: 15px;
     font-weight: 300;
-    color: rgba(62, 52, 38, 0.45);
+    color: rgba(var(--ink-rgb), 0.45);
     margin: 0 0 24px 0;
     max-width: 320px;
     line-height: 1.6;
@@ -409,9 +409,9 @@
 .profile-gate-btn {
     display: inline-block;
     padding: 12px 28px;
-    background: rgba(62, 52, 38, 0.08);
-    color: #2B2418;
-    border: 1px solid rgba(62, 52, 38, 0.25);
+    background: rgba(var(--ink-rgb), 0.08);
+    color: var(--ink);
+    border: 1px solid rgba(var(--ink-rgb), 0.25);
     border-radius: 10px;
     font-family: 'Syne', sans-serif;
     font-size: 13px;
@@ -422,8 +422,8 @@
 }
 
 .profile-gate-btn:hover {
-    background: rgba(62, 52, 38, 0.14);
-    border-color: rgba(62, 52, 38, 0.45);
+    background: rgba(var(--ink-rgb), 0.14);
+    border-color: rgba(var(--ink-rgb), 0.45);
 }
 
 /* ===== READ-ONLY SHELF SECTION ===== */
@@ -438,9 +438,9 @@
     gap: 14px;
     padding: 32px;
     border-radius: 24px;
-    background: rgba(0, 0, 0, 0.02);
-    border: 1px dashed rgba(62, 52, 38, 0.18);
-    color: rgba(62, 52, 38, 0.55);
+    background: rgba(var(--glass-rgb), 0.02);
+    border: 1px dashed rgba(var(--ink-rgb), 0.18);
+    color: rgba(var(--ink-rgb), 0.55);
 }
 
 /* ===== RESPONSIVE ===== */

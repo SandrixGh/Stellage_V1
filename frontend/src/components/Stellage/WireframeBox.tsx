@@ -124,7 +124,7 @@ const RIGHT_FILL = `M ${V.B.x},${V.B.y} L ${V.F.x},${V.F.y} L ${V.G.x},${V.G.y} 
 
 export const WireframeBox = ({
     className,
-    color = "#4A4132",
+    color = "var(--box-common)",
     size = 120,
     rarityGlow = null,
 }: WireframeBoxProps) => {

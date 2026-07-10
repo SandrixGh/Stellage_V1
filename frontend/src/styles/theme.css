@@ -1,0 +1,67 @@
+/**
+ * Тема оформления: две палитры (светлая «бумага» и тёмная «cyberpunk-minimal»)
+ * переключаются атрибутом data-theme на <html>. Все компоненты читают цвет
+ * только через эти переменные — не хардкодить hex/rgb в компонентах.
+ */
+:root,
+:root[data-theme="light"] {
+    --ink: #2B2418;
+    --ink-rgb: 62, 52, 38;
+
+    --ground: #E9E3D4;
+    --surface: #F7F3EA;
+    --surface-hover: #FBF8F0;
+
+    /* Базовый rgb для «стеклянных» полупрозрачных заливок (glass tint). */
+    --glass-rgb: 0, 0, 0;
+    /* Базовый rgb для полупрозрачной шапки/чипсов поверх контента. */
+    --chrome-rgb: 247, 243, 234;
+
+    --box-common: #4A4132;
+    --box-rare: #2E5FB8;
+    --box-golden: #B0801E;
+    --box-dev: #8E45C9;
+
+    --tag-rare: #2E5FB8;
+    --tag-golden: #9A6E1A;
+    --tag-dev: #7E3BB5;
+    --tag-sealed: #8A7A50;
+    --verified: #3E9E58;
+
+    --btn-primary-bg: #2B2418;
+    --btn-primary-text: #F2ECDD;
+    --btn-primary-bg-hover: #3D3423;
+
+    --error-text: #b23a3a;
+    --error-bg-rgb: 178, 58, 58;
+}
+
+:root[data-theme="dark"] {
+    --ink: #D7D0B7;
+    --ink-rgb: 215, 208, 179;
+
+    --ground: #0B0B0A;
+    --surface: #141311;
+    --surface-hover: #1A1714;
+
+    --glass-rgb: 255, 255, 255;
+    --chrome-rgb: 11, 11, 10;
+
+    --box-common: #D7D0B7;
+    --box-rare: #8BB8FF;
+    --box-golden: #E8CB82;
+    --box-dev: #C882FF;
+
+    --tag-rare: #9cc0ff;
+    --tag-golden: #e8cb82;
+    --tag-dev: #d9a8ff;
+    --tag-sealed: #d7c89a;
+    --verified: #8fd49a;
+
+    --btn-primary-bg: #D7D0B7;
+    --btn-primary-text: #0B0B0A;
+    --btn-primary-bg-hover: #E4DEC8;
+
+    --error-text: #ffaaaa;
+    --error-bg-rgb: 255, 80, 80;
+}

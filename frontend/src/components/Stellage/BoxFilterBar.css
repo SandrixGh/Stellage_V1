@@ -15,20 +15,20 @@
     min-width: 200px;
     padding: 12px 16px;
     border-radius: 14px;
-    background: rgba(0, 0, 0, 0.03);
-    border: 1px solid rgba(62, 52, 38, 0.15);
-    color: #2B2418;
+    background: rgba(var(--glass-rgb), 0.03);
+    border: 1px solid rgba(var(--ink-rgb), 0.15);
+    color: var(--ink);
     font-size: 14px;
     outline: none;
     transition: border-color 0.2s ease;
 }
 
 .box-filter-search::placeholder {
-    color: rgba(62, 52, 38, 0.35);
+    color: rgba(var(--ink-rgb), 0.35);
 }
 
 .box-filter-search:focus {
-    border-color: rgba(62, 52, 38, 0.4);
+    border-color: rgba(var(--ink-rgb), 0.4);
 }
 
 /* Кастомный селект сортировки не растягивается на всю строку, а сидит рядом
@@ -51,19 +51,19 @@
     text-transform: uppercase;
     padding: 6px 12px;
     border-radius: 999px;
-    color: rgba(62, 52, 38, 0.6);
-    background: rgba(62, 52, 38, 0.05);
-    border: 1px solid rgba(62, 52, 38, 0.18);
+    color: rgba(var(--ink-rgb), 0.6);
+    background: rgba(var(--ink-rgb), 0.05);
+    border: 1px solid rgba(var(--ink-rgb), 0.18);
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .box-filter-chip:hover {
-    border-color: rgba(62, 52, 38, 0.4);
+    border-color: rgba(var(--ink-rgb), 0.4);
 }
 
 .box-filter-chip.active {
-    background: rgba(62, 52, 38, 0.14);
-    border-color: rgba(62, 52, 38, 0.5);
-    color: #2B2418;
+    background: rgba(var(--ink-rgb), 0.14);
+    border-color: rgba(var(--ink-rgb), 0.5);
+    color: var(--ink);
 }

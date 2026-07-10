@@ -4,8 +4,8 @@
     position: relative;
     width: 100%;
     border-radius: 20px;
-    background: #F7F3EA;
-    border: 1px solid rgba(62, 52, 38, 0.09);
+    background: var(--surface);
+    border: 1px solid rgba(var(--ink-rgb), 0.09);
     overflow: visible;
     touch-action: none; /* чтобы pointer-drag не конфликтовал со скроллом на тач-экранах */
 }
@@ -20,11 +20,11 @@
     background: linear-gradient(
         90deg,
         transparent,
-        rgba(62, 52, 38, 0.35) 6%,
-        rgba(62, 52, 38, 0.35) 94%,
+        rgba(var(--ink-rgb), 0.35) 6%,
+        rgba(var(--ink-rgb), 0.35) 94%,
         transparent
     );
-    box-shadow: 0 6px 18px -6px rgba(62, 52, 38, 0.25);
+    box-shadow: 0 6px 18px -6px rgba(var(--ink-rgb), 0.25);
     pointer-events: none;
 }
 
@@ -89,8 +89,8 @@
     align-items: center;
     gap: 2px;
     padding: 3px 8px 4px;
-    background: rgba(247, 243, 234, 0.72);
-    border: 1px solid rgba(62, 52, 38, 0.13);
+    background: rgba(var(--chrome-rgb), 0.72);
+    border: 1px solid rgba(var(--ink-rgb), 0.13);
     border-radius: 6px;
     pointer-events: none;
     white-space: nowrap;
@@ -100,7 +100,7 @@
     font-family: "Syne", sans-serif;
     font-size: 10px;
     font-weight: 600;
-    color: #2B2418;
+    color: var(--ink);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -113,7 +113,7 @@
     font-weight: 600;
     letter-spacing: 0.8px;
     text-transform: uppercase;
-    color: rgba(62, 52, 38, 0.55);
+    color: rgba(var(--ink-rgb), 0.55);
 }
 
 .shelf-board-empty {
@@ -122,7 +122,7 @@
     margin: auto;
     height: fit-content;
     text-align: center;
-    color: rgba(62, 52, 38, 0.45);
+    color: rgba(var(--ink-rgb), 0.45);
     font-family: "Syne", system-ui, sans-serif;
     font-size: 15px;
     padding: 0 24px;

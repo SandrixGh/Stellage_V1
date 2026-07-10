@@ -1,0 +1,36 @@
+/* ===== APPEARANCE: theme toggle ===== */
+.theme-toggle {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 10px;
+    background: rgba(var(--ink-rgb), 0.06);
+    border: 1px solid rgba(var(--ink-rgb), 0.1);
+    flex-shrink: 0;
+}
+
+.theme-toggle-option {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    padding: 7px 14px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: rgba(var(--ink-rgb), 0.5);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.theme-toggle-option:hover {
+    color: var(--ink);
+}
+
+.theme-toggle-option.active {
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+}
+
+.theme-toggle-standalone {
+    margin-top: 24px;
+}
