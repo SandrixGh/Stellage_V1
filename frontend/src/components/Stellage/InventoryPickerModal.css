@@ -110,13 +110,13 @@
     background: var(--surface-hover);
     border: 1px solid rgba(var(--ink-rgb), 0.10);
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.18s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .picker-item:hover:not(:disabled) {
     background: var(--surface-hover);
-    border-color: rgba(var(--ink-rgb), 0.24);
-    transform: translateY(-2px);
+    border-color: rgba(var(--accent-rgb), 0.4);
+    box-shadow: var(--shadow-md);
 }
 
 .picker-item:disabled {

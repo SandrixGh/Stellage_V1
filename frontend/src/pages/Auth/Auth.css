@@ -38,7 +38,7 @@
     min-height: 100vh;
     background-color: var(--ground);
     padding: 20px;
-    font-family: -apple-system, system-ui, sans-serif;
+    font-family: var(--font-body);
     user-select: none;
     -webkit-user-select: none;
     box-sizing: border-box;
@@ -76,9 +76,10 @@
 }
 
 .app-name {
+    font-family: var(--font-display);
     font-size: 40px;
     font-weight: 700;
-    color: var(--ink);
+    color: var(--accent);
     letter-spacing: 1px;
     margin: 0;
     line-height: 1;
@@ -240,9 +241,9 @@
 .btn-primary {
     width: 100%;
     padding: 16px;
-    background: rgba(var(--ink-rgb), 0.07);
-    color: var(--ink);
-    border: 1px solid rgba(var(--ink-rgb), 0.2);
+    background: var(--accent);
+    color: var(--accent-contrast);
+    border: 1px solid var(--accent);
     border-radius: var(--radius-sm);
     font-size: 15px;
     font-weight: 600;
@@ -267,8 +268,8 @@
 }
 
 .btn-primary:hover:not(:disabled) {
-    background: rgba(var(--ink-rgb), 0.13);
-    border-color: rgba(var(--ink-rgb), 0.38);
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
     box-shadow: var(--shadow-md);
 }
 

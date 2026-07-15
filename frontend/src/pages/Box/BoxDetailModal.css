@@ -230,14 +230,14 @@
 }
 
 .box-modal-btn.primary {
-    background: rgba(var(--ink-rgb), 0.16);
-    border: 1px solid rgba(var(--ink-rgb), 0.4);
-    color: var(--ink);
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: var(--accent-contrast);
 }
 
 .box-modal-btn.primary:hover:not(:disabled) {
-    background: rgba(var(--ink-rgb), 0.24);
-    border-color: rgba(var(--ink-rgb), 0.6);
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
 }
 
 .box-modal-btn.danger {

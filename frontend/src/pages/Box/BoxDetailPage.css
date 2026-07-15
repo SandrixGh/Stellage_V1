@@ -320,9 +320,9 @@
     align-self: flex-start;
     margin-top: 18px;
     padding: 13px 30px;
-    background: rgba(var(--ink-rgb), 0.1);
-    color: var(--ink);
-    border: 1px solid rgba(var(--ink-rgb), 0.3);
+    background: var(--accent);
+    color: var(--accent-contrast);
+    border: 1px solid var(--accent);
     border-radius: var(--radius-md);
     font-family: 'Inter', sans-serif;
     font-size: 14px;
@@ -333,8 +333,8 @@
 }
 
 .box-detail-acquire:hover:not(:disabled) {
-    background: rgba(var(--ink-rgb), 0.18);
-    border-color: rgba(var(--ink-rgb), 0.55);
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
 }
 
 .box-detail-acquire:disabled {
