@@ -324,14 +324,15 @@
     margin-bottom: 6px;
 }
 
-/* Главное действие панели — поставить коробку из инвентаря на полку. */
+/* Главное действие панели — поставить коробку из инвентаря на полку.
+   Единственная сплошная заливка акцентом: первичное действие экрана. */
 .add-box-btn {
     width: 100%;
     padding: 12px 18px;
     text-align: center;
-    background: rgba(var(--ink-rgb), 0.14);
-    color: var(--ink);
-    border: 1px solid rgba(var(--ink-rgb), 0.35);
+    background: var(--accent);
+    color: var(--accent-contrast);
+    border: 1px solid var(--accent);
     border-radius: var(--radius-sm);
     font-family: 'Syne', sans-serif;
     font-size: 14px;
@@ -342,8 +343,8 @@
 }
 
 .add-box-btn:hover {
-    background: rgba(var(--ink-rgb), 0.22);
-    border-color: rgba(var(--ink-rgb), 0.55);
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
 }
 
 .shelf-rail-add {
@@ -375,9 +376,9 @@
 }
 
 .shelf-rail-item.active {
-    background: rgba(var(--ink-rgb), 0.12);
-    border-color: rgba(var(--ink-rgb), 0.5);
-    color: var(--ink);
+    background: rgba(var(--accent-rgb), 0.1);
+    border-color: rgba(var(--accent-rgb), 0.55);
+    color: var(--accent);
 }
 
 .shelf-rail-item-title {

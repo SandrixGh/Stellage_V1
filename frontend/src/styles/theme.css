@@ -58,9 +58,16 @@
     --tag-sealed: #8A7A50;
     --verified: #3E9E58;
 
-    --btn-primary-bg: #2B2418;
-    --btn-primary-text: #F2ECDD;
-    --btn-primary-bg-hover: #3D3423;
+    /* Фирменный акцент — глубокий петроль-зелёный. Единственный «цвет действия»
+       в тихом интерфейсе: первичные кнопки, выбранное/активное состояние, фокус. */
+    --accent: #2C685A;
+    --accent-rgb: 44, 104, 90;
+    --accent-hover: #24564A;
+    --accent-contrast: #F4F1E9;
+
+    --btn-primary-bg: var(--accent);
+    --btn-primary-text: var(--accent-contrast);
+    --btn-primary-bg-hover: var(--accent-hover);
 
     --error-text: #b23a3a;
     --error-bg-rgb: 178, 58, 58;
@@ -88,9 +95,15 @@
     --tag-sealed: #d7c89a;
     --verified: #8fd49a;
 
-    --btn-primary-bg: #D7D0B7;
-    --btn-primary-text: #0B0B0A;
-    --btn-primary-bg-hover: #E4DEC8;
+    /* Тот же петроль, осветлённый — чтобы читался на near-black. */
+    --accent: #4FA98E;
+    --accent-rgb: 79, 169, 142;
+    --accent-hover: #5FBB9E;
+    --accent-contrast: #08130F;
+
+    --btn-primary-bg: var(--accent);
+    --btn-primary-text: var(--accent-contrast);
+    --btn-primary-bg-hover: var(--accent-hover);
 
     --error-text: #ffaaaa;
     --error-bg-rgb: 255, 80, 80;
