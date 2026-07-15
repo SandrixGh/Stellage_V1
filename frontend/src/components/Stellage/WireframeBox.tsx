@@ -169,6 +169,8 @@ export const WireframeBox = ({
     const glow = rarityGlow ? GLOW_BY_RARITY[rarityGlow] : null;
     const filterId = `wf-glow-${rarityGlow ?? "none"}`;
     const glyph = size >= GLYPH_MIN_SIZE ? getContentGlyph(contentType) : null;
+    // На полке (size 80) глиф должен быть простым, без ореола — как в ленте
+    const isSmallBox = size < 100;
 
     return (
         <svg
@@ -253,7 +255,7 @@ export const WireframeBox = ({
                     </g>
                     <g
                         className="wf-glyph"
-                        filter="url(#wf-glyph-glow)"
+                        filter={!isSmallBox ? "url(#wf-glyph-glow)" : undefined}
                         transform={`translate(${GLYPH_CENTER.x} ${GLYPH_CENTER.y}) scale(${GLYPH_SCALE}) translate(-12 -12)`}
                         fill="none"
                         stroke="currentColor"
