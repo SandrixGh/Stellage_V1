@@ -15,7 +15,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.2px;
@@ -91,7 +91,7 @@
 
 /* Rarity tag (shared visual language with the feed) */
 .box-detail-info .rarity-tag {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.7px;
@@ -123,7 +123,7 @@
 
 /* Title */
 .box-detail-title {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     margin: 0;
     font-size: clamp(34px, 4vw, 48px);
     font-weight: 700;
@@ -134,7 +134,7 @@
 
 /* Price */
 .box-detail-price {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     margin: 0;
     font-size: 22px;
     font-weight: 600;
@@ -153,7 +153,7 @@
 
 /* Description */
 .box-detail-description {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     margin: 0;
     font-size: 16px;
     line-height: 1.65;
@@ -177,7 +177,7 @@
 }
 
 .box-detail-meta-row dt {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.8px;
@@ -186,7 +186,7 @@
 }
 
 .box-detail-meta-row dd {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     margin: 0;
     font-size: 15px;
     font-weight: 500;
@@ -203,7 +203,7 @@
 }
 
 .box-detail-content-title {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     margin: 0;
     font-size: 20px;
     font-weight: 600;
@@ -284,7 +284,7 @@
 }
 
 .box-detail-locked-text {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     margin: 0;
     font-size: 15px;
     font-weight: 500;
@@ -324,7 +324,7 @@
     color: var(--ink);
     border: 1px solid rgba(var(--ink-rgb), 0.3);
     border-radius: var(--radius-md);
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
     font-weight: 600;
     letter-spacing: 0.4px;

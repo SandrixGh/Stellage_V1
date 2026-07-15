@@ -33,7 +33,7 @@
 }
 
 .profile-avatar span {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 38px;
     font-weight: 700;
     color: var(--ink);
@@ -45,7 +45,7 @@
 }
 
 .profile-eyebrow {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 2.5px;
@@ -55,7 +55,7 @@
 }
 
 .profile-email {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 30px;
     font-weight: 700;
     color: var(--ink);
@@ -72,7 +72,7 @@
 }
 
 .profile-chip {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.4px;
@@ -112,7 +112,7 @@
 }
 
 .profile-subline {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 13px;
     color: rgba(var(--ink-rgb), 0.45);
     margin: -6px 0 14px 0;
@@ -159,14 +159,14 @@
 }
 
 .profile-input-prefix {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
     color: rgba(var(--ink-rgb), 0.5);
     padding: 0 4px 0 12px;
 }
 
 .profile-input {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
     color: rgba(var(--ink-rgb), 0.9);
     background: rgba(var(--glass-rgb), 0.03);
@@ -235,7 +235,7 @@
 }
 
 .profile-card-title {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 15px;
     font-weight: 600;
     color: var(--ink);
@@ -280,7 +280,7 @@
 }
 
 .profile-row-value {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
     color: rgba(var(--ink-rgb), 0.85);
     overflow: hidden;
@@ -290,7 +290,7 @@
 
 .profile-row-action {
     flex-shrink: 0;
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.6px;
@@ -309,7 +309,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.3px;
@@ -384,7 +384,7 @@
 }
 
 .profile-gate-title {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 44px;
     font-weight: 800;
     color: var(--ink);
@@ -408,7 +408,7 @@
     color: var(--ink);
     border: 1px solid rgba(var(--ink-rgb), 0.25);
     border-radius: var(--radius-sm);
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.4px;

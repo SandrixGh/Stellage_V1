@@ -17,12 +17,12 @@
     border: 1px solid rgba(var(--ink-rgb), 0.1);
     box-shadow: var(--shadow-md);
     color: var(--ink);
-    font-family: "Syne", system-ui, sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
 }
 
 .shelf-sidebar-title {
     margin: 0;
-    font-family: "Syne", system-ui, sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-size: 19px;
     font-weight: 700;
     letter-spacing: 0.4px;
@@ -65,7 +65,7 @@
     color: var(--ink);
     border: 1px solid rgba(var(--ink-rgb), 0.25);
     border-radius: var(--radius-sm);
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.4px;

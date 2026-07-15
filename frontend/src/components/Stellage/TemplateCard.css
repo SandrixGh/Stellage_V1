@@ -48,7 +48,7 @@
 }
 
 .template-title {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     margin: 0;
     font-size: 16px;
     font-weight: 600;
@@ -101,7 +101,7 @@
 
 /* ── Price ── */
 .template-price {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 600;
     color: rgba(var(--ink-rgb), 0.75);

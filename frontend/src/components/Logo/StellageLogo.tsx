@@ -7,25 +7,39 @@ interface StellageLogoProps {
   className?: string;
 }
 
+/**
+ * Знак Stellage (сплетённые кубы). Исходник — одноцветный PNG на прозрачном фоне,
+ * поэтому перекрашиваем его CSS-маской: PNG задаёт форму (альфу), цвет даёт заливка.
+ * По умолчанию — фирменный зелёный (--accent), сам адаптируется под тему. Соотношение
+ * сторон исходника (~877×817) держим через aspect-ratio, чтобы знак не сплющивало.
+ */
 export const StellageLogo: React.FC<StellageLogoProps> = ({
   size = 100,
-  className
+  color = 'var(--accent)',
+  className,
 }) => {
   const sizeValue = typeof size === 'number' ? `${size}px` : size;
 
   return (
-    <img
-      src={logoImage}
-      alt="Stellage Logo"
+    <span
+      role="img"
+      aria-label="Stellage"
       className={className}
       style={{
-        // Drive height from `size`; width follows the asset's real
-        // aspect ratio so the mark is never squished into a square.
-        height: sizeValue,
-        width: 'auto',
         display: 'inline-block',
         flexShrink: 0,
-        objectFit: 'contain'
+        height: sizeValue,
+        width: 'auto',
+        aspectRatio: '877 / 817',
+        backgroundColor: color,
+        WebkitMaskImage: `url(${logoImage})`,
+        maskImage: `url(${logoImage})`,
+        WebkitMaskRepeat: 'no-repeat',
+        maskRepeat: 'no-repeat',
+        WebkitMaskPosition: 'center',
+        maskPosition: 'center',
+        WebkitMaskSize: 'contain',
+        maskSize: 'contain',
       }}
     />
   );

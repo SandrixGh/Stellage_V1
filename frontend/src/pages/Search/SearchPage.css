@@ -38,7 +38,7 @@
     background: rgba(var(--glass-rgb), 0.03);
     border: 1px solid rgba(var(--ink-rgb), 0.13);
     border-radius: 10px;
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 17px;
     font-weight: 400;
     color: var(--ink);
@@ -100,7 +100,7 @@
     justify-content: center;
     background: rgba(var(--ink-rgb), 0.08);
     border: 1px solid rgba(var(--ink-rgb), 0.18);
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 18px;
     font-weight: 700;
     color: var(--ink);
@@ -128,7 +128,7 @@
 }
 
 .search-result-title {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 15px;
     font-weight: 600;
     color: var(--ink);

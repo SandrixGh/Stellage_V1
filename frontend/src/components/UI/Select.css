@@ -15,7 +15,7 @@
     border: 1px solid rgba(var(--ink-rgb), 0.15);
     color: var(--ink);
     font-size: 14px;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Inter', sans-serif;
     text-align: left;
     cursor: pointer;
     outline: none;

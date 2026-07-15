@@ -31,6 +31,11 @@
     --space-4: 16px;
     --space-5: 24px;
     --space-6: 32px;
+
+    /* Шрифтовые роли: Inter — рабочий текст/UI (масс-тон, Telegram/FB);
+       Manrope — сдержанный дисплей на именах/заголовках. */
+    --font-body: "Inter", system-ui, -apple-system, sans-serif;
+    --font-display: "Manrope", "Inter", system-ui, sans-serif;
 }
 
 :root,
@@ -38,9 +43,9 @@
     --ink: #14181A;
     --ink-rgb: 20, 24, 26;
 
-    --ground: #EEF1F1;
+    --ground: #ECF1EF;
     --surface: #FFFFFF;
-    --surface-hover: #F4F7F6;
+    --surface-hover: #EFF5F1;
 
     /* Базовый rgb для «стеклянных» полупрозрачных заливок (glass tint). */
     --glass-rgb: 0, 0, 0;
@@ -77,9 +82,9 @@
     --ink: #E7E9EA;
     --ink-rgb: 231, 233, 234;
 
-    --ground: #0C0E0F;
-    --surface: #16191B;
-    --surface-hover: #1D2123;
+    --ground: #0B0F0D;
+    --surface: #141A17;
+    --surface-hover: #1A211D;
 
     --glass-rgb: 255, 255, 255;
     --chrome-rgb: 12, 14, 15;

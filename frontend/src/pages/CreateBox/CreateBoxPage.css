@@ -19,7 +19,7 @@
 
 .create-box-title {
     margin: 0;
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 30px;
     font-weight: 700;
     color: var(--ink);
@@ -67,7 +67,7 @@
     border: 1px solid rgba(var(--ink-rgb), 0.15);
     color: var(--ink);
     font-size: 14px;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Inter', sans-serif;
     outline: none;
     transition: border-color 0.2s ease;
 }
@@ -160,7 +160,7 @@
 
 .create-box-gate-title {
     margin: 0;
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 30px;
     color: var(--ink);
 }
