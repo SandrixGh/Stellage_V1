@@ -7,7 +7,7 @@ import "./FeedPage.css";
 
 /* ── Rarity filter definitions (label + matching value + dot color) ── */
 const RARITY_FILTERS: { label: string; value: string; dot: string }[] = [
-    { label: "Common", value: "common", dot: "#D7D0B7" },
+    { label: "Common", value: "common", dot: "#9AA0A4" },
     { label: "Rare", value: "rare", dot: "#8BB8FF" },
     { label: "Golden", value: "golden", dot: "#E8CB82" },
     { label: "Developer's", value: "developer's", dot: "#C882FF" },

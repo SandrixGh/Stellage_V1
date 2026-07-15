@@ -17,7 +17,7 @@
     letter-spacing: -0.2px;
     background: var(--surface);
     border: 1px solid rgba(var(--ink-rgb), 0.10);
-    border-radius: 14px;
+    border-radius: var(--radius-lg);
     outline: none;
     transition: border-color 0.2s ease, background 0.2s ease;
 }
