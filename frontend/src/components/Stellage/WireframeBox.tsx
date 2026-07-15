@@ -123,16 +123,24 @@ const GLOW_BY_RARITY: Record<
     "rare" | "golden" | "dev",
     { blur: number; opacity: number }
 > = {
-    rare: { blur: 1.6, opacity: 0.6 },
-    golden: { blur: 2.4, opacity: 0.8 },
-    dev: { blur: 3.2, opacity: 1 },
+    rare: { blur: 3.5, opacity: 0.7 },
+    golden: { blur: 5, opacity: 0.85 },
+    dev: { blur: 6.5, opacity: 1 },
 };
+
+/* Плотность заливки граней. Коробка — объёмный объект (не призрачный контур):
+   верхняя грань самая светлая, передняя средняя, боковая тёмная — даёт объём. */
+const FACE_OPACITY = {
+    top: 0.42,
+    front: 0.26,
+    right: 0.14,
+} as const;
 
 /* ── Content glyph placement (front face «canvas») ──
    Передняя грань — прямоугольник frontWidth×frontHeight в точке (A). Глиф
    рисуется в сетке 24×24 (центр 12,12), масштабируется и центрируется на грани. */
-const GLYPH_SCALE = 1.35;
-const GLYPH_STROKE = 1.3;
+const GLYPH_SCALE = 2.2;
+const GLYPH_STROKE = 1.8;
 const GLYPH_CENTER = {
     x: V.A.x + LAYOUT.frontWidth / 2,
     y: V.A.y + LAYOUT.frontHeight / 2,
@@ -171,10 +179,10 @@ export const WireframeBox = ({
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className={className}
-            style={{ color, maxWidth: "100%", height: "auto" }}
+            style={{ color, maxWidth: "100%", height: "auto", overflow: "visible" }}
         >
-            {glow && (
-                <defs>
+            <defs>
+                {glow && (
                     <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
                         <feGaussianBlur stdDeviation={glow.blur} result="blur" />
                         <feFlood floodColor="currentColor" floodOpacity={glow.opacity} result="color" />
@@ -184,8 +192,30 @@ export const WireframeBox = ({
                             <feMergeNode in="SourceGraphic" />
                         </feMerge>
                     </filter>
-                </defs>
-            )}
+                )}
+                {glyph && (
+                    <>
+                        {/* Пул света ограничиваем передней гранью — свет «внутри» коробки. */}
+                        <clipPath id="wf-front-clip">
+                            <path d={FRONT_FILL} />
+                        </clipPath>
+                        <filter id="wf-pool-blur" x="-80%" y="-80%" width="260%" height="260%">
+                            <feGaussianBlur stdDeviation="5.5" />
+                        </filter>
+                        {/* Свечение глифа: бирюзовый ореол вокруг линий — будто он горит. */}
+                        <filter id="wf-glyph-glow" x="-120%" y="-120%" width="340%" height="340%">
+                            <feGaussianBlur in="SourceAlpha" stdDeviation="2.4" result="b" />
+                            <feFlood floodColor="currentColor" floodOpacity="0.9" result="c" />
+                            <feComposite in="c" in2="b" operator="in" result="g" />
+                            <feMerge>
+                                <feMergeNode in="g" />
+                                <feMergeNode in="g" />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter>
+                    </>
+                )}
+            </defs>
 
             <g
                 filter={glow ? `url(#${filterId})` : undefined}
@@ -193,10 +223,10 @@ export const WireframeBox = ({
                 strokeLinecap="round"
                 strokeLinejoin="round"
             >
-                {/* ── Faint faces (just enough to give the cube a body) ── */}
-                <path className="wf-face" d={TOP_FILL} fill="currentColor" stroke="none" opacity="0.09" />
-                <path className="wf-face" d={RIGHT_FILL} fill="currentColor" stroke="none" opacity="0.045" />
-                <path className="wf-face" d={FRONT_FILL} fill="currentColor" stroke="none" opacity="0.12" />
+                {/* ── Solid shaded faces (коробка как объём, а не контур) ── */}
+                <path className="wf-face" d={TOP_FILL} fill="currentColor" stroke="none" opacity={FACE_OPACITY.top} />
+                <path className="wf-face" d={RIGHT_FILL} fill="currentColor" stroke="none" opacity={FACE_OPACITY.right} />
+                <path className="wf-face" d={FRONT_FILL} fill="currentColor" stroke="none" opacity={FACE_OPACITY.front} />
 
                 {/* ── Hidden edges (one element → no opacity build-up) ── */}
                 <path className="wf-edge wf-edge-hidden" d={HIDDEN} pathLength={1} fill="none" strokeWidth="1.2" opacity="0.34" />
@@ -204,20 +234,39 @@ export const WireframeBox = ({
                 {/* ── Visible wireframe (crisp, rounded) ── */}
                 <path className="wf-edge" d={SILHOUETTE} pathLength={1} fill="none" strokeWidth="1.8" />
                 <path className="wf-edge" d={INTERIOR} pathLength={1} fill="none" strokeWidth="1.8" />
+            </g>
 
-                {/* ── Content-type glyph on the front face (the «canvas») ── */}
-                {glyph && (
+            {/* ── Content-type glyph «горит внутри» коробки ──
+               Свет типа контента — фирменным зелёным (--accent), отдельный канал от
+               редкости (её несёт цвет рёбер). Мягкий пул света под глифом ограничен
+               передней гранью, глиф — с бирюзовым ореолом. */}
+            {glyph && (
+                <>
+                    <g clipPath="url(#wf-front-clip)" style={{ color: "var(--accent)" }}>
+                        <circle
+                            cx={GLYPH_CENTER.x}
+                            cy={GLYPH_CENTER.y}
+                            r={20}
+                            fill="currentColor"
+                            opacity={0.22}
+                            filter="url(#wf-pool-blur)"
+                        />
+                    </g>
                     <g
                         className="wf-glyph"
+                        style={{ color: "var(--accent)" }}
+                        filter="url(#wf-glyph-glow)"
                         transform={`translate(${GLYPH_CENTER.x} ${GLYPH_CENTER.y}) scale(${GLYPH_SCALE}) translate(-12 -12)`}
                         fill="none"
+                        stroke="currentColor"
                         strokeWidth={GLYPH_STROKE}
-                        opacity="0.9"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                     >
                         {glyph}
                     </g>
-                )}
-            </g>
+                </>
+            )}
         </svg>
     );
 };
