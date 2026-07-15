@@ -5,6 +5,9 @@ export interface BoxTemplate {
     price: string;
     currency: string;
     rarity: string;
+    // Тип контента коробки: photo | video | text | file | app | script | hybrid.
+    // Рисует глиф на передней грани куба (что внутри видно сразу на полке).
+    contentType?: string | null;
     // Автор коробки: username/имя создателя, либо null для коробок платформы.
     owner_username?: string | null;
     // id создателя — фронт сравнивает с текущим юзером, чтобы показать

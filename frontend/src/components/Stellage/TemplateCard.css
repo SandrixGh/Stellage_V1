@@ -3,7 +3,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     /* Minimalist direction: flat warm panel, clearly elevated over the black
        ground, hairline border, no glass/glow. */
     background: var(--surface);

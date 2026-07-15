@@ -9,9 +9,7 @@
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: rgba(0, 0, 0, 0.82);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: rgba(0, 0, 0, 0.55);
     animation: box-modal-fade 0.18s ease;
 }
 
@@ -27,11 +25,11 @@
     max-height: 88vh;
     overflow-y: auto;
     padding: 30px 30px 32px;
-    border-radius: 28px;
-    /* Непрозрачная тёмная панель (без просвечивания заднего фона). */
+    border-radius: var(--radius-lg);
+    /* Непрозрачная панель (без просвечивания заднего фона). */
     background: var(--surface);
-    border: 1px solid rgba(var(--ink-rgb), 0.2);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(var(--ink-rgb), 0.1);
+    box-shadow: var(--shadow-lg);
     animation: box-modal-pop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -49,7 +47,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     background: rgba(var(--glass-rgb), 0.04);
     border: 1px solid rgba(var(--ink-rgb), 0.15);
     color: rgba(var(--ink-rgb), 0.7);
@@ -71,9 +69,8 @@
 
 .box-modal-head {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
-    flex-wrap: wrap;
     margin-bottom: 12px;
 }
 
@@ -83,19 +80,24 @@
     font-size: 24px;
     font-weight: 700;
     color: var(--ink);
-    /* Длинное имя без пробелов переносим, а не выпихиваем за край (был гор. скролл). */
+    /* Длинное имя без пробелов переносим внутри доступной ширины, а не
+       выпихиваем бирку редкости на отдельную строку с пустотой рядом. */
+    flex: 1 1 auto;
     min-width: 0;
     word-break: break-word;
     overflow-wrap: anywhere;
 }
 
 .box-modal-rarity {
+    flex: 0 0 auto;
+    /* Прижимаем к верхней строке заголовка, а не к его вертикальному центру. */
+    margin-top: 5px;
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.6px;
     text-transform: uppercase;
     padding: 3px 9px;
-    border-radius: 4px;
+    border-radius: var(--radius-xs);
     color: rgba(var(--ink-rgb), 0.6);
     background: rgba(var(--ink-rgb), 0.07);
     border: 1px solid rgba(var(--ink-rgb), 0.18);
@@ -157,7 +159,7 @@
     justify-content: space-between;
     gap: 16px;
     padding: 10px 14px;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     background: rgba(var(--glass-rgb), 0.03);
     border: 1px solid rgba(var(--ink-rgb), 0.1);
 }
@@ -178,7 +180,7 @@
 .box-modal-content-empty {
     margin: 0;
     padding: 16px;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     background: rgba(var(--glass-rgb), 0.02);
     border: 1px dashed rgba(var(--ink-rgb), 0.18);
     font-size: 13px;
@@ -200,7 +202,7 @@
     flex: 1;
     min-width: 120px;
     padding: 11px 16px;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     font-family: 'Syne', sans-serif;
     font-size: 13px;
     font-weight: 600;
@@ -283,7 +285,7 @@
     width: 100%;
     box-sizing: border-box;
     padding: 11px 14px;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     background: rgba(var(--glass-rgb), 0.04);
     border: 1px solid rgba(var(--ink-rgb), 0.15);
     color: var(--ink);

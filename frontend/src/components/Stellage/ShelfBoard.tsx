@@ -212,7 +212,7 @@ export const ShelfBoard = ({
         <div
             ref={boardRef}
             className={`shelf-board ${editable ? "is-editable" : ""}`}
-            style={{ height: rowCount * ROW_HEIGHT + LABEL_SPACE }}
+            style={{ minHeight: rowCount * ROW_HEIGHT + LABEL_SPACE }}
             onPointerMove={handlePointerMove}
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
@@ -258,7 +258,7 @@ export const ShelfBoard = ({
                         onPointerDown={(e) => handlePointerDown(e, p)}
                     >
                         <div className="shelf-cell-inner">
-                            <WireframeBox size={80} rarityGlow={rarityGlow} color={boxColor} />
+                            <WireframeBox size={80} rarityGlow={rarityGlow} color={boxColor} contentType={p.box.template.contentType} />
                         </div>
                         <div className="shelf-box-label">
                             <span className="shelf-box-name">

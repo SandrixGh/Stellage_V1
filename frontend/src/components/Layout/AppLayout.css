@@ -49,7 +49,7 @@
 }
 
 .status-info.error {
-    color: #ffaaaa;
+    color: var(--error-text);
 }
 
 .empty-message {

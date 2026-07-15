@@ -59,7 +59,7 @@
     background: none;
     cursor: pointer;
     text-align: left;
-    border-radius: 24px;
+    border-radius: var(--radius-lg);
     transition: transform 0.18s ease;
 }
 
@@ -70,7 +70,7 @@
 .inventory-empty {
     padding: 48px 24px;
     text-align: center;
-    border-radius: 24px;
+    border-radius: var(--radius-lg);
     background: rgba(var(--glass-rgb), 0.02);
     border: 1px dashed rgba(var(--ink-rgb), 0.18);
     color: rgba(var(--ink-rgb), 0.5);

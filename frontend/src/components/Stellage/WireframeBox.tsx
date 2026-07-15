@@ -1,8 +1,12 @@
+import { getContentGlyph } from "./contentGlyphs";
+
 interface WireframeBoxProps {
     className?: string;
     color?: string;
     size?: number;
     rarityGlow?: "rare" | "golden" | "dev" | null;
+    /** Тип контента коробки — рисует глиф на передней грани (photo/video/text/…). */
+    contentType?: string | null;
 }
 
 type Point = { x: number; y: number };
@@ -111,6 +115,31 @@ const seg = (a: Point, b: Point) => `M ${a.x},${a.y} L ${b.x},${b.y}`;
 // Corner radius (smaller = tighter corners, fewer artifacts)
 const CORNER_RADIUS = 1.5;
 
+/* ── Rarity aura ──────────────────────────────────────────────────────────
+   Неон переселён с интерфейса на сам товар: Common — чистые линии без свечения,
+   у редких коробок — цветная аура растущей силы. Цвет ауры = currentColor
+   (цвет редкости), поэтому она следует за темой автоматически. */
+const GLOW_BY_RARITY: Record<
+    "rare" | "golden" | "dev",
+    { blur: number; opacity: number }
+> = {
+    rare: { blur: 1.6, opacity: 0.6 },
+    golden: { blur: 2.4, opacity: 0.8 },
+    dev: { blur: 3.2, opacity: 1 },
+};
+
+/* ── Content glyph placement (front face «canvas») ──
+   Передняя грань — прямоугольник frontWidth×frontHeight в точке (A). Глиф
+   рисуется в сетке 24×24 (центр 12,12), масштабируется и центрируется на грани. */
+const GLYPH_SCALE = 1.35;
+const GLYPH_STROKE = 1.3;
+const GLYPH_CENTER = {
+    x: V.A.x + LAYOUT.frontWidth / 2,
+    y: V.A.y + LAYOUT.frontHeight / 2,
+};
+// Ниже этого размера глиф не читается — грань оставляем пустой.
+const GLYPH_MIN_SIZE = 44;
+
 // Outer silhouette of the cube (single closed, rounded loop).
 const SILHOUETTE = roundedPath([V.D, V.A, V.E, V.F, V.G, V.C], CORNER_RADIUS, true);
 // Visible interior edges that meet at the front-top-right corner B.
@@ -127,13 +156,11 @@ export const WireframeBox = ({
     color = "var(--box-common)",
     size = 120,
     rarityGlow = null,
+    contentType = null,
 }: WireframeBoxProps) => {
-    // Minimalist direction: no neon bloom at all — the box reads as crisp
-    // colored line-art. Rarity is carried by the stroke colour + faint face
-    // fills, not by a glow. (rarityGlow kept in the API for compatibility.)
-    void rarityGlow;
-    const glowColor: string | null = null;
-    const filterId = `glow-${rarityGlow ?? "default"}`;
+    const glow = rarityGlow ? GLOW_BY_RARITY[rarityGlow] : null;
+    const filterId = `wf-glow-${rarityGlow ?? "none"}`;
+    const glyph = size >= GLYPH_MIN_SIZE ? getContentGlyph(contentType) : null;
 
     return (
         <svg
@@ -146,11 +173,11 @@ export const WireframeBox = ({
             className={className}
             style={{ color, maxWidth: "100%", height: "auto" }}
         >
-            {glowColor && (
+            {glow && (
                 <defs>
-                    <filter id={filterId} x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="1.1" result="blur" />
-                        <feFlood floodColor={glowColor} result="color" />
+                    <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation={glow.blur} result="blur" />
+                        <feFlood floodColor="currentColor" floodOpacity={glow.opacity} result="color" />
                         <feComposite in="color" in2="blur" operator="in" result="glow" />
                         <feMerge>
                             <feMergeNode in="glow" />
@@ -161,7 +188,7 @@ export const WireframeBox = ({
             )}
 
             <g
-                filter={glowColor ? `url(#${filterId})` : undefined}
+                filter={glow ? `url(#${filterId})` : undefined}
                 stroke="currentColor"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -177,6 +204,19 @@ export const WireframeBox = ({
                 {/* ── Visible wireframe (crisp, rounded) ── */}
                 <path className="wf-edge" d={SILHOUETTE} pathLength={1} fill="none" strokeWidth="1.8" />
                 <path className="wf-edge" d={INTERIOR} pathLength={1} fill="none" strokeWidth="1.8" />
+
+                {/* ── Content-type glyph on the front face (the «canvas») ── */}
+                {glyph && (
+                    <g
+                        className="wf-glyph"
+                        transform={`translate(${GLYPH_CENTER.x} ${GLYPH_CENTER.y}) scale(${GLYPH_SCALE}) translate(-12 -12)`}
+                        fill="none"
+                        strokeWidth={GLYPH_STROKE}
+                        opacity="0.9"
+                    >
+                        {glyph}
+                    </g>
+                )}
             </g>
         </svg>
     );

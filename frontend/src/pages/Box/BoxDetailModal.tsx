@@ -164,7 +164,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                 </button>
 
                 <div className="box-modal-visual">
-                    <WireframeBox size={150} rarityGlow={glow} color={boxColor} />
+                    <WireframeBox size={150} rarityGlow={glow} color={boxColor} contentType={template.contentType} />
                 </div>
 
                 {mode === "view" ? (

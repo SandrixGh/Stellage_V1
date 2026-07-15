@@ -13,12 +13,12 @@
     top: 70px;
     right: 20px;
     width: 280px;
-    background-color: #1a2027;
-    border: 1px solid #362105;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0,0,0.5);
+    background: var(--surface);
+    border: 1px solid rgba(var(--ink-rgb), 0.1);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
     padding: 16px;
-    color: #e6e5d5;
+    color: var(--ink);
     animation: slideIn 0.2s ease-out forwards;
     user-select: none;
 }
@@ -42,7 +42,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 16px;
-    border-bottom: 1px solid rgba(193, 197, 168, 0.2);
+    border-bottom: 1px solid rgba(var(--ink-rgb), 0.1);
     padding-bottom: 8px;
 }
 
@@ -54,7 +54,7 @@
 .close-modal {
     background: none;
     border: none;
-    color: #c1c5a8;
+    color: rgba(var(--ink-rgb), 0.6);
     font-size: 24px;
     cursor: pointer;
 }
@@ -71,12 +71,11 @@
 }
 
 .modal-btn {
-    background: none;
     border: none;
-    background-color: #936639;
-    color: rgb(245, 231, 211);
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
     padding: 8px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     font-weight: 700;
     transition: background 0.2s;
@@ -84,11 +83,23 @@
 }
 
 .modal-btn:hover {
-    background-color: #7f4f24;
+    background: var(--btn-primary-bg-hover);
 }
 
-.delete-btn { color: #6a0303; font-size: 12px; margin-top: 10px; opacity: 0.8; }
+.delete-btn {
+    color: var(--error-text);
+    font-size: 12px;
+    margin-top: 10px;
+    opacity: 0.8;
+}
 
-.delete-btn:hover { background: rgba(239, 68, 68, 0.1); opacity: 1; }
+.delete-btn:hover {
+    background: rgba(var(--error-bg-rgb), 0.1);
+    opacity: 1;
+}
 
-hr { border: 0; border-top: 1px solid rgba(193, 197, 168, 0.1); margin: 8px 0; }
+hr {
+    border: 0;
+    border-top: 1px solid rgba(var(--ink-rgb), 0.1);
+    margin: 8px 0;
+}

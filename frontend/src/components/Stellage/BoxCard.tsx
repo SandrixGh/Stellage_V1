@@ -19,7 +19,7 @@ export const BoxCard = ({ box }: { box: Box }) => {
             </div>
 
             <div className="box-card-visual">
-                <WireframeBox size={110} rarityGlow={rarityGlow} color={boxColor} />
+                <WireframeBox size={110} rarityGlow={rarityGlow} color={boxColor} contentType={box.template.contentType} />
             </div>
 
             <div className="box-card-info">

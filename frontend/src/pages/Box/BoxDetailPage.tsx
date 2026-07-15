@@ -93,6 +93,7 @@ export const BoxDetailPage = () => {
                             size={380}
                             rarityGlow={rarityGlow}
                             color={boxColor}
+                            contentType={template.contentType}
                         />
                     </div>
                 </div>

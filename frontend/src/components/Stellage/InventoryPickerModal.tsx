@@ -73,7 +73,7 @@ export const InventoryPickerModal = ({ boxes, onPick, onClose, disabled }: Inven
                                     title="Поставить на полку"
                                 >
                                     <div className="picker-item-visual">
-                                        <WireframeBox size={72} rarityGlow={rarityGlow} color={boxColor} />
+                                        <WireframeBox size={72} rarityGlow={rarityGlow} color={boxColor} contentType={box.template.contentType} />
                                     </div>
                                     <span className="picker-item-name">{box.template.title}</span>
                                     <span className={`picker-item-rarity rarity-tag-${key}`}>

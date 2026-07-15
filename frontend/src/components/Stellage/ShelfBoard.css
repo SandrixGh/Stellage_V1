@@ -3,7 +3,11 @@
 .shelf-board {
     position: relative;
     width: 100%;
-    border-radius: 20px;
+    /* Заполняет собой обёртку .shelf-view-board, которая растянута на высоту
+       соседнего сайдбара (align-items: stretch в .shelf-view). min-height (инлайн,
+       по числу рядов) остаётся нижней границей на случай, если сайдбар короче. */
+    height: 100%;
+    border-radius: var(--radius-lg);
     background: var(--surface);
     border: 1px solid rgba(var(--ink-rgb), 0.09);
     overflow: visible;
@@ -101,10 +105,16 @@
     font-size: 10px;
     font-weight: 600;
     color: var(--ink);
+    /* Фиксированная (не max-) ширина гарантирует, что обрезка с многоточием
+       всегда применяется и бирка никогда не «вылезает» за пределы стеллажа;
+       text-align: center — чтобы текст не прилипал к левому краю с разными
+       отступами по бокам. */
+    display: block;
+    width: 90px;
+    text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 90px;
 }
 
 .shelf-box-rarity {

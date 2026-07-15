@@ -29,7 +29,7 @@ export const TemplateCard = ({
             }}
         >
             <div className="template-card-visual">
-                <WireframeBox size={size} rarityGlow={rarityGlow} color={boxColor} />
+                <WireframeBox size={size} rarityGlow={rarityGlow} color={boxColor} contentType={template.contentType} />
             </div>
 
             <div className="template-card-footer">

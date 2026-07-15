@@ -1,7 +1,9 @@
 /* ===== SHELF VIEW (sidebar + board + rail layout) ===== */
 .shelf-view {
     display: flex;
-    align-items: flex-start;
+    /* stretch (по умолчанию) — сайдбар и доска растягиваются на высоту самой
+       высокой колонки, иначе их нижние края «обрезаются» на разной высоте. */
+    align-items: stretch;
     justify-content: center;
     gap: 28px;
     width: 100%;

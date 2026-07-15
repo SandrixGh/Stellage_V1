@@ -1,5 +1,6 @@
 /* ──────────────────────────────────────────────────────────────────────────
-   Box detail page — premium dark glassmorphism, 50/50 split layout.
+   Box detail page — тихая светлая сцена, 50/50 split. Вся «энергия» редкости
+   идёт от самой коробки (SVG-аура WireframeBox), а не от фонового свечения.
    ────────────────────────────────────────────────────────────────────────── */
 
 .box-detail {
@@ -22,7 +23,7 @@
     text-decoration: none;
     padding: 8px 14px 8px 12px;
     margin-bottom: 28px;
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     border: 1px solid rgba(var(--ink-rgb), 0.1);
     background: rgba(var(--glass-rgb), 0.02);
     transition: color 0.22s ease, border-color 0.22s ease,
@@ -49,7 +50,7 @@
     min-width: 0;
 }
 
-/* ── LEFT: sticky wireframe stage with ambient aura ── */
+/* ── LEFT: sticky wireframe stage (тихая сцена без фонового свечения) ── */
 .box-detail-visual {
     position: sticky;
     top: 88px;
@@ -61,56 +62,17 @@
     align-items: center;
     justify-content: center;
     min-height: 540px;
-    border-radius: 28px;
-    border: 1px solid rgba(var(--ink-rgb), 0.12);
-    background: rgba(var(--glass-rgb), 0.025);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(var(--ink-rgb), 0.1);
+    background: var(--surface);
+    box-shadow: var(--shadow-md);
     overflow: hidden;
 }
 
-/* Ambient radial glow behind the box — rarity-tinted (default beige). */
+/* Фоновый ореол убран: редкость несёт сама коробка (SVG-аура WireframeBox).
+   Элемент оставлен скрытым, чтобы не трогать разметку. */
 .box-detail-aura {
-    position: absolute;
-    width: 540px;
-    height: 540px;
-    border-radius: 50%;
-    background: radial-gradient(
-        circle,
-        rgba(var(--ink-rgb), 0.16) 0%,
-        rgba(var(--ink-rgb), 0.05) 38%,
-        transparent 70%
-    );
-    filter: blur(8px);
-    pointer-events: none;
-}
-
-.box-detail.rarity-rare .box-detail-aura {
-    background: radial-gradient(
-        circle,
-        rgba(120, 170, 255, 0.2) 0%,
-        rgba(120, 170, 255, 0.06) 38%,
-        transparent 70%
-    );
-}
-
-.box-detail.rarity-golden .box-detail-aura {
-    background: radial-gradient(
-        circle,
-        rgba(230, 200, 120, 0.22) 0%,
-        rgba(230, 200, 120, 0.07) 38%,
-        transparent 70%
-    );
-}
-
-.box-detail.rarity-developers .box-detail-aura {
-    background: radial-gradient(
-        circle,
-        rgba(200, 130, 255, 0.2) 0%,
-        rgba(200, 130, 255, 0.06) 38%,
-        transparent 70%
-    );
+    display: none;
 }
 
 .box-detail-visual-inner svg {
@@ -135,7 +97,7 @@
     letter-spacing: 0.7px;
     text-transform: uppercase;
     padding: 5px 12px;
-    border-radius: 5px;
+    border-radius: var(--radius-xs);
     color: rgba(var(--ink-rgb), 0.6);
     background: rgba(var(--ink-rgb), 0.07);
     border: 1px solid rgba(var(--ink-rgb), 0.18);
@@ -167,7 +129,7 @@
     font-weight: 700;
     line-height: 1.05;
     letter-spacing: -1px;
-    color: #EDE7D2;
+    color: var(--ink);
 }
 
 /* Price */
@@ -257,7 +219,7 @@
 
 .box-detail-tile {
     aspect-ratio: 16 / 10;
-    border-radius: 16px;
+    border-radius: var(--radius-md);
     border: 1px solid rgba(var(--ink-rgb), 0.1);
     background:
         linear-gradient(
@@ -288,7 +250,7 @@
 
 .box-detail-line {
     height: 12px;
-    border-radius: 6px;
+    border-radius: var(--radius-xs);
     background: rgba(var(--ink-rgb), 0.07);
 }
 
@@ -303,7 +265,7 @@
     align-items: center;
     gap: 14px;
     padding: 22px 24px;
-    border-radius: 18px;
+    border-radius: var(--radius-lg);
     border: 1px solid rgba(var(--ink-rgb), 0.1);
     background: rgba(var(--glass-rgb), 0.02);
 }
@@ -315,7 +277,7 @@
     width: 42px;
     height: 42px;
     flex-shrink: 0;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     color: rgba(var(--ink-rgb), 0.6);
     background: rgba(var(--ink-rgb), 0.05);
     border: 1px solid rgba(var(--ink-rgb), 0.14);
@@ -361,7 +323,7 @@
     background: rgba(var(--ink-rgb), 0.1);
     color: var(--ink);
     border: 1px solid rgba(var(--ink-rgb), 0.3);
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     font-family: 'Syne', sans-serif;
     font-size: 14px;
     font-weight: 600;
@@ -373,7 +335,6 @@
 .box-detail-acquire:hover:not(:disabled) {
     background: rgba(var(--ink-rgb), 0.18);
     border-color: rgba(var(--ink-rgb), 0.55);
-    box-shadow: 0 0 28px rgba(var(--ink-rgb), 0.12);
 }
 
 .box-detail-acquire:disabled {

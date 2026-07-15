@@ -21,7 +21,7 @@
     justify-content: center;
     width: 20px;
     height: 20px;
-    border-radius: 6px;
+    border-radius: var(--radius-xs);
     color: rgba(var(--ink-rgb), 0.55);
     background: rgba(var(--ink-rgb), 0.06);
     border: 1px solid rgba(var(--ink-rgb), 0.16);
@@ -45,9 +45,7 @@
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: rgba(0, 0, 0, 0.78);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: rgba(0, 0, 0, 0.55);
     animation: box-name-pop-fade 0.16s ease;
 }
 
@@ -63,10 +61,10 @@
     flex-direction: column;
     gap: 12px;
     padding: 26px 26px 22px;
-    border-radius: 22px;
+    border-radius: var(--radius-lg);
     background: var(--surface);
-    border: 1px solid rgba(var(--ink-rgb), 0.2);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(var(--ink-rgb), 0.1);
+    box-shadow: var(--shadow-lg);
 }
 
 .box-name-pop-eyebrow {
@@ -92,7 +90,7 @@
     align-self: flex-end;
     margin-top: 4px;
     padding: 9px 18px;
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     background: rgba(var(--ink-rgb), 0.1);
     border: 1px solid rgba(var(--ink-rgb), 0.25);
     color: var(--ink);

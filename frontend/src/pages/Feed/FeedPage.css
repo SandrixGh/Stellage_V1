@@ -48,7 +48,7 @@
     padding: 22px 20px;
     background: var(--surface);
     border: 1px solid rgba(var(--ink-rgb), 0.10);
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
 }
 
 .feed-sidebar-title {

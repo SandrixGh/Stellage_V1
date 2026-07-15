@@ -19,10 +19,9 @@
     text-align: center;
     min-height: 220px;
     padding: 48px 24px;
-    border-radius: 28px;
+    border-radius: var(--radius-lg);
     background: rgba(var(--glass-rgb), 0.03);
     border: 1px dashed rgba(var(--ink-rgb), 0.2);
-    backdrop-filter: blur(24px);
 }
 
 .shelf-empty-state p {
@@ -34,7 +33,7 @@
 .badge {
     flex-shrink: 0;
     padding: 5px 12px;
-    border-radius: 4px;
+    border-radius: var(--radius-xs);
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.8px;
@@ -56,7 +55,7 @@
     background: rgba(var(--ink-rgb), 0.08);
     color: var(--ink);
     border: 1px solid rgba(var(--ink-rgb), 0.25);
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     font-family: 'Syne', sans-serif;
     font-size: 13px;
     font-weight: 600;
@@ -68,7 +67,6 @@
 .create-shelf-btn:hover {
     background: rgba(var(--ink-rgb), 0.14);
     border-color: rgba(var(--ink-rgb), 0.45);
-    box-shadow: 0 0 24px rgba(var(--ink-rgb), 0.1);
 }
 
 /* ===== CREATE SHELF MODAL ===== */
@@ -80,8 +78,7 @@
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: rgba(var(--chrome-rgb), 0.7);
-    backdrop-filter: blur(6px);
+    background: rgba(0, 0, 0, 0.55);
     animation: modal-fade 0.2s ease both;
 }
 
@@ -96,10 +93,10 @@
     flex-direction: column;
     gap: 18px;
     padding: 32px;
-    border-radius: 28px;
-    background: rgba(var(--glass-rgb), 0.03);
-    border: 1px solid rgba(var(--ink-rgb), 0.15);
-    backdrop-filter: blur(24px);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid rgba(var(--ink-rgb), 0.1);
+    box-shadow: var(--shadow-lg);
     animation: gate-rise 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -115,9 +112,9 @@
 .shelf-modal-input {
     width: 100%;
     padding: 12px 14px;
-    background: rgba(0, 0, 0, 0.25);
+    background: rgba(var(--glass-rgb), 0.04);
     border: 1px solid rgba(var(--ink-rgb), 0.2);
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     color: var(--ink);
     font-family: 'Syne', sans-serif;
     font-size: 14px;
@@ -148,7 +145,7 @@
 
 .shelf-modal-btn {
     padding: 10px 20px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     font-family: 'Syne', sans-serif;
     font-size: 13px;
     font-weight: 600;
@@ -177,7 +174,6 @@
 .shelf-modal-btn.primary:hover:not(:disabled) {
     background: rgba(var(--ink-rgb), 0.2);
     border-color: rgba(var(--ink-rgb), 0.5);
-    box-shadow: 0 0 24px rgba(var(--ink-rgb), 0.12);
 }
 
 .shelf-modal-btn:disabled {
@@ -285,7 +281,7 @@
     background: rgba(var(--ink-rgb), 0.08);
     color: var(--ink);
     border: 1px solid rgba(var(--ink-rgb), 0.25);
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     font-family: 'Syne', sans-serif;
     font-size: 13px;
     font-weight: 600;
@@ -298,7 +294,6 @@
 .gate-btn:hover {
     background: rgba(var(--ink-rgb), 0.14);
     border-color: rgba(var(--ink-rgb), 0.45);
-    box-shadow: 0 0 24px rgba(var(--ink-rgb), 0.1);
 }
 
 @media (max-width: 720px) {
@@ -337,7 +332,7 @@
     background: rgba(var(--ink-rgb), 0.14);
     color: var(--ink);
     border: 1px solid rgba(var(--ink-rgb), 0.35);
-    border-radius: 14px;
+    border-radius: var(--radius-sm);
     font-family: 'Syne', sans-serif;
     font-size: 14px;
     font-weight: 600;
@@ -349,7 +344,6 @@
 .add-box-btn:hover {
     background: rgba(var(--ink-rgb), 0.22);
     border-color: rgba(var(--ink-rgb), 0.55);
-    box-shadow: 0 0 24px rgba(var(--ink-rgb), 0.12);
 }
 
 .shelf-rail-add {
@@ -366,14 +360,13 @@
     background: rgba(var(--glass-rgb), 0.03);
     color: rgba(var(--ink-rgb), 0.7);
     border: 1px solid rgba(var(--ink-rgb), 0.15);
-    border-radius: 14px;
+    border-radius: var(--radius-sm);
     font-family: 'Syne', sans-serif;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.3px;
     cursor: pointer;
     transition: all 0.2s ease;
-    backdrop-filter: blur(24px);
 }
 
 .shelf-rail-item:hover {
