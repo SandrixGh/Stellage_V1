@@ -87,21 +87,28 @@
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
-    margin-top: 6px;
+    margin-top: 10px;
+    /* Поверх соседних коробок и их свечения, чтобы бирки не «наползали». */
+    z-index: 5;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    padding: 3px 8px 4px;
-    background: rgba(var(--chrome-rgb), 0.72);
+    padding: 3px 7px 4px;
+    background: rgba(var(--chrome-rgb), 0.96);
     border: 1px solid rgba(var(--ink-rgb), 0.13);
-    border-radius: 6px;
+    border-radius: var(--radius-xs);
     pointer-events: none;
     white-space: nowrap;
+    box-sizing: border-box;
+    /* Бирку держим в пределах её ячейки-колонки: не даём наползать на соседние
+       коробки и выходить за край стеллажа у крайних коробок. */
+    width: max-content;
+    max-width: calc(100% - 10px);
 }
 
 .shelf-box-name {
-    font-family: "Syne", sans-serif;
+    font-family: var(--font-display);
     font-size: 10px;
     font-weight: 600;
     color: var(--ink);
@@ -110,7 +117,7 @@
        text-align: center — чтобы текст не прилипал к левому краю с разными
        отступами по бокам. */
     display: block;
-    width: 90px;
+    max-width: 100%;
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
@@ -118,7 +125,7 @@
 }
 
 .shelf-box-rarity {
-    font-family: "Syne", sans-serif;
+    font-family: "Inter", sans-serif;
     font-size: 8px;
     font-weight: 600;
     letter-spacing: 0.8px;
@@ -133,7 +140,7 @@
     height: fit-content;
     text-align: center;
     color: rgba(var(--ink-rgb), 0.45);
-    font-family: "Syne", system-ui, sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-size: 15px;
     padding: 0 24px;
     pointer-events: none;
