@@ -43,9 +43,9 @@
     --ink: #14181A;
     --ink-rgb: 20, 24, 26;
 
-    --ground: #ECF1EF;
+    --ground: #EEF1F1;
     --surface: #FFFFFF;
-    --surface-hover: #EFF5F1;
+    --surface-hover: #F4F7F6;
 
     /* Базовый rgb для «стеклянных» полупрозрачных заливок (glass tint). */
     --glass-rgb: 0, 0, 0;
@@ -69,6 +69,8 @@
     --accent-rgb: 44, 104, 90;
     --accent-hover: #24564A;
     --accent-contrast: #F4F7F6;
+    /* Осветлённый петроль — для знака-логотипа (ярче основного акцента). */
+    --accent-bright: #4FA98E;
 
     --btn-primary-bg: var(--accent);
     --btn-primary-text: var(--accent-contrast);
@@ -82,9 +84,9 @@
     --ink: #E7E9EA;
     --ink-rgb: 231, 233, 234;
 
-    --ground: #0B0F0D;
-    --surface: #141A17;
-    --surface-hover: #1A211D;
+    --ground: #0C0E0F;
+    --surface: #16191B;
+    --surface-hover: #1D2123;
 
     --glass-rgb: 255, 255, 255;
     --chrome-rgb: 12, 14, 15;
@@ -105,6 +107,7 @@
     --accent-rgb: 79, 169, 142;
     --accent-hover: #5FBB9E;
     --accent-contrast: #08130F;
+    --accent-bright: #5FC2A6;
 
     --btn-primary-bg: var(--accent);
     --btn-primary-text: var(--accent-contrast);

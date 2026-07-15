@@ -78,6 +78,9 @@
     justify-content: flex-end;
     width: 100%;
     pointer-events: auto; /* захват возможен только по самой коробке */
+    /* Опускаем коробку на ~2px, чтобы она «стояла» на полке-линии без зазора
+       (у нижней грани SVG есть небольшой внутренний отступ). */
+    transform: translateY(2px);
     transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
 

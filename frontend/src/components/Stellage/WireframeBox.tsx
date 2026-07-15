@@ -199,11 +199,11 @@ export const WireframeBox = ({
                         <clipPath id="wf-front-clip">
                             <path d={FRONT_FILL} />
                         </clipPath>
-                        <filter id="wf-pool-blur" x="-80%" y="-80%" width="260%" height="260%">
+                        <filter id="wf-pool-blur" x="-50%" y="-50%" width="200%" height="200%">
                             <feGaussianBlur stdDeviation="5.5" />
                         </filter>
                         {/* Свечение глифа: бирюзовый ореол вокруг линий — будто он горит. */}
-                        <filter id="wf-glyph-glow" x="-120%" y="-120%" width="340%" height="340%">
+                        <filter id="wf-glyph-glow" x="-60%" y="-60%" width="220%" height="220%">
                             <feGaussianBlur in="SourceAlpha" stdDeviation="2.4" result="b" />
                             <feFlood floodColor="currentColor" floodOpacity="0.9" result="c" />
                             <feComposite in="c" in2="b" operator="in" result="g" />
@@ -237,12 +237,11 @@ export const WireframeBox = ({
             </g>
 
             {/* ── Content-type glyph «горит внутри» коробки ──
-               Свет типа контента — фирменным зелёным (--accent), отдельный канал от
-               редкости (её несёт цвет рёбер). Мягкий пул света под глифом ограничен
-               передней гранью, глиф — с бирюзовым ореолом. */}
+               Свет типа контента — в цвете самой коробки (currentColor), мягкий пул
+               света под глифом ограничен передней гранью — будто горит внутри. */}
             {glyph && (
                 <>
-                    <g clipPath="url(#wf-front-clip)" style={{ color: "var(--accent)" }}>
+                    <g clipPath="url(#wf-front-clip)">
                         <circle
                             cx={GLYPH_CENTER.x}
                             cy={GLYPH_CENTER.y}
@@ -254,7 +253,6 @@ export const WireframeBox = ({
                     </g>
                     <g
                         className="wf-glyph"
-                        style={{ color: "var(--accent)" }}
                         filter="url(#wf-glyph-glow)"
                         transform={`translate(${GLYPH_CENTER.x} ${GLYPH_CENTER.y}) scale(${GLYPH_SCALE}) translate(-12 -12)`}
                         fill="none"
