@@ -90,45 +90,6 @@
     100% { transform: scale(1); filter: brightness(1); }
 }
 
-/* ── Печать: содержимое под замком до вскрытия ── */
-.box-modal-sealed {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-    padding: 26px 22px;
-    border-radius: var(--radius-md);
-    border: 1px dashed rgba(var(--ink-rgb), 0.22);
-    background: rgba(var(--glass-rgb), 0.02);
-    text-align: center;
-}
-
-.box-modal-sealed-wax {
-    width: 46px;
-    height: 46px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    font-size: 20px;
-    color: var(--accent);
-    background: rgba(var(--ink-rgb), 0.05);
-    border: 1px solid rgba(var(--ink-rgb), 0.14);
-}
-
-.box-modal-sealed-text {
-    margin: 0;
-    max-width: 320px;
-    font-size: 13px;
-    line-height: 1.55;
-    color: rgba(var(--ink-rgb), 0.6);
-}
-
-.box-modal-unseal-btn {
-    flex: 0 0 auto;
-    min-width: 160px;
-}
-
 .box-modal-head {
     display: flex;
     align-items: flex-start;
@@ -382,88 +343,110 @@
     word-break: break-word;
 }
 
-.box-modal-assets {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+/* Обрезанный длинный текст в быстром просмотре. */
+.box-modal-content-text.is-clamped {
+    margin-bottom: 6px;
 }
 
-/* Кликабельный превью-тайл ассета — открывает полноэкранный лайтбокс.
-   Ширина по контенту (fit-content) и центрирование: рамка/hover облегают саму
-   картинку, без серых полосок по бокам. */
-.box-modal-asset-open {
-    display: block;
-    width: fit-content;
-    max-width: 100%;
-    margin: 0 auto;
+.box-modal-readmore {
+    margin: 0 0 14px;
     padding: 0;
     border: none;
     background: none;
-    cursor: zoom-in;
-    border-radius: 12px;
-    position: relative;
-    transition: transform 0.16s ease, box-shadow 0.16s ease;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
-.box-modal-asset-open:hover {
+.box-modal-readmore:hover {
+    text-decoration: underline;
+}
+
+/* Сетка компактных превью-плиток (быстрый просмотр): контент не рендерится
+   крупно, а выстраивается мелкими квадратами; клик разворачивает в лайтбокс. */
+.box-modal-thumbs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 8px;
+}
+
+.box-modal-thumb {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    border: 1px solid rgba(var(--ink-rgb), 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(var(--glass-rgb), 0.03);
+    cursor: zoom-in;
+    transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.box-modal-thumb:hover {
     transform: translateY(-1px);
     box-shadow: var(--shadow-md, 0 8px 24px rgba(0, 0, 0, 0.18));
 }
 
-/* Деликатный «плюс/лупа» поверх при наведении — подсказка, что можно увеличить. */
-.box-modal-asset-open::after {
-    content: "⤢";
+/* Само превью заполняет квадрат плитки. */
+.box-modal-thumb .asset-viewer {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Значок «play» поверх видео-превью. */
+.box-modal-thumb-play {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 26px;
-    height: 26px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 7px;
-    background: rgba(8, 8, 8, 0.55);
-    color: #fff;
-    font-size: 13px;
-    opacity: 0;
-    transition: opacity 0.16s ease;
-    pointer-events: none;
-}
-
-.box-modal-asset-open:hover::after {
-    opacity: 1;
-}
-
-/* Видео: плеер с элементами управления + отдельная кнопка «во весь экран».
-   Ширина по контенту и центрирование — как у фото-тайла, без полосок. */
-.box-modal-asset-video {
-    position: relative;
-    width: fit-content;
-    max-width: 100%;
-    margin: 0 auto;
-    border-radius: 12px;
-}
-
-.box-modal-asset-expand {
-    position: absolute;
-    top: 8px;
-    right: 8px;
+    inset: 0;
+    margin: auto;
     width: 30px;
     height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 7px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
     background: rgba(8, 8, 8, 0.55);
     color: #fff;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background 0.16s ease;
+    font-size: 12px;
+    pointer-events: none;
 }
 
-.box-modal-asset-expand:hover {
-    background: rgba(8, 8, 8, 0.8);
+/* Статус со встроенным действием «Распечатать». */
+.box-modal-status-dd {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.box-modal-unseal-inline {
+    padding: 3px 10px;
+    border-radius: var(--radius-xs);
+    border: 1px solid rgba(var(--ink-rgb), 0.2);
+    background: rgba(var(--ink-rgb), 0.05);
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.14s ease;
+}
+
+.box-modal-unseal-inline:hover:not(:disabled) {
+    background: rgba(var(--ink-rgb), 0.1);
+}
+
+.box-modal-unseal-inline:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* Кнопка перехода в детальный вид. */
+.box-modal-detail-btn {
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .box-modal-asset-list {

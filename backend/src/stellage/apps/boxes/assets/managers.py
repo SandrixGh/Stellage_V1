@@ -248,7 +248,6 @@ class AssetManager:
             viewer_id=viewer_id,
             owner_id=access.owner_id,
             is_public=access.is_public,
-            is_sealed=access.is_sealed,
             shelf_id=access.shelf_id,
             shelf_is_public=access.shelf_is_public,
         ):
@@ -287,7 +286,6 @@ class AssetManager:
             viewer_id=viewer_id,
             owner_id=access.owner_id,
             is_public=access.is_public,
-            is_sealed=access.is_sealed,
             shelf_id=access.shelf_id,
             shelf_is_public=access.shelf_is_public,
         ):

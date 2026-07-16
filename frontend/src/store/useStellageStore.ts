@@ -214,12 +214,15 @@ export const useStellageStore = create<StellageState>((set, get) => ({
                 params: { instance_id: instanceId },
             });
             const fresh = res.data;
-            // Обновляем снимок коробки в инвентаре и на текущей доске, чтобы
-            // новый статус (и открывшийся контент) сразу отразился везде.
+            // Оптимистично подменяем снимок в уже загруженных списках…
             set((state) => ({
                 instances: state.instances.map((b) => (b.id === fresh.id ? fresh : b)),
                 currentBoxes: state.currentBoxes.map((b) => (b.id === fresh.id ? fresh : b)),
             }));
+            // …и ресинхронизируем инвентарь и главную полку с сервера, иначе
+            // главная полка приходит из кэша полки и статус «залипает» до
+            // следующего рефетча (баг: распечатка «срабатывала не с первого раза»).
+            await Promise.all([get().fetchInstances(), get().fetchMainShelf()]);
             return fresh;
         } catch (err) {
             set({ error: "Не удалось распечатать коробку" });

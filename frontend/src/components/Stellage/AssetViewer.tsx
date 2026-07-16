@@ -5,6 +5,9 @@ import "./AssetViewer.css";
 
 interface AssetViewerProps {
     asset: BoxAsset;
+    /** Компактное превью-плитка (сетка быстрого просмотра): видео без
+     *  controls, клик по плитке разворачивает в лайтбокс. */
+    thumb?: boolean;
 }
 
 /**
@@ -12,7 +15,7 @@ interface AssetViewerProps {
  * при монтировании; если она успела истечь (onError от img/video) — один раз
  * перезапрашиваем свежую, дальше показываем ошибку.
  */
-export const AssetViewer = ({ asset }: AssetViewerProps) => {
+export const AssetViewer = ({ asset, thumb = false }: AssetViewerProps) => {
     const [url, setUrl] = useState<string | null>(null);
     const [failed, setFailed] = useState(false);
     const retried = useRef(false);
@@ -71,7 +74,10 @@ export const AssetViewer = ({ asset }: AssetViewerProps) => {
         <video
             className="asset-viewer"
             src={url}
-            controls
+            // В превью-плитке контролы не нужны (клик открывает лайтбокс);
+            // грузим только метаданные ради первого кадра-постера.
+            controls={!thumb}
+            muted={thumb}
             preload="metadata"
             onError={handleMediaError}
         />
