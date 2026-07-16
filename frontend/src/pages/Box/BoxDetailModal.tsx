@@ -139,10 +139,10 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     // Длинный текст в модалке не разворачиваем — читается в детальном виде.
     const longText = contentTextValue.length > TEXT_PREVIEW_LIMIT;
 
-    // Уходим на детальную страницу коробки (второй режим просмотра).
+    // Уходим на детальную страницу экземпляра коробки (второй режим просмотра).
     const goToDetail = () => {
         onClose();
-        navigate(`/box/${current.id}`);
+        navigate(`/box/instance/${current.id}`);
     };
 
     const startEdit = () => {

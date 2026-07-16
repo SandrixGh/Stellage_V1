@@ -16,6 +16,7 @@ import { PublicProfilePage } from "./pages/Profile/PublicProfilePage";
 import { SettingsPage } from "./pages/Settings/SettingsPage";
 import { RegisterConfirmPage } from "./pages/Auth/RegisterConfirmPage";
 import { BoxDetailPage } from "./pages/Box/BoxDetailPage";
+import { BoxInstancePage } from "./pages/Box/BoxInstancePage";
 import { PublicShelfPage } from "./pages/Stellage/PublicShelfPage";
 
 function App() {
@@ -47,6 +48,9 @@ function App() {
         {/* Главная теперь и есть лента. */}
         <Route path="/" element={<FeedPage />} />
         <Route path="/feed" element={<Navigate to="/" replace />} />
+        {/* Детальный просмотр экземпляра коробки (второй режим). Отдельно от
+            каталожного /box/:id, который показывает шаблон из ленты. */}
+        <Route path="/box/instance/:id" element={<BoxInstancePage />} />
         <Route path="/box/:id" element={<BoxDetailPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/inventory" element={<InventoryPage />} />

@@ -11,7 +11,7 @@ from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstance
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.enums.asset_status import AssetStatusEnum
 from stellage.database.enums.box_sealing import SealingEnum
-from stellage.database.models import BoxAsset, BoxInstance, Shelf
+from stellage.database.models import BoxAsset, BoxInstance, Shelf, User
 
 
 class BoxInstanceRepository:
@@ -356,6 +356,37 @@ class BoxInstanceRepository:
                 BoxInstanceWithTemplate.model_validate(box)
                 for box in result.unique().scalars()
             ]
+
+
+    async def get_instance_with_owner_by_id(
+        self,
+        instance_id: uuid.UUID,
+    ) -> tuple[BoxInstanceWithTemplate, User, bool] | None:
+        """Читает коробку по id БЕЗ фильтра владельца — для публичного
+        детального просмотра. Возвращает (коробка, владелец, is_public_shelf).
+        Видимость решает вызывающий сервис через can_see_box; None — если
+        коробки нет."""
+        async with self.db.db_session() as session:
+            query = (
+                select(self.instance_model, User, Shelf.is_public)
+                .join(User, self.instance_model.user_id == User.id)
+                .outerjoin(Shelf, self.instance_model.shelf_id == Shelf.id)
+                .where(self.instance_model.id == instance_id)
+                .options(
+                    joinedload(self.instance_model.template),
+                    self._ready_assets_loader(),
+                )
+            )
+            result = await session.execute(query)
+            row = result.unique().first()
+            if row is None:
+                return None
+            instance, owner, shelf_is_public = row
+            return (
+                BoxInstanceWithTemplate.model_validate(instance),
+                owner,
+                bool(shelf_is_public),
+            )
 
 
     async def get_box_instance_by_id(

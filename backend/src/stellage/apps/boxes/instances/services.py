@@ -4,13 +4,18 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 
 from stellage.apps.auth.schemas import UserVerifySchema
+from stellage.apps.boxes.assets.authorization import can_see_box
 from stellage.apps.boxes.instances.managers import InstanceManager
+from stellage.apps.boxes.instances.public_schemas import BoxPublicView
+from stellage.apps.boxes.instances.repositories import BoxInstanceRepository
 from stellage.apps.boxes.instances.schemas import (
     BoxInstanceCreate,
     BoxInstanceWithTemplate,
     BoxPositionUpdate,
     BoxTextContent,
 )
+from stellage.apps.profile.avatar import AvatarManager
+from stellage.apps.profile.schemas import PublicUser
 
 
 class InstanceService:
@@ -19,9 +24,19 @@ class InstanceService:
         manager: Annotated[
             InstanceManager,
             Depends(InstanceManager)
-        ]
+        ],
+        repository: Annotated[
+            BoxInstanceRepository,
+            Depends(BoxInstanceRepository),
+        ],
+        avatar_manager: Annotated[
+            AvatarManager,
+            Depends(AvatarManager),
+        ],
     ):
         self.manager = manager
+        self.repository = repository
+        self.avatar_manager = avatar_manager
 
 
     async def create_instance(
@@ -113,6 +128,52 @@ class InstanceService:
             )
 
         return box
+
+
+    async def get_public_box_view(
+        self,
+        viewer: UserVerifySchema | None,
+        instance_id: uuid.UUID,
+    ) -> BoxPublicView:
+        """Детальный просмотр коробки для отдельной страницы. Читает коробку
+        независимо от владельца, но отдаёт только если зритель вправе её видеть
+        (can_see_box: владелец всегда; остальные — публичная на публичной полке).
+        Невидимая или несуществующая — одинаковый 404. Владельца отдаём публичной
+        карточкой с presigned-аватаром."""
+        found = await self.repository.get_instance_with_owner_by_id(
+            instance_id=instance_id,
+        )
+        viewer_id = viewer.id if viewer else None
+        if found is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Box not found",
+            )
+
+        box, owner, shelf_is_public = found
+        if not can_see_box(
+            viewer_id=viewer_id,
+            owner_id=box.user_id,
+            is_public=box.is_public,
+            shelf_id=box.shelf_id,
+            shelf_is_public=shelf_is_public,
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Box not found",
+            )
+
+        owner_card = PublicUser.model_validate(owner)
+        if owner.avatar_key:
+            owner_card.avatar_url = await self.avatar_manager.get_avatar_url(
+                avatar_key=owner.avatar_key,
+            )
+
+        return BoxPublicView(
+            box=box,
+            owner=owner_card,
+            is_owner=viewer_id is not None and viewer_id == box.user_id,
+        )
 
 
     async def delete_instance(

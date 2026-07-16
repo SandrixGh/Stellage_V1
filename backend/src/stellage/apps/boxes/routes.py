@@ -4,8 +4,9 @@ from typing import Annotated, Optional
 from fastapi import APIRouter, Depends
 from starlette import status
 
-from stellage.apps.auth.depends import get_current_user
+from stellage.apps.auth.depends import get_current_user, get_optional_current_user
 from stellage.apps.auth.schemas import UserVerifySchema
+from stellage.apps.boxes.instances.public_schemas import BoxPublicView
 from stellage.apps.boxes.instances.schemas import (
     BoxInstanceCreate,
     BoxInstanceWithTemplate,
@@ -78,6 +79,31 @@ async def get_box_instance(
 ) -> BoxInstanceWithTemplate:
     return await service.get_instance_by_id(
         user=user,
+        instance_id=instance_id,
+    )
+
+
+@router.get(
+    path="/box-view",
+    response_model=BoxPublicView,
+    status_code=status.HTTP_200_OK,
+)
+async def get_box_view(
+    viewer: Annotated[
+        Optional[UserVerifySchema],
+        Depends(get_optional_current_user),
+    ],
+    service: Annotated[
+        InstanceService,
+        Depends(InstanceService),
+    ],
+    instance_id: uuid.UUID,
+) -> BoxPublicView:
+    # Публичный детальный просмотр коробки (отдельная страница /box/:id).
+    # Отдаёт коробку + карточку владельца, если зритель вправе её видеть;
+    # иначе — 404 (без оракула о существовании чужой приватной коробки).
+    return await service.get_public_box_view(
+        viewer=viewer,
         instance_id=instance_id,
     )
 
@@ -234,10 +260,10 @@ async def unseal_box(
     ],
     instance_id: uuid.UUID,
 ) -> BoxInstanceWithTemplate:
-    # Распечатывание коробки владельцем — необратимо. Чужой доступ к контенту
-    # по-прежнему решает can_view_box_content (нужны public + not-sealed +
-    # публичная полка), так что распечатка публичной коробки на публичной полке
-    # заодно открывает её содержимое остальным.
+    # Распечатывание коробки владельцем — необратимое коллекционное событие
+    # («не вскрыто» → «вскрыто»). Запечатанность больше НЕ влияет на видимость
+    # контента: чужой доступ решает can_view_box_content (public + публичная
+    # полка), а владелец видит содержимое всегда, запечатана коробка или нет.
     return await instance_service.unseal_box(
         user=user,
         instance_id=instance_id,
