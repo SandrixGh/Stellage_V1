@@ -66,4 +66,12 @@ class TemplateService:
                 detail="Template not found"
             )
 
+        # Эндпоинт публичный (без auth): это каталожная витрина шаблона,
+        # содержимое чужих экземпляров здесь не отдаём никому и никогда.
+        # Контент читается через get-box-instance / get-box-assets, где
+        # действует правило видимости.
+        for instance in template.instances:
+            instance.content = None
+            instance.assets = []
+
         return template

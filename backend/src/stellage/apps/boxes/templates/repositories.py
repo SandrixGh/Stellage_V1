@@ -14,7 +14,8 @@ from stellage.apps.boxes.templates.schemas import (
     BoxTemplateReturnWithInstances,
 )
 from stellage.core.core_dependencies.db_dependency import DBDependency
-from stellage.database.models import BoxTemplate
+from stellage.database.enums.asset_status import AssetStatusEnum
+from stellage.database.models import BoxAsset, BoxInstance, BoxTemplate
 
 
 class BoxTemplateRepository:
@@ -131,7 +132,14 @@ class BoxTemplateRepository:
                 select(
                     self.template_model
                 )
-                .options(joinedload(self.template_model.instances))
+                .options(
+                    joinedload(self.template_model.instances)
+                    .selectinload(
+                        BoxInstance.assets.and_(
+                            BoxAsset.status == AssetStatusEnum.READY
+                        )
+                    )
+                )
                 .where(self.template_model.id == template_id)
             )
 

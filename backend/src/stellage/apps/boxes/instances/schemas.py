@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, StringConstraints
 
+from stellage.apps.boxes.assets.schemas import BoxAssetRead
 from stellage.database.enums.box_rarity import BoxRarity
 from stellage.database.enums.box_sealing import SealingEnum
 from stellage.database.enums.currency import CurrencyEnum
@@ -68,6 +69,9 @@ class BoxInstanceReturn(
     serial_number: int
     shelf_row: int | None = None
     shelf_col: int | None = None
+    # Метаданные S3-ассетов (без ключей и ссылок). Дефолт [] сохраняет
+    # валидность старых записей в Redis-кэше.
+    assets: list[BoxAssetRead] = []
     model_config = ConfigDict(from_attributes=True)
 
 

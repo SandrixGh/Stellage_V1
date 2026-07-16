@@ -149,7 +149,7 @@ class ShelfService:
 
         # Контент коробки отдаём только тем, кому он положен по правилу
         # видимости: чужие sealed/private коробки на публичной полке приходят
-        # с content=None (метаданные шаблона остаются видимыми).
+        # с content=None и без ассетов (метаданные шаблона остаются видимыми).
         for box in shelf.boxes:
             if not can_view_box_content(
                 viewer_id=viewer_id,
@@ -160,6 +160,7 @@ class ShelfService:
                 shelf_is_public=shelf.is_public,
             ):
                 box.content = None
+                box.assets = []
 
         return shelf
 

@@ -4,12 +4,13 @@ from typing import Annotated
 from fastapi import Depends, HTTPException
 from sqlalchemy import select, func, insert, update, delete
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from starlette import status
 
 from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate, BoxPositionUpdate
 from stellage.core.core_dependencies.db_dependency import DBDependency
-from stellage.database.models import BoxInstance, Shelf
+from stellage.database.enums.asset_status import AssetStatusEnum
+from stellage.database.models import BoxAsset, BoxInstance, Shelf
 
 
 class BoxInstanceRepository:
@@ -22,6 +23,16 @@ class BoxInstanceRepository:
     ) -> None:
         self.db = db
         self.instance_model = BoxInstance
+
+    def _ready_assets_loader(self):
+        """Подгружает только READY-ассеты: PENDING/DELETING наружу не выходят.
+        Обязателен в каждом запросе, который валидируется в BoxInstanceReturn,
+        иначе async lazy-load упадёт на поле assets."""
+        return selectinload(
+            self.instance_model.assets.and_(
+                BoxAsset.status == AssetStatusEnum.READY
+            )
+        )
 
 
     async def create_instance(
@@ -62,7 +73,10 @@ class BoxInstanceRepository:
                 select_query = (
                     select(self.instance_model)
                     .where(self.instance_model.id == new_instance_id)
-                    .options(joinedload(self.instance_model.template))
+                    .options(
+                    joinedload(self.instance_model.template),
+                    self._ready_assets_loader(),
+                )
                 )
 
                 final_result = await session.execute(select_query)
@@ -116,7 +130,10 @@ class BoxInstanceRepository:
             select_query = (
                 select(self.instance_model)
                 .where(self.instance_model.id == instance_id)
-                .options(joinedload(self.instance_model.template))
+                .options(
+                    joinedload(self.instance_model.template),
+                    self._ready_assets_loader(),
+                )
             )
 
             try:
@@ -213,7 +230,10 @@ class BoxInstanceRepository:
                 select_query = (
                     select(self.instance_model)
                     .where(self.instance_model.id == instance_id)
-                    .options(joinedload(self.instance_model.template))
+                    .options(
+                    joinedload(self.instance_model.template),
+                    self._ready_assets_loader(),
+                )
                 )
                 result = await session.execute(select_query)
                 box = result.unique().scalar_one()
@@ -252,7 +272,10 @@ class BoxInstanceRepository:
             select_query = (
                 select(self.instance_model)
                 .where(self.instance_model.id == instance_id)
-                .options(joinedload(self.instance_model.template))
+                .options(
+                    joinedload(self.instance_model.template),
+                    self._ready_assets_loader(),
+                )
             )
             result = await session.execute(select_query)
             box = result.unique().scalar_one_or_none()
@@ -275,7 +298,10 @@ class BoxInstanceRepository:
             query = (
                 select(self.instance_model)
                 .where(self.instance_model.user_id == user_id)
-                .options(joinedload(self.instance_model.template))
+                .options(
+                    joinedload(self.instance_model.template),
+                    self._ready_assets_loader(),
+                )
             )
 
             result = await session.execute(query)
@@ -298,7 +324,10 @@ class BoxInstanceRepository:
                     self.instance_model.user_id == user_id,
                     self.instance_model.id == instance_id,
                 )
-                .options(joinedload(self.instance_model.template))
+                .options(
+                    joinedload(self.instance_model.template),
+                    self._ready_assets_loader(),
+                )
             )
 
             result = await session.execute(query)

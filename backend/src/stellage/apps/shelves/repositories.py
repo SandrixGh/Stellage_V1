@@ -5,12 +5,13 @@ from fastapi import Depends, HTTPException
 from sqlalchemy import update, insert, select, delete, asc
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from starlette import status
 
 from stellage.apps.shelves.schemas import CreateShelf, ShelfReturnData, ShelfWithBoxInstances
 from stellage.core.core_dependencies.db_dependency import DBDependency
-from stellage.database.models import Shelf, BoxInstance
+from stellage.database.enums.asset_status import AssetStatusEnum
+from stellage.database.models import Shelf, BoxInstance, BoxAsset
 
 
 class ShelfRepository:
@@ -23,6 +24,18 @@ class ShelfRepository:
         self.db = db
         self.model = Shelf
         self.instance_model = BoxInstance
+
+    def _boxes_assets_loader(self):
+        """READY-ассеты коробок полки: без eager-загрузки валидация
+        BoxInstanceReturn.assets упадёт на async lazy-load."""
+        return (
+            joinedload(self.model.boxes)
+            .selectinload(
+                self.instance_model.assets.and_(
+                    BoxAsset.status == AssetStatusEnum.READY
+                )
+            )
+        )
 
 
     async def reset_main_shelf(
@@ -159,6 +172,7 @@ class ShelfRepository:
                     joinedload(self.model.owner),
                     joinedload(self.model.boxes)
                     .joinedload(self.instance_model.template),
+                    self._boxes_assets_loader(),
                 )
             )
 
@@ -216,7 +230,8 @@ class ShelfRepository:
                 .options(
                     joinedload(self.model.owner),
                     joinedload(self.model.boxes)
-                    .joinedload(self.instance_model.template)
+                    .joinedload(self.instance_model.template),
+                    self._boxes_assets_loader(),
                 )
             )
 
@@ -250,6 +265,7 @@ class ShelfRepository:
                     joinedload(self.model.owner),
                     joinedload(self.model.boxes)
                     .joinedload(self.instance_model.template),
+                    self._boxes_assets_loader(),
                 )
             )
 
