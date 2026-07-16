@@ -1,3 +1,4 @@
+import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
@@ -5,7 +6,13 @@ from fastapi import APIRouter, Depends, status
 from stellage.apps.auth.depends import get_current_user, get_optional_current_user
 from stellage.apps.auth.schemas import UserVerifySchema
 from stellage.apps.profile.schemas import PublicUser
-from stellage.apps.social.schemas import FollowActionResult, FollowCounts
+from stellage.apps.social.like_services import LikeService
+from stellage.apps.social.schemas import (
+    FollowActionResult,
+    FollowCounts,
+    LikeActionResult,
+    LikeState,
+)
 from stellage.apps.social.services import SocialService
 
 social_router = APIRouter(
@@ -75,3 +82,44 @@ async def get_following(
     service: Annotated[SocialService, Depends(SocialService)],
 ) -> list[PublicUser]:
     return await service.list_following(username=username)
+
+
+# ── Лайки коробок ──
+
+@social_router.get(
+    path="/box-likes/{instance_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=LikeState,
+)
+async def get_box_likes(
+    instance_id: uuid.UUID,
+    service: Annotated[LikeService, Depends(LikeService)],
+    viewer: Annotated[UserVerifySchema | None, Depends(get_optional_current_user)],
+) -> LikeState:
+    return await service.get_state(instance_id=instance_id, viewer=viewer)
+
+
+@social_router.post(
+    path="/box-likes/{instance_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=LikeActionResult,
+)
+async def like_box(
+    instance_id: uuid.UUID,
+    service: Annotated[LikeService, Depends(LikeService)],
+    user: Annotated[UserVerifySchema, Depends(get_current_user)],
+) -> LikeActionResult:
+    return await service.like(user=user, instance_id=instance_id)
+
+
+@social_router.delete(
+    path="/box-likes/{instance_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=LikeActionResult,
+)
+async def unlike_box(
+    instance_id: uuid.UUID,
+    service: Annotated[LikeService, Depends(LikeService)],
+    user: Annotated[UserVerifySchema, Depends(get_current_user)],
+) -> LikeActionResult:
+    return await service.unlike(user=user, instance_id=instance_id)

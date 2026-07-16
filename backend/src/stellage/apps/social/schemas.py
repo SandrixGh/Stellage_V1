@@ -16,3 +16,16 @@ class FollowActionResult(BaseModel):
     """Результат подписки/отписки: актуальное отношение и число подписчиков."""
     is_following: bool
     followers: int
+
+
+class LikeState(BaseModel):
+    """Состояние лайков коробки: счётчик + лайкнул ли текущий зритель
+    (None для анонима)."""
+    likes: int = 0
+    is_liked: bool | None = None
+
+
+class LikeActionResult(BaseModel):
+    """Результат лайка/снятия лайка."""
+    is_liked: bool
+    likes: int

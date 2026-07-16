@@ -37,3 +37,30 @@ export async function getFollowing(username: string): Promise<PublicUser[]> {
     const res = await api.get<PublicUser[]>(`/social/following/${username}`);
     return res.data;
 }
+
+// ── Лайки коробок ──
+
+export interface LikeState {
+    likes: number;
+    is_liked: boolean | null;
+}
+
+export interface LikeActionResult {
+    is_liked: boolean;
+    likes: number;
+}
+
+export async function getBoxLikes(instanceId: string): Promise<LikeState> {
+    const res = await api.get<LikeState>(`/social/box-likes/${instanceId}`);
+    return res.data;
+}
+
+export async function likeBox(instanceId: string): Promise<LikeActionResult> {
+    const res = await api.post<LikeActionResult>(`/social/box-likes/${instanceId}`);
+    return res.data;
+}
+
+export async function unlikeBox(instanceId: string): Promise<LikeActionResult> {
+    const res = await api.delete<LikeActionResult>(`/social/box-likes/${instanceId}`);
+    return res.data;
+}

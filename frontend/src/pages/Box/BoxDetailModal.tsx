@@ -4,6 +4,7 @@ import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { AssetViewer } from "../../components/Stellage/AssetViewer";
 import { AssetLightbox } from "../../components/Stellage/AssetLightbox";
+import { LikeButton } from "../../components/Stellage/LikeButton";
 import { Select } from "../../components/UI/Select";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
@@ -291,6 +292,10 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                                 <dd>{formatDate(current.created_at)}</dd>
                             </div>
                         </dl>
+
+                        <div className="box-modal-like">
+                            <LikeButton instanceId={current.id} canLike={!!user} />
+                        </div>
 
                         <div className="box-modal-content">
                             <h3 className="box-modal-content-title">Содержимое</h3>

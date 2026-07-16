@@ -1,0 +1,74 @@
+import { useEffect, useState } from "react";
+import { getBoxLikes, likeBox, unlikeBox } from "../../api/social";
+import "./LikeButton.css";
+
+interface LikeButtonProps {
+    instanceId: string;
+    /** Может ли текущий пользователь лайкать (авторизован). Аноним видит
+     *  счётчик, но без действия. */
+    canLike: boolean;
+}
+
+/**
+ * Сердце-лайк со счётчиком для коробки. Сам подтягивает актуальное состояние;
+ * toggle обновляется оптимистично и откатывается при ошибке.
+ */
+export const LikeButton = ({ instanceId, canLike }: LikeButtonProps) => {
+    const [likes, setLikes] = useState(0);
+    const [isLiked, setIsLiked] = useState(false);
+    const [busy, setBusy] = useState(false);
+    const [ready, setReady] = useState(false);
+
+    useEffect(() => {
+        let cancelled = false;
+        setReady(false);
+        getBoxLikes(instanceId)
+            .then((s) => {
+                if (cancelled) return;
+                setLikes(s.likes);
+                setIsLiked(s.is_liked === true);
+                setReady(true);
+            })
+            .catch(() => !cancelled && setReady(true));
+        return () => {
+            cancelled = true;
+        };
+    }, [instanceId]);
+
+    const toggle = async () => {
+        if (busy || !canLike) return;
+        setBusy(true);
+        const was = isLiked;
+        setIsLiked(!was);
+        setLikes((n) => n + (was ? -1 : 1));
+        try {
+            const res = was ? await unlikeBox(instanceId) : await likeBox(instanceId);
+            setIsLiked(res.is_liked);
+            setLikes(res.likes);
+        } catch {
+            setIsLiked(was);
+            setLikes((n) => n + (was ? 1 : -1));
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    if (!ready) return null;
+
+    return (
+        <button
+            type="button"
+            className={`like-btn${isLiked ? " liked" : ""}${canLike ? "" : " readonly"}`}
+            onClick={toggle}
+            disabled={busy || !canLike}
+            aria-pressed={isLiked}
+            aria-label={isLiked ? "Убрать лайк" : "Нравится"}
+            title={canLike ? undefined : "Войдите, чтобы оценить"}
+        >
+            <span className="like-heart" aria-hidden="true">
+                {isLiked ? "♥" : "♡"}
+            </span>
+            <span className="like-count">{likes}</span>
+        </button>
+    );
+};
