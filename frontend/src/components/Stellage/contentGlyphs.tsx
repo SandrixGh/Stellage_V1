@@ -17,7 +17,11 @@ export type ContentType =
     | "file"
     | "app"
     | "script"
-    | "hybrid";
+    | "hybrid"
+    // Типы, которые отдаёт бэкенд (box_content_type): mixed ≈ hybrid,
+    // empty — контента нет (или он скрыт), глиф не рисуем.
+    | "mixed"
+    | "empty";
 
 const GLYPHS: Record<ContentType, ReactNode> = {
     // Фото — рамка с «солнцем» и линией гор.
@@ -73,6 +77,15 @@ const GLYPHS: Record<ContentType, ReactNode> = {
             <rect x="9" y="10" width="10" height="10" rx="2" />
         </>
     ),
+    // Смешанный контент (бэкенд) — тот же глиф «два слоя», что и hybrid.
+    mixed: (
+        <>
+            <rect x="5" y="6" width="10" height="10" rx="2" />
+            <rect x="9" y="10" width="10" height="10" rx="2" />
+        </>
+    ),
+    // Пусто — глифа нет; грань куба остаётся чистой.
+    empty: null,
 };
 
 /** Вернуть элементы глифа для типа контента (или null, если тип неизвестен/не задан). */

@@ -3,9 +3,11 @@ import datetime
 import uuid
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, StringConstraints
+from pydantic import BaseModel, ConfigDict, StringConstraints, computed_field
 
 from stellage.apps.boxes.assets.schemas import BoxAssetRead
+from stellage.apps.boxes.content import resolve_content_type
+from stellage.database.enums.box_content_type import BoxContentTypeEnum
 from stellage.database.enums.box_rarity import BoxRarity
 from stellage.database.enums.box_sealing import SealingEnum
 from stellage.database.enums.currency import CurrencyEnum
@@ -73,6 +75,18 @@ class BoxInstanceReturn(
     # валидность старых записей в Redis-кэше.
     assets: list[BoxAssetRead] = []
     model_config = ConfigDict(from_attributes=True)
+
+    @computed_field
+    @property
+    def content_type(self) -> BoxContentTypeEnum:
+        """Тип наполнения — выводится из текста и ассетов, не хранится в БД.
+        Скрытый правилом видимости контент (content=None, assets=[]) честно
+        даёт EMPTY."""
+        has_text = bool(self.content and self.content.text)
+        return resolve_content_type(
+            has_text=has_text,
+            asset_kinds=[a.kind for a in self.assets],
+        )
 
 
 class BoxInstanceWithTemplate(BoxInstanceReturn):

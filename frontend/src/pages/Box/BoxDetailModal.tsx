@@ -7,7 +7,7 @@ import { Select } from "../../components/UI/Select";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
 import { rarityKey } from "../../utils/rarity";
-import { resolveRarityVisual, resolveContentType } from "../../data/mockTemplates";
+import { resolveRarityVisual, resolveBoxContentType } from "../../data/mockTemplates";
 import {
     ACCEPT_ATTR,
     MAX_ASSETS_PER_BOX,
@@ -224,7 +224,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                 </button>
 
                 <div className="box-modal-visual">
-                    <WireframeBox size={150} rarityGlow={glow} color={boxColor} contentType={resolveContentType(template)} />
+                    <WireframeBox size={150} rarityGlow={glow} color={boxColor} contentType={resolveBoxContentType(current)} />
                 </div>
 
                 {mode === "view" ? (

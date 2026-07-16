@@ -2,7 +2,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "./WireframeBox";
-import { resolveRarityVisual } from "../../data/mockTemplates";
+import { resolveRarityVisual, resolveBoxContentType } from "../../data/mockTemplates";
 import "./ShelfBoard.css";
 
 interface ShelfBoardProps {
@@ -258,7 +258,7 @@ export const ShelfBoard = ({
                         onPointerDown={(e) => handlePointerDown(e, p)}
                     >
                         <div className="shelf-cell-inner">
-                            <WireframeBox size={80} rarityGlow={rarityGlow} color={boxColor} contentType={p.box.template.contentType} />
+                            <WireframeBox size={80} rarityGlow={rarityGlow} color={boxColor} contentType={resolveBoxContentType(p.box)} />
                         </div>
                         <div className="shelf-box-label">
                             <span className="shelf-box-name">

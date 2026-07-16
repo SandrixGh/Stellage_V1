@@ -169,6 +169,40 @@ export const rarityBoxColorMap: Record<string, string> = {
 export const getRarityClass = (rarity: string): string =>
     rarity.toLowerCase().replace(/[^a-z0-9]/g, "");
 
+const CONTENT_TYPES = ["photo", "video", "text", "file", "app", "script", "hybrid"] as const;
+
+/**
+ * Тип контента коробки для глифа на грани. Если бэкенд ещё не отдаёт contentType,
+ * даём детерминированный фолбэк по id — чтобы КАЖДАЯ коробка показывала глиф
+ * (что внутри), а полка читалась разнообразно и стабильно между перезагрузками.
+ */
+export const resolveContentType = (
+    template: { id?: string; contentType?: string | null },
+): string => {
+    if (template.contentType) return template.contentType;
+    const id = template.id ?? "";
+    let h = 0;
+    for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+    return CONTENT_TYPES[h % CONTENT_TYPES.length];
+};
+
+/**
+ * Тип контента для РЕАЛЬНОГО экземпляра коробки. Источник истины —
+ * box.content_type с бэкенда (посчитан из настоящего наполнения). "empty"
+ * пропускаем как «нет глифа», но НЕ подменяем хэшем — пустая коробка честно
+ * пустая. Хэш-фолбэк по шаблону остаётся только для каталога/моков, где
+ * реального контента у нас ещё нет.
+ */
+export const resolveBoxContentType = (box: {
+    content_type?: string | null;
+    template: { id?: string; contentType?: string | null };
+}): string => {
+    if (box.content_type) {
+        return box.content_type === "empty" ? "" : box.content_type;
+    }
+    return resolveContentType(box.template);
+};
+
 /** Resolve the WireframeBox glow + color for a given rarity label. */
 export const resolveRarityVisual = (rarity: string) => {
     const rarityKey = rarity?.toLowerCase() ?? "common";

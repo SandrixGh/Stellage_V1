@@ -1,14 +1,15 @@
 import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "./WireframeBox";
 import { BoxNameLabel } from "./BoxNameLabel";
-import { resolveRarityVisual, resolveContentType } from "../../data/mockTemplates";
+import { resolveRarityVisual, resolveBoxContentType } from "../../data/mockTemplates";
 import "./BoxCard.css";
 
 export const BoxCard = ({ box }: { box: Box }) => {
     const rarityKey = box.template.rarity?.toLowerCase();
     // Тот же визуал, что в ленте: цветные линии wireframe + свечение по редкости.
     const { rarityGlow, boxColor } = resolveRarityVisual(box.template.rarity ?? "common");
-    const contentType = resolveContentType(box.template);
+    // Глиф по реальному содержимому экземпляра (с бэка), а не хэш по id.
+    const contentType = resolveBoxContentType(box);
 
     return (
         <div className={`box-card rarity-${rarityKey}`}>

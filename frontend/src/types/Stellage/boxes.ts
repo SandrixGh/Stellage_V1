@@ -25,6 +25,11 @@ export interface BoxContent {
 
 export type AssetKind = "photo" | "video";
 
+// Тип наполнения коробки — вычисляется бэкендом из реального содержимого
+// (текст + ассеты), а не хранится. Рисует глиф на грани куба. "empty" — коробка
+// пуста ЛИБО контент скрыт правилом видимости.
+export type BoxContentType = "empty" | "text" | "photo" | "video" | "mixed";
+
 // Метаданные S3-ассета коробки. Ни ключей, ни ссылок здесь нет — presigned
 // URL запрашивается отдельно через /boxes/get-asset-url и живёт минуты.
 export interface BoxAsset {
@@ -53,6 +58,9 @@ export interface Box {
     // READY-ассеты коробки; пустой список и когда их нет, и когда контент
     // скрыт правилом видимости.
     assets: BoxAsset[];
+    // Тип наполнения, посчитанный бэкендом из реального содержимого коробки.
+    // Источник истины для глифа на кубе (в отличие от хэш-фолбэка по id).
+    content_type: BoxContentType;
     template: BoxTemplate; // Вложенный объект, который пришел через joinedload
     created_at: string;
     updated_at: string;

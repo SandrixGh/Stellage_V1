@@ -3,7 +3,7 @@ import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "./WireframeBox";
 import { BoxFilterBar } from "./BoxFilterBar";
 import { rarityKey } from "../../utils/rarity";
-import { resolveRarityVisual } from "../../data/mockTemplates";
+import { resolveRarityVisual, resolveBoxContentType } from "../../data/mockTemplates";
 import { filterBoxes, collectRarities, type BoxSort } from "../../utils/boxFilters";
 import "./InventoryPickerModal.css";
 
@@ -73,7 +73,7 @@ export const InventoryPickerModal = ({ boxes, onPick, onClose, disabled }: Inven
                                     title="Поставить на полку"
                                 >
                                     <div className="picker-item-visual">
-                                        <WireframeBox size={72} rarityGlow={rarityGlow} color={boxColor} contentType={box.template.contentType} />
+                                        <WireframeBox size={72} rarityGlow={rarityGlow} color={boxColor} contentType={resolveBoxContentType(box)} />
                                     </div>
                                     <span className="picker-item-name">{box.template.title}</span>
                                     <span className={`picker-item-rarity rarity-tag-${key}`}>
