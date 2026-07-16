@@ -202,6 +202,31 @@ class InstanceManager:
         return box
 
 
+    async def unseal_box(
+        self,
+        user_id: uuid.UUID,
+        instance_id: uuid.UUID,
+    ) -> BoxInstanceWithTemplate:
+        """Распечатывает коробку и сбрасывает кэши полки/экземпляра, чтобы новый
+        статус (и открывшийся для чужих глаз контент) сразу подхватился везде."""
+        await self.refresh_old_shelf(
+            user_id=user_id,
+            instance_id=instance_id,
+        )
+        await self.instance_cache_manager.delete_instance(
+            instance_id=instance_id,
+            user_id=user_id,
+        )
+
+        box = await self.repository.unseal_instance(
+            user_id=user_id,
+            instance_id=instance_id,
+        )
+
+        await self.instance_cache_manager.store_instance(instance=box)
+        return box
+
+
     async def get_instances(
         self,
         user_id: uuid.UUID,

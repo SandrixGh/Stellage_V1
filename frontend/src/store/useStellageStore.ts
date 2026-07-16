@@ -48,6 +48,8 @@ interface StellageState {
     acquireBox: (templateId: string) => Promise<void>;
     createBox: (data: CreateBoxInput) => Promise<Box | null>;
     updateBox: (instanceId: string, data: UpdateBoxInput) => Promise<Box | null>;
+    /** Распечатать коробку (SEALED → NOT_SEALED, необратимо). */
+    unsealBox: (instanceId: string) => Promise<Box | null>;
     /** Перечитать одну коробку (после загрузки/удаления ассетов). */
     refreshBox: (instanceId: string) => Promise<Box | null>;
 
@@ -202,6 +204,25 @@ export const useStellageStore = create<StellageState>((set, get) => ({
             return res.data;
         } catch (err: any) {
             set({ error: "Не удалось сохранить изменения", isLoading: false });
+            return null;
+        }
+    },
+
+    unsealBox: async (instanceId: string) => {
+        try {
+            const res = await api.post<Box>("/boxes/unseal-box", null, {
+                params: { instance_id: instanceId },
+            });
+            const fresh = res.data;
+            // Обновляем снимок коробки в инвентаре и на текущей доске, чтобы
+            // новый статус (и открывшийся контент) сразу отразился везде.
+            set((state) => ({
+                instances: state.instances.map((b) => (b.id === fresh.id ? fresh : b)),
+                currentBoxes: state.currentBoxes.map((b) => (b.id === fresh.id ? fresh : b)),
+            }));
+            return fresh;
+        } catch (err) {
+            set({ error: "Не удалось распечатать коробку" });
             return null;
         }
     },

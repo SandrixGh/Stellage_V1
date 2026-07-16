@@ -1,11 +1,22 @@
+/* Медиа облегает свой контент: ширина по картинке (не на всю ячейку), поэтому
+   вокруг фото нет серых полосок-подложки. Скругление углов — на самом медиа,
+   одинаково для фото и видео. */
 .asset-viewer {
     display: block;
-    width: 100%;
+    max-width: 100%;
+    width: auto;
     max-height: 320px;
+    margin: 0 auto;
     border-radius: 12px;
+    object-fit: contain;
+}
+
+/* Скелетон/ошибка — подложка на всю ширину ячейки (реального контента ещё нет). */
+.asset-viewer-skeleton,
+.asset-viewer-fallback {
+    width: 100%;
     border: 1px solid rgba(var(--ink-rgb), 0.1);
     background: rgba(var(--ink-rgb), 0.04);
-    object-fit: contain;
 }
 
 .asset-viewer-skeleton {

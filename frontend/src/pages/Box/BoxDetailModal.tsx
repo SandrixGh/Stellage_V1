@@ -68,6 +68,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const user = useAuthStore((s) => s.user);
     const isSuperuser = useAuthStore((s) => s.user?.is_superuser ?? false);
     const updateBox = useStellageStore((s) => s.updateBox);
+    const unsealBox = useStellageStore((s) => s.unsealBox);
     const refreshBox = useStellageStore((s) => s.refreshBox);
     const moveBox = useStellageStore((s) => s.moveBox);
     const deleteBox = useStellageStore((s) => s.deleteBox);
@@ -79,6 +80,8 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const [busy, setBusy] = useState(false);
     // Индекс ассета, открытого в полноэкранном лайтбоксе (null — закрыт).
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+    // Проигрывается разовая анимация вскрытия — контент раскрываем после неё.
+    const [unsealing, setUnsealing] = useState(false);
 
     // Поля формы редактирования.
     const [title, setTitle] = useState("");
@@ -97,6 +100,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
         setCurrent(box);
         setMode("view");
         setLightboxIndex(null);
+        setUnsealing(false);
     }, [box]);
 
     useEffect(() => {
@@ -122,6 +126,9 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     // Поля шаблона может править только создатель коробки (не покупатель каталожной).
     const canEdit = isOwner && !!template.creator_id && template.creator_id === user?.id;
     const onShelf = current.shelf_id !== null;
+    // Запечатанная коробка держит содержимое «под печатью» до вскрытия — это
+    // ритуал владения, а не защита доступа (чужой доступ решает бэкенд).
+    const isSealed = current.is_sealed === "sealed";
 
     const startEdit = () => {
         setTitle(template.title);
@@ -154,6 +161,17 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
             setCurrent(updated);
             setMode("view");
         }
+    };
+
+    const handleUnseal = async () => {
+        if (busy || unsealing) return;
+        setUnsealing(true);
+        const fresh = await unsealBox(current.id);
+        // Даём анимации вскрытия доиграть, затем раскрываем контент.
+        setTimeout(() => {
+            if (fresh) setCurrent(fresh);
+            setUnsealing(false);
+        }, 620);
     };
 
     const handleRemoveFromShelf = async () => {
@@ -231,7 +249,11 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                     ✕
                 </button>
 
-                <div className="box-modal-visual">
+                <div
+                    className={`box-modal-visual${unsealing ? " is-unsealing" : ""}${
+                        isSealed && !unsealing ? " is-sealed" : ""
+                    }`}
+                >
                     <WireframeBox size={150} rarityGlow={glow} color={boxColor} contentType={resolveBoxContentType(current)} />
                 </div>
 
@@ -272,48 +294,72 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
 
                         <div className="box-modal-content">
                             <h3 className="box-modal-content-title">Содержимое</h3>
-                            {contentTextValue && (
-                                <p className="box-modal-content-text">{contentTextValue}</p>
-                            )}
-                            {assets.length > 0 && (
-                                <div className="box-modal-assets">
-                                    {assets.map((asset, i) =>
-                                        asset.kind === "photo" ? (
-                                            // Фото — весь тайл кликабелен (открыть лайтбокс).
-                                            <button
-                                                key={asset.id}
-                                                type="button"
-                                                className="box-modal-asset-open"
-                                                onClick={() => setLightboxIndex(i)}
-                                                aria-label={`Открыть «${asset.original_name}»`}
-                                            >
-                                                <AssetViewer asset={asset} />
-                                            </button>
-                                        ) : (
-                                            // Видео — плеер живёт в тайле; отдельная
-                                            // кнопка разворачивает в лайтбокс, не мешая
-                                            // управлению воспроизведением.
-                                            <div key={asset.id} className="box-modal-asset-video">
-                                                <AssetViewer asset={asset} />
-                                                <button
-                                                    type="button"
-                                                    className="box-modal-asset-expand"
-                                                    onClick={() => setLightboxIndex(i)}
-                                                    aria-label={`Открыть «${asset.original_name}» во весь экран`}
-                                                >
-                                                    ⤢
-                                                </button>
-                                            </div>
-                                        ),
-                                    )}
+                            {isSealed && isOwner ? (
+                                // Запечатанная коробка владельца: контент под печатью
+                                // до вскрытия. Кнопка распечатывает — необратимо.
+                                <div className="box-modal-sealed">
+                                    <div className="box-modal-sealed-wax" aria-hidden="true">
+                                        ●
+                                    </div>
+                                    <p className="box-modal-sealed-text">
+                                        Коробка запечатана. Распечатайте её, чтобы
+                                        увидеть содержимое — это действие необратимо.
+                                    </p>
+                                    <button
+                                        type="button"
+                                        className="box-modal-btn primary box-modal-unseal-btn"
+                                        onClick={handleUnseal}
+                                        disabled={busy || unsealing}
+                                    >
+                                        {unsealing ? "Распечатываем…" : "Распечатать"}
+                                    </button>
                                 </div>
-                            )}
-                            {!contentTextValue && assets.length === 0 && (
-                                <p className="box-modal-content-empty">
-                                    {isOwner
-                                        ? "Коробка пока пуста."
-                                        : "Содержимое скрыто или коробка пуста."}
-                                </p>
+                            ) : (
+                                <>
+                                    {contentTextValue && (
+                                        <p className="box-modal-content-text">{contentTextValue}</p>
+                                    )}
+                                    {assets.length > 0 && (
+                                        <div className="box-modal-assets">
+                                            {assets.map((asset, i) =>
+                                                asset.kind === "photo" ? (
+                                                    // Фото — весь тайл кликабелен (открыть лайтбокс).
+                                                    <button
+                                                        key={asset.id}
+                                                        type="button"
+                                                        className="box-modal-asset-open"
+                                                        onClick={() => setLightboxIndex(i)}
+                                                        aria-label={`Открыть «${asset.original_name}»`}
+                                                    >
+                                                        <AssetViewer asset={asset} />
+                                                    </button>
+                                                ) : (
+                                                    // Видео — плеер живёт в тайле; отдельная
+                                                    // кнопка разворачивает в лайтбокс, не мешая
+                                                    // управлению воспроизведением.
+                                                    <div key={asset.id} className="box-modal-asset-video">
+                                                        <AssetViewer asset={asset} />
+                                                        <button
+                                                            type="button"
+                                                            className="box-modal-asset-expand"
+                                                            onClick={() => setLightboxIndex(i)}
+                                                            aria-label={`Открыть «${asset.original_name}» во весь экран`}
+                                                        >
+                                                            ⤢
+                                                        </button>
+                                                    </div>
+                                                ),
+                                            )}
+                                        </div>
+                                    )}
+                                    {!contentTextValue && assets.length === 0 && (
+                                        <p className="box-modal-content-empty">
+                                            {isOwner
+                                                ? "Коробка пока пуста."
+                                                : "Содержимое скрыто или коробка пуста."}
+                                        </p>
+                                    )}
+                                </>
                             )}
                         </div>
 

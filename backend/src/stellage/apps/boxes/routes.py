@@ -219,6 +219,32 @@ async def update_box(
 
 
 @router.post(
+    path="/unseal-box",
+    response_model=BoxInstanceWithTemplate,
+    status_code=status.HTTP_200_OK,
+)
+async def unseal_box(
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user),
+    ],
+    instance_service: Annotated[
+        InstanceService,
+        Depends(InstanceService),
+    ],
+    instance_id: uuid.UUID,
+) -> BoxInstanceWithTemplate:
+    # Распечатывание коробки владельцем — необратимо. Чужой доступ к контенту
+    # по-прежнему решает can_view_box_content (нужны public + not-sealed +
+    # публичная полка), так что распечатка публичной коробки на публичной полке
+    # заодно открывает её содержимое остальным.
+    return await instance_service.unseal_box(
+        user=user,
+        instance_id=instance_id,
+    )
+
+
+@router.post(
     path="/create-box-template",
     response_model=BoxTemplateReturn,
     status_code=status.HTTP_201_CREATED,

@@ -76,6 +76,17 @@ class InstanceService:
         )
 
 
+    async def unseal_box(
+        self,
+        user: UserVerifySchema,
+        instance_id: uuid.UUID,
+    ) -> BoxInstanceWithTemplate:
+        return await self.manager.unseal_box(
+            user_id=user.id,
+            instance_id=instance_id,
+        )
+
+
     async def get_instances(
         self,
         user: UserVerifySchema,

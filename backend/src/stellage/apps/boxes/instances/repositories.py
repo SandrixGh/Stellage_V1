@@ -10,6 +10,7 @@ from starlette import status
 from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate, BoxPositionUpdate
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.enums.asset_status import AssetStatusEnum
+from stellage.database.enums.box_sealing import SealingEnum
 from stellage.database.models import BoxAsset, BoxInstance, Shelf
 
 
@@ -272,6 +273,51 @@ class BoxInstanceRepository:
             select_query = (
                 select(self.instance_model)
                 .where(self.instance_model.id == instance_id)
+                .options(
+                    joinedload(self.instance_model.template),
+                    self._ready_assets_loader(),
+                )
+            )
+            result = await session.execute(select_query)
+            box = result.unique().scalar_one_or_none()
+
+            if not box:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Box not found or access denied",
+                )
+
+            await session.commit()
+            return BoxInstanceWithTemplate.model_validate(box)
+
+
+    async def unseal_instance(
+        self,
+        user_id: uuid.UUID,
+        instance_id: uuid.UUID,
+    ) -> BoxInstanceWithTemplate:
+        """Распечатывает коробку владельца (SEALED → NOT_SEALED). Действие
+        необратимо — как вскрытая настоящая коробка; повторный вызов на уже
+        распечатанной просто вернёт актуальный снимок."""
+        async with self.db.db_session() as session:
+            update_query = (
+                update(self.instance_model)
+                .where(
+                    self.instance_model.user_id == user_id,
+                    self.instance_model.id == instance_id,
+                )
+                .values(is_sealed=SealingEnum.NOT_SEALED)
+            )
+            await session.execute(update_query)
+
+            # Фильтр по user_id и в SELECT: чужой вызов (UPDATE затронул 0 строк)
+            # честно получает 404, а не чужую коробку.
+            select_query = (
+                select(self.instance_model)
+                .where(
+                    self.instance_model.user_id == user_id,
+                    self.instance_model.id == instance_id,
+                )
                 .options(
                     joinedload(self.instance_model.template),
                     self._ready_assets_loader(),

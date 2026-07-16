@@ -65,6 +65,68 @@
     display: flex;
     justify-content: center;
     padding: 8px 0 20px;
+    transition: transform 0.2s ease;
+}
+
+/* Запечатанная коробка чуть «дремлет» — приглушена и слегка меньше,
+   подчёркивая, что её ещё не вскрывали. */
+.box-modal-visual.is-sealed {
+    opacity: 0.82;
+    transform: scale(0.97);
+}
+
+/* Момент вскрытия: короткая встряска + вспышка, затем контент раскрывается. */
+.box-modal-visual.is-unsealing {
+    animation: box-unseal 0.62s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes box-unseal {
+    0%   { transform: scale(0.97); filter: brightness(1); }
+    15%  { transform: translateX(-3px) rotate(-1.5deg); }
+    30%  { transform: translateX(3px) rotate(1.5deg); }
+    45%  { transform: translateX(-2px) rotate(-1deg); }
+    60%  { transform: translateX(2px) rotate(1deg); }
+    72%  { transform: scale(1.06); filter: brightness(1.5); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* ── Печать: содержимое под замком до вскрытия ── */
+.box-modal-sealed {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 26px 22px;
+    border-radius: var(--radius-md);
+    border: 1px dashed rgba(var(--ink-rgb), 0.22);
+    background: rgba(var(--glass-rgb), 0.02);
+    text-align: center;
+}
+
+.box-modal-sealed-wax {
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 20px;
+    color: var(--accent);
+    background: rgba(var(--ink-rgb), 0.05);
+    border: 1px solid rgba(var(--ink-rgb), 0.14);
+}
+
+.box-modal-sealed-text {
+    margin: 0;
+    max-width: 320px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(var(--ink-rgb), 0.6);
+}
+
+.box-modal-unseal-btn {
+    flex: 0 0 auto;
+    min-width: 160px;
 }
 
 .box-modal-head {
@@ -322,10 +384,14 @@
     gap: 12px;
 }
 
-/* Кликабельный превью-тайл ассета — открывает полноэкранный лайтбокс. */
+/* Кликабельный превью-тайл ассета — открывает полноэкранный лайтбокс.
+   Ширина по контенту (fit-content) и центрирование: рамка/hover облегают саму
+   картинку, без серых полосок по бокам. */
 .box-modal-asset-open {
     display: block;
-    width: 100%;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
     padding: 0;
     border: none;
     background: none;
@@ -364,9 +430,13 @@
     opacity: 1;
 }
 
-/* Видео: плеер с элементами управления + отдельная кнопка «во весь экран». */
+/* Видео: плеер с элементами управления + отдельная кнопка «во весь экран».
+   Ширина по контенту и центрирование — как у фото-тайла, без полосок. */
 .box-modal-asset-video {
     position: relative;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
     border-radius: 12px;
 }
 
