@@ -1,0 +1,60 @@
+.follow-block {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.follow-counts {
+    display: flex;
+    gap: 16px;
+}
+
+.follow-count {
+    font-size: 14px;
+    color: rgba(var(--ink-rgb), 0.6);
+}
+
+.follow-count b {
+    color: var(--ink);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.follow-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 20px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: var(--accent-contrast);
+    transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.follow-btn:hover:not(:disabled) {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+/* Уже подписан — приглушённая «ghost»-кнопка, чтобы отписка не выглядела
+   как основное действие. */
+.follow-btn.following {
+    background: transparent;
+    border-color: rgba(var(--ink-rgb), 0.22);
+    color: rgba(var(--ink-rgb), 0.7);
+}
+
+.follow-btn.following:hover:not(:disabled) {
+    border-color: rgba(255, 92, 92, 0.5);
+    color: #d9534f;
+    background: rgba(255, 92, 92, 0.06);
+}
+
+.follow-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

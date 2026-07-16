@@ -5,7 +5,9 @@ import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { ShelfView } from "../../components/Stellage/ShelfView";
 import { Avatar } from "../../components/UI/Avatar";
 import { ProfileStatsRow } from "../../components/Profile/ProfileStatsRow";
+import { FollowButton } from "../../components/Profile/FollowButton";
 import { BoxDetailModal } from "../Box/BoxDetailModal";
+import { useAuthStore } from "../../store/useAuthStore";
 import { onlineStatus, isOnline } from "../../utils/onlineStatus";
 import type { Box } from "../../types/Stellage/boxes";
 import type { PublicProfile } from "../../types/Profile/profile";
@@ -13,6 +15,7 @@ import "./ProfilePage.css";
 
 export const PublicProfilePage = () => {
     const { username } = useParams<{ username: string }>();
+    const currentUser = useAuthStore((s) => s.user);
     const [profile, setProfile] = useState<PublicProfile | null>(null);
     const [status, setStatus] = useState<"loading" | "ready" | "notfound">("loading");
     const [openedBox, setOpenedBox] = useState<Box | null>(null);
@@ -82,6 +85,12 @@ export const PublicProfilePage = () => {
                         </span>
                     </div>
                     {profile.bio && <p className="profile-bio">{profile.bio}</p>}
+                    {profile.username && (
+                        <FollowButton
+                            username={profile.username}
+                            canFollow={!!currentUser && currentUser.id !== profile.id}
+                        />
+                    )}
                 </div>
             </header>
 
