@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { AssetViewer } from "../../components/Stellage/AssetViewer";
+import { AssetLightbox } from "../../components/Stellage/AssetLightbox";
 import { Select } from "../../components/UI/Select";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
@@ -76,6 +77,8 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const [current, setCurrent] = useState<Box | null>(box);
     const [mode, setMode] = useState<"view" | "edit">("view");
     const [busy, setBusy] = useState(false);
+    // Индекс ассета, открытого в полноэкранном лайтбоксе (null — закрыт).
+    const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
     // Поля формы редактирования.
     const [title, setTitle] = useState("");
@@ -93,14 +96,18 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     useEffect(() => {
         setCurrent(box);
         setMode("view");
+        setLightboxIndex(null);
     }, [box]);
 
     useEffect(() => {
         if (!current) return;
-        const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+        // Пока открыт лайтбокс, Esc гасит его (свой обработчик), а не модалку.
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === "Escape" && lightboxIndex === null) onClose();
+        };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
-    }, [current, onClose]);
+    }, [current, onClose, lightboxIndex]);
 
     if (!current) return null;
 
@@ -212,6 +219,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     };
 
     return createPortal(
+        <>
         <div className="box-modal-overlay" onClick={onClose}>
             <div className="box-modal" onClick={(e) => e.stopPropagation()}>
                 <button
@@ -269,9 +277,35 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                             )}
                             {assets.length > 0 && (
                                 <div className="box-modal-assets">
-                                    {assets.map((asset) => (
-                                        <AssetViewer key={asset.id} asset={asset} />
-                                    ))}
+                                    {assets.map((asset, i) =>
+                                        asset.kind === "photo" ? (
+                                            // Фото — весь тайл кликабелен (открыть лайтбокс).
+                                            <button
+                                                key={asset.id}
+                                                type="button"
+                                                className="box-modal-asset-open"
+                                                onClick={() => setLightboxIndex(i)}
+                                                aria-label={`Открыть «${asset.original_name}»`}
+                                            >
+                                                <AssetViewer asset={asset} />
+                                            </button>
+                                        ) : (
+                                            // Видео — плеер живёт в тайле; отдельная
+                                            // кнопка разворачивает в лайтбокс, не мешая
+                                            // управлению воспроизведением.
+                                            <div key={asset.id} className="box-modal-asset-video">
+                                                <AssetViewer asset={asset} />
+                                                <button
+                                                    type="button"
+                                                    className="box-modal-asset-expand"
+                                                    onClick={() => setLightboxIndex(i)}
+                                                    aria-label={`Открыть «${asset.original_name}» во весь экран`}
+                                                >
+                                                    ⤢
+                                                </button>
+                                            </div>
+                                        ),
+                                    )}
                                 </div>
                             )}
                             {!contentTextValue && assets.length === 0 && (
@@ -462,7 +496,16 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                     </div>
                 )}
             </div>
-        </div>,
+        </div>
+
+        {lightboxIndex !== null && assets.length > 0 && (
+            <AssetLightbox
+                assets={assets}
+                startIndex={lightboxIndex}
+                onClose={() => setLightboxIndex(null)}
+            />
+        )}
+        </>,
         document.body
     );
 };
