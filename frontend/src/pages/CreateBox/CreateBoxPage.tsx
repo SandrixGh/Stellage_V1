@@ -11,6 +11,7 @@ import {
     formatBytes,
     kindForMime,
     uploadBoxAsset,
+    uploadErrorMessage,
 } from "../../api/assets";
 import type { AssetKind } from "../../types/Stellage/boxes";
 import "./CreateBoxPage.css";
@@ -49,12 +50,6 @@ const validateFile = (file: File): Pick<StagedFile, "kind" | "status" | "error">
         };
     }
     return { kind, status: "queued" };
-};
-
-const uploadErrorMessage = (err: unknown): string => {
-    const detail = (err as { response?: { data?: { detail?: string } } })
-        ?.response?.data?.detail;
-    return typeof detail === "string" ? detail : "Не удалось загрузить файл";
 };
 
 export const CreateBoxPage = () => {

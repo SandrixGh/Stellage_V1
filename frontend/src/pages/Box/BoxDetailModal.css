@@ -305,3 +305,112 @@
     min-height: 56px;
     line-height: 1.5;
 }
+
+/* ===== Контент: текст и S3-ассеты ===== */
+.box-modal-content-text {
+    margin: 0 0 12px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.box-modal-assets {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.box-modal-asset-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.box-modal-asset-item {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(var(--ink-rgb), 0.12);
+    background: rgba(var(--glass-rgb), 0.03);
+}
+
+.box-modal-asset-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.box-modal-asset-size {
+    font-size: 12px;
+    color: rgba(var(--ink-rgb), 0.45);
+    flex-shrink: 0;
+}
+
+.box-modal-asset-remove {
+    border: none;
+    background: transparent;
+    color: rgba(var(--ink-rgb), 0.45);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.box-modal-asset-remove:hover:not(:disabled) {
+    color: var(--ink);
+    background: rgba(var(--ink-rgb), 0.08);
+}
+
+.box-modal-asset-add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 14px;
+    border-radius: var(--radius-md);
+    border: 1px dashed rgba(var(--ink-rgb), 0.3);
+    color: rgba(var(--ink-rgb), 0.6);
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.18s ease, color 0.18s ease;
+}
+
+.box-modal-asset-add:hover {
+    border-color: rgba(var(--ink-rgb), 0.5);
+    color: var(--ink);
+}
+
+.box-modal-asset-add:has(input:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.box-modal-asset-progress {
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(var(--ink-rgb), 0.12);
+    overflow: hidden;
+}
+
+.box-modal-asset-progress-fill {
+    height: 100%;
+    background: var(--ink);
+    border-radius: 2px;
+    transition: width 0.15s ease;
+}
+
+.box-modal-asset-error {
+    font-size: 12px;
+    color: var(--error-text);
+}

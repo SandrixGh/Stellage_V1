@@ -1,12 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { createPortal } from "react-dom";
 import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
+import { AssetViewer } from "../../components/Stellage/AssetViewer";
 import { Select } from "../../components/UI/Select";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
 import { rarityKey } from "../../utils/rarity";
 import { resolveRarityVisual, resolveContentType } from "../../data/mockTemplates";
+import {
+    ACCEPT_ATTR,
+    MAX_ASSETS_PER_BOX,
+    MAX_BYTES,
+    deleteAsset,
+    formatBytes,
+    kindForMime,
+    uploadBoxAsset,
+    uploadErrorMessage,
+} from "../../api/assets";
 import "./BoxDetailModal.css";
 
 interface BoxDetailModalProps {
@@ -48,14 +59,15 @@ const formatDate = (iso?: string) => {
 };
 
 /**
- * Модалка просмотра коробки на полке: визуал, метаданные шаблона и содержимое.
- * Владельцу коробки доступны действия — редактировать (только создателю),
- * снять с полки и удалить. content — временный JSON-плейсхолдер до переезда на S3.
+ * Модалка просмотра коробки на полке: визуал, метаданные шаблона и содержимое
+ * (текст + S3-ассеты через короткоживущие presigned-ссылки). Владельцу
+ * доступны действия — редактировать (только создателю), снять с полки, удалить.
  */
 export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const user = useAuthStore((s) => s.user);
     const isSuperuser = useAuthStore((s) => s.user?.is_superuser ?? false);
     const updateBox = useStellageStore((s) => s.updateBox);
+    const refreshBox = useStellageStore((s) => s.refreshBox);
     const moveBox = useStellageStore((s) => s.moveBox);
     const deleteBox = useStellageStore((s) => s.deleteBox);
 
@@ -72,6 +84,10 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const [currency, setCurrency] = useState("RUB");
     const [rarity, setRarity] = useState("common");
     const [contentText, setContentText] = useState("");
+
+    // Загрузка/удаление ассетов (режим редактирования).
+    const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+    const [assetError, setAssetError] = useState<string | null>(null);
 
     // Синхронизируем локальную копию и сбрасываем режим при смене коробки.
     useEffect(() => {
@@ -91,7 +107,9 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const { template } = current;
     const key = rarityKey(template.rarity);
     const { rarityGlow: glow, boxColor } = resolveRarityVisual(template.rarity ?? "common");
-    const contentEntries = Object.entries(current.content ?? {});
+    const contentTextValue =
+        typeof current.content?.text === "string" ? current.content.text : "";
+    const assets = current.assets ?? [];
 
     const isOwner = !!user && current.user_id === user.id;
     // Поля шаблона может править только создатель коробки (не покупатель каталожной).
@@ -151,6 +169,48 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
         onClose();
     };
 
+    const syncCurrent = async () => {
+        const fresh = await refreshBox(current.id);
+        if (fresh) setCurrent(fresh);
+    };
+
+    const handleAddAsset = async (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = ""; // позволяем выбрать тот же файл повторно
+        if (!file || busy || uploadProgress !== null) return;
+
+        const kind = kindForMime(file.type);
+        if (!kind) {
+            setAssetError("Неподдерживаемый тип файла");
+            return;
+        }
+        if (file.size > MAX_BYTES[kind]) {
+            setAssetError(`Файл больше лимита ${formatBytes(MAX_BYTES[kind])}`);
+            return;
+        }
+
+        setAssetError(null);
+        setUploadProgress(0);
+        try {
+            await uploadBoxAsset(current.id, file, setUploadProgress);
+            await syncCurrent();
+        } catch (err) {
+            setAssetError(uploadErrorMessage(err));
+        }
+        setUploadProgress(null);
+    };
+
+    const handleDeleteAsset = async (assetId: string) => {
+        if (busy || uploadProgress !== null) return;
+        setAssetError(null);
+        try {
+            await deleteAsset(assetId);
+            await syncCurrent();
+        } catch {
+            setAssetError("Не удалось удалить файл");
+        }
+    };
+
     return createPortal(
         <div className="box-modal-overlay" onClick={onClose}>
             <div className="box-modal" onClick={(e) => e.stopPropagation()}>
@@ -204,18 +264,21 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
 
                         <div className="box-modal-content">
                             <h3 className="box-modal-content-title">Содержимое</h3>
-                            {contentEntries.length > 0 ? (
-                                <dl className="box-modal-content-list">
-                                    {contentEntries.map(([k, v]) => (
-                                        <div key={k} className="box-modal-content-item">
-                                            <dt>{k}</dt>
-                                            <dd>{typeof v === "object" ? JSON.stringify(v) : String(v)}</dd>
-                                        </div>
+                            {contentTextValue && (
+                                <p className="box-modal-content-text">{contentTextValue}</p>
+                            )}
+                            {assets.length > 0 && (
+                                <div className="box-modal-assets">
+                                    {assets.map((asset) => (
+                                        <AssetViewer key={asset.id} asset={asset} />
                                     ))}
-                                </dl>
-                            ) : (
+                                </div>
+                            )}
+                            {!contentTextValue && assets.length === 0 && (
                                 <p className="box-modal-content-empty">
-                                    Коробка пока пуста. Хранилище контента появится позже.
+                                    {isOwner
+                                        ? "Коробка пока пуста."
+                                        : "Содержимое скрыто или коробка пуста."}
                                 </p>
                             )}
                         </div>
@@ -316,7 +379,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                         )}
 
                         <label className="box-modal-field">
-                            <span className="box-modal-label">Содержимое</span>
+                            <span className="box-modal-label">Текст</span>
                             <textarea
                                 className="box-modal-input box-modal-textarea"
                                 value={contentText}
@@ -325,6 +388,58 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                                 onChange={(e) => setContentText(e.target.value)}
                             />
                         </label>
+
+                        <div className="box-modal-field">
+                            <span className="box-modal-label">Файлы</span>
+
+                            {assets.length > 0 && (
+                                <ul className="box-modal-asset-list">
+                                    {assets.map((asset) => (
+                                        <li key={asset.id} className="box-modal-asset-item">
+                                            <span className="box-modal-asset-name" title={asset.original_name}>
+                                                {asset.original_name}
+                                            </span>
+                                            <span className="box-modal-asset-size">
+                                                {formatBytes(asset.size_bytes)}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                className="box-modal-asset-remove"
+                                                aria-label="Удалить файл"
+                                                onClick={() => handleDeleteAsset(asset.id)}
+                                                disabled={busy || uploadProgress !== null}
+                                            >
+                                                ✕
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+
+                            {uploadProgress !== null ? (
+                                <div className="box-modal-asset-progress">
+                                    <div
+                                        className="box-modal-asset-progress-fill"
+                                        style={{ width: `${Math.round(uploadProgress * 100)}%` }}
+                                    />
+                                </div>
+                            ) : (
+                                <label className="box-modal-asset-add">
+                                    <input
+                                        type="file"
+                                        accept={ACCEPT_ATTR}
+                                        hidden
+                                        onChange={handleAddAsset}
+                                        disabled={busy || assets.length >= MAX_ASSETS_PER_BOX}
+                                    />
+                                    + Добавить фото или видео
+                                </label>
+                            )}
+
+                            {assetError && (
+                                <span className="box-modal-asset-error">{assetError}</span>
+                            )}
+                        </div>
 
                         <div className="box-modal-actions">
                             <button

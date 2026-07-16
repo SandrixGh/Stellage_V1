@@ -39,6 +39,13 @@ export function formatBytes(bytes: number): string {
     return `${bytes} Б`;
 }
 
+/** Человекочитаемое сообщение из ошибки загрузки (detail бэкенда, если есть). */
+export function uploadErrorMessage(err: unknown): string {
+    const detail = (err as { response?: { data?: { detail?: string } } })
+        ?.response?.data?.detail;
+    return typeof detail === "string" ? detail : "Не удалось загрузить файл";
+}
+
 /** Свежая ссылка на просмотр ассета (после серверной проверки видимости). */
 export async function getAssetUrl(assetId: string): Promise<AssetDownloadUrl> {
     const res = await api.get<AssetDownloadUrl>("/boxes/get-asset-url", {

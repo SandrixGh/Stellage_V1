@@ -1,0 +1,30 @@
+.asset-viewer {
+    display: block;
+    width: 100%;
+    max-height: 320px;
+    border-radius: 12px;
+    border: 1px solid rgba(var(--ink-rgb), 0.1);
+    background: rgba(var(--ink-rgb), 0.04);
+    object-fit: contain;
+}
+
+.asset-viewer-skeleton {
+    height: 140px;
+    animation: asset-viewer-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes asset-viewer-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+.asset-viewer-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+    padding: 12px;
+    font-size: 13px;
+    color: rgba(var(--ink-rgb), 0.5);
+    text-align: center;
+}
