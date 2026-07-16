@@ -1,5 +1,9 @@
+import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../../store/useAuthStore";
+import { Avatar } from "../../UI/Avatar";
+import { NotificationBell } from "../../Notifications/NotificationBell";
+import { getMyProfile } from "../../../api/profile";
 import "./Header.css";
 import { Logo } from "../../Logo/Logo";
 
@@ -13,6 +17,18 @@ const NAV_ITEMS = [
 export const Header = () => {
     const { user, isAuthenticated } = useAuthStore();
     const navigate = useNavigate();
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+    // Свой аватар для шапки (presigned из /profile/me).
+    useEffect(() => {
+        if (!isAuthenticated) {
+            setAvatarUrl(null);
+            return;
+        }
+        getMyProfile()
+            .then((p) => setAvatarUrl(p.avatar_url ?? null))
+            .catch(() => setAvatarUrl(null));
+    }, [isAuthenticated]);
 
     return (
         <header className="header">
@@ -40,15 +56,19 @@ export const Header = () => {
                 <div className="header-actions">
                     {isAuthenticated ? (
                         <>
+                            <NotificationBell />
                             <NavLink
                                 to="/profile"
                                 className={({ isActive }) =>
                                     `user-profile${isActive ? " active" : ""}`
                                 }
                             >
-                                <span className="user-avatar" aria-hidden="true">
-                                    {(user?.nickname?.trim() || user?.email)?.trim()?.[0]?.toUpperCase() ?? "S"}
-                                </span>
+                                <Avatar
+                                    url={avatarUrl}
+                                    name={user?.nickname?.trim() || user?.email}
+                                    size={30}
+                                    className="header-avatar"
+                                />
                                 <span className="user-email">
                                     {user?.username ? `@${user.username}` : user?.email}
                                 </span>
