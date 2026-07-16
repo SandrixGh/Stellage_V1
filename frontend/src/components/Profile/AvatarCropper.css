@@ -1,0 +1,137 @@
+.cropper-overlay {
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    position: fixed;
+    inset: 0;
+    z-index: 250;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.55);
+    animation: cropper-fade 0.18s ease;
+}
+
+@keyframes cropper-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.cropper {
+    width: 100%;
+    max-width: 400px;
+    padding: 26px 26px 24px;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid rgba(var(--ink-rgb), 0.1);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: cropper-pop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cropper-pop {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.cropper-title {
+    margin: 0 0 4px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    align-self: flex-start;
+}
+
+.cropper-hint {
+    margin: 0 0 18px;
+    font-size: 13px;
+    color: rgba(var(--ink-rgb), 0.55);
+    align-self: flex-start;
+}
+
+.cropper-stage {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: #111;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+
+.cropper-stage:active {
+    cursor: grabbing;
+}
+
+.cropper-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    max-width: none;
+    pointer-events: none;
+}
+
+/* Затемнение вне «кадра» + тонкая рамка. Здесь кадр = вся область (квадрат),
+   поэтому рамка просто обводит стейдж; затемнение оставляем лёгким. */
+.cropper-frame {
+    position: absolute;
+    inset: 0;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    border-radius: var(--radius-md);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+}
+
+.cropper-zoom {
+    width: 100%;
+    max-width: 320px;
+    margin: 18px 0 4px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.cropper-actions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    margin-top: 18px;
+}
+
+.cropper-btn {
+    flex: 1;
+    padding: 11px 16px;
+    border-radius: var(--radius-md);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, opacity 0.18s ease;
+}
+
+.cropper-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cropper-btn.ghost {
+    background: rgba(var(--glass-rgb), 0.04);
+    border: 1px solid rgba(var(--ink-rgb), 0.2);
+    color: rgba(var(--ink-rgb), 0.85);
+}
+
+.cropper-btn.ghost:hover:not(:disabled) {
+    background: rgba(var(--glass-rgb), 0.08);
+    color: var(--ink);
+}
+
+.cropper-btn.primary {
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: var(--accent-contrast);
+}
+
+.cropper-btn.primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}

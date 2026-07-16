@@ -5,6 +5,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useThemeStore } from "../../store/useThemeStore";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { Avatar } from "../../components/UI/Avatar";
+import { AvatarCropper } from "../../components/Profile/AvatarCropper";
 import {
     AVATAR_MIME_TYPES,
     avatarErrorMessage,
@@ -30,6 +31,8 @@ export const SettingsPage = () => {
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [avatarBusy, setAvatarBusy] = useState(false);
     const [avatarError, setAvatarError] = useState<string | null>(null);
+    // Выбранный файл, который сейчас кадрируется (null — кроппер закрыт).
+    const [cropFile, setCropFile] = useState<File | null>(null);
     const fileRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -59,16 +62,21 @@ export const SettingsPage = () => {
         );
     }
 
-    const handleAvatarPick = async (e: ChangeEvent<HTMLInputElement>) => {
+    // Выбор файла открывает кадрирование, а не грузит сразу.
+    const handleAvatarPick = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         e.target.value = ""; // позволяем выбрать тот же файл повторно
         if (!file || avatarBusy) return;
-
         setAvatarError(null);
+        setCropFile(file);
+    };
+
+    // Обрезанный квадрат из кроппера — грузим его.
+    const handleCropped = async (cropped: File) => {
+        setCropFile(null);
         setAvatarBusy(true);
         try {
-            await uploadAvatar(file);
-            // Перечитываем свежую presigned-ссылку на новый аватар.
+            await uploadAvatar(cropped);
             const p = await getMyProfile();
             setAvatarUrl(p.avatar_url ?? null);
         } catch (err) {
@@ -245,6 +253,14 @@ export const SettingsPage = () => {
                     </div>
                 </section>
             </div>
+
+            {cropFile && (
+                <AvatarCropper
+                    file={cropFile}
+                    onCancel={() => setCropFile(null)}
+                    onCrop={handleCropped}
+                />
+            )}
         </div>
     );
 };
