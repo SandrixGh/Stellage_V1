@@ -4,11 +4,13 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 
 from stellage.apps.auth.schemas import UserVerifySchema
+from stellage.apps.notifications.services import NotificationService
 from stellage.apps.profile.avatar import AvatarManager
 from stellage.apps.profile.managers import ProfileManager
 from stellage.apps.profile.schemas import PublicUser
 from stellage.apps.social.repositories import FollowRepository
 from stellage.apps.social.schemas import FollowActionResult, FollowCounts
+from stellage.database.enums.notification_type import NotificationTypeEnum
 
 
 class SocialService:
@@ -17,10 +19,12 @@ class SocialService:
         repository: Annotated[FollowRepository, Depends(FollowRepository)],
         profile_manager: Annotated[ProfileManager, Depends(ProfileManager)],
         avatar_manager: Annotated[AvatarManager, Depends(AvatarManager)],
+        notifications: Annotated[NotificationService, Depends(NotificationService)],
     ) -> None:
         self.repository = repository
         self.profile_manager = profile_manager
         self.avatar_manager = avatar_manager
+        self.notifications = notifications
 
     async def _to_public_users(self, users: list) -> list[PublicUser]:
         result: list[PublicUser] = []
@@ -53,7 +57,18 @@ class SocialService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Cannot follow yourself",
             )
+        # Уведомляем только о НОВОЙ подписке — повторный follow не шлёт спам.
+        already = await self.repository.is_following(
+            follower_id=follower.id,
+            following_id=target_id,
+        )
         await self.repository.follow(follower_id=follower.id, following_id=target_id)
+        if not already:
+            await self.notifications.notify(
+                recipient_id=target_id,
+                actor_id=follower.id,
+                type_=NotificationTypeEnum.FOLLOW,
+            )
         followers = await self.repository.count_followers(user_id=target_id)
         return FollowActionResult(is_following=True, followers=followers)
 

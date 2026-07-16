@@ -7,6 +7,7 @@ __all__ = (
     "BoxAsset",
     "Follow",
     "BoxLike",
+    "Notification",
 )
 
 from .base import Base
@@ -17,3 +18,4 @@ from .box_template import BoxTemplate
 from .box_asset import BoxAsset
 from .follow import Follow
 from .box_like import BoxLike
+from .notification import Notification
