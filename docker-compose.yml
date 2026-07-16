@@ -67,6 +67,9 @@ services:
       MINIO_ROOT_USER: "${s3_access_key_id}"
       MINIO_ROOT_PASSWORD: "${s3_secret_access_key}"
       MINIO_REGION: "${s3_region}"
+      # CORS на уровне API MinIO: только фронтенд-origin (по умолчанию — «*»).
+      # На Selectel аналог задаётся bucket-политикой из infra/minio/cors.json.
+      MINIO_API_CORS_ALLOW_ORIGIN: "http://localhost:5173,http://127.0.0.1:5173"
     volumes:
       - minio-data:/data
     healthcheck:
@@ -75,16 +78,14 @@ services:
       timeout: 5s
       retries: 5
 
-  # Одноразовая идемпотентная инициализация бакета: создать, запретить любой
-  # анонимный доступ, навесить CORS для presigned-загрузок из браузера.
+  # Одноразовая идемпотентная инициализация бакета: создать и запретить любой
+  # анонимный доступ. CORS задан на сервисе minio (MINIO_API_CORS_ALLOW_ORIGIN).
   minio-init:
     image: minio/mc
     container_name: stellage-minio-init
     depends_on:
       minio:
         condition: service_healthy
-    volumes:
-      - ./infra/minio/cors.json:/cors.json:ro
     environment:
       s3_access_key_id: "${s3_access_key_id}"
       s3_secret_access_key: "${s3_secret_access_key}"
@@ -93,8 +94,7 @@ services:
       /bin/sh -c "
       mc alias set local http://minio:9000 \"$$s3_access_key_id\" \"$$s3_secret_access_key\" &&
       mc mb --ignore-existing \"local/$$s3_bucket_name\" &&
-      mc anonymous set none \"local/$$s3_bucket_name\" &&
-      mc cors set \"local/$$s3_bucket_name\" /cors.json
+      mc anonymous set none \"local/$$s3_bucket_name\"
       "
 
   backend:

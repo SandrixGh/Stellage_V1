@@ -1,3 +1,4 @@
+ANSWER TO USER IN RUSSIAN
 # Stellage
 
 ## Platform Overview
@@ -17,17 +18,25 @@ Stellage is an internet platform for buying, selling, placing, and collecting **
 
 ```
 frontend/src/
-  components/     # Shared: WireframeBox, BoxCard, Navbar, TemplateCard
-  pages/          # Auth/, Home/, Feed/, Profile/, MyStellage/
-  stores/         # useAuthStore.ts, useStellageStore.ts
+  api/            # instance.ts (axios, cookie auth), assets.ts (S3 upload/view)
+  components/     # Shared: WireframeBox, BoxCard, AssetViewer, TemplateCard
+  pages/          # Auth/, Home/, Feed/, Box/, CreateBox/, Profile/, MyStellage/
+  store/          # useAuthStore.ts, useStellageStore.ts
   App.tsx, main.tsx
 
-backend/app/
-  auth/           # router, schemas, service, dependencies
-  boxes/          # router, schemas, service, repository, manager
-  shelves/        # router, schemas, service, repository, manager
-  profiles/       # router, schemas, service, repository
-  database.py, main.py, config.py
+backend/src/stellage/
+  apps/
+    auth/         # routes, schemas, services, managers, depends (cookie JWT)
+    boxes/
+      routes.py   # эндпоинты коробок (/boxes)
+      instances/  # schemas, services, managers, repositories, cache_managers
+      templates/  # schemas, services, managers, repositories
+      assets/     # S3-контент: routes, authorization, limits, tasks (Celery)
+    shelves/      # routes, schemas, services, managers, repositories
+    profile/
+  core/           # settings.py, rate_limit.py, celery_config.py
+    core_dependencies/  # db_dependency, redis_dependency, s3_dependency
+  database/       # models/, enums/, mixins/, alembic/
 ```
 
 ## Frontend Patterns
@@ -42,6 +51,19 @@ backend/app/
 - **Endpoint template:** `router.get/post` → `Depends(get_current_user)` → service call → response model
 - **Layer order:** router → service/manager → repository → database
 - **Schemas:** Pydantic v2, separate Request/Response models
+
+## Content Storage (S3)
+
+Бинарный контент коробок (фото/видео) лежит в приватном S3-бакете (локально —
+MinIO из docker-compose, прод — Selectel; переезд = правка `.env`, см.
+`infra/minio/README.md`). Текст — в типизированной JSON-колонке `content`
+(`BoxTextContent`). Правило видимости контента централизовано в
+`apps/boxes/assets/authorization.py::can_view_box_content`: владелец — всегда,
+остальные — только public + распечатанная + на публичной полке; любой отказ —
+404. Загрузка: presigned POST (initiate → прямой POST в S3 → complete с
+проверкой сигнатуры файла). Чтение: presigned GET на 300с. `s3_key` никогда
+не попадает в API-ответы; presigned-ссылки не логируются. Удаление — через
+статус DELETING + Celery (немедленная задача + часовой sweeper).
 
 ## Skills Available
 
