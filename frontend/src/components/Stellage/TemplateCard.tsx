@@ -1,6 +1,6 @@
 import type { BoxTemplate } from "../../types/Stellage/boxes";
 import { WireframeBox } from "./WireframeBox";
-import { formatPrice, resolveRarityVisual } from "../../data/mockTemplates";
+import { formatPrice, resolveRarityVisual, resolveContentType } from "../../data/mockTemplates";
 import "./TemplateCard.css";
 
 /* Shared box tile used by the Feed grid and the Home feed-teaser.
@@ -29,7 +29,7 @@ export const TemplateCard = ({
             }}
         >
             <div className="template-card-visual">
-                <WireframeBox size={size} rarityGlow={rarityGlow} color={boxColor} contentType={template.contentType} />
+                <WireframeBox size={size} rarityGlow={rarityGlow} color={boxColor} contentType={resolveContentType(template)} />
             </div>
 
             <div className="template-card-footer">

@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { getContentGlyph } from "./contentGlyphs";
 
 interface WireframeBoxProps {
@@ -166,8 +167,12 @@ export const WireframeBox = ({
     rarityGlow = null,
     contentType = null,
 }: WireframeBoxProps) => {
+    const uid = useId();
     const glow = rarityGlow ? GLOW_BY_RARITY[rarityGlow] : null;
-    const filterId = `wf-glow-${rarityGlow ?? "none"}`;
+    const filterId = `wf-glow-${uid}`;
+    const clipId = `wf-front-clip-${uid}`;
+    const poolBlurId = `wf-pool-blur-${uid}`;
+    const glyphGlowId = `wf-glyph-glow-${uid}`;
     const glyph = size >= GLYPH_MIN_SIZE ? getContentGlyph(contentType) : null;
     // На полке (size 80) глиф должен быть простым, без ореола — как в ленте
     const isSmallBox = size < 100;
@@ -198,14 +203,14 @@ export const WireframeBox = ({
                 {glyph && (
                     <>
                         {/* Пул света ограничиваем передней гранью — свет «внутри» коробки. */}
-                        <clipPath id="wf-front-clip">
+                        <clipPath id={clipId}>
                             <path d={FRONT_FILL} />
                         </clipPath>
-                        <filter id="wf-pool-blur" x="-50%" y="-50%" width="200%" height="200%">
+                        <filter id={poolBlurId} x="-50%" y="-50%" width="200%" height="200%">
                             <feGaussianBlur stdDeviation="5.5" />
                         </filter>
                         {/* Свечение глифа: бирюзовый ореол вокруг линий — будто он горит. */}
-                        <filter id="wf-glyph-glow" x="-60%" y="-60%" width="220%" height="220%">
+                        <filter id={glyphGlowId} x="-60%" y="-60%" width="220%" height="220%">
                             <feGaussianBlur in="SourceAlpha" stdDeviation="2.4" result="b" />
                             <feFlood floodColor="currentColor" floodOpacity="0.9" result="c" />
                             <feComposite in="c" in2="b" operator="in" result="g" />
@@ -243,19 +248,19 @@ export const WireframeBox = ({
                света под глифом ограничен передней гранью — будто горит внутри. */}
             {glyph && (
                 <>
-                    <g clipPath="url(#wf-front-clip)">
+                    <g clipPath={`url(#${clipId})`}>
                         <circle
                             cx={GLYPH_CENTER.x}
                             cy={GLYPH_CENTER.y}
                             r={20}
                             fill="currentColor"
                             opacity={0.22}
-                            filter="url(#wf-pool-blur)"
+                            filter={`url(#${poolBlurId})`}
                         />
                     </g>
                     <g
                         className="wf-glyph"
-                        filter={!isSmallBox ? "url(#wf-glyph-glow)" : undefined}
+                        filter={!isSmallBox ? `url(#${glyphGlowId})` : undefined}
                         transform={`translate(${GLYPH_CENTER.x} ${GLYPH_CENTER.y}) scale(${GLYPH_SCALE}) translate(-12 -12)`}
                         fill="none"
                         stroke="currentColor"

@@ -127,12 +127,14 @@
     text-overflow: ellipsis;
 }
 
-/* Редкость + лайки в ОДНУ строку — высота бирки не растёт, поэтому нижняя
-   полка не вылезает за экран. */
+/* Редкость сверху, лайки — отдельной строкой ПОД редкостью (как просил
+   пользователь). Дополнительную высоту компенсируем поднятием полок
+   (TOP_PADDING) и увеличенным LABEL_SPACE в ShelfBoard.tsx. */
 .shelf-box-tags {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 1px;
 }
 
 .shelf-box-rarity {

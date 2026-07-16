@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getBoxLikes, likeBox, unlikeBox } from "../../api/social";
+import { formatCount } from "../../utils/formatCount";
 import "./LikeButton.css";
 
 interface LikeButtonProps {
@@ -68,7 +69,7 @@ export const LikeButton = ({ instanceId, canLike }: LikeButtonProps) => {
             <span className="like-heart" aria-hidden="true">
                 {isLiked ? "♥" : "♡"}
             </span>
-            <span className="like-count">{likes}</span>
+            <span className="like-count" title={`${likes} лайков`}>{formatCount(likes)}</span>
         </button>
     );
 };

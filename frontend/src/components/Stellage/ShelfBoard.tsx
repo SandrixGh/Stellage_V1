@@ -3,6 +3,7 @@ import type { PointerEvent as ReactPointerEvent } from "react";
 import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "./WireframeBox";
 import { resolveRarityVisual, resolveBoxContentType } from "../../data/mockTemplates";
+import { formatCount } from "../../utils/formatCount";
 import "./ShelfBoard.css";
 
 interface ShelfBoardProps {
@@ -24,9 +25,13 @@ interface PlacedBox {
 /** Высота одной полки в пикселях (включает зону для коробки + полку под ней). */
 const ROW_HEIGHT = 128;
 
-/** Запас под последней линией, чтобы бирка нижнего ряда не обрезалась
- * (оставляем 3–4px от нижней бирки до края канваса). */
-const LABEL_SPACE = 50;
+/** Отступ сверху доски: визуально «приподнимает» все полки, освобождая место
+ * снизу под двухстрочную бирку (редкость + лайки) нижнего ряда. */
+const TOP_PADDING = 16;
+
+/** Запас под последней линией, чтобы двухстрочная бирка нижнего ряда (редкость
+ * + лайки под ней) не обрезалась и не вылезала за пределы стеллажа. */
+const LABEL_SPACE = 64;
 
 /** Порог смещения курсора (px), после которого жест считается перетаскиванием,
  * а не кликом-открытием коробки. */
@@ -137,7 +142,7 @@ export const ShelfBoard = ({
             const localY = clientY - rect.top;
             const colW = rect.width / colCount;
             let col = Math.round((localX - colW / 2) / colW);
-            let row = Math.round((localY - ROW_HEIGHT / 2) / ROW_HEIGHT);
+            let row = Math.round((localY - TOP_PADDING - ROW_HEIGHT / 2) / ROW_HEIGHT);
             col = Math.max(0, Math.min(colCount - 1, col));
             row = Math.max(0, Math.min(rowCount - 1, row));
             return { row, col };
@@ -153,7 +158,7 @@ export const ShelfBoard = ({
         if (!el) return;
         const rect = el.getBoundingClientRect();
         const boxLeft = p.col * (rect.width / colCount);
-        const boxTop = p.row * ROW_HEIGHT;
+        const boxTop = TOP_PADDING + p.row * ROW_HEIGHT;
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         // Захват ставим на сам board (стабильный элемент), а не на e.target —
@@ -212,7 +217,7 @@ export const ShelfBoard = ({
         <div
             ref={boardRef}
             className={`shelf-board ${editable ? "is-editable" : ""}`}
-            style={{ minHeight: rowCount * ROW_HEIGHT + LABEL_SPACE }}
+            style={{ minHeight: TOP_PADDING + rowCount * ROW_HEIGHT + LABEL_SPACE }}
             onPointerMove={handlePointerMove}
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
@@ -222,7 +227,7 @@ export const ShelfBoard = ({
                 <div
                     key={`line-${row}`}
                     className="shelf-line"
-                    style={{ top: (row + 1) * ROW_HEIGHT - 1 }}
+                    style={{ top: TOP_PADDING + (row + 1) * ROW_HEIGHT - 1 }}
                 />
             ))}
 
@@ -235,18 +240,18 @@ export const ShelfBoard = ({
                     p.box.template.rarity ?? "common"
                 );
                 const boardW = cellWidth * colCount;
-                const boardH = rowCount * ROW_HEIGHT;
+                const boardH = TOP_PADDING + rowCount * ROW_HEIGHT;
                 const cellW = cellWidth || 0;
                 const style: React.CSSProperties = isDragging
                     ? {
                           left: Math.max(0, Math.min(drag!.x - drag!.grabDx, boardW - cellW)),
-                          top: Math.max(0, Math.min(drag!.y - drag!.grabDy, boardH - ROW_HEIGHT)),
+                          top: Math.max(TOP_PADDING, Math.min(drag!.y - drag!.grabDy, boardH - ROW_HEIGHT)),
                           width: cellW || undefined,
                           height: ROW_HEIGHT,
                       }
                     : {
                           left: `${p.col * cellWidthPct}%`,
-                          top: p.row * ROW_HEIGHT,
+                          top: TOP_PADDING + p.row * ROW_HEIGHT,
                           width: `${cellWidthPct}%`,
                           height: ROW_HEIGHT,
                       };
@@ -272,8 +277,8 @@ export const ShelfBoard = ({
                                     {p.box.template.rarity}
                                 </span>
                                 {p.box.likes_count > 0 && (
-                                    <span className="shelf-box-likes" title="Лайки">
-                                        ♥ {p.box.likes_count}
+                                    <span className="shelf-box-likes" title={`${p.box.likes_count} лайков`}>
+                                        ♥ {formatCount(p.box.likes_count)}
                                     </span>
                                 )}
                             </span>

@@ -9,6 +9,7 @@ import {
     formatPrice,
     getRarityClass,
     resolveRarityVisual,
+    resolveContentType,
     type BoxExtra,
 } from "../../data/mockTemplates";
 import "./BoxDetailPage.css";
@@ -93,7 +94,7 @@ export const BoxDetailPage = () => {
                             size={380}
                             rarityGlow={rarityGlow}
                             color={boxColor}
-                            contentType={template.contentType}
+                            contentType={resolveContentType(template)}
                         />
                     </div>
                 </div>

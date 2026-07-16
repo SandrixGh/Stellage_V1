@@ -2,6 +2,7 @@ import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "./WireframeBox";
 import { BoxNameLabel } from "./BoxNameLabel";
 import { resolveRarityVisual, resolveBoxContentType } from "../../data/mockTemplates";
+import { formatCount } from "../../utils/formatCount";
 import "./BoxCard.css";
 
 export const BoxCard = ({ box }: { box: Box }) => {
@@ -33,8 +34,8 @@ export const BoxCard = ({ box }: { box: Box }) => {
                         {box.template.rarity}
                     </span>
                     {box.likes_count > 0 && (
-                        <span className="box-likes-tag" title="Лайки">
-                            ♥ {box.likes_count}
+                        <span className="box-likes-tag" title={`${box.likes_count} лайков`}>
+                            ♥ {formatCount(box.likes_count)}
                         </span>
                     )}
                     <span className={`status-tag ${box.is_sealed === "sealed" ? "sealed" : "unsealed"}`}>
