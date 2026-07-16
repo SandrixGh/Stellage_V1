@@ -17,6 +17,7 @@ import { SettingsPage } from "./pages/Settings/SettingsPage";
 import { RegisterConfirmPage } from "./pages/Auth/RegisterConfirmPage";
 import { BoxDetailPage } from "./pages/Box/BoxDetailPage";
 import { BoxInstancePage } from "./pages/Box/BoxInstancePage";
+import { MessagesPage } from "./pages/Messages/MessagesPage";
 import { PublicShelfPage } from "./pages/Stellage/PublicShelfPage";
 
 function App() {
@@ -58,6 +59,8 @@ function App() {
         <Route path="/my-stellage" element={<MyStellagePage />} />
         <Route path="/stellage/:shelfId" element={<PublicShelfPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/messages" element={<MessagesPage />} />
+        <Route path="/messages/:username" element={<MessagesPage />} />
         <Route path="/u/:username" element={<PublicProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../../api/instance";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { ShelfView } from "../../components/Stellage/ShelfView";
@@ -17,6 +17,7 @@ import "./ProfilePage.css";
 
 export const PublicProfilePage = () => {
     const { username } = useParams<{ username: string }>();
+    const navigate = useNavigate();
     const currentUser = useAuthStore((s) => s.user);
     const [profile, setProfile] = useState<PublicProfile | null>(null);
     const [status, setStatus] = useState<"loading" | "ready" | "notfound">("loading");
@@ -103,14 +104,23 @@ export const PublicProfilePage = () => {
                     </div>
                     {profile.bio && <p className="profile-bio">{profile.bio}</p>}
                     {profile.username && !!currentUser && currentUser.id !== profile.id && (
-                        <FollowButton
-                            username={profile.username}
-                            isFollowing={isFollowing}
-                            onChange={(nowFollowing, count) => {
-                                setIsFollowing(nowFollowing);
-                                setFollowers(count);
-                            }}
-                        />
+                        <div className="profile-actions">
+                            <FollowButton
+                                username={profile.username}
+                                isFollowing={isFollowing}
+                                onChange={(nowFollowing, count) => {
+                                    setIsFollowing(nowFollowing);
+                                    setFollowers(count);
+                                }}
+                            />
+                            <button
+                                type="button"
+                                className="profile-message-btn"
+                                onClick={() => navigate(`/messages/${profile.username}`)}
+                            >
+                                Написать
+                            </button>
+                        </div>
                     )}
                 </div>
             </header>

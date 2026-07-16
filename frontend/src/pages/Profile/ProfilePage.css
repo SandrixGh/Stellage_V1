@@ -81,6 +81,32 @@
     word-break: break-word;
 }
 
+/* Ряд действий на чужом профиле: подписка + написать. */
+.profile-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+}
+
+.profile-message-btn {
+    padding: 8px 18px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(var(--ink-rgb), 0.18);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.profile-message-btn:hover {
+    background: var(--surface-hover);
+    border-color: rgba(var(--ink-rgb), 0.3);
+}
+
 .profile-chip {
     font-family: 'Inter', sans-serif;
     font-size: 11px;

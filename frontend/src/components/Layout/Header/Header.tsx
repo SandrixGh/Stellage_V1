@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { Avatar } from "../../UI/Avatar";
 import { NotificationBell } from "../../Notifications/NotificationBell";
+import { MessagesButton } from "../../Messages/MessagesButton";
 import { getMyProfile } from "../../../api/profile";
 import "./Header.css";
 import { Logo } from "../../Logo/Logo";
@@ -56,6 +57,7 @@ export const Header = () => {
                 <div className="header-actions">
                     {isAuthenticated ? (
                         <>
+                            <MessagesButton />
                             <NotificationBell />
                             <NavLink
                                 to="/profile"

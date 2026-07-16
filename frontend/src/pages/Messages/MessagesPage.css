@@ -1,0 +1,246 @@
+.msg-page {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 0;
+    max-width: 1000px;
+    height: calc(100vh - 160px);
+    min-height: 480px;
+    margin: 24px auto;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid rgba(var(--ink-rgb), 0.09);
+    overflow: hidden;
+}
+
+/* ── Список диалогов ── */
+.msg-list {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(var(--ink-rgb), 0.09);
+    overflow-y: auto;
+}
+
+.msg-list-title {
+    margin: 0;
+    padding: 20px 18px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.msg-list-empty {
+    padding: 20px 18px;
+    color: rgba(var(--ink-rgb), 0.5);
+    font-size: 14px;
+}
+
+.msg-conv {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.14s ease;
+}
+
+.msg-conv:hover {
+    background: var(--surface-hover);
+}
+
+.msg-conv.active {
+    background: rgba(var(--ink-rgb), 0.06);
+}
+
+.msg-conv-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.msg-conv-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.msg-conv-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.msg-conv-time {
+    flex-shrink: 0;
+    font-size: 11px;
+    color: rgba(var(--ink-rgb), 0.45);
+}
+
+.msg-conv-last {
+    font-size: 13px;
+    color: rgba(var(--ink-rgb), 0.55);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 220px;
+}
+
+.msg-conv-badge {
+    flex-shrink: 0;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: #e6465a;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+}
+
+/* ── Активный диалог ── */
+.msg-thread {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.msg-thread-empty,
+.msg-thread-hint {
+    margin: auto;
+    padding: 24px;
+    text-align: center;
+    color: rgba(var(--ink-rgb), 0.5);
+    font-size: 14px;
+}
+
+.msg-thread-head {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(var(--ink-rgb), 0.09);
+}
+
+.msg-thread-profile {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--ink);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.msg-thread-profile:hover {
+    text-decoration: underline;
+}
+
+.msg-thread-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px 20px;
+    overflow-y: auto;
+}
+
+.msg-bubble {
+    max-width: 72%;
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 9px 13px;
+    border-radius: 14px 14px 14px 4px;
+    background: rgba(var(--ink-rgb), 0.06);
+}
+
+.msg-bubble.mine {
+    align-self: flex-end;
+    border-radius: 14px 14px 4px 14px;
+    background: var(--accent);
+    color: var(--accent-contrast, #fff);
+}
+
+.msg-bubble-text {
+    font-size: 14px;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.msg-bubble-time {
+    align-self: flex-end;
+    font-size: 10px;
+    opacity: 0.6;
+}
+
+/* ── Ввод ── */
+.msg-compose {
+    display: flex;
+    gap: 10px;
+    padding: 14px 18px;
+    border-top: 1px solid rgba(var(--ink-rgb), 0.09);
+}
+
+.msg-compose-input {
+    flex: 1;
+    resize: none;
+    max-height: 120px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(var(--ink-rgb), 0.16);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.msg-compose-input:focus {
+    outline: none;
+    border-color: rgba(var(--ink-rgb), 0.35);
+}
+
+.msg-compose-send {
+    flex-shrink: 0;
+    align-self: flex-end;
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: var(--accent);
+    color: var(--accent-contrast, #fff);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.14s ease, opacity 0.14s ease;
+}
+
+.msg-compose-send:hover:not(:disabled) {
+    background: var(--accent-hover, var(--accent));
+}
+
+.msg-compose-send:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+@media (max-width: 720px) {
+    .msg-page {
+        grid-template-columns: 1fr;
+        height: calc(100vh - 130px);
+    }
+    /* На узком экране показываем либо список, либо диалог. */
+    .msg-page:has(.msg-thread-head) .msg-list {
+        display: none;
+    }
+}
