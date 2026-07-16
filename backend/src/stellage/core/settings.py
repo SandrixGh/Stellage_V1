@@ -47,6 +47,31 @@ class RedisSettings(BaseAppSettings):
         )
 
 
+class S3Settings(BaseAppSettings):
+    s3_endpoint_url: str
+    s3_region: str
+    s3_access_key_id: str
+    s3_secret_access_key: SecretStr
+    s3_bucket_name: str
+
+    # Браузерный endpoint для presigned-ссылок. SigV4 подписывает заголовок Host,
+    # поэтому подпись обязана делаться под адрес, по которому пойдёт браузер:
+    # в Docker backend видит MinIO как http://minio:9000, а браузер —
+    # http://localhost:9000. None = совпадает с s3_endpoint_url (Selectel, прод).
+    s3_public_endpoint_url: str | None = None
+
+    # "path" (https://endpoint/bucket/key) работает и у MinIO, и у Selectel;
+    # "virtual" (https://bucket.endpoint/key) — на случай смены провайдера.
+    s3_addressing_style: str = "path"
+
+    upload_url_expire_seconds: int = 600
+    download_url_expire_seconds: int = 300
+
+    @property
+    def browser_endpoint_url(self) -> str:
+        return self.s3_public_endpoint_url or self.s3_endpoint_url
+
+
 class AppSettings(BaseAppSettings):
     db_settings: DbSettings = DbSettings()
 
@@ -54,6 +79,7 @@ class AppSettings(BaseAppSettings):
 
     email_settings: EmailSettings = EmailSettings()
     redis_settings: RedisSettings = RedisSettings()
+    s3_settings: S3Settings = S3Settings()
 
     templates_dir: str = TEMPLATES_DIR
     frontend_url: str

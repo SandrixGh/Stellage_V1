@@ -54,6 +54,49 @@ services:
     ports:
       - "5050:80"
 
+  # Локальный S3 (dev-замена Selectel): приватный бакет, presigned-ссылки —
+  # вся security-механика идентична проду, отличается только endpoint в .env.
+  minio:
+    image: minio/minio:latest
+    container_name: stellage-minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: "${s3_access_key_id}"
+      MINIO_ROOT_PASSWORD: "${s3_secret_access_key}"
+      MINIO_REGION: "${s3_region}"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Одноразовая идемпотентная инициализация бакета: создать, запретить любой
+  # анонимный доступ, навесить CORS для presigned-загрузок из браузера.
+  minio-init:
+    image: minio/mc
+    container_name: stellage-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./infra/minio/cors.json:/cors.json:ro
+    environment:
+      s3_access_key_id: "${s3_access_key_id}"
+      s3_secret_access_key: "${s3_secret_access_key}"
+      s3_bucket_name: "${s3_bucket_name}"
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 \"$$s3_access_key_id\" \"$$s3_secret_access_key\" &&
+      mc mb --ignore-existing \"local/$$s3_bucket_name\" &&
+      mc anonymous set none \"local/$$s3_bucket_name\" &&
+      mc cors set \"local/$$s3_bucket_name\" /cors.json
+      "
+
   backend:
     build:
       context: ./backend
@@ -68,12 +111,18 @@ services:
       db_host: pg
       db_port: 5432
       redis_host: redis
+      # Внутри docker-сети MinIO доступен как minio:9000, а браузер ходит на
+      # localhost:9000 — presigned-ссылки подписываются под браузерный адрес.
+      s3_endpoint_url: http://minio:9000
+      s3_public_endpoint_url: http://localhost:9000
     volumes:
       - ./backend/src:/app/src
     depends_on:
       pg:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      minio:
         condition: service_healthy
 
   celery:
@@ -81,13 +130,16 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: stellage-celery
-    command: celery -A stellage.core.celery_config.celery_app worker -l info
+    # -B: встроенный beat для периодической уборки осиротевших S3-объектов.
+    command: celery -A stellage.core.celery_config.celery_app worker -B -l info
     env_file:
       - backend/.env
     environment:
       db_host: pg
       db_port: 5432
       redis_host: redis
+      s3_endpoint_url: http://minio:9000
+      s3_public_endpoint_url: http://localhost:9000
     volumes:
       - ./backend/src:/app/src
     depends_on:
@@ -95,8 +147,13 @@ services:
         condition: service_healthy
       pg:
         condition: service_healthy
+      minio:
+        condition: service_healthy
 
 volumes:
   pgdata:
+    external: true
+    name: backend_pgdata
   rabbitmq-data:
   redis:
+  minio-data:
