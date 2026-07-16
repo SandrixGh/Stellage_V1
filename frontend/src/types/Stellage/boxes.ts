@@ -23,6 +23,19 @@ export interface BoxContent {
     text?: string | null;
 }
 
+export type AssetKind = "photo" | "video";
+
+// Метаданные S3-ассета коробки. Ни ключей, ни ссылок здесь нет — presigned
+// URL запрашивается отдельно через /boxes/get-asset-url и живёт минуты.
+export interface BoxAsset {
+    id: string;
+    kind: AssetKind;
+    mime: string;
+    size_bytes: number;
+    original_name: string;
+    created_at: string;
+}
+
 export interface Box {
     id: string;
     user_id: string;
@@ -37,6 +50,9 @@ export interface Box {
     // null и для пустых коробок, и когда контент скрыт правилом видимости
     // (чужая sealed/private коробка на публичной полке).
     content: BoxContent | null;
+    // READY-ассеты коробки; пустой список и когда их нет, и когда контент
+    // скрыт правилом видимости.
+    assets: BoxAsset[];
     template: BoxTemplate; // Вложенный объект, который пришел через joinedload
     created_at: string;
     updated_at: string;

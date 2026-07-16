@@ -48,6 +48,8 @@ interface StellageState {
     acquireBox: (templateId: string) => Promise<void>;
     createBox: (data: CreateBoxInput) => Promise<Box | null>;
     updateBox: (instanceId: string, data: UpdateBoxInput) => Promise<Box | null>;
+    /** Перечитать одну коробку (после загрузки/удаления ассетов). */
+    refreshBox: (instanceId: string) => Promise<Box | null>;
 
     moveBox: (instanceId: string, shelfId: string | null) => Promise<void>;
     updateBoxPosition: (instanceId: string, shelf_row: number, shelf_col: number, shelfId?: string) => Promise<void>;
@@ -200,6 +202,24 @@ export const useStellageStore = create<StellageState>((set, get) => ({
             return res.data;
         } catch (err: any) {
             set({ error: "Не удалось сохранить изменения", isLoading: false });
+            return null;
+        }
+    },
+
+    // Точечная ресинхронизация одной коробки: после загрузки/удаления ассетов
+    // обновляем её снимок в инвентаре и на текущей доске без полного refetch.
+    refreshBox: async (instanceId: string) => {
+        try {
+            const res = await api.get<Box>("/boxes/get-box-instance", {
+                params: { instance_id: instanceId },
+            });
+            const fresh = res.data;
+            set((state) => ({
+                instances: state.instances.map((b) => (b.id === fresh.id ? fresh : b)),
+                currentBoxes: state.currentBoxes.map((b) => (b.id === fresh.id ? fresh : b)),
+            }));
+            return fresh;
+        } catch (err) {
             return null;
         }
     },
