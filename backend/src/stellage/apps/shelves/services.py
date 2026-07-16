@@ -5,6 +5,7 @@ from fastapi import Depends, HTTPException, status
 from starlette.responses import JSONResponse
 
 from stellage.apps.auth.schemas import UserVerifySchema
+from stellage.apps.boxes.assets.authorization import can_view_box_content
 from stellage.apps.shelves.managers import ShelfManager
 from stellage.apps.shelves.schemas import CreateShelf, ShelfReturnData, ShelfWithBoxInstances
 
@@ -134,6 +135,7 @@ class ShelfService:
     async def get_public_shelf_with_boxes(
         self,
         shelf_id: uuid.UUID,
+        viewer_id: uuid.UUID | None = None,
     ) -> ShelfWithBoxInstances:
         shelf = await self.manager.get_public_shelf_with_boxes(
             shelf_id=shelf_id,
@@ -144,6 +146,20 @@ class ShelfService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Shelf not found"
             )
+
+        # Контент коробки отдаём только тем, кому он положен по правилу
+        # видимости: чужие sealed/private коробки на публичной полке приходят
+        # с content=None (метаданные шаблона остаются видимыми).
+        for box in shelf.boxes:
+            if not can_view_box_content(
+                viewer_id=viewer_id,
+                owner_id=box.user_id,
+                is_public=box.is_public,
+                is_sealed=box.is_sealed,
+                shelf_id=box.shelf_id,
+                shelf_is_public=shelf.is_public,
+            ):
+                box.content = None
 
         return shelf
 

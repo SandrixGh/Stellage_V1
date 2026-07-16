@@ -1,9 +1,9 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
 import datetime
 import uuid
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, StringConstraints
 
 from stellage.database.enums.box_rarity import BoxRarity
 from stellage.database.enums.box_sealing import SealingEnum
@@ -38,11 +38,20 @@ class GetParentsIds(
     pass
 
 
+class BoxTextContent(BaseModel):
+    """Типизированный текстовый контент коробки. Бинарный контент (фото/видео)
+    живёт в S3 и адресуется через box_assets; здесь — только текст. extra=forbid
+    отсекает контрабанду произвольного JSON через поле content."""
+    model_config = ConfigDict(extra="forbid")
+
+    text: Annotated[str, StringConstraints(max_length=10_000)] | None = None
+
+
 class BoxInstanceBase(BaseModel):
     is_sealed: SealingEnum = SealingEnum.SEALED
     is_public: VisibilityEnum = VisibilityEnum.PRIVATE
     is_verified: VerifyEnum = VerifyEnum.NOT_VERIFIED
-    content: dict | None = None
+    content: BoxTextContent | None = None
 
 
 class BoxInstanceTimeStamps(BaseModel):
@@ -75,7 +84,7 @@ class BoxInstanceUpdate(BaseModel):
     shelf_id: uuid.UUID | None = None
     is_sealed: SealingEnum | None = None
     is_public: VisibilityEnum | None = None
-    content: dict | None = None
+    content: BoxTextContent | None = None
 
 
 class BoxInstanceCreate(BoxInstanceBase, GetTemplateId, GetShelfId):
@@ -91,7 +100,7 @@ class BoxUpdate(BaseModel):
     price: Decimal | None = None
     currency: CurrencyEnum | None = None
     rarity: BoxRarity | None = None
-    content: dict | None = None
+    content: BoxTextContent | None = None
 
 
 class CustomBoxCreate(BaseModel):
@@ -105,7 +114,7 @@ class CustomBoxCreate(BaseModel):
     description: str | None = None
     price: Decimal = Decimal("0")
     currency: CurrencyEnum = CurrencyEnum.RUB
-    content: dict | None = None
+    content: BoxTextContent | None = None
     rarity: BoxRarity | None = None
 
 

@@ -5,7 +5,12 @@ from fastapi import Depends, HTTPException, status
 
 from stellage.apps.boxes.instances.cache_managers import InstanceCacheManager
 from stellage.apps.boxes.instances.repositories import BoxInstanceRepository
-from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate, BoxPositionUpdate
+from stellage.apps.boxes.instances.schemas import (
+    BoxInstanceCreate,
+    BoxInstanceWithTemplate,
+    BoxPositionUpdate,
+    BoxTextContent,
+)
 from stellage.apps.shelves.cache_managers import ShelfCacheManager
 
 
@@ -153,7 +158,7 @@ class InstanceManager:
         self,
         user_id: uuid.UUID,
         instance_id: uuid.UUID,
-        content: dict | None,
+        content: BoxTextContent | None,
         update_content: bool,
     ) -> BoxInstanceWithTemplate:
         """Сбрасывает кэши экземпляра/полки и возвращает свежий снимок. content
@@ -172,7 +177,7 @@ class InstanceManager:
             box = await self.repository.update_content(
                 user_id=user_id,
                 instance_id=instance_id,
-                content=content,
+                content=content.model_dump() if content is not None else None,
             )
         else:
             box = await self.repository.get_box_instance_by_id(

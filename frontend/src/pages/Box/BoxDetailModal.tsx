@@ -6,7 +6,7 @@ import { Select } from "../../components/UI/Select";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
 import { rarityKey } from "../../utils/rarity";
-import { resolveRarityVisual } from "../../data/mockTemplates";
+import { resolveRarityVisual, resolveContentType } from "../../data/mockTemplates";
 import "./BoxDetailModal.css";
 
 interface BoxDetailModalProps {
@@ -16,7 +16,7 @@ interface BoxDetailModalProps {
 
 const SEALED_LABEL: Record<Box["is_sealed"], string> = {
     sealed: "Запечатана",
-    unsealed: "Распечатана",
+    "not sealed": "Распечатана",
 };
 
 const VISIBILITY_LABEL: Record<Box["is_public"], string> = {
@@ -164,7 +164,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                 </button>
 
                 <div className="box-modal-visual">
-                    <WireframeBox size={150} rarityGlow={glow} color={boxColor} contentType={template.contentType} />
+                    <WireframeBox size={150} rarityGlow={glow} color={boxColor} contentType={resolveContentType(template)} />
                 </div>
 
                 {mode === "view" ? (

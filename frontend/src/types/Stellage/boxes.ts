@@ -17,6 +17,12 @@ export interface BoxTemplate {
     updated_at: string;
 }
 
+// Типизированный текстовый контент коробки. Бинарный контент (фото/видео)
+// хранится в S3 и приходит отдельным списком ассетов (box_assets).
+export interface BoxContent {
+    text?: string | null;
+}
+
 export interface Box {
     id: string;
     user_id: string;
@@ -25,10 +31,12 @@ export interface Box {
     serial_number: number;
     shelf_row: number | null; // позиция на стеллаже: индекс полки-линии
     shelf_col: number | null; // позиция на стеллаже: индекс слота в ряду
-    is_sealed: 'sealed' | 'unsealed'; // строго типизируем статусы
+    is_sealed: 'sealed' | 'not sealed'; // значения бэкенд-энума SealingEnum
     is_public: 'public' | 'private';
     is_verified: 'verified' | 'not verified';
-    content: Record<string, unknown>;
+    // null и для пустых коробок, и когда контент скрыт правилом видимости
+    // (чужая sealed/private коробка на публичной полке).
+    content: BoxContent | null;
     template: BoxTemplate; // Вложенный объект, который пришел через joinedload
     created_at: string;
     updated_at: string;

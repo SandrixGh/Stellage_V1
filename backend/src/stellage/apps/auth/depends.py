@@ -2,6 +2,7 @@ import datetime
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, Response, status
+from starlette.requests import Request
 
 from stellage.apps.auth.handlers import AuthHandler
 from stellage.apps.auth.managers import UserManager
@@ -101,6 +102,48 @@ async def get_current_user(
                 await client.set(last_seen_key, "1", ex=LAST_SEEN_THROTTLE_SECONDS)
     except Exception:
         pass
+
+    user.session_id = session_id
+    return user
+
+
+async def get_optional_current_user(
+    request: Request,
+    handler: Annotated[
+        AuthHandler,
+        Depends(AuthHandler)
+    ],
+    manager: Annotated[
+        UserManager,
+        Depends(UserManager)
+    ],
+) -> UserVerifySchema | None:
+    """Мягкая версия get_current_user для публичных эндпоинтов: анонима и любой
+    невалидный/просроченный токен превращает в None вместо 401. Без sliding-refresh
+    и побочных эффектов — только идентификация зрителя для проверки видимости."""
+    token = request.cookies.get("Authorization")
+    if not token:
+        return None
+
+    try:
+        decoded_token = await handler.decode_access_token(token)
+    except HTTPException:
+        return None
+
+    user_id = decoded_token.get("user_id")
+    session_id = decoded_token.get("session_id")
+    if not user_id or not session_id:
+        return None
+
+    if not await manager.get_access_token(
+        user_id=user_id,
+        session_id=session_id,
+    ):
+        return None
+
+    user = await manager.get_user_by_id(user_id=user_id)
+    if not user:
+        return None
 
     user.session_id = session_id
     return user

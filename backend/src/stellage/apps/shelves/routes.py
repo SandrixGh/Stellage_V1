@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, status, Depends
 from starlette.responses import JSONResponse
 
-from stellage.apps.auth.depends import get_current_user
+from stellage.apps.auth.depends import get_current_user, get_optional_current_user
 from stellage.apps.auth.schemas import UserVerifySchema
 from stellage.apps.shelves.dependecies import get_current_main_shelf, get_current_main_shelf_with_boxes
 from stellage.apps.shelves.schemas import ShelfReturnData, CreateShelf, ShelfWithBoxInstances
@@ -162,9 +162,14 @@ async def get_public_shelf_with_boxes(
         ShelfService,
         Depends(ShelfService)
     ],
+    viewer: Annotated[
+        UserVerifySchema | None,
+        Depends(get_optional_current_user)
+    ] = None,
 ) -> ShelfWithBoxInstances:
     return await service.get_public_shelf_with_boxes(
-        shelf_id=shelf_id
+        shelf_id=shelf_id,
+        viewer_id=viewer.id if viewer else None,
     )
 
 

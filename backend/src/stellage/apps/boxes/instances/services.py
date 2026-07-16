@@ -5,7 +5,12 @@ from fastapi import Depends, HTTPException, status
 
 from stellage.apps.auth.schemas import UserVerifySchema
 from stellage.apps.boxes.instances.managers import InstanceManager
-from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate, BoxPositionUpdate
+from stellage.apps.boxes.instances.schemas import (
+    BoxInstanceCreate,
+    BoxInstanceWithTemplate,
+    BoxPositionUpdate,
+    BoxTextContent,
+)
 
 
 class InstanceService:
@@ -60,7 +65,7 @@ class InstanceService:
         self,
         user: UserVerifySchema,
         instance_id: uuid.UUID,
-        content: dict | None,
+        content: BoxTextContent | None,
         update_content: bool,
     ) -> BoxInstanceWithTemplate:
         return await self.manager.update_box(

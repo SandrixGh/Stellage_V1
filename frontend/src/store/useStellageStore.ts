@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { api } from "../api/instance";
 import type { Shelf } from "../types/Stellage/shelves";
-import type { Box, BoxTemplate } from "../types/Stellage/boxes";
+import type { Box, BoxContent, BoxTemplate } from "../types/Stellage/boxes";
 
 /** Данные формы создания пользовательской коробки.
  *  rarity применяется только для суперюзеров (обычным форсится Common на бэке). */
@@ -10,7 +10,7 @@ export interface CreateBoxInput {
     description?: string;
     price?: number;
     currency?: string;
-    content?: Record<string, unknown>;
+    content?: BoxContent;
     rarity?: string;
 }
 
@@ -22,7 +22,7 @@ export interface UpdateBoxInput {
     price?: number;
     currency?: string;
     rarity?: string;
-    content?: Record<string, unknown> | null;
+    content?: BoxContent | null;
 }
 
 interface StellageState {
