@@ -4,6 +4,7 @@ __all__ = (
     "Shelf",
     "BoxInstance",
     "BoxTemplate",
+    "BoxAsset",
 )
 
 from .base import Base
@@ -11,3 +12,4 @@ from .user import User
 from .shelf import Shelf
 from .box_instance import BoxInstance
 from .box_template import BoxTemplate
+from .box_asset import BoxAsset

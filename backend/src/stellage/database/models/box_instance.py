@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from .user import User
     from .shelf import Shelf
     from .box_template import BoxTemplate
+    from .box_asset import BoxAsset
 
 class BoxInstance(IDMixin, TimestampMixin, Base):
     __tablename__ = "box_instances"
@@ -101,6 +102,13 @@ class BoxInstance(IDMixin, TimestampMixin, Base):
     owner: Mapped["User"] = relationship(
         "User",
         back_populates="boxes",
+    )
+
+    # Без cascade delete-orphan: удаление ассетов всегда явное (через статус
+    # DELETING + Celery), чтобы не потерять запись о ключе объекта в S3.
+    assets: Mapped[list["BoxAsset"]] = relationship(
+        "BoxAsset",
+        back_populates="instance",
     )
 
     __table_args__ = (
