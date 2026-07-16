@@ -19,6 +19,10 @@ const describe = (n: NotificationItem): string => {
     if (n.type === "box_like") {
         return n.box_title ? `оценил(а) вашу коробку «${n.box_title}»` : "оценил(а) вашу коробку";
     }
+    if (n.type === "message") return "написал(а) вам сообщение";
+    if (n.type === "gift") {
+        return n.box_title ? `подарил(а) вам коробку «${n.box_title}»` : "подарил(а) вам коробку";
+    }
     return "";
 };
 
@@ -117,10 +121,16 @@ export const NotificationBell = () => {
                                         {!n.is_read && <span className="notif-dot" aria-hidden="true" />}
                                     </>
                                 );
+                                // Сообщение ведёт в чат с отправителем, остальное —
+                                // на профиль актора.
+                                const target =
+                                    n.type === "message"
+                                        ? `/messages/${n.actor.username}`
+                                        : `/u/${n.actor.username}`;
                                 return n.actor.username ? (
                                     <Link
                                         key={n.id}
-                                        to={`/u/${n.actor.username}`}
+                                        to={target}
                                         className="notif-item"
                                         onClick={() => setOpen(false)}
                                     >

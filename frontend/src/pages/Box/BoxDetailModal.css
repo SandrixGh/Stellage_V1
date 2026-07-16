@@ -449,6 +449,36 @@
     margin-bottom: 20px;
 }
 
+/* Инлайн-диалог дарения коробки. */
+.box-modal-gift {
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    background: rgba(var(--glass-rgb), 0.03);
+    border: 1px solid rgba(var(--ink-rgb), 0.1);
+}
+
+.box-modal-gift-hint {
+    margin: 0 0 10px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(var(--ink-rgb), 0.6);
+}
+
+.box-modal-gift-row {
+    display: flex;
+    gap: 8px;
+}
+
+.box-modal-gift-row .box-modal-input {
+    flex: 1;
+    margin: 0;
+}
+
+.box-modal-gift-row .box-modal-btn {
+    flex-shrink: 0;
+}
+
 .box-modal-asset-list {
     list-style: none;
     margin: 0;

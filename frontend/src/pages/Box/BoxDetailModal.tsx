@@ -75,6 +75,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const user = useAuthStore((s) => s.user);
     const isSuperuser = useAuthStore((s) => s.user?.is_superuser ?? false);
     const updateBox = useStellageStore((s) => s.updateBox);
+    const giftBox = useStellageStore((s) => s.giftBox);
     const unsealBox = useStellageStore((s) => s.unsealBox);
     const refreshBox = useStellageStore((s) => s.refreshBox);
     const moveBox = useStellageStore((s) => s.moveBox);
@@ -89,6 +90,10 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
     // Проигрывается разовая анимация вскрытия — контент раскрываем после неё.
     const [unsealing, setUnsealing] = useState(false);
+    // Диалог дарения: открыт ли, введённый username получателя, ошибка.
+    const [giftOpen, setGiftOpen] = useState(false);
+    const [giftUsername, setGiftUsername] = useState("");
+    const [giftError, setGiftError] = useState<string | null>(null);
 
     // Поля формы редактирования.
     const [title, setTitle] = useState("");
@@ -108,6 +113,9 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
         setMode("view");
         setLightboxIndex(null);
         setUnsealing(false);
+        setGiftOpen(false);
+        setGiftUsername("");
+        setGiftError(null);
     }, [box]);
 
     useEffect(() => {
@@ -207,6 +215,20 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
         await deleteBox(current.id);
         setBusy(false);
         onClose();
+    };
+
+    const handleGift = async () => {
+        const uname = giftUsername.trim().replace(/^@/, "");
+        if (!uname || busy) return;
+        setBusy(true);
+        setGiftError(null);
+        const ok = await giftBox(current.id, uname);
+        setBusy(false);
+        if (ok) {
+            onClose();
+        } else {
+            setGiftError("Не удалось подарить: проверьте username получателя.");
+        }
     };
 
     const syncCurrent = async () => {
@@ -388,36 +410,79 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                         </button>
 
                         {isOwner && (
-                            <div className="box-modal-actions">
-                                {canEdit && (
+                            <>
+                                <div className="box-modal-actions">
+                                    {canEdit && (
+                                        <button
+                                            type="button"
+                                            className="box-modal-btn ghost"
+                                            onClick={startEdit}
+                                            disabled={busy}
+                                        >
+                                            Редактировать
+                                        </button>
+                                    )}
+                                    {onShelf && (
+                                        <button
+                                            type="button"
+                                            className="box-modal-btn ghost"
+                                            onClick={handleRemoveFromShelf}
+                                            disabled={busy}
+                                        >
+                                            Снять с полки
+                                        </button>
+                                    )}
                                     <button
                                         type="button"
                                         className="box-modal-btn ghost"
-                                        onClick={startEdit}
+                                        onClick={() => setGiftOpen((v) => !v)}
                                         disabled={busy}
                                     >
-                                        Редактировать
+                                        Подарить
                                     </button>
-                                )}
-                                {onShelf && (
                                     <button
                                         type="button"
-                                        className="box-modal-btn ghost"
-                                        onClick={handleRemoveFromShelf}
+                                        className="box-modal-btn danger"
+                                        onClick={handleDelete}
                                         disabled={busy}
                                     >
-                                        Снять с полки
+                                        Удалить
                                     </button>
+                                </div>
+
+                                {giftOpen && (
+                                    <div className="box-modal-gift">
+                                        <p className="box-modal-gift-hint">
+                                            Подарить коробку — она перейдёт к получателю и
+                                            исчезнет из вашего инвентаря. Действие необратимо.
+                                        </p>
+                                        <div className="box-modal-gift-row">
+                                            <input
+                                                className="box-modal-input"
+                                                type="text"
+                                                value={giftUsername}
+                                                placeholder="username получателя"
+                                                maxLength={30}
+                                                onChange={(e) => setGiftUsername(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter") handleGift();
+                                                }}
+                                            />
+                                            <button
+                                                type="button"
+                                                className="box-modal-btn primary"
+                                                onClick={handleGift}
+                                                disabled={busy || !giftUsername.trim()}
+                                            >
+                                                {busy ? "Дарим…" : "Подтвердить"}
+                                            </button>
+                                        </div>
+                                        {giftError && (
+                                            <span className="box-modal-asset-error">{giftError}</span>
+                                        )}
+                                    </div>
                                 )}
-                                <button
-                                    type="button"
-                                    className="box-modal-btn danger"
-                                    onClick={handleDelete}
-                                    disabled={busy}
-                                >
-                                    Удалить
-                                </button>
-                            </div>
+                            </>
                         )}
                     </div>
                 ) : (

@@ -1,7 +1,7 @@
 import { api } from "./instance";
 import type { PublicUser } from "../types/Profile/profile";
 
-export type NotificationType = "follow" | "box_like";
+export type NotificationType = "follow" | "box_like" | "message" | "gift";
 
 export interface NotificationItem {
     id: string;

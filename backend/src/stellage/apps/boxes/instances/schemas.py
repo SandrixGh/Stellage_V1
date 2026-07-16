@@ -96,6 +96,11 @@ class BoxInstanceWithTemplate(BoxInstanceReturn):
     template: "BoxTemplateReturn"
 
 
+class GiftBoxRequest(BaseModel):
+    """Дарение коробки: username получателя."""
+    to_username: Annotated[str, StringConstraints(min_length=1, max_length=30)]
+
+
 class BoxPositionUpdate(BaseModel):
     shelf_row: int
     shelf_col: int

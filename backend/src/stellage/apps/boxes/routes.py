@@ -13,6 +13,7 @@ from stellage.apps.boxes.instances.schemas import (
     BoxPositionUpdate,
     BoxUpdate,
     CustomBoxCreate,
+    GiftBoxRequest,
 )
 from stellage.apps.boxes.instances.services import InstanceService
 from stellage.apps.boxes.templates.schemas import (
@@ -267,6 +268,32 @@ async def unseal_box(
     return await instance_service.unseal_box(
         user=user,
         instance_id=instance_id,
+    )
+
+
+@router.post(
+    path="/gift-box",
+    response_model=BoxInstanceWithTemplate,
+    status_code=status.HTTP_200_OK,
+)
+async def gift_box(
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user),
+    ],
+    instance_service: Annotated[
+        InstanceService,
+        Depends(InstanceService),
+    ],
+    data: GiftBoxRequest,
+    instance_id: uuid.UUID,
+) -> BoxInstanceWithTemplate:
+    # Дарение коробки другому пользователю: смена владельца + снятие с полки
+    # дарителя + уведомление получателю. Дарить можно только свою коробку.
+    return await instance_service.gift_box(
+        giver=user,
+        instance_id=instance_id,
+        to_username=data.to_username,
     )
 
 

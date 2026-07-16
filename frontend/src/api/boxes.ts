@@ -20,3 +20,15 @@ export async function getBoxView(instanceId: string): Promise<BoxPublicView> {
     });
     return res.data;
 }
+
+/**
+ * Подарить коробку пользователю по username. Меняет владельца и снимает коробку
+ * с полки дарителя. Бэкенд: не своя коробка → 404, себе → 400, нет юзера → 404.
+ */
+export async function giftBox(instanceId: string, toUsername: string): Promise<void> {
+    await api.post(
+        "/boxes/gift-box",
+        { to_username: toUsername },
+        { params: { instance_id: instanceId } },
+    );
+}

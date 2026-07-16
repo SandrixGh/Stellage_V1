@@ -336,6 +336,49 @@ class BoxInstanceRepository:
             return BoxInstanceWithTemplate.model_validate(box)
 
 
+    async def transfer_instance(
+        self,
+        giver_id: uuid.UUID,
+        recipient_id: uuid.UUID,
+        instance_id: uuid.UUID,
+    ) -> BoxInstanceWithTemplate:
+        """Дарит коробку: меняет владельца и снимает её с полки дарителя
+        (shelf_id/row/col → NULL — у нового владельца своя раскладка). UPDATE
+        затрагивает 0 строк, если коробка не принадлежит дарителю → 404."""
+        async with self.db.db_session() as session:
+            update_query = (
+                update(self.instance_model)
+                .where(
+                    self.instance_model.user_id == giver_id,
+                    self.instance_model.id == instance_id,
+                )
+                .values(
+                    user_id=recipient_id,
+                    shelf_id=None,
+                    shelf_row=None,
+                    shelf_col=None,
+                )
+            )
+            result = await session.execute(update_query)
+            if result.rowcount == 0:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Box not found or access denied",
+                )
+
+            select_query = (
+                select(self.instance_model)
+                .where(self.instance_model.id == instance_id)
+                .options(
+                    joinedload(self.instance_model.template),
+                    self._ready_assets_loader(),
+                )
+            )
+            box = (await session.execute(select_query)).unique().scalar_one()
+            await session.commit()
+            return BoxInstanceWithTemplate.model_validate(box)
+
+
     async def get_box_instances(
         self,
         user_id: uuid.UUID

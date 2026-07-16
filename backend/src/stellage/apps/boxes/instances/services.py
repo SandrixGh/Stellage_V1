@@ -14,8 +14,11 @@ from stellage.apps.boxes.instances.schemas import (
     BoxPositionUpdate,
     BoxTextContent,
 )
+from stellage.apps.notifications.services import NotificationService
 from stellage.apps.profile.avatar import AvatarManager
+from stellage.apps.profile.managers import ProfileManager
 from stellage.apps.profile.schemas import PublicUser
+from stellage.database.enums.notification_type import NotificationTypeEnum
 
 
 class InstanceService:
@@ -33,10 +36,20 @@ class InstanceService:
             AvatarManager,
             Depends(AvatarManager),
         ],
+        profile_manager: Annotated[
+            ProfileManager,
+            Depends(ProfileManager),
+        ],
+        notifications: Annotated[
+            NotificationService,
+            Depends(NotificationService),
+        ],
     ):
         self.manager = manager
         self.repository = repository
         self.avatar_manager = avatar_manager
+        self.profile_manager = profile_manager
+        self.notifications = notifications
 
 
     async def create_instance(
@@ -127,6 +140,43 @@ class InstanceService:
                 detail="Box not found"
             )
 
+        return box
+
+
+    async def gift_box(
+        self,
+        giver: UserVerifySchema,
+        instance_id: uuid.UUID,
+        to_username: str,
+    ) -> BoxInstanceWithTemplate:
+        """Дарит коробку пользователю по username. Даритель должен владеть
+        коробкой (иначе 404); подарить себе нельзя (400). Получателю уходит
+        уведомление GIFT со ссылкой на коробку."""
+        recipient = await self.profile_manager.get_user_by_username(
+            username=to_username,
+        )
+        if not recipient:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Recipient not found",
+            )
+        if recipient.id == giver.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot gift a box to yourself",
+            )
+
+        box = await self.manager.gift_box(
+            giver_id=giver.id,
+            recipient_id=recipient.id,
+            instance_id=instance_id,
+        )
+        await self.notifications.notify(
+            recipient_id=recipient.id,
+            actor_id=giver.id,
+            type_=NotificationTypeEnum.GIFT,
+            instance_id=instance_id,
+        )
         return box
 
 

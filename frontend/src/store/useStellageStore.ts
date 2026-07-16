@@ -57,6 +57,9 @@ interface StellageState {
     updateBoxPosition: (instanceId: string, shelf_row: number, shelf_col: number, shelfId?: string) => Promise<void>;
     deleteBox: (instanceId: string) => Promise<void>;
 
+    /** Подарить коробку пользователю по username; убирает её из своего состояния. */
+    giftBox: (instanceId: string, toUsername: string) => Promise<boolean>;
+
     /** Сбросить всё пользовательское состояние (вызывается при смене аккаунта). */
     reset: () => void;
 }
@@ -364,5 +367,26 @@ export const useStellageStore = create<StellageState>((set, get) => ({
         } catch (err) {
             set({ error: "Сессия истекла или недостаточно прав" });
         }
-    } // Скобка была пропущена здесь
+    },
+
+    giftBox: async (instanceId: string, toUsername: string) => {
+        try {
+            await api.post(
+                "/boxes/gift-box",
+                { to_username: toUsername },
+                { params: { instance_id: instanceId } },
+            );
+            // Коробка ушла другому владельцу — убираем её из своих списков
+            // и ресинхронизируем инвентарь + главную полку.
+            set((state) => ({
+                currentBoxes: state.currentBoxes.filter((b) => b.id !== instanceId),
+                instances: state.instances.filter((b) => b.id !== instanceId),
+            }));
+            await Promise.all([get().fetchInstances(), get().fetchMainShelf()]);
+            return true;
+        } catch (err) {
+            set({ error: "Не удалось подарить коробку" });
+            return false;
+        }
+    }
 }));

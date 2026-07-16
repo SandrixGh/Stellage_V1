@@ -227,6 +227,34 @@ class InstanceManager:
         return box
 
 
+    async def gift_box(
+        self,
+        giver_id: uuid.UUID,
+        recipient_id: uuid.UUID,
+        instance_id: uuid.UUID,
+    ) -> BoxInstanceWithTemplate:
+        """Дарит коробку получателю. Сбрасывает кэш старой полки дарителя и
+        кэш экземпляра у дарителя (ключ instance:{giver}:{id} больше не валиден),
+        затем кэширует под новым владельцем."""
+        await self.refresh_old_shelf(
+            user_id=giver_id,
+            instance_id=instance_id,
+        )
+        await self.instance_cache_manager.delete_instance(
+            instance_id=instance_id,
+            user_id=giver_id,
+        )
+
+        box = await self.repository.transfer_instance(
+            giver_id=giver_id,
+            recipient_id=recipient_id,
+            instance_id=instance_id,
+        )
+
+        await self.instance_cache_manager.store_instance(instance=box)
+        return box
+
+
     async def get_instances(
         self,
         user_id: uuid.UUID,
