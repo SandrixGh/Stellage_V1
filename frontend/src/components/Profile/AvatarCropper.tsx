@@ -26,6 +26,7 @@ export const AvatarCropper = ({ file, onCancel, onCrop }: AvatarCropperProps) =>
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const [busy, setBusy] = useState(false);
     const drag = useRef<{ x: number; y: number } | null>(null);
+    const stageRef = useRef<HTMLDivElement>(null);
 
     // Загружаем выбранный файл в <img> и вычисляем масштаб «cover».
     useEffect(() => {
@@ -71,15 +72,35 @@ export const AvatarCropper = ({ file, onCancel, onCrop }: AvatarCropperProps) =>
         drag.current = null;
     };
 
-    const changeScale = (s: number) => {
-        const clamped = Math.max(minScale, Math.min(minScale * 4, s));
-        setScale(clamped);
-        setOffset((o) => clampOffset(o.x, o.y, clamped));
-    };
+    const changeScale = useCallback(
+        (s: number) => {
+            const clamped = Math.max(minScale, Math.min(minScale * 4, s));
+            setScale(clamped);
+            setOffset((o) => clampOffset(o.x, o.y, clamped));
+        },
+        [minScale, clampOffset],
+    );
 
-    const onWheel = (e: React.WheelEvent) => {
-        changeScale(scale * (e.deltaY < 0 ? 1.08 : 0.926));
-    };
+    // Колесо мыши зумит картинку. React onWheel — passive, в нём preventDefault
+    // не работает и прокручивается вся страница. Поэтому вешаем нативный
+    // слушатель с { passive: false } и гасим прокрутку страницы. Множим текущий
+    // масштаб через функциональный апдейт, чтобы не зависеть от устаревшего
+    // значения scale в замыкании.
+    useEffect(() => {
+        const stage = stageRef.current;
+        if (!stage) return;
+        const onWheel = (e: WheelEvent) => {
+            e.preventDefault();
+            const factor = e.deltaY < 0 ? 1.08 : 0.926;
+            setScale((prev) => {
+                const clamped = Math.max(minScale, Math.min(minScale * 4, prev * factor));
+                setOffset((o) => clampOffset(o.x, o.y, clamped));
+                return clamped;
+            });
+        };
+        stage.addEventListener("wheel", onWheel, { passive: false });
+        return () => stage.removeEventListener("wheel", onWheel);
+    }, [minScale, clampOffset]);
 
     const handleCrop = () => {
         if (!img || busy) return;
@@ -127,12 +148,12 @@ export const AvatarCropper = ({ file, onCancel, onCrop }: AvatarCropperProps) =>
                 <p className="cropper-hint">Перетащите и масштабируйте — область в рамке станет аватаром.</p>
 
                 <div
+                    ref={stageRef}
                     className="cropper-stage"
                     style={{ width: BOX, height: BOX }}
                     onPointerDown={onPointerDown}
                     onPointerMove={onPointerMove}
                     onPointerUp={onPointerUp}
-                    onWheel={onWheel}
                 >
                     {img && <img className="cropper-img" src={img.src} style={imgStyle} alt="" draggable={false} />}
                     <div className="cropper-frame" aria-hidden="true" />
