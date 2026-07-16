@@ -3,6 +3,8 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 
+from stellage.apps.boxes.assets.repositories import BoxAssetRepository
+from stellage.apps.boxes.assets.tasks import delete_asset_objects
 from stellage.apps.boxes.instances.cache_managers import InstanceCacheManager
 from stellage.apps.boxes.instances.repositories import BoxInstanceRepository
 from stellage.apps.boxes.instances.schemas import (
@@ -21,6 +23,10 @@ class InstanceManager:
             BoxInstanceRepository,
             Depends(BoxInstanceRepository)
         ],
+        asset_repository: Annotated[
+            BoxAssetRepository,
+            Depends(BoxAssetRepository)
+        ],
         instance_cache_manager: Annotated[
             InstanceCacheManager,
             Depends(InstanceCacheManager)
@@ -33,6 +39,7 @@ class InstanceManager:
         self.shelf_cache_manager = shelf_cache_manager
         self.instance_cache_manager = instance_cache_manager
         self.repository = repository
+        self.asset_repository = asset_repository
 
 
     async def create_instance(
@@ -238,6 +245,18 @@ class InstanceManager:
             user_id=user_id,
             instance_id=instance_id,
         )
+
+        # До удаления коробки помечаем её ассеты DELETING и ставим задачу
+        # на удаление объектов из S3. FK SET NULL сохранит строки ассетов,
+        # так что даже сорвавшуюся задачу доберёт часовой sweeper.
+        asset_ids = await self.asset_repository.mark_deleting_for_instance(
+            instance_id=instance_id,
+            owner_id=user_id,
+        )
+        if asset_ids:
+            delete_asset_objects.delay(
+                [str(asset_id) for asset_id in asset_ids]
+            )
 
         await self.repository.delete_box_instance(
             user_id=user_id,
