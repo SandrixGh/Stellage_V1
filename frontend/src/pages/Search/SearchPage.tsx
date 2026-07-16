@@ -1,14 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../../api/instance";
+import { Avatar } from "../../components/UI/Avatar";
 import { onlineStatus, isOnline } from "../../utils/onlineStatus";
 import type { PublicUser } from "../../types/Profile/profile";
 import "./SearchPage.css";
-
-const monogramOf = (u: PublicUser): string => {
-    const base = u.nickname?.trim() || u.username?.trim() || "?";
-    return base[0]?.toUpperCase() ?? "?";
-};
 
 export const SearchPage = () => {
     const [query, setQuery] = useState("");
@@ -71,9 +67,7 @@ export const SearchPage = () => {
                             const online = isOnline(u.last_seen_at ?? undefined);
                             const inner = (
                                 <>
-                                    <div className="search-result-avatar" aria-hidden="true">
-                                        <span>{monogramOf(u)}</span>
-                                    </div>
+                                    <Avatar url={u.avatar_url} name={title} size={44} />
                                     <div className="search-result-info">
                                         <span className="search-result-title">{title}</span>
                                         {u.username && (

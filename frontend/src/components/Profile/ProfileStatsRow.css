@@ -17,6 +17,17 @@
     border: 1px solid rgba(var(--ink-rgb), 0.1);
 }
 
+.profile-stat-clickable {
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+.profile-stat-clickable:hover {
+    border-color: rgba(var(--ink-rgb), 0.28);
+    background: var(--surface);
+}
+
 .profile-stat-value {
     font-family: 'Inter', sans-serif;
     font-size: 22px;

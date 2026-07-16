@@ -1,28 +1,5 @@
-.follow-block {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-top: 12px;
-}
-
-.follow-counts {
-    display: flex;
-    gap: 16px;
-}
-
-.follow-count {
-    font-size: 14px;
-    color: rgba(var(--ink-rgb), 0.6);
-}
-
-.follow-count b {
-    color: var(--ink);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-}
-
 .follow-btn {
+    margin-top: 12px;
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 600;

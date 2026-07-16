@@ -48,6 +48,20 @@ class ProfileService:
         self.avatar_manager = avatar_manager
 
 
+    async def _to_public_users(self, users: list) -> list[PublicUser]:
+        """Собирает PublicUser со свежими presigned-ссылками на аватары.
+        Presigned-подпись локальна (не сетевой вызов), поэтому дёшева даже для
+        списка."""
+        result: list[PublicUser] = []
+        for user in users:
+            pub = PublicUser.model_validate(user)
+            if user.avatar_key:
+                pub.avatar_url = await self.avatar_manager.get_avatar_url(
+                    avatar_key=user.avatar_key,
+                )
+            result.append(pub)
+        return result
+
     async def search_users(
         self,
         query: str,
@@ -57,7 +71,7 @@ class ProfileService:
             return []
 
         users = await self.manager.search_users(query=cleaned)
-        return [PublicUser.model_validate(user) for user in users]
+        return await self._to_public_users(users)
 
 
     async def get_public_profile(

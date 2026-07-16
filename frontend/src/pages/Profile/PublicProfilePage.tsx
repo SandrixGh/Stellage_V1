@@ -6,8 +6,10 @@ import { ShelfView } from "../../components/Stellage/ShelfView";
 import { Avatar } from "../../components/UI/Avatar";
 import { ProfileStatsRow } from "../../components/Profile/ProfileStatsRow";
 import { FollowButton } from "../../components/Profile/FollowButton";
+import { FollowListModal } from "../../components/Profile/FollowListModal";
 import { BoxDetailModal } from "../Box/BoxDetailModal";
 import { useAuthStore } from "../../store/useAuthStore";
+import { getFollowCounts } from "../../api/social";
 import { onlineStatus, isOnline } from "../../utils/onlineStatus";
 import type { Box } from "../../types/Stellage/boxes";
 import type { PublicProfile } from "../../types/Profile/profile";
@@ -19,6 +21,21 @@ export const PublicProfilePage = () => {
     const [profile, setProfile] = useState<PublicProfile | null>(null);
     const [status, setStatus] = useState<"loading" | "ready" | "notfound">("loading");
     const [openedBox, setOpenedBox] = useState<Box | null>(null);
+    const [followers, setFollowers] = useState<number | undefined>(undefined);
+    const [following, setFollowing] = useState<number | undefined>(undefined);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
+
+    useEffect(() => {
+        if (!username) return;
+        getFollowCounts(username)
+            .then((c) => {
+                setFollowers(c.followers);
+                setFollowing(c.following);
+                setIsFollowing(c.is_following === true);
+            })
+            .catch(() => {});
+    }, [username]);
 
     useEffect(() => {
         if (!username) return;
@@ -85,16 +102,26 @@ export const PublicProfilePage = () => {
                         </span>
                     </div>
                     {profile.bio && <p className="profile-bio">{profile.bio}</p>}
-                    {profile.username && (
+                    {profile.username && !!currentUser && currentUser.id !== profile.id && (
                         <FollowButton
                             username={profile.username}
-                            canFollow={!!currentUser && currentUser.id !== profile.id}
+                            isFollowing={isFollowing}
+                            onChange={(nowFollowing, count) => {
+                                setIsFollowing(nowFollowing);
+                                setFollowers(count);
+                            }}
                         />
                     )}
                 </div>
             </header>
 
-            <ProfileStatsRow stats={profile.stats} />
+            <ProfileStatsRow
+                stats={profile.stats}
+                followers={followers}
+                following={following}
+                onOpenFollowers={() => profile.username && setFollowList("followers")}
+                onOpenFollowing={() => profile.username && setFollowList("following")}
+            />
 
             <section className="profile-shelf-section">
                 {profile.shelf ? (
@@ -111,6 +138,14 @@ export const PublicProfilePage = () => {
             </section>
 
             <BoxDetailModal box={openedBox} onClose={() => setOpenedBox(null)} />
+
+            {followList && profile.username && (
+                <FollowListModal
+                    username={profile.username}
+                    mode={followList}
+                    onClose={() => setFollowList(null)}
+                />
+            )}
         </div>
     );
 };

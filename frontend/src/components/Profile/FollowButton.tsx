@@ -1,86 +1,45 @@
-import { useEffect, useState } from "react";
-import { followUser, getFollowCounts, unfollowUser } from "../../api/social";
+import { useState } from "react";
+import { followUser, unfollowUser } from "../../api/social";
 import "./FollowButton.css";
 
 interface FollowButtonProps {
     username: string;
-    /** Скрываем кнопку на своём профиле и для анонима, но счётчики показываем. */
-    canFollow: boolean;
+    /** Текущее состояние подписки (из follow-counts профиля). */
+    isFollowing: boolean;
+    /** Сообщает новое состояние + число подписчиков наверх (обновить счётчик). */
+    onChange: (isFollowing: boolean, followers: number) => void;
 }
 
 /**
- * Счётчики подписчиков/подписок + кнопка подписки. Сам подтягивает актуальные
- * counts по username; действие обновляет их оптимистично и откатывается при
- * ошибке.
+ * Кнопка подписки/отписки. Счётчики живут в ряду статистики профиля — здесь
+ * только действие; при клике отдаёт актуальное число подписчиков наверх.
  */
-export const FollowButton = ({ username, canFollow }: FollowButtonProps) => {
-    const [followers, setFollowers] = useState(0);
-    const [following, setFollowing] = useState(0);
-    const [isFollowing, setIsFollowing] = useState<boolean | null>(null);
+export const FollowButton = ({ username, isFollowing, onChange }: FollowButtonProps) => {
     const [busy, setBusy] = useState(false);
-    const [ready, setReady] = useState(false);
-
-    useEffect(() => {
-        let cancelled = false;
-        setReady(false);
-        getFollowCounts(username)
-            .then((c) => {
-                if (cancelled) return;
-                setFollowers(c.followers);
-                setFollowing(c.following);
-                setIsFollowing(c.is_following);
-                setReady(true);
-            })
-            .catch(() => !cancelled && setReady(true));
-        return () => {
-            cancelled = true;
-        };
-    }, [username]);
 
     const toggle = async () => {
         if (busy) return;
         setBusy(true);
-        const wasFollowing = isFollowing === true;
-        // Оптимистично.
-        setIsFollowing(!wasFollowing);
-        setFollowers((n) => n + (wasFollowing ? -1 : 1));
         try {
-            const res = wasFollowing
+            const res = isFollowing
                 ? await unfollowUser(username)
                 : await followUser(username);
-            setIsFollowing(res.is_following);
-            setFollowers(res.followers);
+            onChange(res.is_following, res.followers);
         } catch {
-            // Откат.
-            setIsFollowing(wasFollowing);
-            setFollowers((n) => n + (wasFollowing ? 1 : -1));
+            /* при ошибке состояние не меняем */
         } finally {
             setBusy(false);
         }
     };
 
-    if (!ready) return null;
-
     return (
-        <div className="follow-block">
-            <div className="follow-counts">
-                <span className="follow-count">
-                    <b>{followers}</b> {followers === 1 ? "подписчик" : "подписчиков"}
-                </span>
-                <span className="follow-count">
-                    <b>{following}</b> подписок
-                </span>
-            </div>
-            {canFollow && (
-                <button
-                    type="button"
-                    className={`follow-btn${isFollowing ? " following" : ""}`}
-                    onClick={toggle}
-                    disabled={busy}
-                >
-                    {isFollowing ? "Вы подписаны" : "Подписаться"}
-                </button>
-            )}
-        </div>
+        <button
+            type="button"
+            className={`follow-btn${isFollowing ? " following" : ""}`}
+            onClick={toggle}
+            disabled={busy}
+        >
+            {isFollowing ? "Вы подписаны" : "Подписаться"}
+        </button>
     );
 };

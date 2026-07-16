@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 
 from stellage.apps.auth.schemas import UserVerifySchema
+from stellage.apps.profile.avatar import AvatarManager
 from stellage.apps.profile.managers import ProfileManager
 from stellage.apps.profile.schemas import PublicUser
 from stellage.apps.social.repositories import FollowRepository
@@ -15,9 +16,22 @@ class SocialService:
         self,
         repository: Annotated[FollowRepository, Depends(FollowRepository)],
         profile_manager: Annotated[ProfileManager, Depends(ProfileManager)],
+        avatar_manager: Annotated[AvatarManager, Depends(AvatarManager)],
     ) -> None:
         self.repository = repository
         self.profile_manager = profile_manager
+        self.avatar_manager = avatar_manager
+
+    async def _to_public_users(self, users: list) -> list[PublicUser]:
+        result: list[PublicUser] = []
+        for user in users:
+            pub = PublicUser.model_validate(user)
+            if user.avatar_key:
+                pub.avatar_url = await self.avatar_manager.get_avatar_url(
+                    avatar_key=user.avatar_key,
+                )
+            result.append(pub)
+        return result
 
     async def _resolve_user_id(self, username: str) -> uuid.UUID:
         user = await self.profile_manager.get_user_by_username(username=username)
@@ -77,9 +91,9 @@ class SocialService:
     async def list_followers(self, username: str) -> list[PublicUser]:
         target_id = await self._resolve_user_id(username)
         users = await self.repository.list_followers(user_id=target_id)
-        return [PublicUser.model_validate(u) for u in users]
+        return await self._to_public_users(users)
 
     async def list_following(self, username: str) -> list[PublicUser]:
         target_id = await self._resolve_user_id(username)
         users = await self.repository.list_following(user_id=target_id)
-        return [PublicUser.model_validate(u) for u in users]
+        return await self._to_public_users(users)

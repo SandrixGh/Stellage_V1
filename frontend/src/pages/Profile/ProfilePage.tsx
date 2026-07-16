@@ -6,8 +6,10 @@ import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { ShelfView } from "../../components/Stellage/ShelfView";
 import { Avatar } from "../../components/UI/Avatar";
 import { ProfileStatsRow } from "../../components/Profile/ProfileStatsRow";
+import { FollowListModal } from "../../components/Profile/FollowListModal";
 import { BoxDetailModal } from "../Box/BoxDetailModal";
 import { getMyProfile } from "../../api/profile";
+import { getFollowCounts } from "../../api/social";
 import { onlineStatus, isOnline } from "../../utils/onlineStatus";
 import type { Box } from "../../types/Stellage/boxes";
 import type { PublicProfile } from "../../types/Profile/profile";
@@ -18,12 +20,26 @@ export const ProfilePage = () => {
     const { mainShelf, fetchMainShelf } = useStellageStore();
     const [openedBox, setOpenedBox] = useState<Box | null>(null);
     const [profile, setProfile] = useState<PublicProfile | null>(null);
+    const [followers, setFollowers] = useState<number | undefined>(undefined);
+    const [following, setFollowing] = useState<number | undefined>(undefined);
+    const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
 
     useEffect(() => {
         if (!isAuthenticated) return;
         fetchMainShelf();
         getMyProfile().then(setProfile).catch(() => setProfile(null));
     }, [isAuthenticated, fetchMainShelf]);
+
+    // Счётчики подписок для своего профиля (по своему username).
+    useEffect(() => {
+        if (!user?.username) return;
+        getFollowCounts(user.username)
+            .then((c) => {
+                setFollowers(c.followers);
+                setFollowing(c.following);
+            })
+            .catch(() => {});
+    }, [user?.username]);
 
     if (!isAuthenticated || !user) {
         return (
@@ -67,7 +83,15 @@ export const ProfilePage = () => {
                 </div>
             </header>
 
-            {profile && <ProfileStatsRow stats={profile.stats} />}
+            {profile && (
+                <ProfileStatsRow
+                    stats={profile.stats}
+                    followers={followers}
+                    following={following}
+                    onOpenFollowers={() => user.username && setFollowList("followers")}
+                    onOpenFollowing={() => user.username && setFollowList("following")}
+                />
+            )}
 
             <section className="profile-shelf-section">
                 {mainShelf ? (
@@ -85,6 +109,14 @@ export const ProfilePage = () => {
             </section>
 
             <BoxDetailModal box={openedBox} onClose={() => setOpenedBox(null)} />
+
+            {followList && user.username && (
+                <FollowListModal
+                    username={user.username}
+                    mode={followList}
+                    onClose={() => setFollowList(null)}
+                />
+            )}
         </div>
     );
 };

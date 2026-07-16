@@ -1,11 +1,13 @@
 import type { Shelf } from "../Stellage/shelves";
 
-/** Публичная карточка пользователя (без email/PII) — для поиска. */
+/** Публичная карточка пользователя (без email/PII) — для поиска и списков. */
 export interface PublicUser {
     id: string;
     username: string | null;
     nickname: string | null;
     last_seen_at: string | null;
+    // Presigned-ссылка на аватар (может истечь); null — аватара нет.
+    avatar_url?: string | null;
 }
 
 /** Счётчики для витрины профиля (совпадают с backend ProfileStats). */
