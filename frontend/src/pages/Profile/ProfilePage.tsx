@@ -4,18 +4,25 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { ShelfView } from "../../components/Stellage/ShelfView";
+import { Avatar } from "../../components/UI/Avatar";
+import { ProfileStatsRow } from "../../components/Profile/ProfileStatsRow";
 import { BoxDetailModal } from "../Box/BoxDetailModal";
+import { getMyProfile } from "../../api/profile";
 import { onlineStatus, isOnline } from "../../utils/onlineStatus";
 import type { Box } from "../../types/Stellage/boxes";
+import type { PublicProfile } from "../../types/Profile/profile";
 import "./ProfilePage.css";
 
 export const ProfilePage = () => {
     const { user, isAuthenticated } = useAuthStore();
     const { mainShelf, fetchMainShelf } = useStellageStore();
     const [openedBox, setOpenedBox] = useState<Box | null>(null);
+    const [profile, setProfile] = useState<PublicProfile | null>(null);
 
     useEffect(() => {
-        if (isAuthenticated) fetchMainShelf();
+        if (!isAuthenticated) return;
+        fetchMainShelf();
+        getMyProfile().then(setProfile).catch(() => setProfile(null));
     }, [isAuthenticated, fetchMainShelf]);
 
     if (!isAuthenticated || !user) {
@@ -36,15 +43,13 @@ export const ProfilePage = () => {
     }
 
     const displayName = user.nickname?.trim() || user.email;
-    const monogram = displayName?.trim()?.[0]?.toUpperCase() ?? "S";
     const online = isOnline(user.last_seen_at);
+    const bio = profile?.bio ?? user.bio;
 
     return (
         <div className="profile-page">
             <header className="profile-hero">
-                <div className="profile-avatar" aria-hidden="true">
-                    <span>{monogram}</span>
-                </div>
+                <Avatar url={profile?.avatar_url} name={displayName} size={88} />
                 <div className="profile-identity">
                     <p className="profile-eyebrow">Профиль</p>
                     <h1 className="profile-email">{displayName}</h1>
@@ -58,8 +63,11 @@ export const ProfilePage = () => {
                             {onlineStatus(user.last_seen_at)}
                         </span>
                     </div>
+                    {bio && <p className="profile-bio">{bio}</p>}
                 </div>
             </header>
+
+            {profile && <ProfileStatsRow stats={profile.stats} />}
 
             <section className="profile-shelf-section">
                 {mainShelf ? (

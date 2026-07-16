@@ -1,12 +1,13 @@
 import uuid
 
 from fastapi import Depends
-from sqlalchemy import update, select, or_
+from sqlalchemy import update, select, or_, func
 
-from stellage.apps.profile.schemas import ConfirmationCodeRequest
+from stellage.apps.profile.schemas import ConfirmationCodeRequest, ProfileStats
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.core.core_dependencies.redis_dependency import RedisDependency
-from stellage.database.models import User
+from stellage.database.enums.visibility import VisibilityEnum
+from stellage.database.models import User, BoxInstance, Shelf
 
 
 class ProfileManager:
@@ -59,6 +60,62 @@ class ProfileManager:
             return list(result.scalars().all())
 
 
+    async def get_avatar_key(
+        self,
+        user_id: uuid.UUID | str,
+    ) -> str | None:
+        async with self.db.db_session() as session:
+            query = (
+                select(self.user_model.avatar_key)
+                .where(self.user_model.id == user_id)
+            )
+            result = await session.execute(query)
+            return result.scalar()
+
+
+    async def get_user_stats(
+        self,
+        user_id: uuid.UUID | str,
+    ) -> ProfileStats:
+        """Счётчики для витрины профиля: всего коробок, публичных коробок на
+        публичных полках (то, что реально видно другим) и число полок."""
+        async with self.db.db_session() as session:
+            boxes_total = (
+                await session.execute(
+                    select(func.count())
+                    .select_from(BoxInstance)
+                    .where(BoxInstance.user_id == user_id)
+                )
+            ).scalar_one()
+
+            public_boxes = (
+                await session.execute(
+                    select(func.count())
+                    .select_from(BoxInstance)
+                    .join(Shelf, BoxInstance.shelf_id == Shelf.id)
+                    .where(
+                        BoxInstance.user_id == user_id,
+                        BoxInstance.is_public == VisibilityEnum.PUBLIC,
+                        Shelf.is_public.is_(True),
+                    )
+                )
+            ).scalar_one()
+
+            shelves_total = (
+                await session.execute(
+                    select(func.count())
+                    .select_from(Shelf)
+                    .where(Shelf.user_id == user_id)
+                )
+            ).scalar_one()
+
+            return ProfileStats(
+                boxes=boxes_total,
+                public_boxes=public_boxes,
+                shelves=shelves_total,
+            )
+
+
     async def get_user_by_username(
         self,
         username: str,
@@ -67,6 +124,19 @@ class ProfileManager:
             stmt = (
                 select(self.user_model)
                 .where(self.user_model.username == username)
+            )
+            result = await session.execute(stmt)
+            return result.scalar_one_or_none()
+
+
+    async def get_user_by_id(
+        self,
+        user_id: uuid.UUID | str,
+    ) -> User | None:
+        async with self.db.db_session() as session:
+            stmt = (
+                select(self.user_model)
+                .where(self.user_model.id == user_id)
             )
             result = await session.execute(stmt)
             return result.scalar_one_or_none()

@@ -37,6 +37,19 @@ class User(IDMixin, TimestampMixin, Base):
         nullable=True,
     )
 
+    # Ключ объекта аватара в S3 (не URL — наружу отдаётся presigned GET).
+    # NULL = аватар не загружен, фронт показывает монограмму.
+    avatar_key: Mapped[str | None] = mapped_column(
+        String(512),
+        nullable=True,
+    )
+
+    # Короткое описание «о себе» для витрины профиля.
+    bio: Mapped[str | None] = mapped_column(
+        String(280),
+        nullable=True,
+    )
+
     hashed_password: Mapped[Text] = mapped_column(
         Text,
         unique=False,

@@ -3,6 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import { api } from "../../api/instance";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { ShelfView } from "../../components/Stellage/ShelfView";
+import { Avatar } from "../../components/UI/Avatar";
+import { ProfileStatsRow } from "../../components/Profile/ProfileStatsRow";
 import { BoxDetailModal } from "../Box/BoxDetailModal";
 import { onlineStatus, isOnline } from "../../utils/onlineStatus";
 import type { Box } from "../../types/Stellage/boxes";
@@ -60,15 +62,12 @@ export const PublicProfilePage = () => {
     }
 
     const displayName = profile.nickname?.trim() || profile.username || "Без имени";
-    const monogram = displayName?.trim()?.[0]?.toUpperCase() ?? "S";
     const online = isOnline(profile.last_seen_at);
 
     return (
         <div className="profile-page">
             <header className="profile-hero">
-                <div className="profile-avatar" aria-hidden="true">
-                    <span>{monogram}</span>
-                </div>
+                <Avatar url={profile.avatar_url} name={displayName} size={88} />
                 <div className="profile-identity">
                     <p className="profile-eyebrow">Профиль</p>
                     <h1 className="profile-email">{displayName}</h1>
@@ -82,8 +81,11 @@ export const PublicProfilePage = () => {
                             {onlineStatus(profile.last_seen_at)}
                         </span>
                     </div>
+                    {profile.bio && <p className="profile-bio">{profile.bio}</p>}
                 </div>
             </header>
+
+            <ProfileStatsRow stats={profile.stats} />
 
             <section className="profile-shelf-section">
                 {profile.shelf ? (

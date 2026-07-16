@@ -13,7 +13,7 @@ interface AuthState {
     logout: () => Promise<void>;
     delete_account: () => Promise<void>;
     getUser: () => Promise<void>;
-    updateProfile: (data: { username?: string; nickname?: string }) => Promise<void>;
+    updateProfile: (data: { username?: string; nickname?: string; bio?: string }) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({

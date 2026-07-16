@@ -1,3 +1,43 @@
+/* ===== Avatar upload ===== */
+.settings-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.settings-avatar-edit {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+    background: rgba(var(--ink-rgb), 0.06);
+    border: 1px solid rgba(var(--ink-rgb), 0.14);
+    color: rgba(var(--ink-rgb), 0.8);
+    cursor: pointer;
+    transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+.settings-avatar-edit:hover:not(:disabled) {
+    background: rgba(var(--ink-rgb), 0.1);
+    border-color: rgba(var(--ink-rgb), 0.3);
+}
+
+.settings-avatar-edit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.profile-textarea {
+    resize: vertical;
+    min-height: 68px;
+    line-height: 1.5;
+    font-family: 'Inter', sans-serif;
+}
+
 /* ===== APPEARANCE: theme toggle ===== */
 .theme-toggle {
     display: inline-flex;

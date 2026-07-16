@@ -7,6 +7,9 @@ from starlette.responses import JSONResponse
 from stellage.apps.auth.depends import get_current_user
 from stellage.apps.auth.schemas import UserVerifySchema
 from stellage.apps.profile.schemas import (
+    AvatarCompleteRequest,
+    AvatarInitiateRequest,
+    AvatarUploadTarget,
     ChangeEmailRequest,
     ChangePasswordRequest,
     PublicProfile,
@@ -34,6 +37,24 @@ async def search_users(
     ],
 ) -> list[PublicUser]:
     return await service.search_users(query=q)
+
+
+@profile_router.get(
+    path="/me",
+    status_code=status.HTTP_200_OK,
+    response_model=PublicProfile,
+)
+async def get_my_profile(
+    service: Annotated[
+        ProfileService,
+        Depends(ProfileService)
+    ],
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ],
+) -> PublicProfile:
+    return await service.get_my_profile(user=user)
 
 
 @profile_router.get(
@@ -125,3 +146,40 @@ async def update_profile(
         data=data,
         user=user,
     )
+
+
+@profile_router.post(
+    path="/avatar/initiate",
+    status_code=status.HTTP_200_OK,
+    response_model=AvatarUploadTarget,
+)
+async def initiate_avatar_upload(
+    data: AvatarInitiateRequest,
+    service: Annotated[
+        ProfileService,
+        Depends(ProfileService)
+    ],
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ]
+) -> AvatarUploadTarget:
+    return await service.initiate_avatar_upload(user=user, data=data)
+
+
+@profile_router.post(
+    path="/avatar/complete",
+    status_code=status.HTTP_200_OK,
+)
+async def complete_avatar_upload(
+    data: AvatarCompleteRequest,
+    service: Annotated[
+        ProfileService,
+        Depends(ProfileService)
+    ],
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ]
+) -> JSONResponse:
+    return await service.complete_avatar_upload(user=user, data=data)

@@ -8,7 +8,21 @@ export interface PublicUser {
     last_seen_at: string | null;
 }
 
-/** Публичный профиль: карточка пользователя + его главный публичный стеллаж. */
+/** Счётчики для витрины профиля (совпадают с backend ProfileStats). */
+export interface ProfileStats {
+    boxes: number;
+    public_boxes: number;
+    shelves: number;
+}
+
+/**
+ * Публичный профиль: карточка + витрина. avatar_url — короткоживущая
+ * presigned-ссылка (может истечь, тянется заново при загрузке страницы);
+ * null — аватар не загружен, показываем монограмму.
+ */
 export interface PublicProfile extends PublicUser {
+    bio?: string | null;
+    avatar_url?: string | null;
+    stats: ProfileStats;
     shelf: Shelf | null;
 }

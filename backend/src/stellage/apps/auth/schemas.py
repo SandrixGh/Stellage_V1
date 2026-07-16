@@ -54,6 +54,7 @@ class UserVerifySchema(GetUserByID, GetUserByEmail):
     session_id: str | uuid.UUID | None = None
     username: str | None = None
     nickname: str | None = None
+    bio: str | None = None
     last_seen_at: datetime.datetime | None = None
     is_superuser: bool = False
 

@@ -4,8 +4,12 @@ from starlette.responses import JSONResponse
 
 from stellage.apps.auth.handlers import AuthHandler
 from stellage.apps.auth.schemas import UserVerifySchema
+from stellage.apps.profile.avatar import AvatarManager
 from stellage.apps.profile.managers import ProfileManager
 from stellage.apps.profile.schemas import (
+    AvatarCompleteRequest,
+    AvatarInitiateRequest,
+    AvatarUploadTarget,
     ChangeEmailRequest,
     ConfirmationCodeRequest,
     ChangePasswordRequest,
@@ -33,10 +37,15 @@ class ProfileService:
             ShelfManager,
             Depends(ShelfManager),
         ],
+        avatar_manager: Annotated[
+            AvatarManager,
+            Depends(AvatarManager),
+        ],
     ) -> None:
         self.manager = manager
         self.handler = handler
         self.shelf_manager = shelf_manager
+        self.avatar_manager = avatar_manager
 
 
     async def search_users(
@@ -71,7 +80,65 @@ class ProfileService:
 
         profile = PublicProfile.model_validate(user)
         profile.shelf = shelf
+        profile.stats = await self.manager.get_user_stats(user_id=user.id)
+        if user.avatar_key:
+            profile.avatar_url = await self.avatar_manager.get_avatar_url(
+                avatar_key=user.avatar_key,
+            )
         return profile
+
+
+    async def get_my_profile(
+        self,
+        user: UserVerifySchema,
+    ) -> PublicProfile:
+        """Свой профиль для витрины: карточка + статистика + presigned-аватар.
+        Главный стеллаж показываем всегда (свой вижу независимо от публичности)."""
+        full_user = await self.manager.get_user_by_id(user_id=user.id)
+        if not full_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+            )
+
+        shelf = await self.shelf_manager.get_main_shelf_with_boxes(
+            user_id=user.id,
+        )
+
+        profile = PublicProfile.model_validate(full_user)
+        profile.shelf = shelf
+        profile.stats = await self.manager.get_user_stats(user_id=user.id)
+        if full_user.avatar_key:
+            profile.avatar_url = await self.avatar_manager.get_avatar_url(
+                avatar_key=full_user.avatar_key,
+            )
+        return profile
+
+
+    async def initiate_avatar_upload(
+        self,
+        user: UserVerifySchema,
+        data: AvatarInitiateRequest,
+    ) -> AvatarUploadTarget:
+        return await self.avatar_manager.initiate_upload(
+            user_id=user.id,
+            mime=data.mime,
+            size_bytes=data.size_bytes,
+        )
+
+
+    async def complete_avatar_upload(
+        self,
+        user: UserVerifySchema,
+        data: AvatarCompleteRequest,
+    ) -> JSONResponse:
+        await self.avatar_manager.complete_upload(
+            user_id=user.id,
+            key=data.key,
+            mime=data.mime,
+            size_bytes=data.size_bytes,
+        )
+        return JSONResponse(content={"message": "Avatar updated successfully"})
 
 
     async def change_email_request(

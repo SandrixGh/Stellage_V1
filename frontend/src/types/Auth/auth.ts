@@ -4,6 +4,7 @@ export interface UserVerifySchema {
     session_id?: string | null;
     username?: string | null;
     nickname?: string | null;
+    bio?: string | null;
     last_seen_at?: string | null;
     is_superuser?: boolean;
 }

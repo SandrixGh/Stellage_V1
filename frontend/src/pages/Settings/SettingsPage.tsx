@@ -1,9 +1,16 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useThemeStore } from "../../store/useThemeStore";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
+import { Avatar } from "../../components/UI/Avatar";
+import {
+    AVATAR_MIME_TYPES,
+    avatarErrorMessage,
+    getMyProfile,
+    uploadAvatar,
+} from "../../api/profile";
 import "../Profile/ProfilePage.css";
 import "./SettingsPage.css";
 
@@ -14,9 +21,23 @@ export const SettingsPage = () => {
 
     const [username, setUsername] = useState(user?.username ?? "");
     const [nickname, setNickname] = useState(user?.nickname ?? "");
+    const [bio, setBio] = useState(user?.bio ?? "");
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [saved, setSaved] = useState(false);
+
+    // Текущий аватар (presigned из /profile/me) + загрузка нового.
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [avatarBusy, setAvatarBusy] = useState(false);
+    const [avatarError, setAvatarError] = useState<string | null>(null);
+    const fileRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (!isAuthenticated) return;
+        getMyProfile()
+            .then((p) => setAvatarUrl(p.avatar_url ?? null))
+            .catch(() => setAvatarUrl(null));
+    }, [isAuthenticated]);
 
     if (!isAuthenticated || !user) {
         return (
@@ -37,6 +58,25 @@ export const SettingsPage = () => {
             </div>
         );
     }
+
+    const handleAvatarPick = async (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = ""; // позволяем выбрать тот же файл повторно
+        if (!file || avatarBusy) return;
+
+        setAvatarError(null);
+        setAvatarBusy(true);
+        try {
+            await uploadAvatar(file);
+            // Перечитываем свежую presigned-ссылку на новый аватар.
+            const p = await getMyProfile();
+            setAvatarUrl(p.avatar_url ?? null);
+        } catch (err) {
+            setAvatarError(avatarErrorMessage(err));
+        } finally {
+            setAvatarBusy(false);
+        }
+    };
 
     const handleLogout = async () => {
         await logout();
@@ -59,6 +99,7 @@ export const SettingsPage = () => {
             await updateProfile({
                 username: username.trim() || undefined,
                 nickname: nickname.trim() || undefined,
+                bio: bio.trim() || undefined,
             });
             setSaved(true);
         } catch (err) {
@@ -75,13 +116,29 @@ export const SettingsPage = () => {
     return (
         <div className="profile-page">
             <header className="profile-hero">
-                <div className="profile-avatar" aria-hidden="true">
-                    <span>{(nickname.trim() || user.email)?.[0]?.toUpperCase() ?? "S"}</span>
+                <div className="settings-avatar-wrap">
+                    <Avatar url={avatarUrl} name={nickname.trim() || user.email} size={88} />
+                    <button
+                        type="button"
+                        className="settings-avatar-edit"
+                        onClick={() => fileRef.current?.click()}
+                        disabled={avatarBusy}
+                    >
+                        {avatarBusy ? "…" : "Сменить"}
+                    </button>
+                    <input
+                        ref={fileRef}
+                        type="file"
+                        accept={AVATAR_MIME_TYPES.join(",")}
+                        hidden
+                        onChange={handleAvatarPick}
+                    />
                 </div>
                 <div className="profile-identity">
                     <p className="profile-eyebrow">Аккаунт</p>
                     <h1 className="profile-email">Настройки</h1>
                     <p className="profile-subline">{user.email}</p>
+                    {avatarError && <p className="profile-form-error">{avatarError}</p>}
                 </div>
             </header>
 
@@ -119,6 +176,19 @@ export const SettingsPage = () => {
                                 placeholder="Отображаемое имя"
                                 maxLength={50}
                             />
+                        </label>
+
+                        <label className="profile-field">
+                            <span className="profile-field-label">О себе</span>
+                            <textarea
+                                className="profile-input profile-textarea"
+                                value={bio}
+                                onChange={(e) => setBio(e.target.value)}
+                                placeholder="Пара слов о себе или о вашей коллекции"
+                                maxLength={280}
+                                rows={3}
+                            />
+                            <span className="profile-field-hint">{bio.length}/280</span>
                         </label>
 
                         {error && <p className="profile-form-error">{error}</p>}
