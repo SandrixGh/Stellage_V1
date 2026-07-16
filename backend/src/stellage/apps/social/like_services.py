@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 
 from stellage.apps.auth.schemas import UserVerifySchema
-from stellage.apps.boxes.assets.authorization import can_view_box_content
+from stellage.apps.boxes.assets.authorization import can_see_box
 from stellage.apps.social.like_repositories import LikeRepository
 from stellage.apps.social.schemas import LikeActionResult, LikeState
 
@@ -21,14 +21,14 @@ class LikeService:
         instance_id: uuid.UUID,
         viewer: UserVerifySchema | None,
     ) -> None:
-        """Лайкать/видеть лайки можно только у коробки, которую зритель видит.
+        """Лайкать/видеть лайки можно у коробки, которая видна как ОБЪЕКТ на
+        витрине (можно лайкнуть даже запечатанную — важен куб, не содержимое).
         Невидимая или несуществующая — одинаковый 404 (без оракула)."""
         access = await self.repository.get_box_access(instance_id=instance_id)
-        if access is None or not can_view_box_content(
+        if access is None or not can_see_box(
             viewer_id=viewer.id if viewer else None,
             owner_id=access.owner_id,
             is_public=access.is_public,
-            is_sealed=access.is_sealed,
             shelf_id=access.shelf_id,
             shelf_is_public=access.shelf_is_public,
         ):

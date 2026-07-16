@@ -127,6 +127,14 @@
     text-overflow: ellipsis;
 }
 
+/* Редкость + лайки в ОДНУ строку — высота бирки не растёт, поэтому нижняя
+   полка не вылезает за экран. */
+.shelf-box-tags {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .shelf-box-rarity {
     font-family: "Inter", sans-serif;
     font-size: 8px;
@@ -134,6 +142,14 @@
     letter-spacing: 0.8px;
     text-transform: uppercase;
     color: rgba(var(--ink-rgb), 0.55);
+}
+
+.shelf-box-likes {
+    font-family: "Inter", sans-serif;
+    font-size: 8px;
+    font-weight: 600;
+    color: #e6465a;
+    white-space: nowrap;
 }
 
 .shelf-board-empty {

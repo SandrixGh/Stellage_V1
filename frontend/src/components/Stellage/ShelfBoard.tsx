@@ -264,11 +264,18 @@ export const ShelfBoard = ({
                             <span className="shelf-box-name">
                                 {p.box.template.title}
                             </span>
-                            <span
-                                className={`shelf-box-rarity rarity-tag-${rarityKey}`}
-                                style={{ color: boxColor }}
-                            >
-                                {p.box.template.rarity}
+                            <span className="shelf-box-tags">
+                                <span
+                                    className={`shelf-box-rarity rarity-tag-${rarityKey}`}
+                                    style={{ color: boxColor }}
+                                >
+                                    {p.box.template.rarity}
+                                </span>
+                                {p.box.likes_count > 0 && (
+                                    <span className="shelf-box-likes" title="Лайки">
+                                        ♥ {p.box.likes_count}
+                                    </span>
+                                )}
                             </span>
                         </div>
                     </div>

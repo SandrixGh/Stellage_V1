@@ -32,6 +32,11 @@ export const BoxCard = ({ box }: { box: Box }) => {
                     <span className={`rarity-tag rarity-tag-${rarityKey}`} style={{ color: boxColor }}>
                         {box.template.rarity}
                     </span>
+                    {box.likes_count > 0 && (
+                        <span className="box-likes-tag" title="Лайки">
+                            ♥ {box.likes_count}
+                        </span>
+                    )}
                     <span className={`status-tag ${box.is_sealed === "sealed" ? "sealed" : "unsealed"}`}>
                         {box.is_sealed === "sealed" ? "Запечатана" : "Открыта"}
                     </span>

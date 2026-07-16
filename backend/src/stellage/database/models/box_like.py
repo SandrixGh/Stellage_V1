@@ -1,11 +1,12 @@
 import uuid
 
-from sqlalchemy import ForeignKey, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import ForeignKey, UniqueConstraint, select, func
+from sqlalchemy.orm import Mapped, mapped_column, column_property
 
 from stellage.database.mixins.id_mixins import IDMixin
 from stellage.database.mixins.timestamp_mixins import TimestampMixin
 from stellage.database.models import Base
+from stellage.database.models.box_instance import BoxInstance
 
 
 class BoxLike(IDMixin, TimestampMixin, Base):
@@ -31,3 +32,15 @@ class BoxLike(IDMixin, TimestampMixin, Base):
     __table_args__ = (
         UniqueConstraint("user_id", "instance_id", name="uq_box_like_pair"),
     )
+
+
+# Счётчик лайков как коррелированный подзапрос: попадает скаляром прямо в SELECT
+# коробки — один запрос на всю выборку, без N+1. deferred=False, чтобы значение
+# приезжало сразу вместе с остальными полями инстанса.
+BoxInstance.likes_count = column_property(
+    select(func.count(BoxLike.id))
+    .where(BoxLike.instance_id == BoxInstance.id)
+    .correlate_except(BoxLike)
+    .scalar_subquery(),
+    deferred=False,
+)

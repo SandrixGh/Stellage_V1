@@ -61,6 +61,8 @@ export interface Box {
     // Тип наполнения, посчитанный бэкендом из реального содержимого коробки.
     // Источник истины для глифа на кубе (в отличие от хэш-фолбэка по id).
     content_type: BoxContentType;
+    // Число лайков коробки (приходит с бэка, без доп. запроса).
+    likes_count: number;
     template: BoxTemplate; // Вложенный объект, который пришел через joinedload
     created_at: string;
     updated_at: string;

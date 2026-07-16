@@ -109,6 +109,19 @@
     background: rgba(200, 130, 255, 0.07);
 }
 
+/* ── Likes tag ── */
+.box-likes-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    padding: 3px 9px;
+    border-radius: 4px;
+    color: #e6465a;
+    background: rgba(230, 70, 90, 0.07);
+    border: 1px solid rgba(230, 70, 90, 0.28);
+    white-space: nowrap;
+}
+
 /* ── Status tag ── */
 .status-tag {
     font-size: 10px;

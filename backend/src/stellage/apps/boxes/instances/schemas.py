@@ -74,6 +74,9 @@ class BoxInstanceReturn(
     # Метаданные S3-ассетов (без ключей и ссылок). Дефолт [] сохраняет
     # валидность старых записей в Redis-кэше.
     assets: list[BoxAssetRead] = []
+    # Число лайков коробки (column_property, один SQL-подзапрос без N+1).
+    # Дефолт 0 держит валидными старые записи в Redis-кэше.
+    likes_count: int = 0
     model_config = ConfigDict(from_attributes=True)
 
     @computed_field
