@@ -17,9 +17,14 @@ import type { PublicProfile } from "../../types/Profile/profile";
 import { Avatar } from "../../components/UI/Avatar";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { MessageMediaLightbox } from "./MessageMediaLightbox";
+import { GiftPickerModal } from "./GiftPickerModal";
+import { GiftBoxModal } from "./GiftBoxModal";
+import { PeerInfoPopover } from "./PeerInfoPopover";
 import { resolveRarityVisual } from "../../data/mockTemplates";
 import { useAuthStore } from "../../store/useAuthStore";
+import { useStellageStore } from "../../store/useStellageStore";
 import { messagesSocket, type MessageEvent } from "../../api/messagesSocket";
+import { onlineStatus, isOnline } from "../../utils/onlineStatus";
 import "./MessagesPage.css";
 
 const PAGE_SIZE = 40; // совпадает с backend limit — так понимаем, есть ли ещё
@@ -84,6 +89,9 @@ export const MessagesPage = () => {
     const { username } = useParams<{ username: string }>();
     const navigate = useNavigate();
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+    const instances = useStellageStore((s) => s.instances);
+    const fetchInstances = useStellageStore((s) => s.fetchInstances);
+    const giftBox = useStellageStore((s) => s.giftBox);
 
     const [conversations, setConversations] = useState<ConversationPreview[]>([]);
     const [messages, setMessages] = useState<MessageItem[]>([]);
@@ -105,6 +113,12 @@ export const MessagesPage = () => {
     const [lightbox, setLightbox] = useState<MessageItem | null>(null);
     // Показывать кнопку «вниз», когда лента прокручена вверх.
     const [showScrollDown, setShowScrollDown] = useState(false);
+    // Модалка выбора коробки для подарка прямо из чата.
+    const [giftPickerOpen, setGiftPickerOpen] = useState(false);
+    // Telegram-style попап с быстрой инфой о собеседнике (открыт по клику на шапку).
+    const [peerInfoOpen, setPeerInfoOpen] = useState(false);
+    // Просмотр подаренной коробки прямо в чате (instance_id открытого подарка).
+    const [giftBoxId, setGiftBoxId] = useState<string | null>(null);
 
     const listEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -285,6 +299,12 @@ export const MessagesPage = () => {
         };
     }, [staged]);
 
+    // Подгружаем инвентарь при открытии модалки подарка (на случай, если
+    // пользователь ещё не заходил на страницы, где стор уже наполнен).
+    useEffect(() => {
+        if (giftPickerOpen) fetchInstances().catch(() => {});
+    }, [giftPickerOpen, fetchInstances]);
+
     const loadOlder = async () => {
         if (!username || loadingMore || messages.length === 0) return;
         setLoadingMore(true);
@@ -395,6 +415,34 @@ export const MessagesPage = () => {
             setSending(false);
             sendingRef.current = false;
         }
+    };
+
+    // Подарок из инлайн-модалки: дарим коробку, затем (если есть) шлём подпись
+    // отдельным текстовым сообщением — gift-сообщение формирует сам бэкенд.
+    const handleGiftSend = async (instanceId: string, caption: string) => {
+        if (!username) return;
+        const ok = await giftBox(instanceId, username);
+        if (!ok) {
+            setError("Не удалось подарить коробку.");
+            return;
+        }
+        setGiftPickerOpen(false);
+        const text = caption.trim();
+        if (text) {
+            try {
+                await sendMessage(username, text);
+            } catch {
+                /* сама коробка уже подарена — подпись не критична */
+            }
+        }
+        if (usernameRef.current === username) {
+            const fresh = await getConversation(username).catch(() => null);
+            if (fresh && usernameRef.current === username) {
+                setMessages((prev) => mergeById(prev, fresh));
+            }
+        }
+        loadConversations();
+        requestAnimationFrame(() => listEndRef.current?.scrollIntoView({ block: "end" }));
     };
 
     const handlePickFile = () => {
@@ -511,14 +559,18 @@ export const MessagesPage = () => {
                             <button
                                 type="button"
                                 className="msg-thread-head-main"
-                                onClick={() => navigate(`/u/${username}`)}
+                                onClick={() => setPeerInfoOpen(true)}
                             >
                                 <Avatar url={peer?.avatar_url} name={peerName} size={40} />
                                 <span className="msg-thread-head-text">
                                     <span className="msg-thread-head-name">{peerName}</span>
-                                    {peer?.username && (
-                                        <span className="msg-thread-head-sub">@{peer.username}</span>
-                                    )}
+                                    <span
+                                        className={`msg-thread-head-sub${
+                                            isOnline(peer?.last_seen_at) ? " online" : ""
+                                        }`}
+                                    >
+                                        {onlineStatus(peer?.last_seen_at)}
+                                    </span>
                                 </span>
                             </button>
                         </div>
@@ -556,7 +608,10 @@ export const MessagesPage = () => {
                                         prev.kind === "text" &&
                                         m.kind === "text";
                                     return (
-                                        <div key={m.id}>
+                                        <div
+                                            key={m.id}
+                                            className={`msg-row${m.is_mine ? " mine" : ""}`}
+                                        >
                                             {showDay && (
                                                 <div className="msg-day">
                                                     <span>{dayLabel(m.created_at)}</span>
@@ -576,7 +631,7 @@ export const MessagesPage = () => {
                                                 onMediaLoad={onMediaLoad}
                                                 onOpenGift={
                                                     m.gift_instance_id
-                                                        ? () => navigate(`/box/instance/${m.gift_instance_id}`)
+                                                        ? () => setGiftBoxId(m.gift_instance_id)
                                                         : undefined
                                                 }
                                             />
@@ -654,7 +709,7 @@ export const MessagesPage = () => {
                                             type="button"
                                             onClick={() => {
                                                 setAttachMenu(false);
-                                                navigate("/inventory");
+                                                setGiftPickerOpen(true);
                                             }}
                                         >
                                             <span className="msg-attach-icon">🎁</span>
@@ -697,6 +752,29 @@ export const MessagesPage = () => {
 
             {lightbox?.asset_url && (
                 <MessageMediaLightbox message={lightbox} onClose={() => setLightbox(null)} />
+            )}
+
+            {giftPickerOpen && (
+                <GiftPickerModal
+                    boxes={instances}
+                    peerName={peerName}
+                    onSend={handleGiftSend}
+                    onClose={() => setGiftPickerOpen(false)}
+                />
+            )}
+
+            {peerInfoOpen && username && (
+                <PeerInfoPopover
+                    username={username}
+                    peer={peer}
+                    peerName={peerName}
+                    messages={messages}
+                    onClose={() => setPeerInfoOpen(false)}
+                />
+            )}
+
+            {giftBoxId && (
+                <GiftBoxModal instanceId={giftBoxId} onClose={() => setGiftBoxId(null)} />
             )}
         </div>
     );
@@ -778,13 +856,15 @@ const MessageBubble = ({
                 />
             )}
             {hasMedia && !isPhoto && (
-                <video
-                    className="msg-media"
-                    src={m.asset_url!}
-                    controls
-                    preload="metadata"
-                    onLoadedMetadata={onMediaLoad}
-                />
+                <div className="msg-video-frame">
+                    <video
+                        className="msg-media"
+                        src={m.asset_url!}
+                        controls
+                        preload="metadata"
+                        onLoadedMetadata={onMediaLoad}
+                    />
+                </div>
             )}
 
             {editing ? (

@@ -1,0 +1,37 @@
+/* Мини-стеллаж: гомотетичная копия ShelfBoard без бирок/интерактива. */
+.mini-shelf {
+    position: relative;
+    width: 100%;
+    border-radius: var(--radius-md);
+    background: var(--surface-hover);
+    border: 1px solid rgba(var(--ink-rgb), 0.08);
+    overflow: hidden;
+}
+
+/* Линия полки — как на большом стеллаже, но тоньше. */
+.mini-shelf-line {
+    position: absolute;
+    left: 3%;
+    right: 3%;
+    height: 1.5px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(var(--ink-rgb), 0.3) 8%,
+        rgba(var(--ink-rgb), 0.3) 92%,
+        transparent
+    );
+    pointer-events: none;
+}
+
+/* Ячейка: коробка «стоит» нижней гранью на линии полки. */
+.mini-shelf-cell {
+    position: absolute;
+    box-sizing: border-box;
+    padding: 0 3px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    pointer-events: none;
+}

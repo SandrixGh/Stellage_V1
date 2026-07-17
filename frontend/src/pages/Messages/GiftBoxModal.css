@@ -1,0 +1,157 @@
+.giftbox-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 230;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.5);
+    animation: giftbox-fade 0.16s ease;
+}
+
+@keyframes giftbox-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.giftbox {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    max-height: min(85vh, 720px);
+    display: flex;
+    flex-direction: column;
+    padding: 26px 24px 24px;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid rgba(var(--ink-rgb), 0.1);
+    box-shadow: var(--shadow-lg);
+    animation: giftbox-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes giftbox-pop {
+    from { opacity: 0; transform: translateY(10px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.giftbox-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    background: rgba(var(--glass-rgb), 0.04);
+    border: 1px solid rgba(var(--ink-rgb), 0.15);
+    color: rgba(var(--ink-rgb), 0.7);
+    cursor: pointer;
+    z-index: 2;
+    transition: background 0.16s ease, color 0.16s ease;
+}
+
+.giftbox-close:hover {
+    background: rgba(var(--glass-rgb), 0.08);
+    color: var(--ink);
+}
+
+.giftbox-state {
+    padding: 48px 16px;
+    text-align: center;
+    color: rgba(var(--ink-rgb), 0.55);
+    font-size: 14px;
+}
+
+/* Прокрутка внутри модалки, не на странице. */
+.giftbox-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.giftbox-visual {
+    display: flex;
+    justify-content: center;
+    padding: 8px 0 4px;
+}
+
+.giftbox-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    text-align: center;
+}
+
+.giftbox-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.giftbox-rarity {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.giftbox-desc {
+    margin: 0;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(var(--ink-rgb), 0.7);
+}
+
+.giftbox-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(var(--ink-rgb), 0.08);
+}
+
+.giftbox-content-text {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.giftbox-content-empty {
+    margin: 0;
+    padding: 16px 0;
+    text-align: center;
+    font-size: 13px;
+    color: rgba(var(--ink-rgb), 0.45);
+}
+
+.giftbox-open {
+    flex-shrink: 0;
+    margin-top: 4px;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(var(--ink-rgb), 0.14);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.14s ease;
+}
+
+.giftbox-open:hover {
+    background: var(--surface-hover);
+}

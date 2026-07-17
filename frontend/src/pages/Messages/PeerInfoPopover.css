@@ -1,0 +1,206 @@
+.peerinfo-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 230;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.5);
+    animation: peerinfo-fade 0.16s ease;
+}
+
+@keyframes peerinfo-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.peerinfo {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    max-height: min(80vh, 640px);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 22px 22px;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid rgba(var(--ink-rgb), 0.1);
+    box-shadow: var(--shadow-lg);
+    animation: peerinfo-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes peerinfo-pop {
+    from { opacity: 0; transform: translateY(10px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.peerinfo-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    background: rgba(var(--glass-rgb), 0.04);
+    border: 1px solid rgba(var(--ink-rgb), 0.15);
+    color: rgba(var(--ink-rgb), 0.7);
+    cursor: pointer;
+    z-index: 2;
+    transition: background 0.16s ease, color 0.16s ease;
+}
+
+.peerinfo-close:hover {
+    background: rgba(var(--glass-rgb), 0.08);
+    color: var(--ink);
+}
+
+/* Внутренняя прокручиваемая область — скролл в модалке, не на сайте. */
+.peerinfo-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.peerinfo-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    text-align: center;
+}
+
+.peerinfo-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.peerinfo-username {
+    font-size: 13px;
+    color: rgba(var(--ink-rgb), 0.5);
+}
+
+.peerinfo-status {
+    font-size: 12px;
+    color: rgba(var(--ink-rgb), 0.5);
+}
+
+.peerinfo-bio {
+    margin: 4px 0 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: rgba(var(--ink-rgb), 0.7);
+}
+
+.peerinfo-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 10px 0;
+    border-top: 1px solid rgba(var(--ink-rgb), 0.08);
+    border-bottom: 1px solid rgba(var(--ink-rgb), 0.08);
+    font-size: 13px;
+    color: rgba(var(--ink-rgb), 0.6);
+}
+
+.peerinfo-stats b {
+    color: var(--ink);
+    font-weight: 700;
+}
+
+.peerinfo-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.peerinfo-section-head {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(var(--ink-rgb), 0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.peerinfo-media-empty {
+    padding: 20px 0;
+    text-align: center;
+    color: rgba(var(--ink-rgb), 0.45);
+    font-size: 13px;
+    border-radius: var(--radius-md);
+    background: var(--surface-hover);
+}
+
+/* Сетка медиа переписки — как сетка контента коробки, плотный режим. */
+.peerinfo-media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 6px;
+}
+
+.peerinfo-media-tile {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    border: 1px solid rgba(var(--ink-rgb), 0.1);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: rgba(var(--glass-rgb), 0.03);
+    cursor: zoom-in;
+    transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.peerinfo-media-tile:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md, 0 8px 24px rgba(0, 0, 0, 0.18));
+}
+
+.peerinfo-media-tile img,
+.peerinfo-media-tile video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.peerinfo-media-play {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(8, 8, 8, 0.55);
+    color: #fff;
+    font-size: 11px;
+    pointer-events: none;
+}
+
+.peerinfo-profile-btn {
+    flex-shrink: 0;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: var(--accent);
+    color: var(--accent-contrast, #fff);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.14s ease;
+}
+
+.peerinfo-profile-btn:hover {
+    background: var(--accent-hover, var(--accent));
+}
