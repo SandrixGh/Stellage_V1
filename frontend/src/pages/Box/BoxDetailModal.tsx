@@ -7,6 +7,8 @@ import { AssetViewer } from "../../components/Stellage/AssetViewer";
 import { AssetLightbox } from "../../components/Stellage/AssetLightbox";
 import { LikeButton } from "../../components/Stellage/LikeButton";
 import { Select } from "../../components/UI/Select";
+import { UserPicker } from "../../components/UI/UserPicker";
+import type { PublicUser } from "../../types/Profile/profile";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
 import { rarityKey } from "../../utils/rarity";
@@ -90,9 +92,9 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
     // Проигрывается разовая анимация вскрытия — контент раскрываем после неё.
     const [unsealing, setUnsealing] = useState(false);
-    // Диалог дарения: открыт ли, введённый username получателя, ошибка.
+    // Диалог дарения: открыт ли, выбранный получатель, ошибка.
     const [giftOpen, setGiftOpen] = useState(false);
-    const [giftUsername, setGiftUsername] = useState("");
+    const [giftRecipient, setGiftRecipient] = useState<PublicUser | null>(null);
     const [giftError, setGiftError] = useState<string | null>(null);
 
     // Поля формы редактирования.
@@ -114,7 +116,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
         setLightboxIndex(null);
         setUnsealing(false);
         setGiftOpen(false);
-        setGiftUsername("");
+        setGiftRecipient(null);
         setGiftError(null);
     }, [box]);
 
@@ -218,7 +220,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     };
 
     const handleGift = async () => {
-        const uname = giftUsername.trim().replace(/^@/, "");
+        const uname = giftRecipient?.username;
         if (!uname || busy) return;
         setBusy(true);
         setGiftError(null);
@@ -227,7 +229,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
         if (ok) {
             onClose();
         } else {
-            setGiftError("Не удалось подарить: проверьте username получателя.");
+            setGiftError("Не удалось подарить: попробуйте выбрать получателя заново.");
         }
     };
 
@@ -457,22 +459,17 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                                             исчезнет из вашего инвентаря. Действие необратимо.
                                         </p>
                                         <div className="box-modal-gift-row">
-                                            <input
-                                                className="box-modal-input"
-                                                type="text"
-                                                value={giftUsername}
-                                                placeholder="username получателя"
-                                                maxLength={30}
-                                                onChange={(e) => setGiftUsername(e.target.value)}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === "Enter") handleGift();
-                                                }}
+                                            <UserPicker
+                                                value={giftRecipient}
+                                                onSelect={setGiftRecipient}
+                                                excludeUserId={user?.id}
+                                                placeholder="Найдите получателя по имени или @юзернейму"
                                             />
                                             <button
                                                 type="button"
                                                 className="box-modal-btn primary"
                                                 onClick={handleGift}
-                                                disabled={busy || !giftUsername.trim()}
+                                                disabled={busy || !giftRecipient}
                                             >
                                                 {busy ? "Дарим…" : "Подтвердить"}
                                             </button>
