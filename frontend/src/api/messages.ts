@@ -110,17 +110,30 @@ export async function getConversations(): Promise<ConversationPreview[]> {
 }
 
 /**
- * Лента диалога с пользователем. before (ISO created_at) — курсор для догрузки
- * истории вверх; без before открытие помечает входящие прочитанными.
+ * Лента диалога с пользователем. Чистое чтение (прочтение не трогает — для этого
+ * есть markConversationRead). before/beforeId — keyset-курсор догрузки истории
+ * вверх: created_at и id последнего показанного сообщения (оба нужны, иначе
+ * сообщения с совпавшей меткой времени теряются на границе страниц).
  */
 export async function getConversation(
     username: string,
     before?: string,
+    beforeId?: string,
 ): Promise<MessageItem[]> {
+    const params: Record<string, string> = {};
+    if (before) {
+        params.before = before;
+        if (beforeId) params.before_id = beforeId;
+    }
     const res = await api.get<MessageItem[]>(`/messages/with/${username}`, {
-        params: before ? { before } : undefined,
+        params: Object.keys(params).length ? params : undefined,
     });
     return res.data;
+}
+
+/** Пометить входящие от собеседника прочитанными (при открытии/фокусе диалога). */
+export async function markConversationRead(username: string): Promise<void> {
+    await api.post(`/messages/with/${username}/read`);
 }
 
 /** Число непрочитанных сообщений (для бейджа в шапке). */

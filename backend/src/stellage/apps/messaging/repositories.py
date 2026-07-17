@@ -3,7 +3,7 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import select, func, update, delete, or_, and_, case
+from sqlalchemy import select, func, update, delete, or_, and_, case, tuple_
 
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.enums.asset_kind import AssetKindEnum
@@ -53,7 +53,8 @@ class MessageRepository:
         """Создаёт «черновик» сообщения-вложения с заранее известным id (он входит
         в S3-ключ). Помечается прочитанным до complete (is_read=True), чтобы
         недозагруженное вложение не светилось получателю как непрочитанное;
-        complete переведёт в непрочитанное."""
+        complete переведёт в непрочитанное. attachment_pending=True — маркер
+        неподтверждённого черновика для идемпотентного complete."""
         async with self.db.db_session() as session:
             msg = Message(
                 id=message_id,
@@ -62,6 +63,7 @@ class MessageRepository:
                 text=None,
                 kind=MessageKindEnum.TEXT,
                 is_read=True,
+                attachment_pending=True,
                 asset_key=asset_key,
                 asset_mime=asset_mime,
                 asset_kind=asset_kind,
@@ -80,12 +82,19 @@ class MessageRepository:
         caption: str | None,
     ) -> Message | None:
         """Завершает черновик вложения: выставляет caption и делает сообщение
-        непрочитанным для получателя. Фильтр по sender_id — только своё."""
+        непрочитанным для получателя. Идемпотентно: финализирует ТОЛЬКО ещё
+        pending-черновик (attachment_pending=True) и снимает флаг. Повторный
+        вызов не найдёт pending-строку и вернёт None — уведомление и сброс
+        is_read не повторятся. Фильтр по sender_id — только своё."""
         async with self.db.db_session() as session:
             stmt = (
                 update(Message)
-                .where(Message.id == message_id, Message.sender_id == sender_id)
-                .values(text=caption, is_read=False)
+                .where(
+                    Message.id == message_id,
+                    Message.sender_id == sender_id,
+                    Message.attachment_pending.is_(True),
+                )
+                .values(text=caption, is_read=False, attachment_pending=False)
                 .returning(Message)
             )
             result = await session.execute(stmt)
@@ -162,10 +171,13 @@ class MessageRepository:
         partner_id: uuid.UUID,
         limit: int = 40,
         before: datetime.datetime | None = None,
+        before_id: uuid.UUID | None = None,
     ) -> list[Message]:
-        """Страница ленты диалога, старые сверху. before — курсор по created_at
-        для догрузки истории (сообщения строго раньше before). Берём последние
-        limit сообщений до курсора."""
+        """Страница ленты диалога, старые сверху. Курсор keyset по составному
+        ключу (created_at, id) — берём сообщения строго «раньше» курсора в этом
+        порядке. Составной ключ, а не только created_at, чтобы совпадающие метки
+        времени (gift + текст в одной транзакции) не терялись и не дублировались
+        на границе страниц. Тянем последние limit до курсора, затем разворачиваем."""
         async with self.db.db_session() as session:
             conditions = [
                 or_(
@@ -180,13 +192,21 @@ class MessageRepository:
                 )
             ]
             if before is not None:
-                conditions.append(Message.created_at < before)
+                if before_id is not None:
+                    # Строгое сравнение кортежей: (created_at, id) < (before, before_id).
+                    conditions.append(
+                        tuple_(Message.created_at, Message.id)
+                        < tuple_(before, before_id)
+                    )
+                else:
+                    # Обратная совместимость: курсор только по времени.
+                    conditions.append(Message.created_at < before)
 
             # Тянем последние limit сообщений (новые), потом разворачиваем.
             stmt = (
                 select(Message)
                 .where(*conditions)
-                .order_by(Message.created_at.desc())
+                .order_by(Message.created_at.desc(), Message.id.desc())
                 .limit(limit)
             )
             rows = list((await session.execute(stmt)).scalars())
@@ -196,10 +216,16 @@ class MessageRepository:
     async def list_conversations(
         self,
         user_id: uuid.UUID,
+        limit: int = 100,
     ) -> list[tuple[User, str | None, MessageKindEnum, AssetKindEnum | None, datetime.datetime, int]]:
         """Список диалогов: собеседник, текст/тип последнего сообщения, его время
         и число непрочитанных. Текст может быть None (вложение/подарок) — фронт
-        покажет заглушку по kind/asset_kind."""
+        покажет заглушку по kind/asset_kind.
+
+        Последнее сообщение диалога выбираем через DISTINCT ON (partner_id) с
+        tie-break по (created_at DESC, id DESC): ровно одна строка на диалог даже
+        когда у двух сообщений совпал created_at (иначе join по времени плодил
+        дубли диалогов). limit защищает от пользователя с тысячами диалогов."""
         async with self.db.db_session() as session:
             partner_id = case(
                 (Message.sender_id == user_id, Message.recipient_id),
@@ -209,6 +235,7 @@ class MessageRepository:
             base = (
                 select(
                     partner_id,
+                    Message.id.label("msg_id"),
                     Message.text,
                     Message.kind,
                     Message.asset_kind,
@@ -224,12 +251,21 @@ class MessageRepository:
                 )
             ).subquery()
 
-            last_at = (
+            # Последнее сообщение каждого диалога — одна строка на partner_id.
+            last = (
                 select(
                     base.c.partner_id,
-                    func.max(base.c.created_at).label("last_at"),
+                    base.c.text,
+                    base.c.kind,
+                    base.c.asset_kind,
+                    base.c.created_at,
                 )
-                .group_by(base.c.partner_id)
+                .distinct(base.c.partner_id)
+                .order_by(
+                    base.c.partner_id,
+                    base.c.created_at.desc(),
+                    base.c.msg_id.desc(),
+                )
                 .subquery()
             )
 
@@ -249,17 +285,16 @@ class MessageRepository:
             stmt = (
                 select(
                     User,
-                    base.c.text,
-                    base.c.kind,
-                    base.c.asset_kind,
-                    base.c.created_at,
+                    last.c.text,
+                    last.c.kind,
+                    last.c.asset_kind,
+                    last.c.created_at,
                     func.coalesce(unread.c.unread, 0),
                 )
-                .join(last_at, last_at.c.partner_id == base.c.partner_id)
-                .join(User, User.id == base.c.partner_id)
-                .outerjoin(unread, unread.c.partner_id == base.c.partner_id)
-                .where(base.c.created_at == last_at.c.last_at)
-                .order_by(base.c.created_at.desc())
+                .join(User, User.id == last.c.partner_id)
+                .outerjoin(unread, unread.c.partner_id == last.c.partner_id)
+                .order_by(last.c.created_at.desc())
+                .limit(limit)
             )
             rows = (await session.execute(stmt)).all()
             return [(r[0], r[1], r[2], r[3], r[4], r[5]) for r in rows]
@@ -290,6 +325,24 @@ class MessageRepository:
             if row is None:
                 return None
             return row[0], row[1]
+
+    async def gift_box_meta_many(
+        self,
+        instance_ids: list[uuid.UUID],
+    ) -> dict[uuid.UUID, tuple[str | None, str | None]]:
+        """(title, rarity) сразу по нескольким экземплярам — один запрос вместо
+        N вызовов gift_box_meta при сериализации страницы ленты. Отсутствующие
+        (удалённые) экземпляры в результат не попадут."""
+        if not instance_ids:
+            return {}
+        async with self.db.db_session() as session:
+            stmt = (
+                select(BoxInstance.id, BoxTemplate.title, BoxTemplate.rarity)
+                .join(BoxInstance, BoxInstance.template_id == BoxTemplate.id)
+                .where(BoxInstance.id.in_(instance_ids))
+            )
+            rows = (await session.execute(stmt)).all()
+            return {r[0]: (r[1], r[2]) for r in rows}
 
     async def mark_read(
         self,

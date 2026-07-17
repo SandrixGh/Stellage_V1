@@ -1,3 +1,4 @@
+import datetime
 import logging
 import urllib.parse
 import uuid
@@ -54,32 +55,70 @@ class MessageService:
         self.notifications = notifications
         self.s3 = s3
 
-    async def _public_user(self, user) -> PublicUser:
+    async def _public_user(self, user, client=None) -> PublicUser:
         pub = PublicUser.model_validate(user)
         if user.avatar_key:
-            pub.avatar_url = await self.avatar_manager.get_avatar_url(
-                avatar_key=user.avatar_key,
-            )
+            if client is not None:
+                pub.avatar_url = await self.avatar_manager.presign_avatar(
+                    client, user.avatar_key,
+                )
+            else:
+                pub.avatar_url = await self.avatar_manager.get_avatar_url(
+                    avatar_key=user.avatar_key,
+                )
         return pub
 
-    async def _asset_url(self, msg: Message) -> str | None:
-        """Короткоживущая presigned GET-ссылка на вложение сообщения."""
+    async def _presign_get(self, client, msg: Message) -> str | None:
+        """Presigned GET на вложение через УЖЕ ОТКРЫТЫЙ signing-клиент — чтобы на
+        страницу ленты открывать клиент один раз, а не на каждое сообщение."""
         if not msg.asset_key:
             return None
         expires_in = settings.s3_settings.download_url_expire_seconds
         disposition = urllib.parse.quote(msg.asset_name or "file")
+        return await client.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": self.s3.bucket,
+                "Key": msg.asset_key,
+                "ResponseContentType": msg.asset_mime,
+                "ResponseContentDisposition":
+                    f"inline; filename*=UTF-8''{disposition}",
+            },
+            ExpiresIn=expires_in,
+        )
+
+    async def _asset_url(self, msg: Message) -> str | None:
+        """Короткоживущая presigned GET-ссылка на вложение одного сообщения
+        (для точечных вызовов — send/edit/complete)."""
+        if not msg.asset_key:
+            return None
         async with self.s3.get_signing_client() as client:
-            return await client.generate_presigned_url(
-                "get_object",
-                Params={
-                    "Bucket": self.s3.bucket,
-                    "Key": msg.asset_key,
-                    "ResponseContentType": msg.asset_mime,
-                    "ResponseContentDisposition":
-                        f"inline; filename*=UTF-8''{disposition}",
-                },
-                ExpiresIn=expires_in,
-            )
+            return await self._presign_get(client, msg)
+
+    def _build_read(
+        self,
+        msg: Message,
+        viewer_id: uuid.UUID,
+        asset_url: str | None,
+        gift_title: str | None,
+        gift_rarity: str | None,
+    ) -> MessageRead:
+        return MessageRead(
+            id=msg.id,
+            kind=msg.kind,
+            text=msg.text,
+            is_read=msg.is_read,
+            is_mine=msg.sender_id == viewer_id,
+            created_at=msg.created_at,
+            edited=msg.edited_at is not None,
+            asset_url=asset_url,
+            asset_kind=msg.asset_kind,
+            asset_mime=msg.asset_mime,
+            asset_name=msg.asset_name,
+            gift_instance_id=msg.gift_instance_id,
+            gift_box_title=gift_title,
+            gift_box_rarity=gift_rarity,
+        )
 
     async def _to_read(self, msg: Message, viewer_id: uuid.UUID) -> MessageRead:
         gift_title = None
@@ -90,22 +129,51 @@ class MessageService:
             )
             if meta is not None:
                 gift_title, gift_rarity = meta
-        return MessageRead(
-            id=msg.id,
-            kind=msg.kind,
-            text=msg.text,
-            is_read=msg.is_read,
-            is_mine=msg.sender_id == viewer_id,
-            created_at=msg.created_at,
-            edited=msg.edited_at is not None,
+        return self._build_read(
+            msg,
+            viewer_id=viewer_id,
             asset_url=await self._asset_url(msg),
-            asset_kind=msg.asset_kind,
-            asset_mime=msg.asset_mime,
-            asset_name=msg.asset_name,
-            gift_instance_id=msg.gift_instance_id,
-            gift_box_title=gift_title,
-            gift_box_rarity=gift_rarity,
+            gift_title=gift_title,
+            gift_rarity=gift_rarity,
         )
+
+    async def _to_read_many(
+        self,
+        msgs: list[Message],
+        viewer_id: uuid.UUID,
+    ) -> list[MessageRead]:
+        """Batch-сериализация страницы ленты без N+1: gift-мета одним запросом на
+        все подарки, presigned-ссылки — через один общий signing-клиент."""
+        if not msgs:
+            return []
+
+        # Gift-мета батчем: один SQL на все подаренные экземпляры страницы.
+        gift_ids = [
+            m.gift_instance_id
+            for m in msgs
+            if m.kind == MessageKindEnum.GIFT and m.gift_instance_id
+        ]
+        gift_meta: dict[uuid.UUID, tuple[str | None, str | None]] = (
+            await self.repository.gift_box_meta_many(instance_ids=gift_ids)
+            if gift_ids
+            else {}
+        )
+
+        has_assets = any(m.asset_key for m in msgs)
+        result: list[MessageRead] = []
+        if has_assets:
+            async with self.s3.get_signing_client() as client:
+                for m in msgs:
+                    asset_url = await self._presign_get(client, m)
+                    title, rarity = gift_meta.get(m.gift_instance_id, (None, None))
+                    result.append(
+                        self._build_read(m, viewer_id, asset_url, title, rarity)
+                    )
+        else:
+            for m in msgs:
+                title, rarity = gift_meta.get(m.gift_instance_id, (None, None))
+                result.append(self._build_read(m, viewer_id, None, title, rarity))
+        return result
 
     async def _require_recipient(self, sender_id: uuid.UUID, username: str):
         recipient = await self.profile_manager.get_user_by_username(username=username)
@@ -250,13 +318,18 @@ class MessageService:
             sender_id=sender.id,
             caption=data.caption,
         )
+        if finalized is None:
+            # Повторный complete по уже подтверждённому вложению — идемпотентно
+            # ничего не делаем (без дубля уведомления). Отдаём текущее состояние.
+            logger.info("message attachment already completed: message_id=%s", msg.id)
+            return await self._to_read(msg, viewer_id=sender.id)
         await self.notifications.notify(
             recipient_id=msg.recipient_id,
             actor_id=sender.id,
             type_=NotificationTypeEnum.MESSAGE,
         )
         logger.info("message attachment completed: message_id=%s", msg.id)
-        return await self._to_read(finalized or msg, viewer_id=sender.id)
+        return await self._to_read(finalized, viewer_id=sender.id)
 
     async def edit_message(
         self,
@@ -299,6 +372,13 @@ class MessageService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Message not found",
             )
+        if existing.kind == MessageKindEnum.GIFT:
+            # Карточка подарка фиксирует факт дарения в истории — её нельзя
+            # удалить (коробка уже передана, иначе факт дарения потерялся бы).
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Gift messages cannot be deleted",
+            )
         # Жёсткое удаление: строка исчезает у обоих. Сначала чистим вложение в S3.
         if existing.asset_key:
             async with self.s3.get_client() as client:
@@ -319,7 +399,11 @@ class MessageService:
         user: UserVerifySchema,
         username: str,
         before: str | None = None,
+        before_id: uuid.UUID | None = None,
     ) -> list[MessageRead]:
+        """Страница ленты диалога. Чистое чтение — прочтение НЕ трогаем (для этого
+        есть отдельный POST mark_conversation_read). Курсор keyset: before —
+        created_at, before_id — id последнего показанного сообщения."""
         partner = await self.profile_manager.get_user_by_username(username=username)
         if not partner:
             raise HTTPException(
@@ -328,9 +412,8 @@ class MessageService:
             )
         before_dt = None
         if before:
-            import datetime as _dt
             try:
-                before_dt = _dt.datetime.fromisoformat(before)
+                before_dt = datetime.datetime.fromisoformat(before)
             except ValueError:
                 before_dt = None
 
@@ -338,17 +421,29 @@ class MessageService:
             user_id=user.id,
             partner_id=partner.id,
             before=before_dt,
+            before_id=before_id if before_dt is not None else None,
         )
-        # Открытие диалога = прочтение входящих. При догрузке истории (before)
-        # не трогаем прочтение.
-        if before_dt is None:
-            await self.repository.mark_read(user_id=user.id, partner_id=partner.id)
-            await self.notifications.mark_read_from_actor(
-                recipient_id=user.id,
-                actor_id=partner.id,
-                type_=NotificationTypeEnum.MESSAGE,
+        return await self._to_read_many(rows, viewer_id=user.id)
+
+    async def mark_conversation_read(
+        self,
+        user: UserVerifySchema,
+        username: str,
+    ) -> None:
+        """Помечает входящие от собеседника прочитанными и гасит связанные
+        message-уведомления. Явный POST — GET ленты остаётся чистым чтением."""
+        partner = await self.profile_manager.get_user_by_username(username=username)
+        if not partner:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found",
             )
-        return [await self._to_read(m, viewer_id=user.id) for m in rows]
+        await self.repository.mark_read(user_id=user.id, partner_id=partner.id)
+        await self.notifications.mark_read_from_actor(
+            recipient_id=user.id,
+            actor_id=partner.id,
+            type_=NotificationTypeEnum.MESSAGE,
+        )
 
     async def list_conversations(
         self,
@@ -356,15 +451,30 @@ class MessageService:
     ) -> list[ConversationPreview]:
         rows = await self.repository.list_conversations(user_id=user.id)
         result: list[ConversationPreview] = []
-        for partner, last_text, kind, asset_kind, last_at, unread in rows:
-            result.append(
-                ConversationPreview(
-                    user=await self._public_user(partner),
-                    last_text=_preview_text(last_text, kind, asset_kind),
-                    last_at=last_at,
-                    unread=unread,
+        # Один signing-client на весь список — без N+1 presigned-аватаров.
+        has_avatars = any(partner.avatar_key for partner, *_ in rows)
+        client_ctx = self.s3.get_signing_client() if has_avatars else None
+        if client_ctx is not None:
+            async with client_ctx as client:
+                for partner, last_text, kind, asset_kind, last_at, unread in rows:
+                    result.append(
+                        ConversationPreview(
+                            user=await self._public_user(partner, client=client),
+                            last_text=_preview_text(last_text, kind, asset_kind),
+                            last_at=last_at,
+                            unread=unread,
+                        )
+                    )
+        else:
+            for partner, last_text, kind, asset_kind, last_at, unread in rows:
+                result.append(
+                    ConversationPreview(
+                        user=await self._public_user(partner),
+                        last_text=_preview_text(last_text, kind, asset_kind),
+                        last_at=last_at,
+                        unread=unread,
+                    )
                 )
-            )
         return result
 
     async def unread_count(self, user: UserVerifySchema) -> UnreadMessagesCount:

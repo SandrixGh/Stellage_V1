@@ -143,13 +143,18 @@ class AvatarManager:
 
     async def get_avatar_url(self, avatar_key: str) -> str:
         """Короткоживущая presigned GET-ссылка на аватар (аватар публичный)."""
-        expires_in = settings.s3_settings.download_url_expire_seconds
         async with self.s3.get_signing_client() as client:
-            return await client.generate_presigned_url(
-                "get_object",
-                Params={"Bucket": self.s3.bucket, "Key": avatar_key},
-                ExpiresIn=expires_in,
-            )
+            return await self.presign_avatar(client, avatar_key)
+
+    async def presign_avatar(self, client, avatar_key: str) -> str:
+        """Presigned GET на аватар через УЖЕ ОТКРЫТЫЙ signing-клиент — чтобы
+        списки (диалоги/подписчики) не открывали клиент на каждого пользователя."""
+        expires_in = settings.s3_settings.download_url_expire_seconds
+        return await client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": self.s3.bucket, "Key": avatar_key},
+            ExpiresIn=expires_in,
+        )
 
     async def _discard(self, client, key: str) -> None:
         try:

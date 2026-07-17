@@ -127,6 +127,26 @@ async def get_conversation(
     service: Annotated[MessageService, Depends(MessageService)],
     user: Annotated[UserVerifySchema, Depends(get_current_user)],
     before: str | None = None,
+    before_id: uuid.UUID | None = None,
 ) -> list[MessageRead]:
-    # Открытие диалога помечает входящие прочитанными; before — догрузка истории.
-    return await service.get_conversation(user=user, username=username, before=before)
+    # Чистое чтение ленты. before/before_id — keyset-курсор догрузки истории.
+    # Пометка прочтения — отдельным POST .../read (см. ниже).
+    return await service.get_conversation(
+        user=user,
+        username=username,
+        before=before,
+        before_id=before_id,
+    )
+
+
+@messaging_router.post(
+    path="/with/{username}/read",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def mark_conversation_read(
+    username: str,
+    service: Annotated[MessageService, Depends(MessageService)],
+    user: Annotated[UserVerifySchema, Depends(get_current_user)],
+) -> None:
+    # Явная пометка входящих прочитанными при открытии/фокусе диалога.
+    await service.mark_conversation_read(user=user, username=username)

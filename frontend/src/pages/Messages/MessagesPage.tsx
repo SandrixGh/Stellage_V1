@@ -5,6 +5,7 @@ import {
     editMessage,
     getConversation,
     getConversations,
+    markConversationRead,
     sendAttachment,
     sendMessage,
     type ConversationPreview,
@@ -145,6 +146,18 @@ export const MessagesPage = () => {
                 if (cancelled) return;
                 setMessages(m);
                 setHasMore(m.length >= PAGE_SIZE);
+                // Прочтение — отдельным запросом (GET ленты больше не мутирует БД).
+                markConversationRead(username)
+                    .then(() => {
+                        if (cancelled) return;
+                        // Локально гасим бейдж непрочитанного этого диалога.
+                        setConversations((prev) =>
+                            prev.map((c) =>
+                                c.user.username === username ? { ...c, unread: 0 } : c,
+                            ),
+                        );
+                    })
+                    .catch(() => {});
             })
             .catch(() => !cancelled && setMessages([]))
             .finally(() => !cancelled && setLoadingThread(false));
@@ -216,10 +229,11 @@ export const MessagesPage = () => {
         if (!username || loadingMore || messages.length === 0) return;
         setLoadingMore(true);
         const oldest = messages[0].created_at;
+        const oldestId = messages[0].id;
         const container = bodyRef.current;
         const prevHeight = container?.scrollHeight ?? 0;
         try {
-            const older = await getConversation(username, oldest);
+            const older = await getConversation(username, oldest, oldestId);
             setMessages((prev) => [...older, ...prev]);
             setHasMore(older.length >= PAGE_SIZE);
             requestAnimationFrame(() => {

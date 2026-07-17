@@ -80,6 +80,16 @@ class Message(IDMixin, TimestampMixin, Base):
     )
     asset_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     asset_size: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    # True между initiate и complete: черновик вложения ещё не подтверждён.
+    # complete финализирует только pending-черновик — повторный complete тогда
+    # ничего не делает (идемпотентно, без дубля уведомления и «воскрешения»
+    # прочитанного в непрочитанное).
+    attachment_pending: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        server_default="false",
+    )
 
     # ── Подарок (kind=GIFT) ──────────────────────────────────────────────────
     # Экземпляр подаренной коробки; SET NULL — карточка остаётся, если коробку
