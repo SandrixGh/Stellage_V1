@@ -31,15 +31,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-origins = [
-    "http://localhost:5173", 
-    "http://127.0.0.1:5173",
-    "http://172.18.0.1:5173",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    # Origin'ы берутся из настроек (CORS_ORIGINS в .env) + frontend_url —
+    # чтобы прод-домен не приходилось зашивать в код и не забыть добавить.
+    allow_origins=settings.cors_origins_list,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],

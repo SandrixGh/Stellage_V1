@@ -84,6 +84,19 @@ class AppSettings(BaseAppSettings):
     templates_dir: str = TEMPLATES_DIR
     frontend_url: str
 
+    # Разрешённые CORS-origin'ы. Задаётся в .env как строка через запятую
+    # (CORS_ORIGINS=https://app.example.com,https://www.example.com); дефолт —
+    # локальные dev-хосты. frontend_url добавляется автоматически (см. property
+    # ниже), чтобы прод-домен не забыть.
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://172.18.0.1:5173"
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        origins = [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+        if self.frontend_url and self.frontend_url not in origins:
+            origins.append(self.frontend_url)
+        return origins
+
     access_token_expire: int
     # Долгоживущий refresh-токен: пока он жив, короткий access молча
     # перевыпускается через POST /auth/refresh, поэтому пользователя не
