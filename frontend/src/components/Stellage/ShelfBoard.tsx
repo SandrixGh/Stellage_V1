@@ -234,10 +234,13 @@ export const ShelfBoard = ({
             {/* Коробки. */}
             {placed.map((p) => {
                 const isDragging = editable && drag?.id === p.box.id && drag.moved;
-                const rarityKey = p.box.template.rarity?.toLowerCase() ?? "";
+                // template может отсутствовать в неполном ответе — не роняем всю
+                // доску, показываем безопасные фолбэки.
+                const template = p.box.template;
+                const rarityKey = template?.rarity?.toLowerCase() ?? "";
                 // Тот же визуал, что в ленте (TemplateCard): цвет линий + свечение.
                 const { rarityGlow, boxColor } = resolveRarityVisual(
-                    p.box.template.rarity ?? "common"
+                    template?.rarity ?? "common"
                 );
                 const boardW = cellWidth * colCount;
                 const boardH = TOP_PADDING + rowCount * ROW_HEIGHT;
@@ -267,14 +270,14 @@ export const ShelfBoard = ({
                         </div>
                         <div className="shelf-box-label">
                             <span className="shelf-box-name">
-                                {p.box.template.title}
+                                {template?.title ?? "Коробка"}
                             </span>
                             <span className="shelf-box-tags">
                                 <span
                                     className={`shelf-box-rarity rarity-tag-${rarityKey}`}
                                     style={{ color: boxColor }}
                                 >
-                                    {p.box.template.rarity}
+                                    {template?.rarity}
                                 </span>
                                 {p.box.likes_count > 0 && (
                                     <span className="shelf-box-likes" title={`${p.box.likes_count} лайков`}>

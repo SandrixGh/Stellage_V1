@@ -72,7 +72,19 @@ export const BoxInstancePage = () => {
     }
 
     const { box, owner, is_owner } = view;
-    const { template } = box;
+    const template = box?.template;
+    // Гард: без коробки/шаблона/владельца рендерить нечего — показываем то же
+    // «не найдено», а не падаем на доступе к их полям (белый экран).
+    if (!box || !template || !owner) {
+        return (
+            <div className="box-page-missing">
+                <p>Коробка не найдена или скрыта.</p>
+                <button type="button" className="box-page-back" onClick={() => navigate(-1)}>
+                    ← Назад
+                </button>
+            </div>
+        );
+    }
     const key = rarityKey(template.rarity);
     const { rarityGlow: glow, boxColor } = resolveRarityVisual(template.rarity ?? "common");
     const contentText = typeof box.content?.text === "string" ? box.content.text : "";

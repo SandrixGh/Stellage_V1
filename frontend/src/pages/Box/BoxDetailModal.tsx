@@ -134,7 +134,9 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
         return () => window.removeEventListener("keydown", onKey);
     }, [current, onClose, lightboxIndex]);
 
-    if (!current) return null;
+    // Без коробки или её шаблона рендерить модалку нечем — не падаем на
+    // доступе к template.* (иначе краш всплывёт в ErrorBoundary).
+    if (!current || !current.template) return null;
 
     const { template } = current;
     const key = rarityKey(template.rarity);
