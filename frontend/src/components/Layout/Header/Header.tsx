@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../../store/useAuthStore";
-import { Avatar } from "../../UI/Avatar";
 import { NotificationBell } from "../../Notifications/NotificationBell";
 import { MessagesButton } from "../../Messages/MessagesButton";
+import { AccountMenu } from "./AccountMenu";
 import { getMyProfile } from "../../../api/profile";
 import "./Header.css";
 import { Logo } from "../../Logo/Logo";
@@ -16,7 +16,7 @@ const NAV_ITEMS = [
 ];
 
 export const Header = () => {
-    const { user, isAuthenticated } = useAuthStore();
+    const { isAuthenticated } = useAuthStore();
     const navigate = useNavigate();
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
@@ -59,22 +59,7 @@ export const Header = () => {
                         <>
                             <MessagesButton />
                             <NotificationBell />
-                            <NavLink
-                                to="/profile"
-                                className={({ isActive }) =>
-                                    `user-profile${isActive ? " active" : ""}`
-                                }
-                            >
-                                <Avatar
-                                    url={avatarUrl}
-                                    name={user?.nickname?.trim() || user?.email}
-                                    size={30}
-                                    className="header-avatar"
-                                />
-                                <span className="user-email">
-                                    {user?.username ? `@${user.username}` : user?.email}
-                                </span>
-                            </NavLink>
+                            <AccountMenu avatarUrl={avatarUrl} />
                             <NavLink
                                 to="/settings"
                                 aria-label="Настройки аккаунта"

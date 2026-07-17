@@ -3,6 +3,7 @@ import axios from "axios";
 import type { UserVerifySchema } from "../types/Auth/auth";
 import { api, setOnSessionExpired } from "../api/instance";
 import { useStellageStore } from "./useStellageStore";
+import { useAccountsStore } from "./useAccountsStore";
 
 interface AuthState {
     user: UserVerifySchema | null;
@@ -26,6 +27,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
             const res = await api.get<UserVerifySchema>("/auth/get-user");
             set({user: res.data, isAuthenticated: true, isInitialized: true});
+            // Запоминаем аккаунт для меню быстрого переключения.
+            useAccountsStore.getState().remember({
+                email: res.data.email,
+                username: res.data.username,
+                nickname: res.data.nickname,
+            });
         } catch (error) {
             // Only treat a real 401 (no/invalid session) as logged out.
             // Transient/network errors must not flip an authenticated user out.

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import './Auth.css';
 import { AuthCard } from "../../components/Auth/AuthCard";
@@ -7,7 +7,11 @@ import { AuthForm } from "../../components/Auth/AuthForm";
 import { AuthLayout } from "../../components/Auth/AuthLayout";
 
 export const LoginPage = () => {
-    const [email, setEmail] = useState("");
+    const location = useLocation();
+    // При переключении аккаунтов сюда приходит предзаполненный email.
+    const prefillEmail = (location.state as { prefillEmail?: string } | null)?.prefillEmail ?? "";
+
+    const [email, setEmail] = useState(prefillEmail);
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
