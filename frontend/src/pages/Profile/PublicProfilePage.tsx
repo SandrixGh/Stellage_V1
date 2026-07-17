@@ -10,7 +10,6 @@ import { FollowListModal } from "../../components/Profile/FollowListModal";
 import { useAuthStore } from "../../store/useAuthStore";
 import { getFollowCounts } from "../../api/social";
 import { onlineStatus, isOnline } from "../../utils/onlineStatus";
-import type { Box } from "../../types/Stellage/boxes";
 import type { PublicProfile } from "../../types/Profile/profile";
 import "./ProfilePage.css";
 
