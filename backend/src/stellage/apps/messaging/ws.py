@@ -89,18 +89,26 @@ async def messages_ws(
 
 
 async def _pump_redis_to_ws(pubsub, websocket: WebSocket) -> None:
-    """Пересылает сообщения Redis pub/sub клиенту как есть (payload уже JSON)."""
-    async for message in pubsub.listen():
-        if message is None or message.get("type") != "message":
-            continue
-        data = message.get("data")
-        if data is None:
-            continue
-        await websocket.send_text(data)
+    """Пересылает сообщения Redis pub/sub клиенту как есть (payload уже JSON).
+    Обрыв сокета — штатное завершение задачи."""
+    try:
+        async for message in pubsub.listen():
+            if message is None or message.get("type") != "message":
+                continue
+            data = message.get("data")
+            if data is None:
+                continue
+            await websocket.send_text(data)
+    except WebSocketDisconnect:
+        return
 
 
 async def _drain_ws(websocket: WebSocket) -> None:
     """Читаем входящие фреймы, чтобы детектить закрытие. Содержимое не важно —
-    клиент по сокету команд не шлёт (всё через HTTP)."""
-    while True:
-        await websocket.receive_text()
+    клиент по сокету команд не шлёт (всё через HTTP). Отключение клиента —
+    штатное завершение задачи, а не ошибка."""
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        return
