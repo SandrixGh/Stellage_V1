@@ -5,6 +5,12 @@
 sweeper cleanup_stale_assets, который добирает всё, что сорвалось: строки
 DELETING, ассеты удалённых коробок (instance_id IS NULL после SET NULL)
 и брошенные PENDING старше суток.
+
+Замечание по event-loop: каждая задача исполняется через asyncio.run(), т.е.
+в СВОЁМ event loop. Процессный engine приложения привязывается к первому
+loop'у и не переживает его закрытие, поэтому в воркере на каждый прогон
+создаётся локальный engine со своим пулом и обязательным dispose() в finally —
+это не утечка (пул честно закрывается), а требование модели «loop на задачу».
 """
 import asyncio
 import datetime
@@ -14,10 +20,11 @@ import uuid
 from botocore.exceptions import ClientError
 from celery import shared_task
 from sqlalchemy import and_, delete, or_, select
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from stellage.apps.boxes.assets.limits import PENDING_TTL_HOURS
-from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.core.core_dependencies.s3_dependency import S3Dependency
+from stellage.core.settings import settings
 from stellage.database.enums.asset_status import AssetStatusEnum
 from stellage.database.models import BoxAsset
 
@@ -25,14 +32,27 @@ from stellage.database.models import BoxAsset
 logger = logging.getLogger(__name__)
 
 
-async def _remove_assets(rows: list[tuple[uuid.UUID, str]]) -> int:
+def _new_session_factory() -> tuple[object, async_sessionmaker]:
+    """Локальный engine + фабрика сессий для одного прогона задачи. Engine
+    привязывается к текущему event loop asyncio.run() и диспозится в finally."""
+    engine = create_async_engine(
+        url=settings.db_settings.db_url,
+        echo=settings.db_settings.db_echo,
+        pool_pre_ping=True,
+    )
+    return engine, async_sessionmaker(bind=engine, expire_on_commit=False)
+
+
+async def _remove_assets(
+    session_factory: async_sessionmaker,
+    rows: list[tuple[uuid.UUID, str]],
+) -> int:
     """Удаляет объекты в S3 и затем их строки в БД. Отсутствие объекта в S3 —
     не ошибка (повторный запуск идемпотентен). Любой сбой оставляет строку
     на месте — её доберёт следующий проход sweeper'а."""
     if not rows:
         return 0
 
-    db = DBDependency()
     s3 = S3Dependency()
     removed = 0
 
@@ -44,7 +64,7 @@ async def _remove_assets(rows: list[tuple[uuid.UUID, str]]) -> int:
                 except ClientError:
                     pass
 
-                async with db.db_session() as session:
+                async with session_factory() as session:
                     await session.execute(
                         delete(BoxAsset).where(BoxAsset.id == asset_id)
                     )
@@ -61,18 +81,21 @@ async def _remove_assets(rows: list[tuple[uuid.UUID, str]]) -> int:
 
 
 async def _collect_and_remove_by_ids(asset_ids: list[uuid.UUID]) -> int:
-    db = DBDependency()
-    async with db.db_session() as session:
-        result = await session.execute(
-            select(BoxAsset.id, BoxAsset.s3_key)
-            .where(
-                BoxAsset.id.in_(asset_ids),
-                BoxAsset.status == AssetStatusEnum.DELETING,
+    engine, session_factory = _new_session_factory()
+    try:
+        async with session_factory() as session:
+            result = await session.execute(
+                select(BoxAsset.id, BoxAsset.s3_key)
+                .where(
+                    BoxAsset.id.in_(asset_ids),
+                    BoxAsset.status == AssetStatusEnum.DELETING,
+                )
             )
-        )
-        rows = [(row.id, row.s3_key) for row in result.fetchall()]
+            rows = [(row.id, row.s3_key) for row in result.fetchall()]
 
-    return await _remove_assets(rows)
+        return await _remove_assets(session_factory, rows)
+    finally:
+        await engine.dispose()
 
 
 async def _collect_and_remove_stale() -> int:
@@ -81,24 +104,27 @@ async def _collect_and_remove_stale() -> int:
         - datetime.timedelta(hours=PENDING_TTL_HOURS)
     )
 
-    db = DBDependency()
-    async with db.db_session() as session:
-        result = await session.execute(
-            select(BoxAsset.id, BoxAsset.s3_key)
-            .where(
-                or_(
-                    BoxAsset.status == AssetStatusEnum.DELETING,
-                    BoxAsset.instance_id.is_(None),
-                    and_(
-                        BoxAsset.status == AssetStatusEnum.PENDING,
-                        BoxAsset.created_at < cutoff,
-                    ),
+    engine, session_factory = _new_session_factory()
+    try:
+        async with session_factory() as session:
+            result = await session.execute(
+                select(BoxAsset.id, BoxAsset.s3_key)
+                .where(
+                    or_(
+                        BoxAsset.status == AssetStatusEnum.DELETING,
+                        BoxAsset.instance_id.is_(None),
+                        and_(
+                            BoxAsset.status == AssetStatusEnum.PENDING,
+                            BoxAsset.created_at < cutoff,
+                        ),
+                    )
                 )
             )
-        )
-        rows = [(row.id, row.s3_key) for row in result.fetchall()]
+            rows = [(row.id, row.s3_key) for row in result.fetchall()]
 
-    return await _remove_assets(rows)
+        return await _remove_assets(session_factory, rows)
+    finally:
+        await engine.dispose()
 
 
 @shared_task(

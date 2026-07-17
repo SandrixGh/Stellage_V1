@@ -7,6 +7,17 @@ from botocore.config import Config
 from stellage.core.settings import settings
 
 
+# aioboto3.Session и botocore.Config — процессные синглтоны (создаются один раз
+# при импорте), чтобы конструктор зависимости, вызываемый на каждый запрос, был
+# дешёвым. Сами клиенты по-прежнему открываются и закрываются на каждый вызов
+# get_client/get_signing_client через async with (это и есть их жизненный цикл).
+_session = aioboto3.Session()
+_config = Config(
+    signature_version="s3v4",
+    s3={"addressing_style": settings.s3_settings.s3_addressing_style},
+)
+
+
 class S3Dependency:
     """Асинхронные S3-клиенты поверх aioboto3 (по образцу RedisDependency).
 
@@ -18,11 +29,8 @@ class S3Dependency:
 
     def __init__(self) -> None:
         self._s3 = settings.s3_settings
-        self._session = aioboto3.Session()
-        self._config = Config(
-            signature_version="s3v4",
-            s3={"addressing_style": self._s3.s3_addressing_style},
-        )
+        self._session = _session
+        self._config = _config
 
     @property
     def bucket(self) -> str:
