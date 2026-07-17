@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getBoxView, type BoxPublicView } from "../../api/boxes";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
-import { AssetViewer } from "../../components/Stellage/AssetViewer";
-import { AssetLightbox } from "../../components/Stellage/AssetLightbox";
+import { ContentGrid } from "../../components/Stellage/ContentGrid";
 import { LikeButton } from "../../components/Stellage/LikeButton";
 import { Avatar } from "../../components/UI/Avatar";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -37,7 +36,6 @@ export const BoxInstancePage = () => {
     const [view, setView] = useState<BoxPublicView | null>(null);
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
-    const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
     useEffect(() => {
         if (!id) return;
@@ -170,24 +168,7 @@ export const BoxInstancePage = () => {
                     <p className="box-page-content-text">{contentText}</p>
                 )}
 
-                {assets.length > 0 && (
-                    <div className="box-page-gallery">
-                        {assets.map((asset, i) => (
-                            <button
-                                key={asset.id}
-                                type="button"
-                                className="box-page-media"
-                                onClick={() => setLightboxIndex(i)}
-                                aria-label={`Открыть «${asset.original_name}»`}
-                            >
-                                <AssetViewer asset={asset} />
-                                {asset.kind === "video" && (
-                                    <span className="box-page-media-play" aria-hidden="true">▶</span>
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                )}
+                {assets.length > 0 && <ContentGrid assets={assets} />}
 
                 {!contentText && assets.length === 0 && (
                     <p className="box-page-content-empty">
@@ -195,14 +176,6 @@ export const BoxInstancePage = () => {
                     </p>
                 )}
             </div>
-
-            {lightboxIndex !== null && assets.length > 0 && (
-                <AssetLightbox
-                    assets={assets}
-                    startIndex={lightboxIndex}
-                    onClose={() => setLightboxIndex(null)}
-                />
-            )}
         </div>
     );
 };
