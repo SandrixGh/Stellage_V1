@@ -47,15 +47,21 @@ class LikeRepository:
                 shelf_is_public=row.shelf_is_public,
             )
 
-    async def like(self, user_id: uuid.UUID, instance_id: uuid.UUID) -> None:
+    async def like(self, user_id: uuid.UUID, instance_id: uuid.UUID) -> bool:
+        """Ставит лайк идемпотентно. Возвращает True, только если строка реально
+        вставлена (лайк НОВЫЙ) — определяется атомарно по RETURNING после
+        ON CONFLICT DO NOTHING, без отдельного чтения is_liked (иначе гонка двух
+        лайков слала бы два уведомления)."""
         async with self.db.db_session() as session:
             stmt = (
                 pg_insert(BoxLike)
                 .values(user_id=user_id, instance_id=instance_id)
                 .on_conflict_do_nothing(constraint="uq_box_like_pair")
+                .returning(BoxLike.id)
             )
-            await session.execute(stmt)
+            inserted = (await session.execute(stmt)).scalar_one_or_none()
             await session.commit()
+            return inserted is not None
 
     async def unlike(self, user_id: uuid.UUID, instance_id: uuid.UUID) -> None:
         async with self.db.db_session() as session:

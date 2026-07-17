@@ -183,14 +183,24 @@ async def create_box(
         ),
         creator_id=user.id,
     )
-    return await instance_service.create_instance(
-        user=user,
-        data=BoxInstanceCreate(
+    # Шаблон и экземпляр создаются разными транзакциями (репозитории коммитят
+    # каждый сам). Если создание экземпляра сорвётся, компенсируем — удаляем
+    # только что созданный шаблон, чтобы не оставлять orphan в каталоге.
+    try:
+        return await instance_service.create_instance(
+            user=user,
+            data=BoxInstanceCreate(
+                template_id=template.id,
+                shelf_id=None,
+                content=data.content,
+            ),
+        )
+    except Exception:
+        await template_service.delete_template(
             template_id=template.id,
-            shelf_id=None,
-            content=data.content,
-        ),
-    )
+            creator_id=user.id,
+        )
+        raise
 
 
 @router.patch(

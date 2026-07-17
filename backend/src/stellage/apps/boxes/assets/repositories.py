@@ -2,7 +2,7 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import delete, func, insert, select, update
+from sqlalchemy import bindparam, delete, func, insert, select, text, update
 
 from stellage.apps.boxes.assets.schemas import (
     BoxAssetInternal,
@@ -103,7 +103,7 @@ class BoxAssetRepository:
             result = await session.execute(query)
             return result.scalar_one()
 
-    async def create_pending(
+    async def reserve_pending_slot(
         self,
         asset_id: uuid.UUID,
         owner_id: uuid.UUID,
@@ -113,11 +113,45 @@ class BoxAssetRepository:
         mime: str,
         size_bytes: int,
         original_name: str,
-    ) -> None:
+        max_assets_per_box: int,
+        max_user_storage_bytes: int,
+    ) -> str:
+        """Атомарно (в одной транзакции под advisory-lock по владельцу) проверяет
+        лимит числа ассетов коробки и квоту хранилища, затем создаёт PENDING-
+        запись. Advisory-lock сериализует параллельные аплоады одного владельца,
+        закрывая TOCTOU между проверкой и вставкой. Возвращает: "ok" | "too_many"
+        | "quota"."""
         async with self.db.db_session() as session:
-            query = (
-                insert(self.model)
-                .values(
+            # Транзакционный advisory lock по владельцу: снимается на commit/rollback.
+            await session.execute(
+                text("SELECT pg_advisory_xact_lock(hashtextextended(:k, 0))")
+                .bindparams(bindparam("k", f"asset_upload:{owner_id}")),
+            )
+
+            active_count = (
+                await session.execute(
+                    select(func.count(self.model.id)).where(
+                        self.model.instance_id == instance_id,
+                        self.model.status != AssetStatusEnum.DELETING,
+                    )
+                )
+            ).scalar_one()
+            if active_count >= max_assets_per_box:
+                return "too_many"
+
+            used_bytes = (
+                await session.execute(
+                    select(func.coalesce(func.sum(self.model.size_bytes), 0)).where(
+                        self.model.owner_id == owner_id,
+                        self.model.status != AssetStatusEnum.DELETING,
+                    )
+                )
+            ).scalar_one()
+            if used_bytes + size_bytes > max_user_storage_bytes:
+                return "quota"
+
+            await session.execute(
+                insert(self.model).values(
                     id=asset_id,
                     owner_id=owner_id,
                     instance_id=instance_id,
@@ -129,8 +163,8 @@ class BoxAssetRepository:
                     status=AssetStatusEnum.PENDING,
                 )
             )
-            await session.execute(query)
             await session.commit()
+            return "ok"
 
     async def get_owned_asset(
         self,

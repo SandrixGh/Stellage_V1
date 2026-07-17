@@ -299,18 +299,19 @@ class InstanceManager:
             instance_id=instance_id,
         )
 
-        # До удаления коробки помечаем её ассеты DELETING и ставим задачу
-        # на удаление объектов из S3. FK SET NULL сохранит строки ассетов,
-        # так что даже сорвавшуюся задачу доберёт часовой sweeper.
+        # Порядок важен: физическое удаление объектов в S3 ставим в очередь
+        # ТОЛЬКО после успешного удаления коробки. Иначе (если задача уходила
+        # до commit'а) сбой delete_box_instance оставлял бы «живую» коробку с
+        # уже безвозвратно удалёнными из S3 ассетами.
+        # 1) Помечаем ассеты DELETING (данные пока целы; FK SET NULL сохранит
+        #    строки — их подхватит sweeper, даже если что-то сорвётся).
         asset_ids = await self.asset_repository.mark_deleting_for_instance(
             instance_id=instance_id,
             owner_id=user_id,
         )
-        if asset_ids:
-            delete_asset_objects.delay(
-                [str(asset_id) for asset_id in asset_ids]
-            )
 
+        # 2) Удаляем саму коробку. Упадёт здесь — объекты в S3 ещё на месте,
+        #    ассеты можно вернуть в READY; ничего не потеряно.
         await self.repository.delete_box_instance(
             user_id=user_id,
             instance_id=instance_id,
@@ -320,3 +321,9 @@ class InstanceManager:
             user_id=user_id,
             instance_id=instance_id,
         )
+
+        # 3) Коробки уже нет — теперь безопасно чистить объекты в S3.
+        if asset_ids:
+            delete_asset_objects.delay(
+                [str(asset_id) for asset_id in asset_ids]
+            )

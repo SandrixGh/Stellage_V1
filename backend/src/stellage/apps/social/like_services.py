@@ -49,10 +49,10 @@ class LikeService:
         instance_id: uuid.UUID,
     ) -> LikeActionResult:
         access = await self._require_visible_box(instance_id=instance_id, viewer=user)
-        # Уведомляем владельца только о НОВОМ лайке (не о повторном).
-        already = await self.repository.is_liked(user_id=user.id, instance_id=instance_id)
-        await self.repository.like(user_id=user.id, instance_id=instance_id)
-        if not already:
+        # Новизна лайка определяется самим insert (RETURNING) атомарно —
+        # уведомление владельцу уходит ровно один раз даже при гонке двух лайков.
+        is_new = await self.repository.like(user_id=user.id, instance_id=instance_id)
+        if is_new:
             await self.notifications.notify(
                 recipient_id=access.owner_id,
                 actor_id=user.id,

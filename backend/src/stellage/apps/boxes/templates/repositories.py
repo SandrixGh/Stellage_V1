@@ -103,6 +103,24 @@ class BoxTemplateRepository:
             return BoxTemplateReturn.model_validate(template)
 
 
+    async def delete_template(
+        self,
+        template_id: uuid.UUID,
+        creator_id: uuid.UUID,
+    ) -> None:
+        """Удаляет свой шаблон (по creator_id). Используется как компенсация,
+        когда создание экземпляра под только что созданным шаблоном сорвалось —
+        чтобы не оставлять orphan-шаблон в каталоге."""
+        async with self.db.db_session() as session:
+            await session.execute(
+                delete(self.template_model).where(
+                    self.template_model.id == template_id,
+                    self.template_model.creator_id == creator_id,
+                )
+            )
+            await session.commit()
+
+
     async def get_templates(
         self,
     ) -> list[BoxTemplateReturn]:

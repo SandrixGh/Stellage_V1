@@ -99,21 +99,6 @@ class AssetManager:
                 detail=f"File too large: limit is {max_bytes} bytes",
             )
 
-        if await self.repository.count_active_for_instance(
-            instance_id=data.instance_id,
-        ) >= MAX_ASSETS_PER_BOX:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"Box already has {MAX_ASSETS_PER_BOX} assets",
-            )
-
-        used_bytes = await self.repository.sum_bytes_for_owner(owner_id=user_id)
-        if used_bytes + data.size_bytes > MAX_USER_STORAGE_BYTES:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Storage quota exceeded",
-            )
-
         # Ключ полностью серверный: клиентское имя файла в него не попадает.
         asset_id = uuid.uuid4()
         s3_key = (
@@ -121,7 +106,10 @@ class AssetManager:
             f"{asset_id}{MIME_EXTENSIONS[data.mime]}"
         )
 
-        await self.repository.create_pending(
+        # Лимит числа ассетов + квота проверяются и запись создаётся в ОДНОЙ
+        # транзакции под advisory-lock по владельцу — параллельные аплоады
+        # больше не пробивают лимиты через TOCTOU.
+        outcome = await self.repository.reserve_pending_slot(
             asset_id=asset_id,
             owner_id=user_id,
             instance_id=data.instance_id,
@@ -130,7 +118,19 @@ class AssetManager:
             mime=data.mime,
             size_bytes=data.size_bytes,
             original_name=sanitize_filename(data.original_name),
+            max_assets_per_box=MAX_ASSETS_PER_BOX,
+            max_user_storage_bytes=MAX_USER_STORAGE_BYTES,
         )
+        if outcome == "too_many":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Box already has {MAX_ASSETS_PER_BOX} assets",
+            )
+        if outcome == "quota":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Storage quota exceeded",
+            )
 
         expires_in = settings.s3_settings.upload_url_expire_seconds
         async with self.s3.get_signing_client() as client:

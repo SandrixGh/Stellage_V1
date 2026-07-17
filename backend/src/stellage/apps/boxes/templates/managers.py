@@ -47,6 +47,17 @@ class TemplateManager:
         )
 
 
+    async def delete_template(
+        self,
+        template_id: uuid.UUID,
+        creator_id: uuid.UUID,
+    ) -> None:
+        return await self.repository.delete_template(
+            template_id=template_id,
+            creator_id=creator_id,
+        )
+
+
     async def get_templates(
         self
     ) -> list[BoxTemplateReturn]:
