@@ -1,7 +1,7 @@
 import uuid
 from typing import Annotated, Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from starlette import status
 
 from stellage.apps.auth.depends import get_current_user, get_optional_current_user
@@ -44,9 +44,11 @@ async def get_box_instances(
     service: Annotated[
         InstanceService,
         Depends(InstanceService),
-    ]
+    ],
+    limit: Annotated[int, Query(ge=1, le=200)] = 200,
+    offset: Annotated[int, Query(ge=0)] = 0,
 ) -> list[BoxInstanceWithTemplate]:
-    return await service.get_instances(user=user)
+    return await service.get_instances(user=user, limit=limit, offset=offset)
 
 
 @router.get(

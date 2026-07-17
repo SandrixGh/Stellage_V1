@@ -124,9 +124,13 @@ class InstanceService:
     async def get_instances(
         self,
         user: UserVerifySchema,
+        limit: int = 200,
+        offset: int = 0,
     ) -> list[BoxInstanceWithTemplate]:
         return await self.manager.get_instances(
             user_id=user.id,
+            limit=limit,
+            offset=offset,
         )
 
 

@@ -434,8 +434,13 @@ class BoxInstanceRepository:
 
     async def get_box_instances(
         self,
-        user_id: uuid.UUID
+        user_id: uuid.UUID,
+        limit: int = 200,
+        offset: int = 0,
     ) -> list[BoxInstanceWithTemplate]:
+        # LIMIT/OFFSET: большой инвентарь не тянем целиком одним запросом и
+        # тяжёлым payload'ом. Стабильный порядок по created_at,id — чтобы
+        # страницы не «прыгали».
         async with self.db.db_session() as session:
             query = (
                 select(self.instance_model)
@@ -444,6 +449,12 @@ class BoxInstanceRepository:
                     joinedload(self.instance_model.template),
                     self._ready_assets_loader(),
                 )
+                .order_by(
+                    self.instance_model.created_at.desc(),
+                    self.instance_model.id.desc(),
+                )
+                .limit(limit)
+                .offset(offset)
             )
 
             result = await session.execute(query)

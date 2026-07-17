@@ -265,9 +265,13 @@ class InstanceManager:
     async def get_instances(
         self,
         user_id: uuid.UUID,
+        limit: int = 200,
+        offset: int = 0,
     ) -> list[BoxInstanceWithTemplate]:
         return await self.repository.get_box_instances(
             user_id=user_id,
+            limit=limit,
+            offset=offset,
         )
 
 
