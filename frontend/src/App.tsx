@@ -25,6 +25,7 @@ import { BoxDetailPage } from "./pages/Box/BoxDetailPage";
 import { BoxInstancePage } from "./pages/Box/BoxInstancePage";
 import { MessagesPage } from "./pages/Messages/MessagesPage";
 import { PublicShelfPage } from "./pages/Stellage/PublicShelfPage";
+import { ProtectedRoute } from "./components/Auth/ProtectedRoute";
 
 function App() {
   const { getUser, isInitialized, isAuthenticated } = useAuthStore();
@@ -64,8 +65,11 @@ function App() {
       />
       <Route path="/auth/register_confirm" element={<RegisterConfirmPage />} />
 
-      {/* App shell — publicly accessible */}
+      {/* App shell. Внутри — публичные страницы (лента, каталог, публичные
+          профили/полки) и приватные под ProtectedRoute (инвентарь, создание,
+          свой профиль/стеллаж, сообщения, настройки). */}
       <Route element={<AppLayout />}>
+        {/* ── Публичные ── */}
         {/* Главная теперь и есть лента. */}
         <Route path="/" element={<FeedPage />} />
         <Route path="/feed" element={<Navigate to="/" replace />} />
@@ -74,15 +78,19 @@ function App() {
         <Route path="/box/instance/:id" element={<BoxInstancePage />} />
         <Route path="/box/:id" element={<BoxDetailPage />} />
         <Route path="/search" element={<SearchPage />} />
-        <Route path="/inventory" element={<InventoryPage />} />
-        <Route path="/create-box" element={<CreateBoxPage />} />
-        <Route path="/my-stellage" element={<MyStellagePage />} />
         <Route path="/stellage/:shelfId" element={<PublicShelfPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/messages" element={<MessagesPage />} />
-        <Route path="/messages/:username" element={<MessagesPage />} />
         <Route path="/u/:username" element={<PublicProfilePage />} />
-        <Route path="/settings" element={<SettingsPage />} />
+
+        {/* ── Приватные (только для авторизованных) ── */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/inventory" element={<InventoryPage />} />
+          <Route path="/create-box" element={<CreateBoxPage />} />
+          <Route path="/my-stellage" element={<MyStellagePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/messages/:username" element={<MessagesPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

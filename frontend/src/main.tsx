@@ -8,11 +8,14 @@ import './styles/index.css'
 // first paint, so there's no flash of the wrong theme on load.
 import './store/useThemeStore';
 import App from './App.tsx'
+import { ErrorBoundary } from './components/UI/ErrorBoundary';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
     </BrowserRouter>
   </StrictMode>,
 )
