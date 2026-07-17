@@ -1,3 +1,4 @@
+import datetime
 import uuid
 from typing import Annotated
 
@@ -33,6 +34,61 @@ class NotificationRepository:
                     instance_id=instance_id,
                 )
             )
+            await session.commit()
+
+    async def bump_or_create_message(
+        self,
+        recipient_id: uuid.UUID,
+        actor_id: uuid.UUID,
+    ) -> None:
+        """Агрегирует уведомления о сообщениях: если у получателя уже есть
+        непрочитанное MESSAGE-уведомление от этого актора — просто поднимаем его
+        наверх ленты (обновляем created_at) и держим непрочитанным, вместо того
+        чтобы плодить по строке на каждое сообщение. Иначе создаём одно.
+        Результат — ровно одна строка «X написал вам сообщение» на диалог."""
+        async with self.db.db_session() as session:
+            existing = (
+                update(Notification)
+                .where(
+                    Notification.recipient_id == recipient_id,
+                    Notification.actor_id == actor_id,
+                    Notification.type == NotificationTypeEnum.MESSAGE,
+                    Notification.is_read.is_(False),
+                )
+                .values(created_at=datetime.datetime.now(datetime.UTC))
+            )
+            result = await session.execute(existing)
+            if result.rowcount == 0:
+                session.add(
+                    Notification(
+                        recipient_id=recipient_id,
+                        actor_id=actor_id,
+                        type=NotificationTypeEnum.MESSAGE,
+                    )
+                )
+            await session.commit()
+
+    async def mark_read_from_actor(
+        self,
+        recipient_id: uuid.UUID,
+        actor_id: uuid.UUID,
+        type_: NotificationTypeEnum,
+    ) -> None:
+        """Помечает прочитанными уведомления заданного типа от конкретного
+        актора — например, когда получатель открыл диалог, message-уведомления
+        от собеседника в колокольчике тоже должны погаснуть."""
+        async with self.db.db_session() as session:
+            stmt = (
+                update(Notification)
+                .where(
+                    Notification.recipient_id == recipient_id,
+                    Notification.actor_id == actor_id,
+                    Notification.type == type_,
+                    Notification.is_read.is_(False),
+                )
+                .values(is_read=True)
+            )
+            await session.execute(stmt)
             await session.commit()
 
     async def list_for_recipient(

@@ -28,14 +28,37 @@ class NotificationService:
         instance_id: uuid.UUID | None = None,
     ) -> None:
         """Создаёт уведомление. Себе не уведомляем (актор == получатель) —
-        мягко игнорируем, чтобы вызывающему не приходилось это проверять."""
+        мягко игнорируем, чтобы вызывающему не приходилось это проверять.
+
+        Сообщения агрегируются: вместо строки на каждое сообщение держим одно
+        непрочитанное «X написал вам сообщение» на диалог (см.
+        bump_or_create_message)."""
         if recipient_id == actor_id:
+            return
+        if type_ == NotificationTypeEnum.MESSAGE:
+            await self.repository.bump_or_create_message(
+                recipient_id=recipient_id,
+                actor_id=actor_id,
+            )
             return
         await self.repository.create(
             recipient_id=recipient_id,
             actor_id=actor_id,
             type_=type_,
             instance_id=instance_id,
+        )
+
+    async def mark_read_from_actor(
+        self,
+        recipient_id: uuid.UUID,
+        actor_id: uuid.UUID,
+        type_: NotificationTypeEnum,
+    ) -> None:
+        """Гасит непрочитанные уведомления типа type_ от конкретного актора."""
+        await self.repository.mark_read_from_actor(
+            recipient_id=recipient_id,
+            actor_id=actor_id,
+            type_=type_,
         )
 
     async def list_notifications(

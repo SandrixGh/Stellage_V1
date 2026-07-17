@@ -92,8 +92,14 @@ class MessageService:
             user_id=user.id,
             partner_id=partner.id,
         )
-        # Открытие диалога = прочтение входящих от собеседника.
+        # Открытие диалога = прочтение входящих от собеседника. Гасим и счётчик
+        # сообщений, и агрегированное message-уведомление в колокольчике от него.
         await self.repository.mark_read(user_id=user.id, partner_id=partner.id)
+        await self.notifications.mark_read_from_actor(
+            recipient_id=user.id,
+            actor_id=partner.id,
+            type_=NotificationTypeEnum.MESSAGE,
+        )
         return [
             MessageRead(
                 id=m.id,
