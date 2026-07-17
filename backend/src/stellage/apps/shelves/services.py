@@ -155,7 +155,6 @@ class ShelfService:
                 viewer_id=viewer_id,
                 owner_id=box.user_id,
                 is_public=box.is_public,
-                is_sealed=box.is_sealed,
                 shelf_id=box.shelf_id,
                 shelf_is_public=shelf.is_public,
             ):

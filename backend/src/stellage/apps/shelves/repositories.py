@@ -308,6 +308,11 @@ class ShelfRepository:
             if was_main is None:
                 return None
 
+            # По умолчанию новой главной полки нет: назначаем её только когда
+            # удаляли именно главную. Инициализация до ветки убирает
+            # UnboundLocalError на возврате при удалении обычной полки.
+            new_main_id = None
+
             if was_main:
                 new_main_query = (
                     select(self.model.id)
