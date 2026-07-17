@@ -32,12 +32,15 @@ class BoxTemplateRepository:
 
     async def create_template(
         self,
-        data: BoxTemplateCreate
+        data: BoxTemplateCreate,
+        creator_id: uuid.UUID,
     ) -> BoxTemplateReturn:
         async with self.db.db_session() as session:
+            # creator_id проставляется сервером, а не из тела запроса — защита
+            # от подделки авторства/выдачи шаблона за платформенный.
             query = (
                 insert(self.template_model)
-                .values(**data.model_dump())
+                .values(**data.model_dump(), creator_id=creator_id)
                 .returning(self.template_model)
             )
             try:

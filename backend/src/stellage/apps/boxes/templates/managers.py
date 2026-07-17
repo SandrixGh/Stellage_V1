@@ -26,9 +26,11 @@ class TemplateManager:
     async def create_template(
         self,
         data: BoxTemplateCreate,
+        creator_id: uuid.UUID,
     ) -> BoxTemplateReturn:
         return await self.repository.create_template(
             data=data,
+            creator_id=creator_id,
         )
 
 

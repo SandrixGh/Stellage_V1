@@ -29,8 +29,10 @@ class BoxTemplateBase(BaseModel):
 
 
 class BoxTemplateCreate(BoxTemplateBase):
-    # NULL = шаблон платформы; иначе id пользователя-создателя коробки.
-    creator_id: uuid.UUID | None = None
+    # creator_id НЕ принимается из тела запроса: его проставляет сервер
+    # (creator_id=текущий пользователь), иначе клиент мог бы подделать авторство
+    # шаблона или выдать его за платформенный (creator_id=null). См. роуты.
+    pass
 
 
 class BoxTemplatePatch(BaseModel):

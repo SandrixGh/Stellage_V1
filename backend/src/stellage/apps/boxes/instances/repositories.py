@@ -11,7 +11,7 @@ from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstance
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.enums.asset_status import AssetStatusEnum
 from stellage.database.enums.box_sealing import SealingEnum
-from stellage.database.models import BoxAsset, BoxInstance, Shelf, User
+from stellage.database.models import BoxAsset, BoxInstance, BoxTemplate, Shelf, User
 
 
 class BoxInstanceRepository:
@@ -42,6 +42,31 @@ class BoxInstanceRepository:
         data: BoxInstanceCreate,
     ) -> BoxInstanceWithTemplate:
         async with self.db.db_session() as session:
+            # IDOR-защита: шаблон обязан существовать, а полка (если указана) —
+            # принадлежать создателю. Иначе можно было бы размножать чужой
+            # шаблон (порча нумерации серий) или класть коробку в чужой стеллаж.
+            template_exists = await session.execute(
+                select(BoxTemplate.id).where(BoxTemplate.id == data.template_id)
+            )
+            if template_exists.scalar_one_or_none() is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Template not found",
+                )
+
+            if data.shelf_id is not None:
+                owned_shelf = await session.execute(
+                    select(Shelf.id).where(
+                        Shelf.id == data.shelf_id,
+                        Shelf.user_id == user_id,
+                    )
+                )
+                if owned_shelf.scalar_one_or_none() is None:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Shelf not found or access denied",
+                    )
+
             serial_subquery = (
                 select(
                     func.coalesce(

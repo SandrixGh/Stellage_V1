@@ -179,8 +179,8 @@ async def create_box(
             price=data.price,
             currency=data.currency,
             rarity=rarity,
-            creator_id=user.id,
-        )
+        ),
+        creator_id=user.id,
     )
     return await instance_service.create_instance(
         user=user,
@@ -313,8 +313,10 @@ async def create_box_template(
     ],
     data: BoxTemplateCreate
 ) -> BoxTemplateReturn:
+    # creator_id всегда = текущий пользователь (не из тела запроса).
     return await service.create_template(
-        data=data
+        data=data,
+        creator_id=user.id,
     )
 
 

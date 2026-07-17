@@ -53,8 +53,10 @@ class BoxTextContent(BaseModel):
 class BoxInstanceBase(BaseModel):
     is_sealed: SealingEnum = SealingEnum.SEALED
     is_public: VisibilityEnum = VisibilityEnum.PRIVATE
-    is_verified: VerifyEnum = VerifyEnum.NOT_VERIFIED
     content: BoxTextContent | None = None
+    # is_verified СПЕЦИАЛЬНО не здесь: значок верификации — доверенный статус
+    # модерации, его нельзя выставлять из тела запроса при создании коробки.
+    # Для отдачи наружу поле объявлено в BoxInstanceReturn ниже.
 
 
 class BoxInstanceTimeStamps(BaseModel):
@@ -71,6 +73,9 @@ class BoxInstanceReturn(
     serial_number: int
     shelf_row: int | None = None
     shelf_col: int | None = None
+    # Статус верификации — только для ОТДАЧИ (читается из БД). В create-схему
+    # не входит: выставить его из тела запроса нельзя (см. BoxInstanceBase).
+    is_verified: VerifyEnum = VerifyEnum.NOT_VERIFIED
     # Метаданные S3-ассетов (без ключей и ссылок). Дефолт [] сохраняет
     # валидность старых записей в Redis-кэше.
     assets: list[BoxAssetRead] = []

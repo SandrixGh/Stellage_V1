@@ -27,9 +27,12 @@ class TemplateService:
     async def create_template(
         self,
         data: BoxTemplateCreate,
+        creator_id: uuid.UUID,
     ) -> BoxTemplateReturn:
+        # creator_id — всегда серверный (текущий пользователь), не из тела.
         return await self.manager.create_template(
             data=data,
+            creator_id=creator_id,
         )
 
 
