@@ -14,10 +14,12 @@ from stellage.apps.boxes.instances.schemas import (
     BoxPositionUpdate,
     BoxTextContent,
 )
+from stellage.apps.messaging.repositories import MessageRepository
 from stellage.apps.notifications.services import NotificationService
 from stellage.apps.profile.avatar import AvatarManager
 from stellage.apps.profile.managers import ProfileManager
 from stellage.apps.profile.schemas import PublicUser
+from stellage.database.enums.message_kind import MessageKindEnum
 from stellage.database.enums.notification_type import NotificationTypeEnum
 
 
@@ -44,12 +46,17 @@ class InstanceService:
             NotificationService,
             Depends(NotificationService),
         ],
+        messages: Annotated[
+            MessageRepository,
+            Depends(MessageRepository),
+        ],
     ):
         self.manager = manager
         self.repository = repository
         self.avatar_manager = avatar_manager
         self.profile_manager = profile_manager
         self.notifications = notifications
+        self.messages = messages
 
 
     async def create_instance(
@@ -176,6 +183,14 @@ class InstanceService:
             actor_id=giver.id,
             type_=NotificationTypeEnum.GIFT,
             instance_id=instance_id,
+        )
+        # Системная карточка подарка в диалоге — чтобы дарение было видно в чате.
+        await self.messages.create(
+            sender_id=giver.id,
+            recipient_id=recipient.id,
+            text=None,
+            kind=MessageKindEnum.GIFT,
+            gift_instance_id=instance_id,
         )
         return box
 
