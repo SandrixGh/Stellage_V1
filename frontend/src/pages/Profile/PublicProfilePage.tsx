@@ -7,7 +7,6 @@ import { Avatar } from "../../components/UI/Avatar";
 import { ProfileStatsRow } from "../../components/Profile/ProfileStatsRow";
 import { FollowButton } from "../../components/Profile/FollowButton";
 import { FollowListModal } from "../../components/Profile/FollowListModal";
-import { BoxDetailModal } from "../Box/BoxDetailModal";
 import { useAuthStore } from "../../store/useAuthStore";
 import { getFollowCounts } from "../../api/social";
 import { onlineStatus, isOnline } from "../../utils/onlineStatus";
@@ -21,7 +20,6 @@ export const PublicProfilePage = () => {
     const currentUser = useAuthStore((s) => s.user);
     const [profile, setProfile] = useState<PublicProfile | null>(null);
     const [status, setStatus] = useState<"loading" | "ready" | "notfound">("loading");
-    const [openedBox, setOpenedBox] = useState<Box | null>(null);
     const [followers, setFollowers] = useState<number | undefined>(undefined);
     const [following, setFollowing] = useState<number | undefined>(undefined);
     const [isFollowing, setIsFollowing] = useState(false);
@@ -138,7 +136,7 @@ export const PublicProfilePage = () => {
                     <ShelfView
                         shelf={profile.shelf}
                         editable={false}
-                        onOpen={setOpenedBox}
+                        onOpen={(box) => navigate(`/box/instance/${box.id}`)}
                     />
                 ) : (
                     <div className="profile-shelf-empty">
@@ -146,8 +144,6 @@ export const PublicProfilePage = () => {
                     </div>
                 )}
             </section>
-
-            <BoxDetailModal box={openedBox} onClose={() => setOpenedBox(null)} />
 
             {followList && profile.username && (
                 <FollowListModal

@@ -65,6 +65,7 @@ class MessageRead(BaseModel):
     # Подарок (kind=GIFT).
     gift_instance_id: uuid.UUID | None = None
     gift_box_title: str | None = None
+    gift_box_rarity: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
 import { api } from "./api/instance";
 import "./App.css";
@@ -28,6 +28,10 @@ import { PublicShelfPage } from "./pages/Stellage/PublicShelfPage";
 
 function App() {
   const { getUser, isInitialized, isAuthenticated } = useAuthStore();
+  const location = useLocation();
+  // «Добавить аккаунт»: вход доступен даже авторизованному (?add=1) — новый
+  // аккаунт станет активным, текущий останется в реестре устройства.
+  const addingAccount = new URLSearchParams(location.search).get("add") === "1";
 
   useEffect(() => {
     getUser();
@@ -50,7 +54,9 @@ function App() {
       {/* Standalone auth screens (no app shell) */}
       <Route
         path="/login"
-        element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
+        element={
+          isAuthenticated && !addingAccount ? <Navigate to="/" replace /> : <LoginPage />
+        }
       />
       <Route
         path="/register"

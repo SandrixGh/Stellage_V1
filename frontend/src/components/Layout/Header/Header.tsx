@@ -17,10 +17,12 @@ const NAV_ITEMS = [
 
 export const Header = () => {
     const { isAuthenticated } = useAuthStore();
+    const userId = useAuthStore((s) => s.user?.id);
     const navigate = useNavigate();
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-    // Свой аватар для шапки (presigned из /profile/me).
+    // Свой аватар для шапки (presigned из /profile/me). Пере-запрашиваем при
+    // смене активного аккаунта (userId), а не только при входе/выходе.
     useEffect(() => {
         if (!isAuthenticated) {
             setAvatarUrl(null);
@@ -29,7 +31,7 @@ export const Header = () => {
         getMyProfile()
             .then((p) => setAvatarUrl(p.avatar_url ?? null))
             .catch(() => setAvatarUrl(null));
-    }, [isAuthenticated]);
+    }, [isAuthenticated, userId]);
 
     return (
         <header className="header">

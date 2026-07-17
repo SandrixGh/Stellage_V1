@@ -22,6 +22,7 @@ export interface MessageItem {
     // Подарок (kind === "gift").
     gift_instance_id: string | null;
     gift_box_title: string | null;
+    gift_box_rarity: string | null;
 }
 
 export interface ConversationPreview {

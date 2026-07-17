@@ -86,33 +86,9 @@
     background: rgba(var(--ink-rgb), 0.06);
 }
 
-.account-row-switch {
-    padding: 0;
-    gap: 0;
-}
-
-.account-row-switch:hover {
-    background: transparent;
-}
-
-.account-row-main {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: 1;
-    min-width: 0;
-    padding: 8px;
-    border: none;
-    background: transparent;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    text-align: left;
-    color: var(--ink);
-    transition: background 0.15s ease;
-}
-
-.account-row-main:hover {
-    background: rgba(var(--ink-rgb), 0.06);
+.account-row-switch:disabled {
+    opacity: 0.6;
+    cursor: default;
 }
 
 .account-row-text {

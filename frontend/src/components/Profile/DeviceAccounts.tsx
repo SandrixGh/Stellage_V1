@@ -16,7 +16,7 @@ import "./DeviceAccounts.css";
  */
 export const DeviceAccounts = () => {
     const navigate = useNavigate();
-    const { user, switchTo, logout } = useAuthStore();
+    const { user, switchTo } = useAuthStore();
     const [accounts, setAccounts] = useState<DeviceAccount[]>([]);
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState<string | null>(null);
@@ -54,11 +54,11 @@ export const DeviceAccounts = () => {
         }
     };
 
-    // Добавить аккаунт = выйти из текущего и открыть вход. Текущий останется в
-    // списке устройства, так что позже переключимся обратно без пароля.
-    const handleAdd = async () => {
-        await logout();
-        navigate("/login");
+    // Добавить аккаунт БЕЗ выхода из текущего: открываем вход в режиме «add».
+    // После входа новый аккаунт станет активным, а текущий останется в реестре
+    // устройства (его сессия в Redis не трогается) — переключимся назад без пароля.
+    const handleAdd = () => {
+        navigate("/login?add=1");
     };
 
     return (

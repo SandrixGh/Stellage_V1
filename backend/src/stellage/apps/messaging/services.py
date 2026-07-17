@@ -83,10 +83,13 @@ class MessageService:
 
     async def _to_read(self, msg: Message, viewer_id: uuid.UUID) -> MessageRead:
         gift_title = None
+        gift_rarity = None
         if msg.kind == MessageKindEnum.GIFT and msg.gift_instance_id:
-            gift_title = await self.repository.gift_box_title(
+            meta = await self.repository.gift_box_meta(
                 instance_id=msg.gift_instance_id,
             )
+            if meta is not None:
+                gift_title, gift_rarity = meta
         return MessageRead(
             id=msg.id,
             kind=msg.kind,
@@ -101,6 +104,7 @@ class MessageService:
             asset_name=msg.asset_name,
             gift_instance_id=msg.gift_instance_id,
             gift_box_title=gift_title,
+            gift_box_rarity=gift_rarity,
         )
 
     async def _require_recipient(self, sender_id: uuid.UUID, username: str):

@@ -274,6 +274,23 @@ class MessageRepository:
             )
             return (await session.execute(stmt)).scalar_one_or_none()
 
+    async def gift_box_meta(
+        self,
+        instance_id: uuid.UUID,
+    ) -> tuple[str | None, str | None] | None:
+        """(title, rarity) коробки-подарка — чтобы в чате нарисовать её визуал.
+        None, если экземпляр удалён (gift_instance_id мог занулиться)."""
+        async with self.db.db_session() as session:
+            stmt = (
+                select(BoxTemplate.title, BoxTemplate.rarity)
+                .join(BoxInstance, BoxInstance.template_id == BoxTemplate.id)
+                .where(BoxInstance.id == instance_id)
+            )
+            row = (await session.execute(stmt)).first()
+            if row is None:
+                return None
+            return row[0], row[1]
+
     async def mark_read(
         self,
         user_id: uuid.UUID,
