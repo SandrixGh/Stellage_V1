@@ -23,6 +23,7 @@ from stellage.apps.boxes.templates.schemas import (
     BoxTemplateReturnWithInstances,
 )
 from stellage.apps.boxes.templates.services import TemplateService
+from stellage.core.rate_limit import rate_limit
 from stellage.database.enums.box_rarity import BoxRarity
 
 router = APIRouter(
@@ -275,6 +276,7 @@ async def unseal_box(
     path="/gift-box",
     response_model=BoxInstanceWithTemplate,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(max_calls=20, window_seconds=60))],
 )
 async def gift_box(
     user: Annotated[

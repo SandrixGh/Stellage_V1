@@ -57,6 +57,10 @@ class UserVerifySchema(GetUserByID, GetUserByEmail):
     bio: str | None = None
     last_seen_at: datetime.datetime | None = None
     is_superuser: bool = False
+    # Активен ли аккаунт: деактивированный (бан) с живой сессией должен получать
+    # 401, а не продолжать работать до истечения TTL токена. Дефолт True держит
+    # валидными старые записи в Redis-кэше, где поля ещё не было.
+    is_active: bool = True
 
 
 class DeviceAccount(BaseModel):

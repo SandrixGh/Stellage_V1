@@ -28,6 +28,7 @@ messaging_router = APIRouter(
     path="/send",
     status_code=status.HTTP_201_CREATED,
     response_model=MessageRead,
+    dependencies=[Depends(rate_limit(max_calls=30, window_seconds=60))],
 )
 async def send_message(
     data: SendMessageRequest,
@@ -71,6 +72,7 @@ async def complete_attachment(
     path="/{message_id}",
     status_code=status.HTTP_200_OK,
     response_model=MessageRead,
+    dependencies=[Depends(rate_limit(max_calls=30, window_seconds=60))],
 )
 async def edit_message(
     message_id: uuid.UUID,
@@ -84,6 +86,7 @@ async def edit_message(
 @messaging_router.delete(
     path="/{message_id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(rate_limit(max_calls=30, window_seconds=60))],
 )
 async def delete_message(
     message_id: uuid.UUID,
@@ -121,6 +124,7 @@ async def unread_count(
     path="/with/{username}",
     status_code=status.HTTP_200_OK,
     response_model=list[MessageRead],
+    dependencies=[Depends(rate_limit(max_calls=120, window_seconds=60))],
 )
 async def get_conversation(
     username: str,

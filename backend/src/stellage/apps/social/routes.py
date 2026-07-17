@@ -14,6 +14,7 @@ from stellage.apps.social.schemas import (
     LikeState,
 )
 from stellage.apps.social.services import SocialService
+from stellage.core.rate_limit import rate_limit
 
 social_router = APIRouter(
     prefix="/social",
@@ -25,6 +26,7 @@ social_router = APIRouter(
     path="/follow/{username}",
     status_code=status.HTTP_200_OK,
     response_model=FollowActionResult,
+    dependencies=[Depends(rate_limit(max_calls=30, window_seconds=60))],
 )
 async def follow_user(
     username: str,
@@ -103,6 +105,7 @@ async def get_box_likes(
     path="/box-likes/{instance_id}",
     status_code=status.HTTP_200_OK,
     response_model=LikeActionResult,
+    dependencies=[Depends(rate_limit(max_calls=60, window_seconds=60))],
 )
 async def like_box(
     instance_id: uuid.UUID,

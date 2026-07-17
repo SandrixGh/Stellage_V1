@@ -100,6 +100,7 @@ async def get_asset_url(
     path="/get-box-assets",
     response_model=list[BoxAssetRead],
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(max_calls=120, window_seconds=60))],
 )
 async def get_box_assets(
     instance_id: uuid.UUID,
@@ -121,6 +122,7 @@ async def get_box_assets(
 @router.delete(
     path="/delete-asset",
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(rate_limit(max_calls=30, window_seconds=60))],
 )
 async def delete_asset(
     asset_id: uuid.UUID,

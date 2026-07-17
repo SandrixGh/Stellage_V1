@@ -40,6 +40,7 @@ async def registration(
     path="/register_confirm/",
     response_model=dict[str, str],
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(max_calls=10, window_seconds=60))],
 )
 async def confirm_registration(
     token: str,

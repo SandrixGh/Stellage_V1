@@ -61,6 +61,14 @@ async def get_current_user(
             detail="User not found"
         )
 
+    # Деактивированный аккаунт (бан) не должен работать по живой сессии до
+    # истечения TTL токена — рвём немедленно.
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account is disabled"
+        )
+
     # Sliding session: once the token is past the refresh threshold of its
     # lifetime, transparently issue a fresh one (same session_id) and bump the
     # Redis TTL + cookie so active users stay logged in indefinitely.
@@ -142,7 +150,7 @@ async def get_optional_current_user(
         return None
 
     user = await manager.get_user_by_id(user_id=user_id)
-    if not user:
+    if not user or not user.is_active:
         return None
 
     user.session_id = session_id

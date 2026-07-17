@@ -99,6 +99,13 @@ class AppSettings(BaseAppSettings):
     # over secure connections. Kept False by default for local http dev.
     cookie_secure: bool = False
 
+    # Доверять ли заголовку X-Forwarded-For при определении IP клиента для
+    # rate limit. Включать ТОЛЬКО когда перед приложением стоит доверенный
+    # обратный прокси, который сам проставляет заголовок (иначе клиент подделает
+    # IP и обойдёт лимит). За прокси без этого флага все клиенты схлопываются в
+    # один IP прокси и режут друг друга. По умолчанию False (прямой доступ в dev).
+    trust_proxy_headers: bool = False
+
     @property
     def is_production(self) -> bool:
         return self.environment == "production"
