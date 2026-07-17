@@ -128,9 +128,15 @@ class BoxInstanceRepository:
                 )
             )
 
+            # Фильтр по user_id и в SELECT: чужой вызов (UPDATE затронул 0 строк)
+            # честно получает 404, а не снимок чужой коробки (её content, шаблон,
+            # метаданные ассетов). Иначе SELECT только по id вернул бы чужую.
             select_query = (
                 select(self.instance_model)
-                .where(self.instance_model.id == instance_id)
+                .where(
+                    self.instance_model.user_id == user_id,
+                    self.instance_model.id == instance_id,
+                )
                 .options(
                     joinedload(self.instance_model.template),
                     self._ready_assets_loader(),
@@ -228,9 +234,14 @@ class BoxInstanceRepository:
                     dragged.shelf_col = data.shelf_col
                     await session.flush()
 
+                # dragged уже проверен на принадлежность user_id выше; фильтр в
+                # SELECT держит инвариант «наружу только своя коробка» на будущее.
                 select_query = (
                     select(self.instance_model)
-                    .where(self.instance_model.id == instance_id)
+                    .where(
+                        self.instance_model.user_id == user_id,
+                        self.instance_model.id == instance_id,
+                    )
                     .options(
                     joinedload(self.instance_model.template),
                     self._ready_assets_loader(),
@@ -270,9 +281,15 @@ class BoxInstanceRepository:
             )
             await session.execute(update_query)
 
+            # user_id и в SELECT: иначе правка content чужой коробки (UPDATE
+            # затронул 0 строк) всё равно вернула бы её снимок — утечка content
+            # и шаблона. Фильтр даёт честный 404 для чужого экземпляра.
             select_query = (
                 select(self.instance_model)
-                .where(self.instance_model.id == instance_id)
+                .where(
+                    self.instance_model.user_id == user_id,
+                    self.instance_model.id == instance_id,
+                )
                 .options(
                     joinedload(self.instance_model.template),
                     self._ready_assets_loader(),
