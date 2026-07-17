@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 import uuid
 
 from sqlalchemy.dialects.postgresql import ENUM as PostgresEnum
-from sqlalchemy import ForeignKey, JSON, Integer, CheckConstraint, Index, text
+from sqlalchemy import ForeignKey, JSON, Integer, CheckConstraint, Index, UniqueConstraint, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from stellage.database.enums.box_sealing import SealingEnum
@@ -121,4 +121,17 @@ class BoxInstance(IDMixin, TimestampMixin, Base):
             unique=True,
             postgresql_where=text("shelf_id IS NOT NULL"),
         ),
+        # Серийный номер уникален в пределах шаблона: защищает от гонки
+        # coalesce(max)+1 при параллельном создании экземпляров одного шаблона.
+        UniqueConstraint(
+            'template_id',
+            'serial_number',
+            name='uq_box_instances_template_serial',
+        ),
+        # Индексы на FK: частые фильтры WHERE user_id / template_id / shelf_id
+        # (инвентарь, каталог шаблона, счётчики профиля) — Postgres не создаёт
+        # индексы на внешние ключи автоматически.
+        Index('ix_box_instances_user_id', 'user_id'),
+        Index('ix_box_instances_template_id', 'template_id'),
+        Index('ix_box_instances_shelf_id', 'shelf_id'),
     )

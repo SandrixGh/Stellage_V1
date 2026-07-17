@@ -36,6 +36,10 @@ class BoxInstanceRepository:
         )
 
 
+    # Сколько раз пересчитать serial_number и повторить insert при гонке
+    # (уникальное ограничение uq_box_instances_template_serial).
+    _SERIAL_RETRY_ATTEMPTS = 5
+
     async def create_instance(
         self,
         user_id: uuid.UUID,
@@ -67,57 +71,64 @@ class BoxInstanceRepository:
                         detail="Shelf not found or access denied",
                     )
 
+            base_data = data.model_dump()
+            base_data["user_id"] = user_id
+
+            # serial = max(serial)+1 в пределах шаблона. При параллельном
+            # создании два запроса могут получить одинаковый serial — теперь это
+            # ловит уникальное ограничение, и мы просто пересчитываем и повторяем
+            # (а не отдаём дубль или 400).
             serial_subquery = (
                 select(
                     func.coalesce(
-                        func.max(
-                            self.instance_model.serial_number
-                        ),
-                        0
+                        func.max(self.instance_model.serial_number),
+                        0,
                     ) + 1
                 )
-                .where(
-                    self.instance_model.template_id == data.template_id
-                )
+                .where(self.instance_model.template_id == data.template_id)
                 .scalar_subquery()
             )
 
-            instance_data = data.model_dump()
-            instance_data["serial_number"] = serial_subquery
-            instance_data["user_id"] = user_id
-
-            create_query = (
-                insert(self.instance_model)
-                .values(**instance_data)
-                .returning(self.instance_model.id)
-            )
-
-            try:
-                result = await session.execute(create_query)
-                new_instance_id = result.scalar_one()
-
-                select_query = (
-                    select(self.instance_model)
-                    .where(self.instance_model.id == new_instance_id)
-                    .options(
-                    joinedload(self.instance_model.template),
-                    self._ready_assets_loader(),
+            for attempt in range(self._SERIAL_RETRY_ATTEMPTS):
+                create_query = (
+                    insert(self.instance_model)
+                    .values(**base_data, serial_number=serial_subquery)
+                    .returning(self.instance_model.id)
                 )
-                )
+                try:
+                    result = await session.execute(create_query)
+                    new_instance_id = result.scalar_one()
 
-                final_result = await session.execute(select_query)
+                    select_query = (
+                        select(self.instance_model)
+                        .where(self.instance_model.id == new_instance_id)
+                        .options(
+                            joinedload(self.instance_model.template),
+                            self._ready_assets_loader(),
+                        )
+                    )
+                    final_result = await session.execute(select_query)
+                    instance = final_result.unique().scalar_one()
 
-                instance = final_result.unique().scalar_one()
+                    await session.commit()
+                    return BoxInstanceWithTemplate.model_validate(instance)
 
-                await session.commit()
-                return BoxInstanceWithTemplate.model_validate(instance)
-
-            except IntegrityError:
-                await session.rollback()
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Box already exist"
-                )
+                except IntegrityError as exc:
+                    await session.rollback()
+                    constraint = getattr(
+                        getattr(exc.orig, "diag", None), "constraint_name", None
+                    )
+                    # Конфликт серии — повторяем (max пересчитается). Последняя
+                    # попытка или другое нарушение — отдаём 400.
+                    if (
+                        constraint == "uq_box_instances_template_serial"
+                        and attempt < self._SERIAL_RETRY_ATTEMPTS - 1
+                    ):
+                        continue
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Box already exist",
+                    )
 
 
     async def move_to_shelf(

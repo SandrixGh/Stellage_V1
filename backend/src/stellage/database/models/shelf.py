@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, String, Boolean, UniqueConstraint
+from sqlalchemy import ForeignKey, String, Boolean, Index, UniqueConstraint, text
 from sqlalchemy.orm import Mapped, relationship, mapped_column
 
 from stellage.database.mixins.id_mixins import IDMixin
@@ -49,4 +49,14 @@ class Shelf(IDMixin, TimestampMixin, Base):
 
     __table_args__ = (
         UniqueConstraint("user_id", "title", name="uq_user_shelf_title"),
+        # Не больше одной главной полки на пользователя: частичный уникальный
+        # индекс по user_id там, где is_main. Защищает от гонки set_main_shelf,
+        # которая иначе оставляла бы две is_main и роняла get_main_shelf
+        # (scalar_one_or_none → MultipleResultsFound → 500).
+        Index(
+            "uq_shelves_one_main_per_user",
+            "user_id",
+            unique=True,
+            postgresql_where=text("is_main"),
+        ),
     )
