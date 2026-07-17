@@ -69,7 +69,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     switchTo: async (userId) => {
         useStellageStore.getState().reset();
         await switchAccount(userId);
-        await get().getUser();
+        try {
+            await get().getUser();
+        } catch {
+            // Cookie уже сменилась на новый аккаунт, но перечитать пользователя
+            // не удалось (сеть). Нельзя оставлять на экране старого пользователя —
+            // сбрасываем состояние; ProtectedRoute уведёт на /login, откуда сессия
+            // восстановится. getUser сам глотает 401, сюда долетит только сбой сети.
+            get().clearSession();
+        }
     },
 
     updateProfile: async (data) => {
