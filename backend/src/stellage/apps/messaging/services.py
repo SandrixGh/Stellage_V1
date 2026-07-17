@@ -15,6 +15,7 @@ from stellage.apps.boxes.assets.limits import (
     MIME_EXTENSIONS,
     matches_magic,
 )
+from stellage.apps.messaging.events import MessageEventPublisher
 from stellage.apps.messaging.repositories import MessageRepository
 from stellage.apps.messaging.schemas import (
     AttachmentCompleteRequest,
@@ -48,12 +49,14 @@ class MessageService:
         avatar_manager: Annotated[AvatarManager, Depends(AvatarManager)],
         notifications: Annotated[NotificationService, Depends(NotificationService)],
         s3: Annotated[S3Dependency, Depends(S3Dependency)],
+        events: Annotated[MessageEventPublisher, Depends(MessageEventPublisher)],
     ) -> None:
         self.repository = repository
         self.profile_manager = profile_manager
         self.avatar_manager = avatar_manager
         self.notifications = notifications
         self.s3 = s3
+        self.events = events
 
     async def _public_user(self, user, client=None) -> PublicUser:
         pub = PublicUser.model_validate(user)
@@ -175,6 +178,46 @@ class MessageService:
                 result.append(self._build_read(m, viewer_id, None, title, rarity))
         return result
 
+    async def _usernames_of(
+        self,
+        sender_id: uuid.UUID,
+        recipient_id: uuid.UUID,
+    ) -> tuple[str | None, str | None]:
+        sender = await self.profile_manager.get_user_by_id(user_id=sender_id)
+        recipient = await self.profile_manager.get_user_by_id(user_id=recipient_id)
+        return (
+            sender.username if sender else None,
+            recipient.username if recipient else None,
+        )
+
+    async def _broadcast_message(self, msg: Message, event_type: str) -> None:
+        """Публикует событие про сообщение обоим участникам с их перспективой:
+        для каждого зрителя свой is_mine и свой peer (username собеседника).
+        Сериализуем один раз на зрителя (asset_url/gift-мета включены)."""
+        sender_username, recipient_username = await self._usernames_of(
+            msg.sender_id, msg.recipient_id,
+        )
+        # Получателю: сообщение «не моё», собеседник — отправитель.
+        recipient_read = await self._to_read(msg, viewer_id=msg.recipient_id)
+        await self.events.publish(
+            msg.recipient_id,
+            {
+                "type": event_type,
+                "peer": sender_username,
+                "message": recipient_read.model_dump(mode="json"),
+            },
+        )
+        # Отправителю (другие его вкладки/устройства): сообщение «моё».
+        sender_read = await self._to_read(msg, viewer_id=msg.sender_id)
+        await self.events.publish(
+            msg.sender_id,
+            {
+                "type": event_type,
+                "peer": recipient_username,
+                "message": sender_read.model_dump(mode="json"),
+            },
+        )
+
     async def _require_recipient(self, sender_id: uuid.UUID, username: str):
         recipient = await self.profile_manager.get_user_by_username(username=username)
         if not recipient:
@@ -205,7 +248,25 @@ class MessageService:
             actor_id=sender.id,
             type_=NotificationTypeEnum.MESSAGE,
         )
+        await self._broadcast_message(msg, event_type="message.new")
         return await self._to_read(msg, viewer_id=sender.id)
+
+    async def create_gift_message(
+        self,
+        giver_id: uuid.UUID,
+        recipient_id: uuid.UUID,
+        instance_id: uuid.UUID,
+    ) -> None:
+        """Системная карточка подарка в диалоге + real-time событие обоим. Точка
+        входа для gift-флоу коробок, чтобы дарение появлялось в чате мгновенно."""
+        msg = await self.repository.create(
+            sender_id=giver_id,
+            recipient_id=recipient_id,
+            text=None,
+            kind=MessageKindEnum.GIFT,
+            gift_instance_id=instance_id,
+        )
+        await self._broadcast_message(msg, event_type="message.new")
 
     async def initiate_attachment(
         self,
@@ -328,6 +389,7 @@ class MessageService:
             actor_id=sender.id,
             type_=NotificationTypeEnum.MESSAGE,
         )
+        await self._broadcast_message(finalized, event_type="message.new")
         logger.info("message attachment completed: message_id=%s", msg.id)
         return await self._to_read(finalized, viewer_id=sender.id)
 
@@ -356,7 +418,9 @@ class MessageService:
             sender_id=user.id,
             text=data.text,
         )
-        return await self._to_read(updated or existing, viewer_id=user.id)
+        result = updated or existing
+        await self._broadcast_message(result, event_type="message.edit")
+        return await self._to_read(result, viewer_id=user.id)
 
     async def delete_message(
         self,
@@ -384,6 +448,18 @@ class MessageService:
             async with self.s3.get_client() as client:
                 await self._discard_object(client, existing.asset_key)
         await self.repository.hard_delete(message_id=message_id, sender_id=user.id)
+        # Событие удаления — обоим участникам (payload только id, строки уже нет).
+        sender_username, recipient_username = await self._usernames_of(
+            existing.sender_id, existing.recipient_id,
+        )
+        await self.events.publish(
+            existing.recipient_id,
+            {"type": "message.delete", "peer": sender_username, "id": str(message_id)},
+        )
+        await self.events.publish(
+            existing.sender_id,
+            {"type": "message.delete", "peer": recipient_username, "id": str(message_id)},
+        )
         logger.info("message deleted: message_id=%s", message_id)
 
     async def _discard_object(self, client, key: str) -> None:
@@ -443,6 +519,12 @@ class MessageService:
             recipient_id=user.id,
             actor_id=partner.id,
             type_=NotificationTypeEnum.MESSAGE,
+        )
+        # Собеседнику (автору прочитанных сообщений) — обновить галочки: с его
+        # точки зрения прочитан диалог с тем, кто открыл (peer = user.username).
+        await self.events.publish(
+            partner.id,
+            {"type": "message.read", "peer": user.username},
         )
 
     async def list_conversations(
