@@ -367,7 +367,7 @@
    крупно, а выстраивается мелкими квадратами; клик разворачивает в лайтбокс. */
 .box-modal-thumbs {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
     gap: 8px;
 }
 
@@ -388,12 +388,15 @@
     box-shadow: var(--shadow-md, 0 8px 24px rgba(0, 0, 0, 0.18));
 }
 
-/* Само превью заполняет квадрат плитки. */
+/* Само превью заполняет квадрат плитки. image-rendering: auto просит браузер
+   использовать качественный ресемпл при даунскейле крупного фото — так плитка
+   не выглядит «мыльной» (сам файл в S3 полноразмерный, оригинал — в лайтбоксе). */
 .box-modal-thumb .asset-viewer {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+    image-rendering: auto;
 }
 
 /* Значок «play» поверх видео-превью. */
