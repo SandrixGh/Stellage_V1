@@ -17,6 +17,7 @@ from stellage.apps.profile.schemas import (
     UpdateProfileRequest,
 )
 from stellage.apps.profile.services import ProfileService
+from stellage.core.rate_limit import rate_limit
 
 profile_router = APIRouter(
     prefix="/profile",
@@ -28,6 +29,7 @@ profile_router = APIRouter(
     path="/search",
     status_code=status.HTTP_200_OK,
     response_model=list[PublicUser],
+    dependencies=[Depends(rate_limit(max_calls=30, window_seconds=60))],
 )
 async def search_users(
     q: str,
@@ -74,20 +76,28 @@ async def get_public_profile(
 @profile_router.post(
     path="/change-email-request",
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(max_calls=5, window_seconds=300))],
 )
 async def change_email_request(
     data: ChangeEmailRequest,
     service: Annotated[
         ProfileService,
         Depends(ProfileService)
-    ]
+    ],
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ],
 ) -> JSONResponse:
-    return await service.change_email_request(data=data)
+    # Только для себя: код смены привязывается к текущему пользователю, чужой
+    # e-mail так не «занять» и письмами не завалить (плюс rate limit).
+    return await service.change_email_request(data=data, user=user)
 
 
 @profile_router.post(
     path="/confirm-new-email",
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(max_calls=10, window_seconds=300))],
 )
 async def confirm_new_email(
     confirmation_code: str,
@@ -109,6 +119,7 @@ async def confirm_new_email(
 @profile_router.post(
     path="/change-password",
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(max_calls=5, window_seconds=300))],
 )
 async def change_password(
     data: ChangePasswordRequest,
@@ -130,6 +141,7 @@ async def change_password(
 @profile_router.patch(
     path="/update",
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(max_calls=20, window_seconds=60))],
 )
 async def update_profile(
     data: UpdateProfileRequest,

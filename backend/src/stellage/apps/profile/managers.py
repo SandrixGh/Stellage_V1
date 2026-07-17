@@ -3,7 +3,7 @@ import uuid
 from fastapi import Depends
 from sqlalchemy import update, select, or_, func
 
-from stellage.apps.profile.schemas import ConfirmationCodeRequest, ProfileStats
+from stellage.apps.profile.schemas import ProfileStats
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.core.core_dependencies.redis_dependency import RedisDependency
 from stellage.database.enums.visibility import VisibilityEnum
@@ -142,6 +142,23 @@ class ProfileManager:
             return result.scalar_one_or_none()
 
 
+    async def is_email_taken(
+        self,
+        email: str,
+        exclude_user_id: uuid.UUID | str,
+    ) -> bool:
+        async with self.db.db_session() as session:
+            query = (
+                select(self.user_model.id)
+                .where(
+                    self.user_model.email == email,
+                    self.user_model.id != exclude_user_id,
+                )
+            )
+            result = await session.execute(query)
+            return result.scalar() is not None
+
+
     async def is_username_taken(
         self,
         username: str,
@@ -174,29 +191,67 @@ class ProfileManager:
             return result.scalar()
 
 
-    async def store_confirmation_code(
+    async def revoke_all_sessions(
         self,
-        confirmation_code_request: ConfirmationCodeRequest
+        user_id: uuid.UUID | str,
+        keep_session_id: str | None = None,
     ) -> None:
+        """Отзывает access/refresh-сессии пользователя (после смены пароля):
+        удаляет ключи {user_id}:* и refresh:{user_id}:*. Так угнанная сессия
+        перестаёт действовать сразу, а не живёт до истечения TTL. keep_session_id
+        (текущая сессия) сохраняется, чтобы не разлогинивать самого инициатора."""
+        keep = set()
+        if keep_session_id is not None:
+            keep = {
+                f"{user_id}:{keep_session_id}",
+                f"refresh:{user_id}:{keep_session_id}",
+            }
+        patterns = (f"{user_id}:*", f"refresh:{user_id}:*")
         async with self.redis.get_client() as client:
-            return await client.set(
-                f"{confirmation_code_request.confirmation_code}",
-                confirmation_code_request.email,
-                ex=3600
-            )
+            for pattern in patterns:
+                keys = [
+                    key
+                    async for key in client.scan_iter(match=pattern)
+                    if key not in keep
+                ]
+                if keys:
+                    await client.delete(*keys)
 
 
-    async def get_new_email_by_confirmation_code(
+    @staticmethod
+    def _email_change_key(user_id: uuid.UUID | str) -> str:
+        # Ключ привязан к пользователю: код смены e-mail действует ТОЛЬКО для
+        # того, кто его запросил. Раньше ключом был сам код (глобальный) — любой
+        # активный код срабатывал для любого юзера → перехват чужого e-mail.
+        return f"email_change:{user_id}"
+
+    async def store_email_change(
         self,
+        user_id: uuid.UUID | str,
+        new_email: str,
         confirmation_code: str,
-    ) -> str | None:
-        async with self.redis.get_client() as client:
-            return await client.get(f"{confirmation_code}")
-
-
-    async def remove_confirmation_code(
-        self,
-        confirmation_code: str
     ) -> None:
         async with self.redis.get_client() as client:
-            return await client.delete(f"{confirmation_code}")
+            await client.hset(
+                self._email_change_key(user_id),
+                mapping={"code": confirmation_code, "email": new_email},
+            )
+            await client.expire(self._email_change_key(user_id), 3600)
+
+    async def get_email_change(
+        self,
+        user_id: uuid.UUID | str,
+    ) -> tuple[str, str] | None:
+        """Возвращает (код, новый e-mail) незавершённой смены этого пользователя."""
+        async with self.redis.get_client() as client:
+            data = await client.hgetall(self._email_change_key(user_id))
+        if not data or "code" not in data or "email" not in data:
+            return None
+        return data["code"], data["email"]
+
+    async def remove_email_change(
+        self,
+        user_id: uuid.UUID | str,
+    ) -> None:
+        async with self.redis.get_client() as client:
+            await client.delete(self._email_change_key(user_id))

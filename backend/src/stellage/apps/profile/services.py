@@ -11,7 +11,6 @@ from stellage.apps.profile.schemas import (
     AvatarInitiateRequest,
     AvatarUploadTarget,
     ChangeEmailRequest,
-    ConfirmationCodeRequest,
     ChangePasswordRequest,
     PublicProfile,
     PublicUser,
@@ -158,18 +157,29 @@ class ProfileService:
     async def change_email_request(
         self,
         data: ChangeEmailRequest,
+        user: UserVerifySchema,
     ) -> JSONResponse:
+        # Нельзя запросить смену на уже занятый другим аккаунтом e-mail —
+        # иначе подтверждение упало бы на unique-constraint (500) в самом конце.
+        if await self.manager.is_email_taken(
+            email=str(data.new_email),
+            exclude_user_id=user.id,
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email already in use",
+            )
+
         confirmation_code = await self.handler.generate_confirmation_code(
             length=settings.confirmation_code_length,
         )
 
-        confirmation_code_request = ConfirmationCodeRequest(
-            email=data.new_email,
+        # Код привязан к пользователю (ключ email_change:{user_id}): подтвердить
+        # смену можно только для СВОЕГО аккаунта, чужим кодом чужой e-mail не занять.
+        await self.manager.store_email_change(
+            user_id=user.id,
+            new_email=str(data.new_email),
             confirmation_code=confirmation_code,
-        )
-
-        await self.manager.store_confirmation_code(
-            confirmation_code_request=confirmation_code_request
         )
 
         try:
@@ -197,23 +207,38 @@ class ProfileService:
         confirmation_code: str,
         user: UserVerifySchema,
     ) -> JSONResponse:
-        email = await self.manager.get_new_email_by_confirmation_code(
-            confirmation_code=confirmation_code,
-        )
-        if not email:
+        pending = await self.manager.get_email_change(user_id=user.id)
+        # Код сверяется с сохранённым ИМЕННО для этого пользователя. Нет
+        # незавершённой смены или код не совпал — 400, без утечки чужих кодов.
+        if pending is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid confirmation code"
+                detail="Invalid confirmation code",
+            )
+        stored_code, new_email = pending
+        if confirmation_code != stored_code:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid confirmation code",
+            )
+
+        # Гонка: e-mail мог быть занят между request и confirm — отдаём 409, а не 500.
+        if await self.manager.is_email_taken(
+            email=new_email,
+            exclude_user_id=user.id,
+        ):
+            await self.manager.remove_email_change(user_id=user.id)
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email already in use",
             )
 
         await self.manager.update_user_fields(
             user_id=user.id,
-            email=email,
+            email=new_email,
         )
 
-        await self.manager.remove_confirmation_code(
-            confirmation_code=confirmation_code
-        )
+        await self.manager.remove_email_change(user_id=user.id)
 
         response = JSONResponse(
             content={"message": "Email changing was successful"}
@@ -251,6 +276,13 @@ class ProfileService:
         await self.manager.update_user_fields(
             user_id=user.id,
             hashed_password=new_hashed_password,
+        )
+
+        # Смена пароля выкидывает все ОСТАЛЬНЫЕ сессии (кроме текущей): если
+        # аккаунт был скомпрометирован, чужая сессия перестаёт работать сразу.
+        await self.manager.revoke_all_sessions(
+            user_id=user.id,
+            keep_session_id=str(user.session_id) if user.session_id else None,
         )
 
         response = JSONResponse(content={"message": "Changing password was successful"})
