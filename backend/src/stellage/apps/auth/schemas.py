@@ -59,6 +59,24 @@ class UserVerifySchema(GetUserByID, GetUserByEmail):
     is_superuser: bool = False
 
 
+class DeviceAccount(BaseModel):
+    """Один аккаунт, залогиненный на этом устройстве, для меню быстрого
+    переключения. Хранится в подписанной cookie (id + session_id) — по ним
+    сервер поднимает живую refresh-сессию и перевыпускает cookie без пароля."""
+    id: uuid.UUID | str
+    session_id: str
+
+
+class DeviceAccountView(BaseModel):
+    """Отображаемая карточка аккаунта устройства (для /auth/sessions)."""
+    id: uuid.UUID | str
+    email: EmailStr
+    username: str | None = None
+    nickname: str | None = None
+    avatar_url: str | None = None
+    is_current: bool = False
+
+
 class UserWithBoxInstances(UserReturnData):
     boxes: list["BoxInstanceReturn"] = []
 

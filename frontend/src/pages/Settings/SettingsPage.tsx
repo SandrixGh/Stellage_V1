@@ -6,6 +6,7 @@ import { useThemeStore } from "../../store/useThemeStore";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { Avatar } from "../../components/UI/Avatar";
 import { AvatarCropper } from "../../components/Profile/AvatarCropper";
+import { DeviceAccounts } from "../../components/Profile/DeviceAccounts";
 import {
     AVATAR_MIME_TYPES,
     avatarErrorMessage,
@@ -240,6 +241,8 @@ export const SettingsPage = () => {
                         <button className="profile-row-action" disabled>Скоро</button>
                     </div>
                 </section>
+
+                <DeviceAccounts />
 
                 <section className="profile-card profile-card-danger">
                     <h2 className="profile-card-title">Сессия и аккаунт</h2>

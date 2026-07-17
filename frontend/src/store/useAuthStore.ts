@@ -2,8 +2,8 @@ import { create } from "zustand";
 import axios from "axios";
 import type { UserVerifySchema } from "../types/Auth/auth";
 import { api, setOnSessionExpired } from "../api/instance";
+import { switchAccount } from "../api/sessions";
 import { useStellageStore } from "./useStellageStore";
-import { useAccountsStore } from "./useAccountsStore";
 
 interface AuthState {
     user: UserVerifySchema | null;
@@ -15,6 +15,8 @@ interface AuthState {
     delete_account: () => Promise<void>;
     getUser: () => Promise<void>;
     clearSession: () => void;
+    // Мгновенное переключение на другой аккаунт устройства без пароля.
+    switchTo: (userId: string) => Promise<void>;
     updateProfile: (data: { username?: string; nickname?: string; bio?: string }) => Promise<void>;
 }
 
@@ -27,12 +29,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
             const res = await api.get<UserVerifySchema>("/auth/get-user");
             set({user: res.data, isAuthenticated: true, isInitialized: true});
-            // Запоминаем аккаунт для меню быстрого переключения.
-            useAccountsStore.getState().remember({
-                email: res.data.email,
-                username: res.data.username,
-                nickname: res.data.nickname,
-            });
         } catch (error) {
             // Only treat a real 401 (no/invalid session) as logged out.
             // Transient/network errors must not flip an authenticated user out.
@@ -66,6 +62,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     clearSession: () => {
         set({ user: null, isAuthenticated: false });
         useStellageStore.getState().reset();
+    },
+
+    // Переключение на другой аккаунт устройства без пароля: сервер перевыпускает
+    // cookie активного аккаунта, затем перечитываем пользователя.
+    switchTo: async (userId) => {
+        useStellageStore.getState().reset();
+        await switchAccount(userId);
+        await get().getUser();
     },
 
     updateProfile: async (data) => {

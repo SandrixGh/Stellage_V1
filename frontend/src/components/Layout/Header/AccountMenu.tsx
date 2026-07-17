@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../../store/useAuthStore";
-import { useAccountsStore } from "../../../store/useAccountsStore";
+import { getDeviceAccounts, type DeviceAccount } from "../../../api/sessions";
 import { Avatar } from "../../UI/Avatar";
 import "./AccountMenu.css";
 
@@ -11,30 +11,25 @@ interface AccountMenuProps {
 }
 
 /**
- * Меню профиля в шапке с быстрым переключением аккаунтов. Так как сессия — одна
- * cookie на браузер, «переключение» = выйти из текущего и открыть логин с
- * предзаполненным email выбранного аккаунта (пароль вводится). Никакие секреты
- * в браузере не хранятся — только список отображаемых данных.
+ * Меню профиля в шапке. Показывает текущий аккаунт и — если на устройстве
+ * залогинен ещё кто-то — быстрый список для переключения БЕЗ пароля (сессии
+ * ведёт сервер). Полное управление аккаунтами устройства — в Настройках.
  */
 export const AccountMenu = ({ avatarUrl }: AccountMenuProps) => {
-    const { user, logout } = useAuthStore();
-    const { accounts, remember, forget } = useAccountsStore();
+    const { user, logout, switchTo } = useAuthStore();
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
+    const [others, setOthers] = useState<DeviceAccount[]>([]);
+    const [switching, setSwitching] = useState<string | null>(null);
     const rootRef = useRef<HTMLDivElement>(null);
 
-    // Дописываем свежий аватар в запись текущего аккаунта, чтобы в меню у
-    // остальных вкладок он тоже показывался.
+    // Подтягиваем другие аккаунты устройства при открытии меню.
     useEffect(() => {
-        if (user?.email && avatarUrl) {
-            remember({
-                email: user.email,
-                username: user.username,
-                nickname: user.nickname,
-                avatarUrl,
-            });
-        }
-    }, [user?.email, user?.username, user?.nickname, avatarUrl, remember]);
+        if (!open) return;
+        getDeviceAccounts()
+            .then((list) => setOthers(list.filter((a) => !a.is_current)))
+            .catch(() => setOthers([]));
+    }, [open]);
 
     // Клик вне меню — закрыть.
     useEffect(() => {
@@ -48,23 +43,18 @@ export const AccountMenu = ({ avatarUrl }: AccountMenuProps) => {
         return () => document.removeEventListener("mousedown", onClick);
     }, [open]);
 
-    const currentEmail = user?.email?.toLowerCase();
-    const others = accounts.filter((a) => a.email.toLowerCase() !== currentEmail);
-
     const label = (email: string, username?: string | null, nickname?: string | null) =>
         nickname?.trim() || (username ? `@${username}` : email);
 
-    const switchTo = async (email: string) => {
-        setOpen(false);
-        // Освобождаем единственную cookie, затем открываем логин с prefill.
-        await logout();
-        navigate("/login", { state: { prefillEmail: email } });
-    };
-
-    const addAccount = async () => {
-        setOpen(false);
-        await logout();
-        navigate("/login");
+    const handleSwitch = async (id: string) => {
+        setSwitching(id);
+        try {
+            await switchTo(id);
+            setOpen(false);
+            navigate("/");
+        } finally {
+            setSwitching(null);
+        }
     };
 
     return (
@@ -83,7 +73,7 @@ export const AccountMenu = ({ avatarUrl }: AccountMenuProps) => {
                     className="header-avatar"
                 />
                 <span className="account-trigger-name">
-                    {user?.username ? `@${user.username}` : user?.email}
+                    {user?.nickname?.trim() || (user?.username ? `@${user.username}` : user?.email)}
                 </span>
                 <svg
                     className="account-chevron"
@@ -127,43 +117,43 @@ export const AccountMenu = ({ avatarUrl }: AccountMenuProps) => {
                     {others.length > 0 && (
                         <>
                             <div className="account-divider" />
-                            <div className="account-section-title">Сменить аккаунт</div>
+                            <div className="account-section-title">Быстрое переключение</div>
                             {others.map((a) => (
-                                <div key={a.email} className="account-row account-row-switch">
-                                    <button
-                                        type="button"
-                                        className="account-row-main"
-                                        onClick={() => switchTo(a.email)}
-                                    >
-                                        <Avatar
-                                            url={a.avatarUrl ?? null}
-                                            name={a.nickname?.trim() || a.email}
-                                            size={36}
-                                        />
-                                        <span className="account-row-text">
-                                            <span className="account-row-name">
-                                                {label(a.email, a.username, a.nickname)}
-                                            </span>
-                                            <span className="account-row-sub">{a.email}</span>
+                                <button
+                                    key={a.id}
+                                    type="button"
+                                    className="account-row account-row-switch"
+                                    onClick={() => handleSwitch(a.id)}
+                                    disabled={switching !== null}
+                                >
+                                    <Avatar
+                                        url={a.avatar_url}
+                                        name={a.nickname?.trim() || a.email}
+                                        size={36}
+                                    />
+                                    <span className="account-row-text">
+                                        <span className="account-row-name">
+                                            {label(a.email, a.username, a.nickname)}
                                         </span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="account-forget"
-                                        title="Убрать из списка"
-                                        aria-label="Убрать из списка"
-                                        onClick={() => forget(a.email)}
-                                    >
-                                        ×
-                                    </button>
-                                </div>
+                                        <span className="account-row-sub">
+                                            {switching === a.id ? "Переключаем…" : a.email}
+                                        </span>
+                                    </span>
+                                </button>
                             ))}
                         </>
                     )}
 
                     <div className="account-divider" />
-                    <button type="button" className="account-action" onClick={addAccount}>
-                        + Добавить аккаунт
+                    <button
+                        type="button"
+                        className="account-action"
+                        onClick={() => {
+                            setOpen(false);
+                            navigate("/settings");
+                        }}
+                    >
+                        Аккаунты и настройки
                     </button>
                     <button
                         type="button"

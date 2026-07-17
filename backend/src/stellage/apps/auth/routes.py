@@ -4,7 +4,12 @@ from fastapi import APIRouter, status, Depends, Request
 from starlette.responses import JSONResponse
 
 from stellage.apps.auth.depends import get_current_user
-from stellage.apps.auth.schemas import UserReturnData, AuthUser, UserVerifySchema
+from stellage.apps.auth.schemas import (
+    UserReturnData,
+    AuthUser,
+    UserVerifySchema,
+    DeviceAccountView,
+)
 from stellage.apps.auth.services import UserService
 from stellage.core.rate_limit import rate_limit
 
@@ -12,6 +17,8 @@ auth_router = APIRouter(
     prefix="/auth",
     tags=["auth"]
 )
+
+DEVICE_COOKIE = "DeviceAccounts"
 
 @auth_router.post(
     path="/register",
@@ -52,12 +59,16 @@ async def confirm_registration(
 )
 async def login_user(
     user: AuthUser,
+    request: Request,
     service: Annotated[
         UserService,
         Depends(UserService)
     ],
 ) -> JSONResponse:
-    return await service.login_user(user=user)
+    return await service.login_user(
+        user=user,
+        device_cookie=request.cookies.get(DEVICE_COOKIE),
+    )
 
 
 @auth_router.post(
@@ -73,14 +84,43 @@ async def refresh_session(
     ],
 ) -> JSONResponse:
     refresh_token = request.cookies.get("RefreshToken")
-    return await service.refresh_session(refresh_token=refresh_token)
+    return await service.refresh_session(
+        refresh_token=refresh_token,
+        device_cookie=request.cookies.get(DEVICE_COOKIE),
+    )
+
+
+@auth_router.get(
+    path="/sessions",
+    status_code=status.HTTP_200_OK,
+    response_model=list[DeviceAccountView],
+)
+async def list_sessions(
+    request: Request,
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ],
+    service: Annotated[
+        UserService,
+        Depends(UserService)
+    ],
+) -> list[DeviceAccountView]:
+    """Аккаунты этого устройства для меню быстрого переключения."""
+    return await service.list_device_accounts(
+        current_user_id=user.id,
+        device_cookie=request.cookies.get(DEVICE_COOKIE),
+    )
 
 
 @auth_router.post(
-    path="/logout",
+    path="/switch/{target_user_id}",
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(max_calls=20, window_seconds=60))],
 )
-async def logout(
+async def switch_account(
+    target_user_id: str,
+    request: Request,
     user: Annotated[
         UserVerifySchema,
         Depends(get_current_user)
@@ -90,7 +130,56 @@ async def logout(
         Depends(UserService)
     ],
 ) -> JSONResponse:
-    return await service.logout_user(user=user)
+    """Мгновенно переключиться на другой аккаунт устройства без пароля."""
+    return await service.switch_account(
+        target_user_id=target_user_id,
+        device_cookie=request.cookies.get(DEVICE_COOKIE),
+    )
+
+
+@auth_router.delete(
+    path="/sessions/{target_user_id}",
+    status_code=status.HTTP_200_OK,
+)
+async def unlink_session(
+    target_user_id: str,
+    request: Request,
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ],
+    service: Annotated[
+        UserService,
+        Depends(UserService)
+    ],
+) -> JSONResponse:
+    """Убрать чужой аккаунт из устройства (revoke + удаление из cookie)."""
+    return await service.unlink_device_account(
+        target_user_id=target_user_id,
+        current_user_id=user.id,
+        device_cookie=request.cookies.get(DEVICE_COOKIE),
+    )
+
+
+@auth_router.post(
+    path="/logout",
+    status_code=status.HTTP_200_OK,
+)
+async def logout(
+    request: Request,
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ],
+    service: Annotated[
+        UserService,
+        Depends(UserService)
+    ],
+) -> JSONResponse:
+    return await service.logout_user(
+        user=user,
+        device_cookie=request.cookies.get(DEVICE_COOKIE),
+    )
 
 
 @auth_router.get(
@@ -112,6 +201,7 @@ async def get_auth_user(
     status_code=status.HTTP_200_OK
 )
 async def delete_account(
+    request: Request,
     user: Annotated[
         UserVerifySchema,
         Depends(get_current_user)
@@ -123,4 +213,5 @@ async def delete_account(
 ) -> JSONResponse:
     return await service.delete_account(
         user=user,
+        device_cookie=request.cookies.get(DEVICE_COOKIE),
     )
