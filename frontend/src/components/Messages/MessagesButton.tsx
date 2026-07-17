@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { getUnreadMessages } from "../../api/messages";
+import { messagesSocket } from "../../api/messagesSocket";
 import "./MessagesButton.css";
 
-const POLL_MS = 30_000;
-
-/** Иконка личных сообщений в шапке с бейджем непрочитанного (опрос раз в 30с). */
+/**
+ * Иконка личных сообщений в шапке с бейджем непрочитанного. Счётчик обновляется
+ * в реальном времени: первичное значение — один запрос при монтировании, дальше
+ * пересчитываем на WS-события (новое сообщение / прочтение), без поллинга.
+ */
 export const MessagesButton = () => {
     const [unread, setUnread] = useState(0);
 
@@ -15,8 +18,16 @@ export const MessagesButton = () => {
 
     useEffect(() => {
         refresh();
-        const t = setInterval(refresh, POLL_MS);
-        return () => clearInterval(t);
+        const unsubscribe = messagesSocket.subscribe((event) => {
+            if (
+                event.type === "message.new" ||
+                event.type === "message.read" ||
+                event.type === "message.delete"
+            ) {
+                refresh();
+            }
+        });
+        return unsubscribe;
     }, [refresh]);
 
     return (

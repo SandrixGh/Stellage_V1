@@ -23,6 +23,9 @@ export interface MessageItem {
     gift_instance_id: string | null;
     gift_box_title: string | null;
     gift_box_rarity: string | null;
+    // Клиентское: оптимистично вставленное, ещё не подтверждённое сервером.
+    // Сервер это поле не присылает.
+    pending?: boolean;
 }
 
 export interface ConversationPreview {

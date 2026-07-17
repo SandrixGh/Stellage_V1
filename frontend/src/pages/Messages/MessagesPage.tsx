@@ -19,10 +19,26 @@ import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { MessageMediaLightbox } from "./MessageMediaLightbox";
 import { resolveRarityVisual } from "../../data/mockTemplates";
 import { useAuthStore } from "../../store/useAuthStore";
+import { messagesSocket, type MessageEvent } from "../../api/messagesSocket";
 import "./MessagesPage.css";
 
-const POLL_MS = 12_000;
 const PAGE_SIZE = 40; // совпадает с backend limit — так понимаем, есть ли ещё
+
+/** Хронологическая сортировка по (created_at, id) — тот же порядок, что на бэке. */
+const byChrono = (a: MessageItem, b: MessageItem): number => {
+    const ta = new Date(a.created_at).getTime();
+    const tb = new Date(b.created_at).getTime();
+    if (ta !== tb) return ta - tb;
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+};
+
+/** Слияние без дублей по id (входящее эхо/оптимистичная вставка/догрузка). */
+const mergeById = (prev: MessageItem[], incoming: MessageItem[]): MessageItem[] => {
+    const map = new Map<string, MessageItem>();
+    for (const m of prev) map.set(m.id, m);
+    for (const m of incoming) map.set(m.id, m); // свежее серверное побеждает
+    return [...map.values()].sort(byChrono);
+};
 
 const timeAgo = (iso: string): string => {
     const d = new Date(iso);
@@ -95,6 +111,12 @@ export const MessagesPage = () => {
     const bodyRef = useRef<HTMLDivElement>(null);
     const attachRef = useRef<HTMLDivElement>(null);
     const composeRef = useRef<HTMLTextAreaElement>(null);
+    // Актуальный username открытого диалога — чтобы async-колбэки (WS, отправка,
+    // догрузка) не писали в уже сменившийся диалог (гонка при переключении).
+    const usernameRef = useRef<string | undefined>(username);
+    usernameRef.current = username;
+    // Синхронный барьер против двойной отправки по Enter (setState асинхронный).
+    const sendingRef = useRef(false);
 
     // Авторост поля ввода под текст (до max-height из CSS).
     const growCompose = () => {
@@ -107,7 +129,8 @@ export const MessagesPage = () => {
     const loadConversations = useCallback(() => {
         getConversations()
             .then(setConversations)
-            .catch(() => setConversations([]));
+            // При ошибке НЕ стираем список — временный сбой не должен опустошать UI.
+            .catch(() => {});
     }, []);
 
     useEffect(() => {
@@ -141,9 +164,11 @@ export const MessagesPage = () => {
         setError(null);
         setEditingId(null);
         setStaged(null);
+        setMessages([]); // чистим ленту прошлого диалога сразу, до загрузки
         getConversation(username)
             .then((m) => {
-                if (cancelled) return;
+                // Игнорируем ответ, если диалог уже сменился (гонка).
+                if (cancelled || usernameRef.current !== username) return;
                 setMessages(m);
                 setHasMore(m.length >= PAGE_SIZE);
                 // Прочтение — отдельным запросом (GET ленты больше не мутирует БД).
@@ -159,32 +184,57 @@ export const MessagesPage = () => {
                     })
                     .catch(() => {});
             })
-            .catch(() => !cancelled && setMessages([]))
+            // При ошибке НЕ стираем уже показанное — просто отметим сбой.
+            .catch(() => {
+                if (!cancelled && usernameRef.current === username) {
+                    setError("Не удалось загрузить переписку.");
+                }
+            })
             .finally(() => !cancelled && setLoadingThread(false));
         return () => {
             cancelled = true;
         };
     }, [username]);
 
-    // Лёгкое автообновление открытого диалога.
+    // Real-time поток: применяем WS-события открытого диалога к ленте и всегда —
+    // к списку диалогов/бейджам (событие может прийти по другому собеседнику).
     useEffect(() => {
-        if (!username) return;
-        const id = setInterval(async () => {
-            try {
-                const fresh = await getConversation(username);
-                setMessages((prev) => {
-                    if (prev.length === 0) return fresh;
-                    const lastKnown = prev[prev.length - 1]?.created_at ?? "";
-                    const newer = fresh.filter((m) => m.created_at > lastKnown);
-                    if (newer.length === 0) return fresh.length >= prev.length ? fresh : prev;
-                    return [...prev, ...newer];
-                });
-            } catch {
-                /* тихо — следующий тик попробует снова */
+        if (!isAuthenticated) return;
+        const unsubscribe = messagesSocket.subscribe((event: MessageEvent) => {
+            // Событие относится к текущему открытому диалогу?
+            const forOpen = !!event.peer && event.peer === usernameRef.current;
+
+            if (event.type === "message.new") {
+                if (forOpen) {
+                    setMessages((prev) => mergeById(prev, [event.message]));
+                    // Входящее в открытый диалог сразу помечаем прочитанным.
+                    if (!event.message.is_mine && usernameRef.current) {
+                        markConversationRead(usernameRef.current).catch(() => {});
+                    }
+                }
+                // Список диалогов пересобираем (превью/порядок/непрочитанные).
+                loadConversations();
+            } else if (event.type === "message.edit") {
+                if (forOpen) {
+                    setMessages((prev) => mergeById(prev, [event.message]));
+                }
+                loadConversations();
+            } else if (event.type === "message.delete") {
+                if (forOpen) {
+                    setMessages((prev) => prev.filter((m) => m.id !== event.id));
+                }
+                loadConversations();
+            } else if (event.type === "message.read") {
+                // Собеседник прочитал наши сообщения — проставляем галочки «прочитано».
+                if (forOpen) {
+                    setMessages((prev) =>
+                        prev.map((m) => (m.is_mine ? { ...m, is_read: true } : m)),
+                    );
+                }
             }
-        }, POLL_MS);
-        return () => clearInterval(id);
-    }, [username]);
+        });
+        return unsubscribe;
+    }, [isAuthenticated, loadConversations]);
 
     // Автопрокрутка к последнему сообщению при изменении хвоста ленты — только
     // если пользователь и так внизу (не отрываем от чтения истории).
@@ -197,6 +247,16 @@ export const MessagesPage = () => {
 
     const scrollToBottom = () => {
         listEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    };
+
+    // Медиа грузится лениво: высота ленты вырастает уже после рендера. Если
+    // пользователь был внизу — догоняем скролл после загрузки картинки/видео,
+    // иначе последнее фото «уезжает» за нижний край.
+    const onMediaLoad = () => {
+        const el = bodyRef.current;
+        if (!el) return;
+        const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 280;
+        if (nearBottom) listEndRef.current?.scrollIntoView({ block: "end" });
     };
 
     // Следим за прокруткой ленты — показываем кнопку «вниз», когда ушли вверх.
@@ -234,58 +294,106 @@ export const MessagesPage = () => {
         const prevHeight = container?.scrollHeight ?? 0;
         try {
             const older = await getConversation(username, oldest, oldestId);
-            setMessages((prev) => [...older, ...prev]);
+            // Диалог мог смениться, пока грузили — не подмешиваем в чужую ленту.
+            if (usernameRef.current !== username) return;
+            setMessages((prev) => mergeById(prev, older));
             setHasMore(older.length >= PAGE_SIZE);
             requestAnimationFrame(() => {
                 if (container) container.scrollTop = container.scrollHeight - prevHeight;
             });
         } catch {
-            /* игнорируем */
+            /* игнорируем — кнопка «Показать раньше» останется, можно повторить */
         } finally {
             setLoadingMore(false);
         }
     };
 
     // Единая отправка: если есть прикреплённый файл — шлём его с подписью
-    // (draft), иначе — обычный текст.
+    // (draft), иначе — обычный текст. sendingRef — синхронный барьер против
+    // двойной отправки по Enter (setState(sending) применяется не сразу).
     const handleSend = async () => {
-        if (!username || sending || uploadPct !== null) return;
+        if (!username || sendingRef.current || uploadPct !== null) return;
         const text = draft.trim();
+        const target = username;
 
         if (staged) {
+            sendingRef.current = true;
             setSending(true);
             setError(null);
             setUploadPct(0);
             try {
-                const msg = await sendAttachment(username, staged.file, text, (f) =>
+                const msg = await sendAttachment(target, staged.file, text, (f) =>
                     setUploadPct(Math.round(f * 100)),
                 );
-                setMessages((prev) => [...prev, msg]);
-                setDraft("");
-                setStaged(null);
-                loadConversations();
+                // Вложение уехало — не подмешиваем в чужой диалог, если переключились.
+                if (usernameRef.current === target) {
+                    setMessages((prev) => mergeById(prev, [msg]));
+                    setDraft("");
+                    setStaged(null);
+                    loadConversations();
+                    requestAnimationFrame(() =>
+                        listEndRef.current?.scrollIntoView({ block: "end" }),
+                    );
+                }
             } catch (err) {
                 setError(uploadErrorMessage(err));
             } finally {
                 setUploadPct(null);
                 setSending(false);
+                sendingRef.current = false;
             }
             return;
         }
 
         if (!text) return;
+        // Оптимистичная вставка с временным id и статусом «отправляется».
+        const tempId = `temp:${crypto.randomUUID()}`;
+        const optimistic: MessageItem = {
+            id: tempId,
+            kind: "text",
+            text,
+            is_read: false,
+            is_mine: true,
+            created_at: new Date().toISOString(),
+            edited: false,
+            asset_url: null,
+            asset_kind: null,
+            asset_mime: null,
+            asset_name: null,
+            gift_instance_id: null,
+            gift_box_title: null,
+            gift_box_rarity: null,
+            pending: true,
+        };
+        sendingRef.current = true;
         setSending(true);
         setError(null);
+        setMessages((prev) => mergeById(prev, [optimistic]));
+        setDraft("");
+        if (composeRef.current) composeRef.current.style.height = "auto";
+        requestAnimationFrame(() =>
+            listEndRef.current?.scrollIntoView({ block: "end" }),
+        );
         try {
-            const msg = await sendMessage(username, text);
-            setMessages((prev) => [...prev, msg]);
-            setDraft("");
-            if (composeRef.current) composeRef.current.style.height = "auto";
-            loadConversations();
+            const msg = await sendMessage(target, text);
+            if (usernameRef.current === target) {
+                // Реальным сообщением заменяем оптимистичное (убираем temp).
+                setMessages((prev) =>
+                    mergeById(
+                        prev.filter((m) => m.id !== tempId),
+                        [msg],
+                    ),
+                );
+                loadConversations();
+            }
         } catch {
+            // Отправка не удалась — убираем оптимистичное и возвращаем текст.
+            setMessages((prev) => prev.filter((m) => m.id !== tempId));
+            setDraft((d) => d || text);
             setError("Не удалось отправить сообщение.");
         } finally {
             setSending(false);
+            sendingRef.current = false;
         }
     };
 
@@ -323,7 +431,7 @@ export const MessagesPage = () => {
         if (!text) return;
         try {
             const updated = await editMessage(id, text);
-            setMessages((prev) => prev.map((m) => (m.id === id ? updated : m)));
+            setMessages((prev) => mergeById(prev, [updated]));
             setEditingId(null);
         } catch {
             setError("Не удалось изменить сообщение.");
@@ -389,19 +497,31 @@ export const MessagesPage = () => {
                     <div className="msg-thread-empty">Выберите диалог слева.</div>
                 ) : (
                     <>
-                        <button
-                            type="button"
-                            className="msg-thread-head"
-                            onClick={() => navigate(`/u/${username}`)}
-                        >
-                            <Avatar url={peer?.avatar_url} name={peerName} size={40} />
-                            <span className="msg-thread-head-text">
-                                <span className="msg-thread-head-name">{peerName}</span>
-                                {peer?.username && (
-                                    <span className="msg-thread-head-sub">@{peer.username}</span>
-                                )}
-                            </span>
-                        </button>
+                        <div className="msg-thread-head">
+                            {/* Назад к списку — только на узком экране, где список скрыт. */}
+                            <button
+                                type="button"
+                                className="msg-thread-back"
+                                onClick={() => navigate("/messages")}
+                                aria-label="К списку диалогов"
+                                title="К списку диалогов"
+                            >
+                                ‹
+                            </button>
+                            <button
+                                type="button"
+                                className="msg-thread-head-main"
+                                onClick={() => navigate(`/u/${username}`)}
+                            >
+                                <Avatar url={peer?.avatar_url} name={peerName} size={40} />
+                                <span className="msg-thread-head-text">
+                                    <span className="msg-thread-head-name">{peerName}</span>
+                                    {peer?.username && (
+                                        <span className="msg-thread-head-sub">@{peer.username}</span>
+                                    )}
+                                </span>
+                            </button>
+                        </div>
 
                         <div className="msg-thread-body" ref={bodyRef} onScroll={onBodyScroll}>
                             {hasMore && (
@@ -453,6 +573,7 @@ export const MessagesPage = () => {
                                                 onSaveEdit={() => saveEdit(m.id)}
                                                 onDelete={() => handleDelete(m.id)}
                                                 onOpenMedia={() => setLightbox(m)}
+                                                onMediaLoad={onMediaLoad}
                                                 onOpenGift={
                                                     m.gift_instance_id
                                                         ? () => navigate(`/box/instance/${m.gift_instance_id}`)
@@ -592,6 +713,7 @@ interface BubbleProps {
     onSaveEdit: () => void;
     onDelete: () => void;
     onOpenMedia: () => void;
+    onMediaLoad: () => void;
     onOpenGift?: () => void;
 }
 
@@ -606,6 +728,7 @@ const MessageBubble = ({
     onSaveEdit,
     onDelete,
     onOpenMedia,
+    onMediaLoad,
     onOpenGift,
 }: BubbleProps) => {
     // Системная карточка подарка — крупная плитка с визуалом коробки.
@@ -651,10 +774,17 @@ const MessageBubble = ({
                     alt={m.asset_name ?? "Фото"}
                     loading="lazy"
                     onClick={onOpenMedia}
+                    onLoad={onMediaLoad}
                 />
             )}
             {hasMedia && !isPhoto && (
-                <video className="msg-media" src={m.asset_url!} controls preload="metadata" />
+                <video
+                    className="msg-media"
+                    src={m.asset_url!}
+                    controls
+                    preload="metadata"
+                    onLoadedMetadata={onMediaLoad}
+                />
             )}
 
             {editing ? (
@@ -686,15 +816,17 @@ const MessageBubble = ({
                 {m.is_mine && (
                     <span
                         className={`msg-bubble-ticks${m.is_read ? " read" : ""}`}
-                        title={m.is_read ? "Прочитано" : "Отправлено"}
+                        title={m.pending ? "Отправляется" : m.is_read ? "Прочитано" : "Отправлено"}
                         aria-hidden="true"
                     >
-                        {m.is_read ? "✓✓" : "✓"}
+                        {m.pending ? "🕓" : m.is_read ? "✓✓" : "✓"}
                     </span>
                 )}
             </span>
 
-            {m.is_mine && !editing && (
+            {/* Действия — только для подтверждённого своего сообщения (у
+                оптимистичного id ещё временный, править/удалять нечего). */}
+            {m.is_mine && !editing && !m.pending && (
                 <div className="msg-bubble-actions">
                     {m.text !== null && (
                         <button type="button" onClick={onStartEdit} title="Изменить">
