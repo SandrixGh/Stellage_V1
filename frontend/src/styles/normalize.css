@@ -111,11 +111,6 @@ html {
    */
   height: 100%;
   /**
-    Убираем скачок интерфейса по горизонтали
-    при появлении / исчезновении скроллбара
-   */
-  scrollbar-gutter: stable;
-  /**
     Плавный скролл
    */
   scroll-behavior: smooth;
@@ -131,6 +126,12 @@ body {
     Унифицированный интерлиньяж
    */
   line-height: 1.5;
+  /**
+    Базовый шрифт на body, а не только на .app-content: порталы (модалки,
+    попапы) рендерятся в document.body вне .app-content и без этого наследуют
+    системный шрифт вместо Inter/Manrope.
+   */
+  font-family: var(--font-body);
   /**
     Тёмный фон страницы — иначе дорожка скроллбара просвечивает белым
    */
@@ -223,32 +224,17 @@ svg * {
   }
 }
 
-/* ===== CUSTOM SCROLLBAR ===== */
-/* Auth pages use overflow:hidden (Auth.css) so these rules never apply there. */
+/* ===== СКРОЛЛБАРЫ СКРЫТЫ ВЕЗДЕ ===== */
+/* Прокрутка работает (колесо/тач/клавиши), но полосы не рисуются нигде —
+   ни на странице, ни во внутренних скролл-контейнерах, ни в модалках. */
 
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(var(--ink-rgb), 0.22);
-    border-radius: 999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(var(--ink-rgb), 0.42);
-}
-
-::-webkit-scrollbar-corner {
-    background: transparent;
+    width: 0;
+    height: 0;
+    display: none;
 }
 
 * {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(var(--ink-rgb), 0.22) transparent;
+    scrollbar-width: none;          /* Firefox */
+    -ms-overflow-style: none;       /* старый Edge/IE */
 }

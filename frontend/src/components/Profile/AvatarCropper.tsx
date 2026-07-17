@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useBodyScrollLock } from "../../hooks/useBodyScrollLock";
 import "./AvatarCropper.css";
 
 interface AvatarCropperProps {
@@ -72,6 +73,7 @@ export const AvatarCropper = ({ file, onCancel, onCrop }: AvatarCropperProps) =>
     const [minScale, setMinScale] = useState(1);
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const [busy, setBusy] = useState(false);
+    useBodyScrollLock();
     const drag = useRef<{ x: number; y: number } | null>(null);
     const stageRef = useRef<HTMLDivElement>(null);
 

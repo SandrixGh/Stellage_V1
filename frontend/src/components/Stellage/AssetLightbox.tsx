@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { getAssetUrl } from "../../api/assets";
 import type { BoxAsset } from "../../types/Stellage/boxes";
+import { useBodyScrollLock } from "../../hooks/useBodyScrollLock";
 import "./AssetLightbox.css";
 
 interface AssetLightboxProps {
@@ -22,6 +23,7 @@ export const AssetLightbox = ({ assets, startIndex, onClose }: AssetLightboxProp
     const [url, setUrl] = useState<string | null>(null);
     const [failed, setFailed] = useState(false);
     const retried = useRef(false);
+    useBodyScrollLock();
 
     const count = assets.length;
     const asset = assets[index];

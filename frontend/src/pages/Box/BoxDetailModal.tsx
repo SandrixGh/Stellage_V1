@@ -13,6 +13,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
 import { rarityKey } from "../../utils/rarity";
 import { resolveRarityVisual, resolveBoxContentType } from "../../data/mockTemplates";
+import { useBodyScrollLock } from "../../hooks/useBodyScrollLock";
 import {
     ACCEPT_ATTR,
     MAX_ASSETS_PER_BOX,
@@ -108,6 +109,9 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     // Загрузка/удаление ассетов (режим редактирования).
     const [uploadProgress, setUploadProgress] = useState<number | null>(null);
     const [assetError, setAssetError] = useState<string | null>(null);
+
+    // Блокируем прокрутку страницы, пока модалка открыта (current != null).
+    useBodyScrollLock(!!current);
 
     // Синхронизируем локальную копию и сбрасываем режим при смене коробки.
     useEffect(() => {

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { getFollowers, getFollowing } from "../../api/social";
 import { Avatar } from "../UI/Avatar";
 import type { PublicUser } from "../../types/Profile/profile";
+import { useBodyScrollLock } from "../../hooks/useBodyScrollLock";
 import "./FollowListModal.css";
 
 interface FollowListModalProps {
@@ -20,6 +21,7 @@ const TITLE = {
 /** Список людей (подписчики или подписки) с аватарами и ссылками на профиль. */
 export const FollowListModal = ({ username, mode, onClose }: FollowListModalProps) => {
     const [users, setUsers] = useState<PublicUser[] | null>(null);
+    useBodyScrollLock();
 
     useEffect(() => {
         let cancelled = false;

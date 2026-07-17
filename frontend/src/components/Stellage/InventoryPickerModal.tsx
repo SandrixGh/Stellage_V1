@@ -5,21 +5,35 @@ import { BoxFilterBar } from "./BoxFilterBar";
 import { rarityKey } from "../../utils/rarity";
 import { resolveRarityVisual, resolveBoxContentType } from "../../data/mockTemplates";
 import { filterBoxes, collectRarities, type BoxSort } from "../../utils/boxFilters";
+import { useBodyScrollLock } from "../../hooks/useBodyScrollLock";
 import "./InventoryPickerModal.css";
 
 interface InventoryPickerModalProps {
-    /** Коробки инвентаря, доступные для постановки (shelf_id === null). */
+    /** Коробки, из которых выбирает пользователь (набор решает вызывающая
+     *  сторона — например, только со shelf_id === null для постановки на полку,
+     *  или весь инвентарь для дарения). */
     boxes: Box[];
     onPick: (instanceId: string) => void;
     onClose: () => void;
     disabled?: boolean;
+    /** Заголовок/подсказка — переопределяются для сценариев помимо «на полку». */
+    title?: string;
+    hint?: string;
 }
 
 /** Модалка «Добавить коробку на полку»: поиск + фильтр по редкости + сортировка. */
-export const InventoryPickerModal = ({ boxes, onPick, onClose, disabled }: InventoryPickerModalProps) => {
+export const InventoryPickerModal = ({
+    boxes,
+    onPick,
+    onClose,
+    disabled,
+    title = "Добавить коробку",
+    hint = "Выбери коробку из инвентаря, чтобы поставить её на стеллаж.",
+}: InventoryPickerModalProps) => {
     const [query, setQuery] = useState("");
     const [activeRarities, setActiveRarities] = useState<string[]>([]);
     const [sort, setSort] = useState<BoxSort>("date_desc");
+    useBodyScrollLock();
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -42,10 +56,10 @@ export const InventoryPickerModal = ({ boxes, onPick, onClose, disabled }: Inven
         <div className="picker-overlay" onClick={onClose}>
             <div className="picker-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="picker-head">
-                    <h2 className="picker-title">Добавить коробку</h2>
+                    <h2 className="picker-title">{title}</h2>
                     <button type="button" className="picker-close" aria-label="Закрыть" onClick={onClose}>✕</button>
                 </div>
-                <p className="picker-hint">Выбери коробку из инвентаря, чтобы поставить её на стеллаж.</p>
+                <p className="picker-hint">{hint}</p>
 
                 <BoxFilterBar
                     query={query}

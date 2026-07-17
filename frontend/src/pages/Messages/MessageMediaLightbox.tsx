@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import type { MessageItem } from "../../api/messages";
+import { useBodyScrollLock } from "../../hooks/useBodyScrollLock";
 import "./MessageMediaLightbox.css";
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
  * запрашиваем. Esc / клик по фону — закрыть.
  */
 export const MessageMediaLightbox = ({ message, onClose }: Props) => {
+    useBodyScrollLock();
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (e.key === "Escape") onClose();
