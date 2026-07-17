@@ -103,10 +103,22 @@ export const SettingsPage = () => {
         e.preventDefault();
         setError(null);
         setSaved(false);
+
+        // Клиентская валидация username: форма сабмитится программно, минуя
+        // нативную проверку pattern/minLength — проверяем сами, чтобы не гонять
+        // заведомо невалидное на бэкенд (там 422) и сразу дать понятную ошибку.
+        const trimmedUsername = username.trim();
+        if (trimmedUsername && !/^[a-z0-9_]{3,30}$/.test(trimmedUsername)) {
+            setError(
+                "Username: 3–30 символов, только строчные латинские буквы, цифры и _",
+            );
+            return;
+        }
+
         setSaving(true);
         try {
             await updateProfile({
-                username: username.trim() || undefined,
+                username: trimmedUsername || undefined,
                 nickname: nickname.trim() || undefined,
                 bio: bio.trim() || undefined,
             });

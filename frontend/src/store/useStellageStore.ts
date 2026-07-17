@@ -3,6 +3,15 @@ import { api } from "../api/instance";
 import type { Shelf } from "../types/Stellage/shelves";
 import type { Box, BoxContent, BoxTemplate } from "../types/Stellage/boxes";
 
+/** Убирает коробку из снимка полки (или отдаёт полку как есть, если её нет).
+ *  Нужно, чтобы delete/gift оптимистично чистили не только currentBoxes, но и
+ *  сохранённые mainShelf/selectedShelf/publicShelf — иначе коробка «возвращается»
+ *  при повторном заходе на полку до рефетча. */
+function removeBoxFromShelf(shelf: Shelf | null, boxId: string): Shelf | null {
+    if (!shelf || !shelf.boxes) return shelf;
+    return { ...shelf, boxes: shelf.boxes.filter((b) => b.id !== boxId) };
+}
+
 /** Данные формы создания пользовательской коробки.
  *  rarity применяется только для суперюзеров (обычным форсится Common на бэке). */
 export interface CreateBoxInput {
@@ -358,10 +367,14 @@ export const useStellageStore = create<StellageState>((set, get) => ({
                 params: { instance_id: instanceId }
             });
 
-            // Оптимистично убираем из текущей доски, затем ресинхронизируем
-            // инвентарь и главную полку (коробка могла стоять на стеллаже).
+            // Оптимистично убираем из текущей доски И из снимков всех полок
+            // (иначе удалённая коробка «вернётся» при повторном заходе на
+            // selectedShelf/publicShelf до рефетча), затем ресинхронизируем.
             set((state) => ({
-                currentBoxes: state.currentBoxes.filter(b => b.id !== instanceId)
+                currentBoxes: state.currentBoxes.filter(b => b.id !== instanceId),
+                mainShelf: removeBoxFromShelf(state.mainShelf, instanceId),
+                selectedShelf: removeBoxFromShelf(state.selectedShelf, instanceId),
+                publicShelf: removeBoxFromShelf(state.publicShelf, instanceId),
             }));
             await Promise.all([get().fetchInstances(), get().fetchMainShelf()]);
         } catch (err) {
@@ -377,10 +390,13 @@ export const useStellageStore = create<StellageState>((set, get) => ({
                 { params: { instance_id: instanceId } },
             );
             // Коробка ушла другому владельцу — убираем её из своих списков
-            // и ресинхронизируем инвентарь + главную полку.
+            // и из снимков всех полок, затем ресинхронизируем.
             set((state) => ({
                 currentBoxes: state.currentBoxes.filter((b) => b.id !== instanceId),
                 instances: state.instances.filter((b) => b.id !== instanceId),
+                mainShelf: removeBoxFromShelf(state.mainShelf, instanceId),
+                selectedShelf: removeBoxFromShelf(state.selectedShelf, instanceId),
+                publicShelf: removeBoxFromShelf(state.publicShelf, instanceId),
             }));
             await Promise.all([get().fetchInstances(), get().fetchMainShelf()]);
             return true;
