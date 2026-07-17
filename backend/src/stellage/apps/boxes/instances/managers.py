@@ -233,9 +233,11 @@ class InstanceManager:
         recipient_id: uuid.UUID,
         instance_id: uuid.UUID,
     ) -> BoxInstanceWithTemplate:
-        """Дарит коробку получателю. Сбрасывает кэш старой полки дарителя и
-        кэш экземпляра у дарителя (ключ instance:{giver}:{id} больше не валиден),
-        затем кэширует под новым владельцем."""
+        """Дарит коробку получателю. Инвалидирует кэш экземпляра у ОБОИХ
+        (даритель — ключ больше не валиден; получатель — мог держать старый
+        снимок), не записывая новый снимок вручную: кэш наполнится свежими
+        данными при первом GET. Так исключаем гонку delete-before-write, при
+        которой параллельное чтение закэшировало бы устаревшее значение."""
         await self.refresh_old_shelf(
             user_id=giver_id,
             instance_id=instance_id,
@@ -251,7 +253,12 @@ class InstanceManager:
             instance_id=instance_id,
         )
 
-        await self.instance_cache_manager.store_instance(instance=box)
+        # Инвалидируем кэш получателя (без записи снимка) — свежие данные
+        # подтянет его первый GET из БД.
+        await self.instance_cache_manager.delete_instance(
+            instance_id=instance_id,
+            user_id=recipient_id,
+        )
         return box
 
 
