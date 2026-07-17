@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAssetUrl } from "../../api/assets";
 import type { BoxAsset } from "../../types/Stellage/boxes";
 import "./AssetViewer.css";
@@ -20,30 +20,40 @@ export const AssetViewer = ({ asset, thumb = false }: AssetViewerProps) => {
     const [failed, setFailed] = useState(false);
     const retried = useRef(false);
 
-    const load = useCallback(async () => {
-        try {
-            const target = await getAssetUrl(asset.id);
-            setUrl(target.url);
-        } catch {
-            setFailed(true);
-        }
-    }, [asset.id]);
-
+    // Свежая ссылка под текущий asset.id. cancelled-флаг защищает от гонки,
+    // если родитель быстро подменит asset: ответ старого не перезапишет новый.
     useEffect(() => {
         retried.current = false;
         setUrl(null);
         setFailed(false);
-        load();
-    }, [load]);
+        let cancelled = false;
+        (async () => {
+            try {
+                const target = await getAssetUrl(asset.id);
+                if (!cancelled) setUrl(target.url);
+            } catch {
+                if (!cancelled) setFailed(true);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [asset.id]);
 
-    const handleMediaError = () => {
+    const handleMediaError = async () => {
         if (retried.current) {
             setFailed(true);
             return;
         }
         retried.current = true;
         setUrl(null);
-        load();
+        // Осознанный повтор для текущего ассета (например истёкшая ссылка).
+        try {
+            const target = await getAssetUrl(asset.id);
+            setUrl(target.url);
+        } catch {
+            setFailed(true);
+        }
     };
 
     if (failed) {

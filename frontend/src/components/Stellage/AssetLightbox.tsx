@@ -36,23 +36,27 @@ export const AssetLightbox = ({ assets, startIndex, onClose }: AssetLightboxProp
         [count],
     );
 
-    const load = useCallback(async () => {
-        if (!asset) return;
-        try {
-            const target = await getAssetUrl(asset.id);
-            setUrl(target.url);
-        } catch {
-            setFailed(true);
-        }
-    }, [asset]);
-
-    // Свежая ссылка под текущий ассет.
+    // Свежая ссылка под текущий ассет. cancelled-флаг защищает от гонки при
+    // быстром листании: ответ для ПРЕДЫДУЩЕГО ассета не должен перезаписать
+    // ссылку текущего.
     useEffect(() => {
         retried.current = false;
         setUrl(null);
         setFailed(false);
-        load();
-    }, [load]);
+        if (!asset) return;
+        let cancelled = false;
+        (async () => {
+            try {
+                const target = await getAssetUrl(asset.id);
+                if (!cancelled) setUrl(target.url);
+            } catch {
+                if (!cancelled) setFailed(true);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [asset]);
 
     // Предзагрузка соседних фото — чтобы листание было мгновенным.
     useEffect(() => {
@@ -82,14 +86,21 @@ export const AssetLightbox = ({ assets, startIndex, onClose }: AssetLightboxProp
         return () => window.removeEventListener("keydown", onKey);
     }, [go, onClose]);
 
-    const handleMediaError = () => {
+    const handleMediaError = async () => {
         if (retried.current) {
             setFailed(true);
             return;
         }
         retried.current = true;
         setUrl(null);
-        load();
+        // Осознанный повтор для текущего ассета (например истёкшая ссылка).
+        if (!asset) return;
+        try {
+            const target = await getAssetUrl(asset.id);
+            setUrl(target.url);
+        } catch {
+            setFailed(true);
+        }
     };
 
     if (!asset) return null;
