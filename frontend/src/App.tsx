@@ -1,7 +1,13 @@
 import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
+import { api } from "./api/instance";
 import "./App.css";
+
+// Тихий keep-alive: продлеваем сессию заметно чаще, чем живёт access-токен
+// (час), чтобы даже неактивная вкладка не выпадала. Ошибки глотаем — их
+// разрулит 401-interceptor.
+const KEEP_ALIVE_MS = 20 * 60 * 1000;
 
 import { AppLayout } from "./components/Layout/AppLayout";
 import { LoginPage } from "./pages/Auth/LoginPage";
@@ -26,6 +32,14 @@ function App() {
   useEffect(() => {
     getUser();
   }, [getUser]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const id = setInterval(() => {
+      api.post("/auth/refresh").catch(() => {});
+    }, KEEP_ALIVE_MS);
+    return () => clearInterval(id);
+  }, [isAuthenticated]);
 
   if (!isInitialized) {
     return <div className="loader">Загрузка...</div>;

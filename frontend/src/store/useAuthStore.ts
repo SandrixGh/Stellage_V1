@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 import type { UserVerifySchema } from "../types/Auth/auth";
-import { api } from "../api/instance";
+import { api, setOnSessionExpired } from "../api/instance";
 import { useStellageStore } from "./useStellageStore";
 
 interface AuthState {
@@ -13,6 +13,7 @@ interface AuthState {
     logout: () => Promise<void>;
     delete_account: () => Promise<void>;
     getUser: () => Promise<void>;
+    clearSession: () => void;
     updateProfile: (data: { username?: string; nickname?: string; bio?: string }) => Promise<void>;
 }
 
@@ -53,6 +54,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
     },
 
+    // Локальный сброс без запроса на бэк: вызывается, когда сессия уже мертва
+    // (refresh не удался) — сервер трогать бессмысленно.
+    clearSession: () => {
+        set({ user: null, isAuthenticated: false });
+        useStellageStore.getState().reset();
+    },
+
     updateProfile: async (data) => {
         await api.patch("/profile/update", data);
         await get().getUser();
@@ -68,4 +76,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
     },
 }))
+
+// Когда axios-interceptor исчерпал попытку refresh — разлогиниваем UI.
+setOnSessionExpired(() => {
+    useAuthStore.getState().clearSession();
+});
 

@@ -60,6 +60,58 @@ class UserService:
         await self.manager.confirm_user(email)
 
 
+    # Refresh-cookie ограничена путём /api.v1/auth, чтобы длинный токен не
+    # гонялся в каждом запросе — только на /auth/refresh и /auth/logout.
+    REFRESH_COOKIE_PATH = "/api.v1/auth"
+
+    def _set_access_cookie(self, response: JSONResponse, token: str) -> None:
+        response.set_cookie(
+            key="Authorization",
+            value=token,
+            httponly=True,
+            secure=settings.cookie_secure,
+            samesite="lax",
+            max_age=settings.access_token_expire,
+        )
+
+    def _set_refresh_cookie(self, response: JSONResponse, token: str) -> None:
+        response.set_cookie(
+            key="RefreshToken",
+            value=token,
+            httponly=True,
+            secure=settings.cookie_secure,
+            samesite="lax",
+            max_age=settings.refresh_token_expire,
+            path=self.REFRESH_COOKIE_PATH,
+        )
+
+    async def _issue_session(
+        self,
+        user_id,
+        session_id: str | None = None,
+    ) -> tuple[str, str, str]:
+        """Выпускает пару access+refresh для (новой или существующей) сессии и
+        сохраняет обе в Redis. Возвращает (access, refresh, session_id)."""
+        access, session_id = await self.handler.create_access_token(
+            user_id=user_id,
+            session_id=session_id,
+        )
+        refresh = await self.handler.create_refresh_token(
+            user_id=user_id,
+            session_id=session_id,
+        )
+        await self.manager.store_access_token(
+            user_id=user_id,
+            token=access,
+            session_id=session_id,
+        )
+        await self.manager.store_refresh_token(
+            user_id=user_id,
+            token=refresh,
+            session_id=session_id,
+        )
+        return access, refresh, session_id
+
     async def login_user(self, user: AuthUser) -> JSONResponse:
         exist_user = await self.manager.get_user_by_email(email=str(user.email))
 
@@ -85,28 +137,47 @@ class UserService:
                 detail="Exist user is not verified",
             )
 
-        token, session_id = await self.handler.create_access_token(
-            user_id=exist_user.id,
-        )
-
-        await self.manager.store_access_token(
-            user_id=exist_user.id,
-            token=token,
-            session_id=session_id,
-        )
+        access, refresh, _ = await self._issue_session(user_id=exist_user.id)
 
         logger.info("User logged in: %s", exist_user.email)
         response = JSONResponse(content={"message": "Login is successful"})
+        self._set_access_cookie(response, access)
+        self._set_refresh_cookie(response, refresh)
 
-        response.set_cookie(
-            key="Authorization",
-            value=token,
-            httponly=True,
-            secure=settings.cookie_secure,
-            samesite="lax",
-            max_age=settings.access_token_expire,
+        return response
+
+
+    async def refresh_session(self, refresh_token: str | None) -> JSONResponse:
+        """Тихое продление сессии: по валидному refresh-токену из cookie
+        перевыпускает и access, и refresh (ротация), обновляя обе cookie."""
+        if not refresh_token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token is missing",
+            )
+
+        payload = await self.handler.decode_refresh_token(refresh_token)
+        user_id = payload["user_id"]
+        session_id = payload["session_id"]
+
+        stored = await self.manager.get_refresh_token(
+            user_id=user_id,
+            session_id=session_id,
+        )
+        if not stored or stored != refresh_token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token is invalid",
+            )
+
+        access, refresh, _ = await self._issue_session(
+            user_id=user_id,
+            session_id=session_id,
         )
 
+        response = JSONResponse(content={"message": "Session refreshed"})
+        self._set_access_cookie(response, access)
+        self._set_refresh_cookie(response, refresh)
         return response
 
 
@@ -118,9 +189,14 @@ class UserService:
             user_id=user.id,
             session_id=user.session_id,
         )
+        await self.manager.revoke_refresh_token(
+            user_id=user.id,
+            session_id=user.session_id,
+        )
 
         response = JSONResponse(content={"message": "Logged out"})
         response.delete_cookie(key="Authorization")
+        response.delete_cookie(key="RefreshToken", path=self.REFRESH_COOKIE_PATH)
 
         return response
 
@@ -133,10 +209,16 @@ class UserService:
             user_id=user.id,
             session_id=user.session_id,
         )
+        await self.manager.revoke_refresh_token(
+            user_id=user.id,
+            session_id=user.session_id,
+        )
         await self.manager.delete_account(
             user_id=user.id,
         )
         logger.info("Account deleted: user_id=%s", user.id)
 
         response = JSONResponse(content={"message": "Deleting the account was successful"})
+        response.delete_cookie(key="Authorization")
+        response.delete_cookie(key="RefreshToken", path=self.REFRESH_COOKIE_PATH)
         return response

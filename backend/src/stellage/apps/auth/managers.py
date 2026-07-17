@@ -94,6 +94,38 @@ class UserManager:
             return await client.get(f"{user_id}:{session_id}")
 
 
+    async def store_refresh_token(
+        self,
+        user_id: uuid.UUID,
+        token: str,
+        session_id: str,
+    ) -> None:
+        async with self.redis.get_client() as client:
+            await client.set(
+                f"refresh:{user_id}:{session_id}",
+                token,
+                ex=settings.refresh_token_expire,
+            )
+
+
+    async def get_refresh_token(
+        self,
+        user_id: str | uuid.UUID,
+        session_id: str,
+    ) -> str | None:
+        async with self.redis.get_client() as client:
+            return await client.get(f"refresh:{user_id}:{session_id}")
+
+
+    async def revoke_refresh_token(
+        self,
+        user_id: uuid.UUID | str,
+        session_id: str,
+    ) -> None:
+        async with self.redis.get_client() as client:
+            return await client.delete(f"refresh:{user_id}:{session_id}")
+
+
     async def get_user_by_id(
         self,
         user_id: str | uuid.UUID,

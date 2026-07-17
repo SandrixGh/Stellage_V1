@@ -85,6 +85,10 @@ class AppSettings(BaseAppSettings):
     frontend_url: str
 
     access_token_expire: int
+    # Долгоживущий refresh-токен: пока он жив, короткий access молча
+    # перевыпускается через POST /auth/refresh, поэтому пользователя не
+    # выкидывает по истечении часа. По умолчанию 30 дней.
+    refresh_token_expire: int = 60 * 60 * 24 * 30
 
     confirmation_code_length: int
 

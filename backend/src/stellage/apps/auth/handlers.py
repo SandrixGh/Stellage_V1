@@ -46,6 +46,7 @@ class AuthHandler:
             "sub": str(user_id),
             "user_id": str(user_id),
             "session_id": session_id,
+            "type": "access",
         }
 
         encoded_jwt =jwt.encode(
@@ -58,6 +59,27 @@ class AuthHandler:
             encoded_jwt=encoded_jwt,
             session_id=session_id,
         )
+
+
+    async def create_refresh_token(
+        self,
+        user_id: uuid.UUID,
+        session_id: str,
+    ) -> str:
+        """Долгоживущий refresh-токен той же сессии. Помечен type=refresh, чтобы
+        его нельзя было подсунуть вместо access (и наоборот) — decode_* это
+        проверяет."""
+        expire = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
+            seconds=settings.refresh_token_expire,
+        )
+        data = {
+            "exp": expire,
+            "sub": str(user_id),
+            "user_id": str(user_id),
+            "session_id": session_id,
+            "type": "refresh",
+        }
+        return jwt.encode(payload=data, key=self.secret, algorithm="HS256")
 
 
     async def decode_access_token(self, token: str) -> dict:
@@ -79,6 +101,32 @@ class AuthHandler:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token"
             )
+
+
+    async def decode_refresh_token(self, token: str) -> dict:
+        try:
+            payload = jwt.decode(
+                jwt=token,
+                key=self.secret,
+                algorithms=["HS256"],
+            )
+        except jwt.ExpiredSignatureError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token has expired",
+            )
+        except jwt.InvalidTokenError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+            )
+
+        if payload.get("type") != "refresh":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+            )
+        return payload
 
     @staticmethod
     async def generate_confirmation_code(

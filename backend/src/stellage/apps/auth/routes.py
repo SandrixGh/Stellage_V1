@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, Depends, Request
 from starlette.responses import JSONResponse
 
 from stellage.apps.auth.depends import get_current_user
@@ -58,6 +58,22 @@ async def login_user(
     ],
 ) -> JSONResponse:
     return await service.login_user(user=user)
+
+
+@auth_router.post(
+    path="/refresh",
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(max_calls=30, window_seconds=60))],
+)
+async def refresh_session(
+    request: Request,
+    service: Annotated[
+        UserService,
+        Depends(UserService)
+    ],
+) -> JSONResponse:
+    refresh_token = request.cookies.get("RefreshToken")
+    return await service.refresh_session(refresh_token=refresh_token)
 
 
 @auth_router.post(
