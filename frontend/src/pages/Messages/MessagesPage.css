@@ -154,6 +154,7 @@
 }
 
 .msg-bubble {
+    position: relative;
     max-width: 72%;
     align-self: flex-start;
     display: flex;
@@ -178,10 +179,202 @@
     word-break: break-word;
 }
 
-.msg-bubble-time {
+.msg-bubble-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     align-self: flex-end;
+}
+
+.msg-bubble-edited {
+    font-size: 10px;
+    font-style: italic;
+    opacity: 0.55;
+}
+
+.msg-bubble-time {
     font-size: 10px;
     opacity: 0.6;
+}
+
+/* ── Вложение (фото/видео) ── */
+.msg-bubble-media {
+    display: block;
+    max-width: 260px;
+    max-height: 320px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.msg-bubble-media img,
+.msg-bubble-media video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 320px;
+    object-fit: cover;
+}
+
+video.msg-bubble-media {
+    width: 260px;
+    background: #000;
+}
+
+/* ── Действия на своём сообщении (наведение) ── */
+.msg-bubble-actions {
+    position: absolute;
+    top: 4px;
+    right: calc(100% + 6px);
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.14s ease;
+}
+
+.msg-bubble:hover .msg-bubble-actions {
+    opacity: 1;
+}
+
+.msg-bubble-actions button {
+    width: 26px;
+    height: 26px;
+    border: 1px solid rgba(var(--ink-rgb), 0.12);
+    background: var(--surface);
+    border-radius: 7px;
+    color: rgba(var(--ink-rgb), 0.6);
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.14s ease, color 0.14s ease;
+}
+
+.msg-bubble-actions button:hover {
+    background: var(--surface-hover);
+    color: var(--ink);
+}
+
+/* ── Инлайн-редактор ── */
+.msg-edit {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 200px;
+}
+
+.msg-edit-input {
+    resize: vertical;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    font-family: inherit;
+    font-size: 14px;
+    color: #111;
+    background: #fff;
+}
+
+.msg-edit-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.msg-edit-save,
+.msg-edit-cancel {
+    padding: 5px 12px;
+    border-radius: 7px;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.msg-edit-save {
+    background: var(--accent);
+    color: var(--accent-contrast, #fff);
+}
+
+.msg-edit-cancel {
+    background: rgba(0, 0, 0, 0.08);
+    color: #333;
+}
+
+/* ── Карточка подарка ── */
+.msg-gift {
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 80%;
+    padding: 10px 16px;
+    border: 1px dashed rgba(var(--ink-rgb), 0.22);
+    border-radius: 14px;
+    background: rgba(var(--accent-rgb), 0.08);
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.14s ease;
+}
+
+.msg-gift:hover {
+    background: rgba(var(--accent-rgb), 0.16);
+}
+
+.msg-gift-icon {
+    font-size: 18px;
+}
+
+/* ── Показать раньше / автообновление ── */
+.msg-load-more {
+    display: flex;
+    justify-content: center;
+    padding: 4px 0 8px;
+}
+
+.msg-load-more-btn {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--ink-rgb), 0.14);
+    background: var(--surface);
+    color: rgba(var(--ink-rgb), 0.7);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.msg-load-more-btn:hover:not(:disabled) {
+    background: var(--surface-hover);
+}
+
+.msg-error {
+    padding: 8px 20px;
+    color: #d1483f;
+    font-size: 13px;
+}
+
+/* ── Кнопка прикрепления ── */
+.msg-compose-attach {
+    flex-shrink: 0;
+    align-self: flex-end;
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(var(--ink-rgb), 0.16);
+    background: var(--surface);
+    color: rgba(var(--ink-rgb), 0.7);
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.14s ease, color 0.14s ease;
+}
+
+.msg-compose-attach:hover:not(:disabled) {
+    background: var(--surface-hover);
+    color: var(--ink);
+}
+
+.msg-compose-attach:disabled {
+    opacity: 0.7;
+    cursor: default;
+    font-size: 12px;
+    font-weight: 700;
 }
 
 /* ── Ввод ── */
