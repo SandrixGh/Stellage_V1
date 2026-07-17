@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import './Auth.css';
 import { AuthCard } from "../../components/Auth/AuthCard";
@@ -13,6 +13,11 @@ export const LoginPage = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    // Режим «добавить аккаунт»: вход, не выходя из текущего. Бэкенд добавляет
+    // новый аккаунт в реестр устройства (старые сессии не трогает), новый
+    // становится активным — после входа ведём в Настройки к списку аккаунтов.
+    const isAdding = searchParams.get("add") === "1";
     const login = useAuthStore((state) => state.login)
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -21,7 +26,7 @@ export const LoginPage = () => {
         setIsLoading(true);
         try {
             await login(email, password);
-            navigate("/");
+            navigate(isAdding ? "/settings" : "/");
         } catch (err: any) {
             const message = err.response?.data?.detail || 'Произошла ошибка при входе'
             setError(message)
@@ -33,13 +38,17 @@ export const LoginPage = () => {
     return (
         <AuthLayout>
             <AuthCard
-                title="Вход"
+                title={isAdding ? "Добавить аккаунт" : "Вход"}
                 footer={
-                    <>Ещё нет аккаунта?
-                        <Link className="auth-link" to="/register">
-                            Зарегистрироваться
-                        </Link>
-                    </>
+                    isAdding ? (
+                        <>Вход в другой аккаунт — текущий останется на устройстве.</>
+                    ) : (
+                        <>Ещё нет аккаунта?
+                            <Link className="auth-link" to="/register">
+                                Зарегистрироваться
+                            </Link>
+                        </>
+                    )
                 }
             >
                 {error && <div className="error-message">{error}</div>}
