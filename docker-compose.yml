@@ -120,6 +120,16 @@ services:
       s3_public_endpoint_url: http://localhost:9000
     volumes:
       - ./backend/src:/app/src
+    # Liveness, а не readiness: контейнеру полагается считаться здоровым, пока
+    # жив процесс. Готовность зависимостей смотрят на /health/ready — падение
+    # Postgres не должно приводить к перезапуску исправного приложения.
+    # Проверяем питоном, а не curl: его нет в python:3.13-slim.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     depends_on:
       pg:
         condition: service_healthy

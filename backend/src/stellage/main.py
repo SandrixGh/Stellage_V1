@@ -8,6 +8,7 @@ from starlette.middleware.cors import CORSMiddleware
 from stellage.apps import apps_router
 from stellage.core.core_dependencies.db_dependency import dispose_engine
 from stellage.core.core_dependencies.redis_dependency import dispose_pool
+from stellage.core.health import health_router
 from stellage.core.logging_config import configure_logging
 from stellage.core.settings import settings
 
@@ -39,6 +40,12 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
+)
+
+# Health — вне /api.v1: инфраструктурный контракт для healthcheck'ов, его путь
+# не должен ехать вместе с версией продуктового API.
+app.include_router(
+    router=health_router,
 )
 
 app.include_router(
