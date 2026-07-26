@@ -187,11 +187,11 @@ class AssetManager:
                     Bucket=self.s3.bucket,
                     Key=asset.s3_key,
                 )
-            except ClientError:
+            except ClientError as err:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail="File was not uploaded to storage",
-                )
+                ) from err
 
             # Фактические размер и тип обязаны совпасть с заявленными в initiate.
             if (

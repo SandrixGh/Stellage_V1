@@ -1,4 +1,4 @@
-from typing_extensions import NamedTuple
+from typing import NamedTuple
 
 
 class CreateTokenTuple(NamedTuple):

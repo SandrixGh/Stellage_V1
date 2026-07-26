@@ -1,13 +1,10 @@
+import uuid
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from decimal import Decimal
-
+from sqlalchemy import ForeignKey, Numeric, String
 from sqlalchemy.dialects.postgresql import ENUM as PostgresEnum
-
-import uuid
-
-from sqlalchemy import String, Numeric, ForeignKey
-from sqlalchemy.orm import mapped_column, Mapped, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from stellage.database.enums.box_rarity import BoxRarity
 from stellage.database.enums.currency import CurrencyEnum

@@ -1,7 +1,7 @@
-from typing import TYPE_CHECKING
 import datetime
 import uuid
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict
 
@@ -61,4 +61,5 @@ class BoxTemplateReturnWithInstances(BoxTemplateReturn):
 
 
 from stellage.apps.boxes.instances.schemas import BoxInstanceReturn
+
 BoxTemplateReturnWithInstances.model_rebuild()

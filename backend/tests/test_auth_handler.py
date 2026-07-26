@@ -1,13 +1,12 @@
 """Unit tests for AuthHandler — pure Python, no I/O."""
-import asyncio
 import datetime
 import uuid
 
 import jwt
 import pytest
+from tests.conftest import run
 
 from stellage.apps.auth.handlers import AuthHandler
-from tests.conftest import run
 
 
 @pytest.fixture

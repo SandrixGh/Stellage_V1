@@ -6,7 +6,6 @@ from botocore.config import Config
 
 from stellage.core.settings import settings
 
-
 # aioboto3.Session и botocore.Config — процессные синглтоны (создаются один раз
 # при импорте), чтобы конструктор зависимости, вызываемый на каждый запрос, был
 # дешёвым. Сами клиенты по-прежнему открываются и закрываются на каждый вызов

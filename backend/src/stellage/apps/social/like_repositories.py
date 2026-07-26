@@ -2,12 +2,12 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import select, func, delete
+from sqlalchemy import delete, func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from stellage.apps.boxes.assets.schemas import BoxContentAccess
 from stellage.core.core_dependencies.db_dependency import DBDependency
-from stellage.database.models import BoxLike, BoxInstance, Shelf
+from stellage.database.models import BoxInstance, BoxLike, Shelf
 
 
 class LikeRepository:

@@ -90,17 +90,17 @@ class AuthHandler:
                 algorithms=["HS256"]
             )
 
-        except jwt.ExpiredSignatureError:
+        except jwt.ExpiredSignatureError as err:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token has expired"
-            )
+            ) from err
 
-        except jwt.InvalidTokenError:
+        except jwt.InvalidTokenError as err:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token"
-            )
+            ) from err
 
 
     async def decode_refresh_token(self, token: str) -> dict:
@@ -110,16 +110,16 @@ class AuthHandler:
                 key=self.secret,
                 algorithms=["HS256"],
             )
-        except jwt.ExpiredSignatureError:
+        except jwt.ExpiredSignatureError as err:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Refresh token has expired",
-            )
-        except jwt.InvalidTokenError:
+            ) from err
+        except jwt.InvalidTokenError as err:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid refresh token",
-            )
+            ) from err
 
         if payload.get("type") != "refresh":
             raise HTTPException(

@@ -1,10 +1,15 @@
 import uuid
 
 from fastapi import Depends, HTTPException, status
-from sqlalchemy import insert, update, select, delete
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.exc import IntegrityError
 
-from stellage.apps.auth.schemas import CreateUser, UserReturnData, GetUserWithIDAndEmail, UserVerifySchema
+from stellage.apps.auth.schemas import (
+    CreateUser,
+    GetUserWithIDAndEmail,
+    UserReturnData,
+    UserVerifySchema,
+)
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.core.core_dependencies.redis_dependency import RedisDependency
 from stellage.core.settings import settings
@@ -31,11 +36,11 @@ class UserManager:
             try:
                 result = await session.execute(query)
 
-            except IntegrityError:
+            except IntegrityError as err:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="User already exists"
-                )
+                ) from err
 
             await session.commit()
             user_data = result.scalar_one()

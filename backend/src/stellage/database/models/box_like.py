@@ -1,7 +1,7 @@
 import uuid
 
-from sqlalchemy import ForeignKey, UniqueConstraint, select, func
-from sqlalchemy.orm import Mapped, mapped_column, column_property
+from sqlalchemy import ForeignKey, UniqueConstraint, func, select
+from sqlalchemy.orm import Mapped, column_property, mapped_column
 
 from stellage.database.mixins.id_mixins import IDMixin
 from stellage.database.mixins.timestamp_mixins import TimestampMixin

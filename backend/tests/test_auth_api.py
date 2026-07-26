@@ -7,7 +7,6 @@ from starlette.responses import JSONResponse
 from stellage.apps.auth.services import UserService
 from stellage.main import app
 
-
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _mock_user_service(test_user_return=None):

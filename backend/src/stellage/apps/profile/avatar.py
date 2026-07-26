@@ -103,11 +103,11 @@ class AvatarManager:
         async with self.s3.get_client() as client:
             try:
                 head = await client.head_object(Bucket=self.s3.bucket, Key=key)
-            except ClientError:
+            except ClientError as err:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail="Image was not uploaded to storage",
-                )
+                ) from err
 
             if head.get("ContentLength") != size_bytes or head.get("ContentType") != mime:
                 await self._discard(client, key)

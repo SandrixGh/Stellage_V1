@@ -5,13 +5,15 @@ from unittest.mock import AsyncMock
 import pytest
 from fastapi import HTTPException
 from starlette.responses import JSONResponse
-
-from stellage.apps.shelves.services import ShelfService
-from stellage.apps.shelves.schemas import CreateShelf
-from stellage.apps.shelves.dependecies import get_current_main_shelf, get_current_main_shelf_with_boxes
-from stellage.main import app
 from tests.conftest import TEST_SHELF_ID, TEST_USER_ID, run
 
+from stellage.apps.shelves.dependecies import (
+    get_current_main_shelf,
+    get_current_main_shelf_with_boxes,
+)
+from stellage.apps.shelves.schemas import CreateShelf
+from stellage.apps.shelves.services import ShelfService
+from stellage.main import app
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 

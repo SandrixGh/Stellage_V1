@@ -2,16 +2,16 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
-from sqlalchemy import update, insert, select, delete, asc
+from sqlalchemy import asc, delete, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import joinedload
 from starlette import status
 
 from stellage.apps.shelves.schemas import CreateShelf, ShelfReturnData, ShelfWithBoxInstances
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.enums.asset_status import AssetStatusEnum
-from stellage.database.models import Shelf, BoxInstance, BoxAsset
+from stellage.database.models import BoxAsset, BoxInstance, Shelf
 
 
 class ShelfRepository:
@@ -47,7 +47,7 @@ class ShelfRepository:
             update(self.model)
             .where(
                 self.model.user_id == user_id,
-                self.model.is_main == True,
+                self.model.is_main.is_(True),
             )
             .values(is_main=False)
         )
@@ -110,12 +110,12 @@ class ShelfRepository:
                 shelf_data = result.scalar_one()
                 return ShelfReturnData.model_validate(shelf_data)
 
-            except IntegrityError:
+            except IntegrityError as err:
                 await session.rollback()
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Shelf already exist"
-                )
+                ) from err
             except Exception as e:
                 await session.rollback()
                 raise e
@@ -144,7 +144,7 @@ class ShelfRepository:
                 select(self.model)
                 .where(
                     self.model.user_id == user_id,
-                    self.model.is_main == True,
+                    self.model.is_main.is_(True),
                 )
             )
 
@@ -166,7 +166,7 @@ class ShelfRepository:
                 select(self.model)
                 .where(
                     self.model.user_id == user_id,
-                    self.model.is_main == True,
+                    self.model.is_main.is_(True),
                 )
                 .options(
                     joinedload(self.model.owner),

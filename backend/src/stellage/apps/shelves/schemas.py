@@ -1,8 +1,8 @@
 import datetime
 import uuid
-from typing import Annotated, TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
 
-from pydantic import BaseModel, StringConstraints, ConfigDict
+from pydantic import BaseModel, ConfigDict, StringConstraints
 
 if TYPE_CHECKING:
     from stellage.apps.boxes.instances.schemas import BoxInstanceWithTemplate
@@ -68,4 +68,5 @@ class ShelfWithBoxInstances(ShelfReturnData):
 
 
 from stellage.apps.boxes.instances.schemas import BoxInstanceWithTemplate
+
 ShelfWithBoxInstances.model_rebuild()

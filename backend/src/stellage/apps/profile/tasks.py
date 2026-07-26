@@ -1,6 +1,5 @@
-from email.message import EmailMessage
-
 import smtplib
+from email.message import EmailMessage
 
 from celery import shared_task
 from jinja2 import Environment, FileSystemLoader

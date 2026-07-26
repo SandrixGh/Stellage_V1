@@ -1,9 +1,10 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
-import uuid
 
-from sqlalchemy.dialects.postgresql import ENUM as PostgresEnum
+import uuid
+from typing import TYPE_CHECKING
+
 from sqlalchemy import BigInteger, CheckConstraint, ForeignKey, Index, String
+from sqlalchemy.dialects.postgresql import ENUM as PostgresEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from stellage.database.enums.asset_kind import AssetKindEnum
@@ -86,7 +87,7 @@ class BoxAsset(IDMixin, TimestampMixin, Base):
         nullable=False,
     )
 
-    instance: Mapped["BoxInstance | None"] = relationship(
+    instance: Mapped[BoxInstance | None] = relationship(
         "BoxInstance",
         back_populates="assets",
     )

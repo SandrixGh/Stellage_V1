@@ -1,4 +1,5 @@
 from celery import Celery
+
 from stellage.core.settings import settings
 
 celery_app = Celery(

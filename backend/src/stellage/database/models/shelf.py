@@ -1,16 +1,16 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, String, Boolean, Index, UniqueConstraint, text
-from sqlalchemy.orm import Mapped, relationship, mapped_column
+from sqlalchemy import Boolean, ForeignKey, Index, String, UniqueConstraint, text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from stellage.database.mixins.id_mixins import IDMixin
 from stellage.database.mixins.timestamp_mixins import TimestampMixin
 from stellage.database.models import Base
 
 if TYPE_CHECKING:
-    from stellage.database.models.user import User
     from stellage.database.models.box_instance import BoxInstance
+    from stellage.database.models.user import User
 
 
 class Shelf(IDMixin, TimestampMixin, Base):

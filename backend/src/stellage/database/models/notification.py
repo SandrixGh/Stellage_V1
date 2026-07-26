@@ -1,7 +1,7 @@
 import uuid
 
+from sqlalchemy import Boolean, ForeignKey, Index
 from sqlalchemy.dialects.postgresql import ENUM as PostgresEnum
-from sqlalchemy import ForeignKey, Boolean, Index
 from sqlalchemy.orm import Mapped, mapped_column
 
 from stellage.database.enums.notification_type import NotificationTypeEnum

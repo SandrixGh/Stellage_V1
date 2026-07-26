@@ -3,12 +3,12 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import select, func, update
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import aliased
 
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.enums.notification_type import NotificationTypeEnum
-from stellage.database.models import Notification, User, BoxInstance, BoxTemplate
+from stellage.database.models import BoxInstance, BoxTemplate, Notification, User
 
 
 class NotificationRepository:

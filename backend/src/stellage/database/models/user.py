@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import String, Text, Boolean, DateTime
+from sqlalchemy import Boolean, DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from stellage.database.mixins.id_mixins import IDMixin
@@ -9,8 +9,8 @@ from stellage.database.mixins.timestamp_mixins import TimestampMixin
 from stellage.database.models.base import Base
 
 if TYPE_CHECKING:
-    from stellage.database.models.shelf import Shelf
     from stellage.database.models.box_instance import BoxInstance
+    from stellage.database.models.shelf import Shelf
 
 class User(IDMixin, TimestampMixin, Base):
     __tablename__ = "users"

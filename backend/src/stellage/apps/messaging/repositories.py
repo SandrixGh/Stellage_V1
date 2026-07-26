@@ -3,12 +3,12 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import select, func, update, delete, or_, and_, case, tuple_
+from sqlalchemy import and_, case, delete, func, or_, select, tuple_, update
 
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.enums.asset_kind import AssetKindEnum
 from stellage.database.enums.message_kind import MessageKindEnum
-from stellage.database.models import Message, User, BoxInstance, BoxTemplate
+from stellage.database.models import BoxInstance, BoxTemplate, Message, User
 
 
 class MessageRepository:

@@ -12,12 +12,12 @@ __all__ = (
 )
 
 from .base import Base
-from .user import User
-from .shelf import Shelf
-from .box_instance import BoxInstance
-from .box_template import BoxTemplate
 from .box_asset import BoxAsset
-from .follow import Follow
+from .box_instance import BoxInstance
 from .box_like import BoxLike
-from .notification import Notification
+from .box_template import BoxTemplate
+from .follow import Follow
 from .message import Message
+from .notification import Notification
+from .shelf import Shelf
+from .user import User

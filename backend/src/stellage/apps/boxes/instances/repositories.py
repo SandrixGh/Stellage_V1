@@ -2,12 +2,16 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
-from sqlalchemy import select, func, insert, update, delete
+from sqlalchemy import delete, func, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload, selectinload
 from starlette import status
 
-from stellage.apps.boxes.instances.schemas import BoxInstanceCreate, BoxInstanceWithTemplate, BoxPositionUpdate
+from stellage.apps.boxes.instances.schemas import (
+    BoxInstanceCreate,
+    BoxInstanceWithTemplate,
+    BoxPositionUpdate,
+)
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.enums.asset_status import AssetStatusEnum
 from stellage.database.enums.box_sealing import SealingEnum
@@ -128,7 +132,7 @@ class BoxInstanceRepository:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail="Box already exist",
-                    )
+                    ) from exc
 
 
     async def move_to_shelf(
@@ -196,12 +200,12 @@ class BoxInstanceRepository:
 
                 return BoxInstanceWithTemplate.model_validate(box)
 
-            except IntegrityError:
+            except IntegrityError as err:
                 await session.rollback()
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Box on that shelf already exist"
-                )
+                ) from err
 
 
     async def update_position(
@@ -290,12 +294,12 @@ class BoxInstanceRepository:
 
                 return BoxInstanceWithTemplate.model_validate(box)
 
-            except IntegrityError:
+            except IntegrityError as err:
                 await session.rollback()
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Box on that position already exist"
-                )
+                ) from err
 
 
     async def update_content(

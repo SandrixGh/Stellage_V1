@@ -1,7 +1,7 @@
-from typing import TYPE_CHECKING, Annotated
 import datetime
 import uuid
 from decimal import Decimal
+from typing import TYPE_CHECKING, Annotated
 
 from pydantic import BaseModel, ConfigDict, StringConstraints, computed_field
 
@@ -150,4 +150,5 @@ class CustomBoxCreate(BaseModel):
 
 
 from stellage.apps.boxes.templates.schemas import BoxTemplateReturn
+
 BoxInstanceWithTemplate.model_rebuild()

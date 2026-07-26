@@ -1,13 +1,13 @@
 import uuid
 
 from fastapi import Depends
-from sqlalchemy import update, select, or_, func
+from sqlalchemy import func, or_, select, update
 
 from stellage.apps.profile.schemas import ProfileStats
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.core.core_dependencies.redis_dependency import RedisDependency
 from stellage.database.enums.visibility import VisibilityEnum
-from stellage.database.models import User, BoxInstance, Shelf
+from stellage.database.models import BoxInstance, Shelf, User
 
 
 class ProfileManager:

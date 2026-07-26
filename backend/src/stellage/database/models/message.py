@@ -1,7 +1,7 @@
 import datetime
 import uuid
 
-from sqlalchemy import ForeignKey, String, Boolean, Index, DateTime, BigInteger
+from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, Index, String
 from sqlalchemy.dialects.postgresql import ENUM as PostgresEnum
 from sqlalchemy.orm import Mapped, mapped_column
 

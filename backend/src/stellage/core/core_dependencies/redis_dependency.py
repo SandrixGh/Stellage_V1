@@ -1,10 +1,9 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from redis.asyncio import Redis, ConnectionPool
+from redis.asyncio import ConnectionPool, Redis
 
 from stellage.core.settings import settings
-
 
 # Пул соединений Redis — процессный синглтон, создаётся один раз при импорте.
 # Раньше он жил в RedisDependency.__init__, а зависимость инстанцируется на

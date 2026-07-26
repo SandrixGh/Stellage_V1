@@ -49,12 +49,12 @@ class BoxTemplateRepository:
                 await session.commit()
                 return BoxTemplateReturn.model_validate(template)
 
-            except IntegrityError:
+            except IntegrityError as err:
                 await session.rollback()
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Template already exist"
-                )
+                ) from err
 
             except Exception as e:
                 await session.rollback()

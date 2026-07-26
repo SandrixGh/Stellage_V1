@@ -2,7 +2,7 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import select, func, delete
+from sqlalchemy import delete, func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from stellage.core.core_dependencies.db_dependency import DBDependency

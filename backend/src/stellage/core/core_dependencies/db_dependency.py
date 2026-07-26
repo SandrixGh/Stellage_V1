@@ -1,7 +1,6 @@
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from stellage.core.settings import settings
-
 
 # Engine и фабрика сессий — процессные синглтоны, создаются один раз при импорте
 # модуля. Раньше они жили в DBDependency.__init__, а FastAPI инстанцирует

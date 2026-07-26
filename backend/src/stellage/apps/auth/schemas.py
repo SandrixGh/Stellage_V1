@@ -1,6 +1,6 @@
 import datetime
 import uuid
-from typing import Annotated, TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
 
 from pydantic import BaseModel, EmailStr, StringConstraints
 
@@ -86,4 +86,5 @@ class UserWithBoxInstances(UserReturnData):
 
 
 from stellage.apps.boxes.instances.schemas import BoxInstanceReturn
+
 UserWithBoxInstances.model_rebuild()

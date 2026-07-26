@@ -1,9 +1,10 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
-import uuid
 
+import uuid
+from typing import TYPE_CHECKING
+
+from sqlalchemy import JSON, CheckConstraint, ForeignKey, Index, Integer, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import ENUM as PostgresEnum
-from sqlalchemy import ForeignKey, JSON, Integer, CheckConstraint, Index, UniqueConstraint, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from stellage.database.enums.box_sealing import SealingEnum
@@ -14,10 +15,10 @@ from stellage.database.mixins.timestamp_mixins import TimestampMixin
 from stellage.database.models import Base
 
 if TYPE_CHECKING:
-    from .user import User
-    from .shelf import Shelf
-    from .box_template import BoxTemplate
     from .box_asset import BoxAsset
+    from .box_template import BoxTemplate
+    from .shelf import Shelf
+    from .user import User
 
 class BoxInstance(IDMixin, TimestampMixin, Base):
     __tablename__ = "box_instances"
@@ -95,7 +96,7 @@ class BoxInstance(IDMixin, TimestampMixin, Base):
         nullable=True,
     )
 
-    template: Mapped["BoxTemplate"] = relationship(
+    template: Mapped[BoxTemplate] = relationship(
         "BoxTemplate",
         back_populates="instances"
     )
@@ -105,14 +106,14 @@ class BoxInstance(IDMixin, TimestampMixin, Base):
         back_populates="boxes"
     )
 
-    owner: Mapped["User"] = relationship(
+    owner: Mapped[User] = relationship(
         "User",
         back_populates="boxes",
     )
 
     # Без cascade delete-orphan: удаление ассетов всегда явное (через статус
     # DELETING + Celery), чтобы не потерять запись о ключе объекта в S3.
-    assets: Mapped[list["BoxAsset"]] = relationship(
+    assets: Mapped[list[BoxAsset]] = relationship(
         "BoxAsset",
         back_populates="instance",
     )

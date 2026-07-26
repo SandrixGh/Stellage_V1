@@ -6,9 +6,9 @@ from starlette import status
 
 from stellage.apps.boxes.templates.managers import TemplateManager
 from stellage.apps.boxes.templates.schemas import (
-    BoxTemplateReturn,
     BoxTemplateCreate,
     BoxTemplatePatch,
+    BoxTemplateReturn,
     BoxTemplateReturnWithInstances,
 )
 

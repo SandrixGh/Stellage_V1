@@ -2,18 +2,16 @@
 import uuid
 from unittest.mock import AsyncMock
 
+# ── Fixtures ──────────────────────────────────────────────────────────────────
+import pytest
 from fastapi import HTTPException
+from tests.conftest import TEST_INSTANCE_ID, TEST_SHELF_ID, TEST_TEMPLATE_ID, TEST_USER_ID
 
 from stellage.apps.boxes.instances.services import InstanceService
-from stellage.apps.boxes.templates.services import TemplateService
 from stellage.apps.boxes.templates.schemas import BoxTemplateReturnWithInstances
+from stellage.apps.boxes.templates.services import TemplateService
 from stellage.main import app
-from tests.conftest import TEST_TEMPLATE_ID, TEST_INSTANCE_ID, TEST_SHELF_ID, TEST_USER_ID
 
-
-# ── Fixtures ──────────────────────────────────────────────────────────────────
-
-import pytest
 
 @pytest.fixture
 def mock_template_service(test_template):

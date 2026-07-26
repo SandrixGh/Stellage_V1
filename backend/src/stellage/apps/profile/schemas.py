@@ -1,7 +1,8 @@
 import datetime
 import uuid
-from typing import Annotated, TYPE_CHECKING
-from pydantic import EmailStr, BaseModel, StringConstraints, ConfigDict
+from typing import TYPE_CHECKING, Annotated
+
+from pydantic import BaseModel, ConfigDict, EmailStr, StringConstraints
 
 if TYPE_CHECKING:
     from stellage.apps.shelves.schemas import ShelfWithBoxInstances
@@ -108,4 +109,5 @@ class PublicProfile(PublicUser):
 
 
 from stellage.apps.shelves.schemas import ShelfWithBoxInstances
+
 PublicProfile.model_rebuild()

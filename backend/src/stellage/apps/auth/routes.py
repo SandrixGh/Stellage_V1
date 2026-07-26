@@ -1,14 +1,14 @@
 from typing import Annotated
 
-from fastapi import APIRouter, status, Depends, Request
+from fastapi import APIRouter, Depends, Request, status
 from starlette.responses import JSONResponse
 
 from stellage.apps.auth.depends import get_current_user
 from stellage.apps.auth.schemas import (
-    UserReturnData,
     AuthUser,
-    UserVerifySchema,
     DeviceAccountView,
+    UserReturnData,
+    UserVerifySchema,
 )
 from stellage.apps.auth.services import UserService
 from stellage.core.rate_limit import rate_limit

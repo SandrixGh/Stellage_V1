@@ -345,11 +345,11 @@ class MessageService:
                     Bucket=self.s3.bucket,
                     Key=msg.asset_key,
                 )
-            except ClientError:
+            except ClientError as err:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail="File was not uploaded to storage",
-                )
+                ) from err
             if (
                 head.get("ContentLength") != msg.asset_size
                 or head.get("ContentType") != msg.asset_mime

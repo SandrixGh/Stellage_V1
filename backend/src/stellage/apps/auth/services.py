@@ -1,7 +1,7 @@
 import logging
 
 from fastapi import Depends, HTTPException, status
-from itsdangerous import URLSafeTimedSerializer, BadSignature, BadData
+from itsdangerous import BadData, BadSignature, URLSafeTimedSerializer
 from starlette.responses import JSONResponse
 
 from stellage.apps.auth.handlers import AuthHandler
@@ -51,11 +51,11 @@ class UserService:
         confirmation_token = self.serializer.dumps(user_data.email)
         try:
             send_confirmation_email.delay(user_data.email, confirmation_token)
-        except Exception:
+        except Exception as err:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Registration succeeded but confirmation email could not be sent. Please try again later.",
-            )
+            ) from err
 
         return user_data
 
@@ -64,11 +64,11 @@ class UserService:
         try:
             email = self.serializer.loads(token, max_age=3600)
 
-        except BadSignature:
+        except BadSignature as err:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid or expired token"
-            )
+            ) from err
 
         await self.manager.confirm_user(email)
 

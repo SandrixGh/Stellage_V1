@@ -9,22 +9,18 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from starlette.testclient import TestClient
 
-from stellage.main import app
 from stellage.apps.auth.depends import get_current_user
-from stellage.apps.auth.schemas import UserVerifySchema, UserReturnData
-from stellage.apps.auth.services import UserService
-from stellage.apps.shelves.services import ShelfService
-from stellage.apps.shelves.schemas import ShelfReturnData, ShelfWithBoxInstances
-from stellage.apps.boxes.instances.services import InstanceService
-from stellage.apps.boxes.templates.services import TemplateService
-from stellage.apps.boxes.templates.schemas import BoxTemplateReturn
+from stellage.apps.auth.schemas import UserReturnData, UserVerifySchema
 from stellage.apps.boxes.instances.schemas import BoxInstanceWithTemplate
+from stellage.apps.boxes.templates.schemas import BoxTemplateReturn
+from stellage.apps.shelves.schemas import ShelfReturnData, ShelfWithBoxInstances
 from stellage.core.core_dependencies.redis_dependency import RedisDependency
 from stellage.database.enums.box_rarity import BoxRarity
-from stellage.database.enums.currency import CurrencyEnum
 from stellage.database.enums.box_sealing import SealingEnum
+from stellage.database.enums.currency import CurrencyEnum
 from stellage.database.enums.verification import VerifyEnum
 from stellage.database.enums.visibility import VisibilityEnum
+from stellage.main import app
 
 # ── Stable IDs ────────────────────────────────────────────────────────────────
 TEST_USER_ID = uuid.UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")

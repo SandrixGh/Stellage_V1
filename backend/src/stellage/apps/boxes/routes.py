@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
 from starlette import status
@@ -18,9 +18,9 @@ from stellage.apps.boxes.instances.schemas import (
 )
 from stellage.apps.boxes.instances.services import InstanceService
 from stellage.apps.boxes.templates.schemas import (
-    BoxTemplateReturn,
     BoxTemplateCreate,
     BoxTemplatePatch,
+    BoxTemplateReturn,
     BoxTemplateReturnWithInstances,
 )
 from stellage.apps.boxes.templates.services import TemplateService
@@ -97,7 +97,7 @@ async def get_box_instance(
 )
 async def get_box_view(
     viewer: Annotated[
-        Optional[UserVerifySchema],
+        UserVerifySchema | None,
         Depends(get_optional_current_user),
     ],
     service: Annotated[
@@ -363,7 +363,7 @@ async def move_to_shelf(
         Depends(InstanceService),
     ],
     instance_id: uuid.UUID,
-    shelf_id: Optional[uuid.UUID] = None
+    shelf_id: uuid.UUID | None = None
 ) -> BoxInstanceWithTemplate:
     return await service.move_to_shelf(
         user=user,

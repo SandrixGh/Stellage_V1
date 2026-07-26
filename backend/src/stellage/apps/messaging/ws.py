@@ -62,7 +62,7 @@ async def _touch_last_seen(
         async with redis.get_client() as client:
             key = f"last_seen:{user_id}"
             if not await client.get(key):
-                now = datetime.datetime.now(datetime.timezone.utc)
+                now = datetime.datetime.now(datetime.UTC)
                 await profile_manager.update_user_fields(user_id=user_id, last_seen_at=now)
                 await client.set(key, "1", ex=LAST_SEEN_THROTTLE_SECONDS)
     except Exception:

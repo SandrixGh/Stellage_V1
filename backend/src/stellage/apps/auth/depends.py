@@ -11,7 +11,6 @@ from stellage.apps.auth.utils import get_token_from_cookies
 from stellage.apps.profile.managers import ProfileManager
 from stellage.core.settings import settings
 
-
 LAST_SEEN_THROTTLE_SECONDS = 60
 
 # Re-issue the access token once it has passed this fraction of its lifetime.
@@ -75,7 +74,7 @@ async def get_current_user(
     try:
         exp = decoded_token.get("exp")
         if exp is not None:
-            now_ts = datetime.datetime.now(datetime.timezone.utc).timestamp()
+            now_ts = datetime.datetime.now(datetime.UTC).timestamp()
             remaining = exp - now_ts
             if remaining < settings.access_token_expire * TOKEN_REFRESH_THRESHOLD_RATIO:
                 new_token, _ = await handler.create_access_token(
@@ -102,7 +101,7 @@ async def get_current_user(
         async with manager.redis.get_client() as client:
             last_seen_key = f"last_seen:{user_id}"
             if not await client.get(last_seen_key):
-                now = datetime.datetime.now(datetime.timezone.utc)
+                now = datetime.datetime.now(datetime.UTC)
                 await profile_manager.update_user_fields(
                     user_id=user_id,
                     last_seen_at=now,

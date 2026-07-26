@@ -1,4 +1,5 @@
 from typing import Annotated
+
 from fastapi import Depends, HTTPException, status
 from starlette.responses import JSONResponse
 
@@ -187,11 +188,11 @@ class ProfileService:
                 to_email=str(data.new_email),
                 confirmation_code=confirmation_code
             )
-        except Exception:
+        except Exception as err:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Confirmation code could not be sent. Please try again later.",
-            )
+            ) from err
 
         response = JSONResponse(
             content={
