@@ -25,6 +25,7 @@ import { BoxDetailPage } from "./pages/Box/BoxDetailPage";
 import { BoxInstancePage } from "./pages/Box/BoxInstancePage";
 import { MessagesPage } from "./pages/Messages/MessagesPage";
 import { PublicShelfPage } from "./pages/Stellage/PublicShelfPage";
+import { NotFoundPage } from "./pages/NotFound/NotFoundPage";
 import { ProtectedRoute } from "./components/Auth/ProtectedRoute";
 
 function App() {
@@ -91,9 +92,13 @@ function App() {
           <Route path="/messages/:username" element={<MessagesPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
-      </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+        {/* 404 внутри layout'а: шапка и навигация остаются на месте, чтобы с
+            несуществующего адреса можно было уйти куда угодно, а не только
+            назад. Раньше здесь был молчаливый <Navigate to="/">, из-за
+            которого опечатка в адресе неотличима от сломанной навигации. */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
     </Routes>
   );
 }

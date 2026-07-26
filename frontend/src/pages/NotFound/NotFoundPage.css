@@ -1,0 +1,90 @@
+/* Страница 404. Живёт внутри AppLayout, поэтому шапка и навигация на месте —
+   пользователь не выброшен из приложения, а просто зашёл не туда.
+   Заголовок и подзаголовок берутся из общих примитивов AppLayout.css
+   (.page-title / .page-subtitle), здесь только раскладка и действия. */
+.notfound-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 48px 0 64px;
+}
+
+.notfound-visual {
+    /* Коробка приглушена: это иллюстрация состояния, а не объект внимания. */
+    opacity: 0.4;
+    margin-bottom: 24px;
+}
+
+.notfound-page .page-subtitle {
+    max-width: 460px;
+    margin-bottom: 28px;
+}
+
+/* Путь показываем моноширинным — это техническая цитата из адресной строки,
+   и её нужно отличать от обычного текста. */
+.notfound-path {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    padding: 2px 6px;
+    border-radius: var(--radius-xs);
+    background: rgba(var(--ink-rgb), 0.06);
+    color: rgba(var(--ink-rgb), 0.75);
+    /* Длинный путь не должен распирать страницу по горизонтали. */
+    overflow-wrap: anywhere;
+}
+
+.notfound-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+}
+
+.notfound-action {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(var(--ink-rgb), 0.14);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.notfound-action:hover {
+    background: var(--surface-hover);
+    border-color: rgba(var(--ink-rgb), 0.22);
+}
+
+.notfound-action-primary {
+    background: var(--btn-primary-bg);
+    border-color: transparent;
+    color: var(--btn-primary-text);
+}
+
+.notfound-action-primary:hover {
+    background: var(--btn-primary-bg-hover);
+    border-color: transparent;
+}
+
+@media (max-width: 560px) {
+    .notfound-page {
+        padding: 32px 0 48px;
+    }
+
+    .notfound-actions {
+        /* На узком экране кнопки в столбец во всю ширину: попасть пальцем в
+           широкую цель проще, чем в две тесные рядом. */
+        flex-direction: column;
+        align-self: stretch;
+    }
+
+    .notfound-action {
+        justify-content: center;
+    }
+}

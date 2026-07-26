@@ -1,4 +1,36 @@
 /* Легаси-стили (.container/.card/.btn-logout с хардкод-цветами) удалены —
    классы нигде не использовались. Оформление живёт в styles/theme.css
-   (токены) и в per-component CSS. Файл оставлен пустым намеренно, чтобы не
-   трогать импорт в App.tsx. */
+   (токены) и в per-component CSS.
+
+   Здесь остаётся только то, что рисуется ВНЕ роутера и вне AppLayout, то есть
+   не может опереться на его CSS. */
+
+/* Экран холодной загрузки: показывается, пока getUser() не ответил и приложение
+   ещё не знает, авторизован ли пользователь. Класс использовался в App.tsx, но
+   не был определён ни в одном CSS — первым, что видел пользователь при каждом
+   заходе, был чёрный системный текст в левом верхнем углу.
+
+   Тема к этому моменту уже применена: useThemeStore импортируется в main.tsx
+   ради сайд-эффекта и ставит data-theme на <html> до первого кадра, поэтому
+   токены здесь разрешаются корректно и светлая тема не мигает. */
+.loader {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ground);
+    color: rgba(var(--ink-rgb), 0.55);
+    font-family: var(--font-body);
+    font-size: 15px;
+    letter-spacing: 0.1px;
+    /* Пульсация вместо спиннера: тон интерфейса тихий, а мигание вращающегося
+       кольца на долю секунды заметнее самой загрузки. prefers-reduced-motion
+       гасится глобально в styles/normalize.css. */
+    animation: app-loader-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes app-loader-pulse {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+}
