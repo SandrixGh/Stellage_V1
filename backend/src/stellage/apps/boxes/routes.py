@@ -1,3 +1,4 @@
+import logging
 import uuid
 from typing import Annotated, Optional
 
@@ -25,6 +26,8 @@ from stellage.apps.boxes.templates.schemas import (
 from stellage.apps.boxes.templates.services import TemplateService
 from stellage.core.rate_limit import rate_limit
 from stellage.database.enums.box_rarity import BoxRarity
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/boxes",
@@ -198,10 +201,21 @@ async def create_box(
             ),
         )
     except Exception:
-        await template_service.delete_template(
-            template_id=template.id,
-            creator_id=user.id,
-        )
+        # Компенсация не должна подменять исходную ошибку: если удаление
+        # шаблона тоже сорвётся, клиент получит сообщение о нём вместо
+        # настоящей причины сбоя. Логируем и пробрасываем оригинал —
+        # осиротевший шаблон переживём, потерянную диагностику нет.
+        try:
+            await template_service.delete_template(
+                template_id=template.id,
+                creator_id=user.id,
+            )
+        except Exception:
+            logger.exception(
+                "Не удалось удалить осиротевший шаблон %s после сбоя "
+                "создания экземпляра",
+                template.id,
+            )
         raise
 
 

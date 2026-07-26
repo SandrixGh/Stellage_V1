@@ -2,7 +2,7 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
-from sqlalchemy import insert, select, update
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 from starlette import status
