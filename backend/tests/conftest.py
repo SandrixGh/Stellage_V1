@@ -116,6 +116,28 @@ def test_box_instance(test_template) -> BoxInstanceWithTemplate:
 
 # ── Mock Redis ────────────────────────────────────────────────────────────────
 
+def make_mock_pipeline():
+    """Заглушка redis-пайплайна для rate_limit (core/rate_limit.py).
+
+    Форма важна и повторяет redis-py: pipeline() — СИНХРОННЫЙ вызов,
+    возвращающий асинхронный контекст-менеджер; команды внутри буферизуются
+    синхронно; результат отдаёт только await execute(). AsyncMock здесь не
+    годится — он вернул бы корутину, которая не является async CM.
+
+    execute() отдаёт [zremrangebyscore, zcard, zadd, expire]; zcard=0 означает
+    «вызовов в окне ещё не было», поэтому лимит в тестах никогда не срабатывает.
+    """
+    pipe = MagicMock()
+    pipe.zremrangebyscore = MagicMock(return_value=pipe)
+    pipe.zcard = MagicMock(return_value=pipe)
+    pipe.zadd = MagicMock(return_value=pipe)
+    pipe.expire = MagicMock(return_value=pipe)
+    pipe.execute = AsyncMock(return_value=[0, 0, 1, True])
+    pipe.__aenter__ = AsyncMock(return_value=pipe)
+    pipe.__aexit__ = AsyncMock(return_value=False)
+    return pipe
+
+
 def make_mock_redis():
     mock_client = AsyncMock()
     mock_client.incr = AsyncMock(return_value=1)
@@ -124,6 +146,7 @@ def make_mock_redis():
     mock_client.get = AsyncMock(return_value=None)
     mock_client.delete = AsyncMock(return_value=1)
     mock_client.aclose = AsyncMock()
+    mock_client.pipeline = MagicMock(side_effect=lambda *a, **kw: make_mock_pipeline())
 
     mock_dep = MagicMock(spec=RedisDependency)
 
