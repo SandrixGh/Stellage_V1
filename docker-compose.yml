@@ -27,7 +27,10 @@ services:
       retries: 3
 
   pg:
-    image: postgres
+    # Тег зафиксирован: плавающий `postgres` однажды подтянет следующий мажор,
+    # который откажется читать каталог данных прошлого (том backend_pgdata
+    # сейчас в формате 18). Апгрейд мажора — только осознанно, через pg_dump.
+    image: postgres:18
     container_name: stellage-pg
     environment:
       POSTGRES_DB: "${db_name}"
