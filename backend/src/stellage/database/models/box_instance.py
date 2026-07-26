@@ -59,13 +59,19 @@ class BoxInstance(IDMixin, TimestampMixin, Base):
         default=SealingEnum.SEALED,
     )
 
+    # Приватная по умолчанию. Дефолт продублирован на стороне БД: default=
+    # применяется SQLAlchemy на клиенте, поэтому INSERT в обход ORM (скрипт,
+    # миграция, будущая админка) его не увидит. Расхождение здесь означало бы
+    # публикацию чужого контента, поэтому значение задано в обоих местах и
+    # совпадает с дефолтом схемы BoxInstanceBase.
     is_public: Mapped[VisibilityEnum] = mapped_column(
         PostgresEnum(
             VisibilityEnum,
             name="visibilityenum",
             create_type=False
         ),
-        default=VisibilityEnum.PUBLIC,
+        default=VisibilityEnum.PRIVATE,
+        server_default=text("'PRIVATE'"),
     )
 
     is_verified: Mapped[VerifyEnum] = mapped_column(
