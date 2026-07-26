@@ -1,18 +1,23 @@
-/* Экран мессенджера занимает всю доступную высоту под шапкой и НЕ прокручивает
-   страницу целиком: прокручиваются только список диалогов и лента сообщений.
-   .app-content даёт padding 40/64 сверху/снизу — вычитаем его вместе с высотой
-   шапки (68px), чтобы поле ввода всегда оставалось на экране. */
+/* Экран мессенджера занимает ВСЁ доступное окно под сайтовой шапкой (68px) и НЕ
+   прокручивает страницу целиком: прокручиваются только список диалогов и лента
+   сообщений. Вырываемся из ограничений .app-content (max-width 1280px + padding
+   40/24/64) отрицательными margin, чтобы занять всю ширину и высоту вьюпорта. */
 .msg-page {
     display: grid;
     grid-template-columns: 320px 1fr;
     gap: 0;
-    max-width: 1000px;
-    height: calc(100vh - 68px - 40px - 64px);
+    /* Full-bleed: раздвигаемся до краёв окна, гася боковой padding/центровку
+       .app-content, и компенсируем его верх/низ (40/64). Высота — всё окно
+       минус сайтовая шапка (68px). */
+    max-width: none;
+    height: calc(100vh - 68px);
+    /* dvh учитывает выезжающую адресную строку мобильных браузеров — без него
+       поле ввода уходит за нижний край экрана. vh выше остаётся фолбэком. */
+    height: calc(100dvh - 68px);
     min-height: 420px;
-    margin: 0 auto;
-    border-radius: var(--radius-lg);
+    margin: -40px calc(50% - 50vw) -64px;
     background: var(--surface);
-    border: 1px solid rgba(var(--ink-rgb), 0.09);
+    border-top: 1px solid rgba(var(--ink-rgb), 0.09);
     overflow: hidden;
 }
 
@@ -126,6 +131,12 @@
 
 /* ── Активный диалог ── */
 .msg-thread {
+    /* Высота плавающей шапки диалога: аватар 40px + её собственные отступы
+       (4px×2 у кнопки, 8px×2 у шапки) + 1px границы. Задана переменной, потому
+       что от неё зависит верхний отступ ленты — иначе первое сообщение уезжает
+       под absolute-шапку. Менять размер аватара — менять и это значение. */
+    --msg-head-h: 65px;
+    position: relative;
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -141,21 +152,26 @@
     font-size: 14px;
 }
 
-/* Шапка диалога: [назад] + аватар + ник собеседника. Зафиксирована сверху.
-   Стеклянная — тот же приём, что у сайтовой шапки (chrome-tint + blur), но
-   чуть прозрачнее, т.к. это внутренняя панель, а не самый верхний слой. */
+/* Шапка диалога: [назад] + аватар + ник собеседника. Плавает поверх ленты
+   (absolute), поэтому проскролленные сообщения просвечивают сквозь неё —
+   полупрозрачный chrome-tint + blur держат текст имени читаемым. Лента снизу
+   получает padding-top под высоту шапки, чтобы первое сообщение не пряталось. */
 .msg-thread-head {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 2;
-    flex-shrink: 0;
+    box-sizing: border-box;
+    height: var(--msg-head-h);
     display: flex;
     align-items: center;
     gap: 4px;
     padding: 8px 12px;
-    border-bottom: 1px solid rgba(var(--ink-rgb), 0.09);
-    background: rgba(var(--chrome-rgb), 0.66);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(var(--ink-rgb), 0.08);
+    background: rgba(var(--chrome-rgb), 0.5);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
 }
 
 /* Кликабельная область имени/аватара — ведёт на профиль собеседника. */
@@ -236,7 +252,9 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 18px 20px;
+    /* Верхний отступ = высота плавающей шапки + обычные 18px, иначе первое
+       сообщение оказывается под ней. */
+    padding: calc(var(--msg-head-h) + 18px) 20px 18px;
     overflow-y: auto;
     overscroll-behavior: contain;
 }
@@ -782,7 +800,6 @@ video.msg-media {
 @media (max-width: 720px) {
     .msg-page {
         grid-template-columns: 1fr;
-        height: calc(100vh - 68px - 24px - 24px);
     }
     /* На узком экране показываем либо список, либо диалог. */
     .msg-page:has(.msg-thread-head) .msg-list {
