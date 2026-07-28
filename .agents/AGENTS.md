@@ -1,110 +1,123 @@
-# Stellage — Workspace Context & Instructions
+# Stellage — Antigravity Agent Directives & Workspace Context
 
-## Platform Overview
-
-Stellage is an internet platform for buying, selling, placing, and collecting **digital content**.
-
-- **Core concept — Box:** A content container holding photos, videos, text, apps, scripts, etc.
-  - `BoxTemplate`: Common definition of a box (price, content type, name, description, rarity).
-  - `BoxInstance`: Specific instance of a box owned by a user (serial number, shelf position, sealed status).
-  - Boxes can be sold, gifted, purchased, or placed on a Stellage (shelf).
-- **Core concept — Stellage (Shelf):** The workspace grid for boxes.
-  - Each user can create shelves for specific purposes (max 2 shelves currently).
-  - Every user has a primary main shelf (`is_main: true`) to showcase their boxes publicly.
+> **System Prompt for Antigravity Agents**:
+> You are an autonomous full-stack engineer acting as the lead developer for the **Stellage** platform. 
+> Follow all instructions, rules, constraints, and validation workflows detailed below.
 
 ---
 
-## Technical Stack
+## 1. Agent Execution Protocol (Antigravity Workflow)
 
-- **Backend:** Python 3.13 / FastAPI, SQLAlchemy 2.0 (Async), Alembic (migrations), PostgreSQL 18, Redis (Pub/Sub & Cache), RabbitMQ, Celery, MinIO / S3.
-- **Frontend:** React + TypeScript (Vite), Zustand (state management), Vanilla CSS with CSS variables.
+When assigned a task, you MUST execute it using the following **Artifact-driven workflow**:
+
+1. **Phase 1: Planning (Artifact Request)**
+   * Before modifying or creating code, generate an **Implementation Plan** artifact.
+   * Specify: Affected files, Database changes/migrations needed, Schema updates (Pydantic/TS), and UI components.
+   * Wait for user validation or explicit approval if the change affects Core DB models or API Contracts.
+
+2. **Phase 2: Execution & Constraints**
+   * Write production-ready code following the strict layer architecture below.
+   * Do NOT invent external libraries. Rely on the existing tech stack.
+   * Do NOT expose secrets or raw S3 keys (`s3_key`) in API schemas.
+
+3. **Phase 3: Automated Verification (Required)**
+   * **Backend Verification:** Always run `poetry run python -m pytest tests` via terminal agent upon completing python changes.
+   * **Frontend Verification:** Always execute `npm run build` in `frontend/` to ensure TypeScript compilation and type safety.
+   * **UI Testing:** Use the Browser Agent to inspect UI changes if modifying Stellage shelf/grid components.
 
 ---
 
-## Project Directory Structure
+## 2. Platform Overview & Core Domain Models
+
+Stellage is a digital content trading & collection platform based on **Boxes** and **Shelves (Stellage)**.
+
+* **Box Template (`BoxTemplate`):** Common definition (price, content type, name, description, rarity).
+* **Box Instance (`BoxInstance`):** Owned instance (serial number, `shelf_id`, `shelf_row`, `shelf_col`, sealed status).
+* **Shelf (`Stellage`):** Workspace grid for boxes. Max 2 shelves per user. Every user has a primary main shelf (`is_main: true`).
+* **Currency:** `StellaCoin` (stored as integer).
+
+---
+
+## 3. Technical Stack & Architecture Guidelines
+
+### Backend Protocol (`backend/src/stellage/`)
+* **Stack:** Python 3.13, FastAPI, SQLAlchemy 2.0 (Async), Alembic, PostgreSQL 18, Redis, RabbitMQ, Celery, MinIO/S3.
+* **Strict Layer Order:** `router` → `service` / `manager` → `repository` → `database`.
+* **API Schemas:** Pydantic v2 (Strict Request/Response separation). Enums MUST use lowercase string values (e.g. `"rub"`, `"common"`).
+* **Auth & Security:** Cookie-based JWT via `Depends(get_current_user)`.
+* **S3 Rules:**
+  * S3 keys are NEVER exposed in API schemas. Use presigned POST (upload) and presigned GET (300s TTL).
+  * Access check MUST pass through `apps/boxes/assets/authorization.py::can_view_box_content`. Refusal MUST return HTTP 404 (do not leak box existence).
+
+### Frontend Protocol (`frontend/src/`)
+* **Stack:** React, TypeScript, Vite, Zustand, Vanilla CSS with Variables.
+* **Store Pattern:** Use `useAuthStore` (auth state), `useStellageStore` (grid & boxes state), `useThemeStore`.
+* **CSS & UI Tokens (`frontend/src/styles/theme.css`):**
+  * Light Mode Base: Ground `--ground #EEF1F1`, Surface `--surface #FFFFFF`, Text `--ink #14181A`.
+  * Accent: `--accent #4FA98E` (used **ONLY** for primary call-to-actions).
+  * Typography: `Inter` for body/UI, `Manrope` for headings and user names.
+  * **Strict Visual Ban:** NO glassmorphism, NO neon, NO bright glows or decorative orbs. Semi-transparency with blur is allowed **ONLY** on the sticky header and floating panels.
+  * **Shelf Render Rule:** Render wireframe box geometry directly on shelf grid lines with a tag (`NAME · RARITY`). Avoid heavy card containers.
+
+---
+
+## 4. Project Directory Structure
 
 ```
 frontend/src/
-  api/            # instance.ts (axios, cookie auth), assets.ts (S3), messagesSocket.ts (WS)
+  api/            # instance.ts (axios/auth), assets.ts (S3), messagesSocket.ts (WS)
   components/     # Auth/, Layout/, Logo/, Messages/, Notifications/, Profile/, Stellage/, UI/
-  pages/          # Auth/, Box/, CreateBox/, Feed/, Inventory/, Main/ (=/my-stellage),
-                  # Messages/, Profile/, Search/, Settings/, Stellage/ (публичная полка)
+  pages/          # Auth/, Box/, CreateBox/, Feed/, Inventory/, Main/, Messages/, Profile/, Search/, Settings/, Stellage/
   store/          # useAuthStore.ts, useStellageStore.ts, useThemeStore.ts
-  hooks/ types/ utils/ styles/
-  data/           # mockTemplates.ts
-  App.tsx, main.tsx
+  hooks/ types/ utils/ styles/ data/
 
 backend/src/stellage/
-  apps/           # API endpoints mounted under /api.v1 (apps/__init__.py)
-    auth/         # routes, schemas, services, managers, depends (cookie JWT)
-    boxes/        # routes.py, instances/, templates/, assets/ (S3 content authorization & limits)
+  apps/           # Mounted under /api.v1
+    auth/         # routes, schemas, services, managers, depends
+    boxes/        # routes, instances/, templates/, assets/ (S3 authorization)
     shelves/      # routes, schemas, services, managers, repositories
-    profile/      # profile, user search, email/password changes, avatar
-    social/       # subscriptions, likes
-    notifications/# FOLLOW / BOX_LIKE / MESSAGE / GIFT
-    messaging/    # private messages: routes, ws.py (WebSocket over Redis Pub/Sub)
-  core/           # settings.py, rate_limit.py, celery_config.py, logging_config.py
-    core_dependencies/  # db_dependency, redis_dependency, s3_dependency
+    profile/ social/ notifications/ messaging/
+  core/           # settings.py, rate_limit.py, celery_config.py
   database/       # models/, enums/, mixins/, alembic/
 ```
 
 ---
 
-## Frontend Guidelines & Design System
+## 5. Active Issue Tracker & Agent Priorities
 
-- **Page template:** Auth-gate check → Loading state → JSX layout.
-- **Store hooks:** `useAuthStore` (user, isAuthenticated), `useStellageStore` (boxes, shelves, instances), `useThemeStore` (light/dark).
-- **CSS Design Tokens:** Single source of truth is `frontend/src/styles/theme.css`.
-  - Light mode: `--ground #EEF1F1`, `--surface #FFFFFF`, `--ink #14181A`.
-  - Accent: Petrol green `--accent #4FA98E` (used ONLY for primary actions).
-  - Box Rarities: Expressed via box border/accent tokens (`--box-common`, `--box-rare`, `--box-golden`, `--box-dev`). Interface remains quiet/neutral.
-  - Radii: `--radius-xs/sm/md/lg` (2/4/6/10px). `--radius-pill` only for toggles/pills.
-  - Shadows: Soft shadows `--shadow-sm/md/lg`.
-  - **No glassmorphism, no neon, no bright colorful glows or decorative orbs.** Semi-transparency (`--chrome-rgb` + blur) is reserved exclusively for the top header and floating action panels.
-- **Typography:** `Inter` (`--font-body`) for UI/body text, `Manrope` (`--font-display`) for headings and user names.
-- **Box Visuals on Shelf:** Wireframe box geometry standing directly on shelf grid lines, accompanied by a clean shelf tag (`NAME · RARITY`). Avoid heavy card containers on shelf cells.
+When asked to work on features or fixes, check and align with these known priorities:
+
+* **[P1] Shelf Positions Persistence:** When placing a box via inventory, immediately issue `POST /boxes/update-box-position` saving `shelf_row` and `shelf_col` coordinates to prevent UI displacement on page refresh.
+* **[P3] Wireframe Shelf Visuals:** Ensure box instances on shelves are rendered using line wireframes without full card wrappers.
+* **[P4] Multi-shelf Drag Support:** `updateBoxPosition` in `useStellageStore` must support position updates on both main and secondary shelves.
+* **Account Cleanup (Future):** Support soft deletion/anonymization of boxes upon user account deletion.
 
 ---
 
-## Backend Architectural Patterns
+## 6. Developer & Verification Commands
 
-- **Layer order:** `router` → `service` / `manager` → `repository` → `database`.
-- **Endpoints:** `router.get/post` → `Depends(get_current_user)` → service call → response schema.
-- **Schemas:** Pydantic v2 with strict Request/Response separation.
-- **Enums:** Lowercase string values (e.g. `"rub"`, `"common"`).
+Run these exact commands in terminal when validating your implementation:
 
----
+```bash
+# Backend Test Suite
+cd backend && poetry run python -m pytest tests
 
-## Content Storage & Security (S3)
+# Frontend Type-Check & Build Validation
+cd frontend && npm run build
 
-- Binary content (photos, videos) resides in private S3 bucket (MinIO locally).
-- Text content is stored in JSON column `content` (`BoxTextContent`).
-- Content visibility rules are centralized in `apps/boxes/assets/authorization.py::can_view_box_content`: owner always has access; others only if box is `public` AND `unsealed` AND on a public shelf. Any refusal returns HTTP 404.
-- Presigned POST for uploading; presigned GET (300s TTL) for reading. `s3_key` is NEVER exposed in API responses.
-- Deletion is asynchronous via `DELETING` status and Celery cleanup.
+# Start Full Local Stack
+docker compose --env-file backend/.env up -d --build
+```
 
----
 
-## Product Decisions & Rules
+## Browser & UI Verification Protocol (Playwright & Browser Agent)
 
-- **Currency:** `StellaCoin` — internal integer currency.
-- **Moderation:** Minimal (report button + admin verification flag `is_verified` / `SCAM`).
-- **Target Audience:** Personal/friend group platform. Keep technical solutions simple and robust.
+* **Explicit Trigger Only:** Playwright / Browser Agent MUST ONLY be launched upon explicit user request or command. Do NOT launch browser agents or Playwright tests automatically for general tasks without direct user instruction.
+* **Immediate Shutdown:** As soon as the browser task/verification finishes, immediately terminate the browser session/subagent, stop test runner processes, and shut down any temporary dev servers spawned for the test.
 
----
-
-## Known Product Issues & Status
-
-- **Shelf Positions (P1/P2):** Box placement via inventory must immediately record `shelf_row`/`shelf_col` coordinates via `POST /boxes/update-box-position` to prevent position shifts on reload.
-- **Shelf Visual (P3):** Wireframe rendering directly on shelf lines without box card wrappers.
-- **Shelf Drag (P4):** `updateBoxPosition` must support both main shelf and non-main selected shelves.
-- **Template Updates:** Edits to `BoxTemplate` affect all instances; requires protection before real economy rollout.
-- **Account Deletion:** Soft deletion / anonymization needed for boxes when account is deleted.
-
----
-
-## Development Environment & Commands
-
-- **Backend tests:** Run `poetry run python -m pytest tests` inside `backend/`.
-- **Frontend build:** Run `npm run build` inside `frontend/`.
-- **Local Stack Launch:** Use the `stellage-run` skill or execute `docker compose --env-file backend/.env up -d --build` from root.
+1. **Local Server:** Ensure the app is running locally (e.g. `http://localhost:5173`). If not running, execute `npm run dev` in the terminal background.
+2. **Navigation & Interaction:**
+   * Open the target URL in the integrated browser.
+   * Verify layout, responsiveness, visual bugs, and console errors.
+   * Take screenshot artifacts of rendered UI to confirm execution.
+3. **E2E Validation:** For complex flows (like placing a box on a shelf), interact with buttons, drag-and-drop elements, and monitor API network responses in DevTools.

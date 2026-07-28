@@ -106,11 +106,12 @@
 
 .auth-card h2 {
     margin: 0 0 36px 0;
-    font-size: 24px;
-    font-weight: 600;
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
     color: var(--ink);
     text-align: center;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
 }
 
 .auth-card p {
@@ -188,9 +189,9 @@
 /* Input field */
 .form-group input {
     width: 100%;
-    padding: 14px 16px;
-    background: rgba(var(--glass-rgb), 0.04) !important;
-    border: 1px solid rgba(var(--glass-rgb), 0.1);
+    padding: 16px 16px;
+    background: rgba(var(--glass-rgb), 0.02) !important;
+    border: 1px solid rgba(var(--glass-rgb), 0.15);
     border-radius: var(--radius-sm);
     font-size: 15px;
     color: var(--ink) !important;
@@ -204,9 +205,9 @@
 }
 
 .form-group input:focus {
-    border-color: rgba(var(--ink-rgb), 0.4);
-    background: rgba(var(--glass-rgb), 0.07) !important;
-    box-shadow: 0 0 0 3px rgba(var(--ink-rgb), 0.06);
+    border-color: var(--accent);
+    background: rgba(var(--glass-rgb), 0.05) !important;
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
 }
 
 /* Password input needs right padding for eye icon */
@@ -328,7 +329,6 @@
 .auth-link:hover {
     background: rgba(var(--glass-rgb), 0.1);
     border-color: rgba(var(--ink-rgb), 0.3);
-    transform: translateY(-1px);
 }
 
 /* ===== AUTOFILL ===== */

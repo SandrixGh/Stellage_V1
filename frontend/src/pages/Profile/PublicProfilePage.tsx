@@ -9,6 +9,7 @@ import { FollowButton } from "../../components/Profile/FollowButton";
 import { FollowListModal } from "../../components/Profile/FollowListModal";
 import { useAuthStore } from "../../store/useAuthStore";
 import { getFollowCounts } from "../../api/social";
+import { giftStellaCoins } from "../../api/profile";
 import { onlineStatus, isOnline } from "../../utils/onlineStatus";
 import type { PublicProfile } from "../../types/Profile/profile";
 import "./ProfilePage.css";
@@ -23,6 +24,11 @@ export const PublicProfilePage = () => {
     const [following, setFollowing] = useState<number | undefined>(undefined);
     const [isFollowing, setIsFollowing] = useState(false);
     const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
+
+    const [isGifting, setIsGifting] = useState(false);
+    const [giftAmount, setGiftAmount] = useState("");
+    const [giftLoading, setGiftLoading] = useState(false);
+    const [giftMessage, setGiftMessage] = useState<{ text: string; isError: boolean } | null>(null);
 
     useEffect(() => {
         if (!username) return;
@@ -82,6 +88,28 @@ export const PublicProfilePage = () => {
     const displayName = profile.nickname?.trim() || profile.username || "Без имени";
     const online = isOnline(profile.last_seen_at);
 
+    const handleGift = async () => {
+        const amount = parseInt(giftAmount, 10);
+        if (isNaN(amount) || amount <= 0) {
+            setGiftMessage({ text: "Введите корректную сумму", isError: true });
+            return;
+        }
+        setGiftLoading(true);
+        setGiftMessage(null);
+        try {
+            await giftStellaCoins(profile.username!, amount);
+            setGiftMessage({ text: `Успешно переведено ${amount} Stellacoin!`, isError: false });
+            setIsGifting(false);
+            setGiftAmount("");
+            await useAuthStore.getState().getUser();
+        } catch (err: any) {
+            const detail = err.response?.data?.detail;
+            setGiftMessage({ text: typeof detail === "string" ? detail : "Ошибка перевода", isError: true });
+        } finally {
+            setGiftLoading(false);
+        }
+    };
+
     return (
         <div className="profile-page">
             <header className="profile-hero">
@@ -117,6 +145,49 @@ export const PublicProfilePage = () => {
                             >
                                 Написать
                             </button>
+                            
+                            {!isGifting ? (
+                                <button
+                                    type="button"
+                                    className="profile-message-btn"
+                                    onClick={() => { setIsGifting(true); setGiftMessage(null); }}
+                                >
+                                    Подарить Stellacoin
+                                </button>
+                            ) : (
+                                <div className="profile-gift-inline">
+                                    <input
+                                        type="text"
+                                        inputMode="numeric"
+                                        className="profile-input profile-gift-input"
+                                        placeholder="Сумма"
+                                        value={giftAmount}
+                                        onChange={(e) => setGiftAmount(e.target.value.replace(/\D/g, ""))}
+                                        disabled={giftLoading}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="profile-message-btn"
+                                        onClick={handleGift}
+                                        disabled={giftLoading}
+                                    >
+                                        {giftLoading ? "..." : "Отправить"}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="profile-message-btn ghost"
+                                        onClick={() => { setIsGifting(false); setGiftMessage(null); }}
+                                        disabled={giftLoading}
+                                    >
+                                        Отмена
+                                    </button>
+                                </div>
+                            )}
+                            {giftMessage && (
+                                <div className={`profile-gift-msg ${giftMessage.isError ? "error" : "success"}`}>
+                                    {giftMessage.text}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

@@ -67,3 +67,11 @@ export function avatarErrorMessage(err: unknown): string {
         ?.response?.data?.detail;
     return typeof detail === "string" ? detail : "Не удалось загрузить аватар";
 }
+
+export async function addStellaCoins(amount: number): Promise<void> {
+    await api.post("/profile/coins/add", { amount });
+}
+
+export async function giftStellaCoins(targetUsername: string, amount: number): Promise<void> {
+    await api.post(`/profile/public/${targetUsername}/coins/gift`, { amount });
+}

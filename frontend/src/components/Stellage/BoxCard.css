@@ -5,18 +5,17 @@
     border-radius: var(--radius-lg);
     /* Minimalist direction: flat warm panel, hairline border, no glass/glow. */
     background: var(--surface);
-    border: 1px solid rgba(var(--ink-rgb), 0.09);
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-                border-color 0.2s ease,
-                background 0.2s ease;
+    border: 1px solid rgba(var(--ink-rgb), 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
     overflow: hidden;
 }
 
 .box-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(var(--ink-rgb), 0.22);
+    border-color: rgba(var(--ink-rgb), 0.15);
     background: var(--surface-hover);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
 }
 
 /* ── Serial / verified row ── */
@@ -59,10 +58,10 @@
 }
 
 .box-title {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-display);
     margin: 0;
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: 700;
     color: var(--ink);
     letter-spacing: -0.1px;
     white-space: nowrap;
@@ -79,8 +78,8 @@
 
 /* ── Rarity tag ── */
 .rarity-tag {
-    font-size: 10px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     letter-spacing: 0.6px;
     text-transform: uppercase;
     padding: 3px 9px;
@@ -92,21 +91,21 @@
 
 .rarity-tag-rare {
     color: var(--tag-rare);
-    border-color: rgba(120, 170, 255, 0.35);
-    background: rgba(120, 170, 255, 0.07);
+    border-color: rgba(var(--tag-rare-rgb), 0.35);
+    background: rgba(var(--tag-rare-rgb), 0.15);
 }
 
 .rarity-tag-golden {
     color: var(--tag-golden);
-    border-color: rgba(230, 200, 120, 0.4);
-    background: rgba(230, 200, 120, 0.07);
+    border-color: rgba(var(--tag-golden-rgb), 0.4);
+    background: rgba(var(--tag-golden-rgb), 0.15);
 }
 
 .rarity-tag-developer\'s,
 .rarity-tag-dev {
     color: var(--tag-dev);
-    border-color: rgba(200, 130, 255, 0.35);
-    background: rgba(200, 130, 255, 0.07);
+    border-color: rgba(var(--tag-dev-rgb), 0.35);
+    background: rgba(var(--tag-dev-rgb), 0.15);
 }
 
 /* ── Likes tag ── */

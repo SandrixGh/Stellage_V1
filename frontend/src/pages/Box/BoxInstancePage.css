@@ -226,11 +226,10 @@ a.box-page-owner:hover {
     overflow: hidden;
     background: rgba(var(--glass-rgb), 0.03);
     cursor: zoom-in;
-    transition: transform 0.14s ease, box-shadow 0.14s ease;
+    transition: box-shadow 0.14s ease;
 }
 
 .box-page-media:hover {
-    transform: translateY(-2px);
     box-shadow: var(--shadow-md, 0 8px 24px rgba(0, 0, 0, 0.18));
 }
 

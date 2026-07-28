@@ -60,11 +60,11 @@
     cursor: pointer;
     text-align: left;
     border-radius: var(--radius-lg);
-    transition: transform 0.18s ease;
+    transition: background 0.18s ease;
 }
 
 .inventory-card-btn:hover {
-    transform: translateY(-3px);
+    background: var(--surface-hover);
 }
 
 .inventory-empty {

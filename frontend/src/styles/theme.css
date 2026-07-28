@@ -97,8 +97,11 @@
     --box-dev: #C882FF;
 
     --tag-rare: #9cc0ff;
+    --tag-rare-rgb: 156, 192, 255;
     --tag-golden: #e8cb82;
+    --tag-golden-rgb: 232, 203, 130;
     --tag-dev: #d9a8ff;
+    --tag-dev-rgb: 217, 168, 255;
     --tag-sealed: #A6ADB1;
     --verified: #8fd49a;
 

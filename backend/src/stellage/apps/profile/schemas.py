@@ -12,6 +12,14 @@ class ChangeEmailRequest(BaseModel):
     new_email: EmailStr
 
 
+class GiftCoinsRequest(BaseModel):
+    amount: int
+
+
+class AddCoinsRequest(BaseModel):
+    amount: int
+
+
 class ConfirmationCodeRequest(BaseModel):
     email: EmailStr
     confirmation_code: str

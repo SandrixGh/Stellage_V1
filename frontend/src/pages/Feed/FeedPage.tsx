@@ -65,13 +65,18 @@ export const FeedPage = () => {
     return (
         <div className="feed-page">
             <div className="feed-search">
-                <input
-                    type="text"
-                    className="feed-search-input"
-                    placeholder="Поиск коробок..."
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                />
+                <div className="feed-search-icon-wrapper">
+                    <input
+                        type="text"
+                        className="feed-search-input"
+                        placeholder="Поиск коробок..."
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                    />
+                    <svg className="feed-search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
             </div>
 
             <div className="feed-layout">

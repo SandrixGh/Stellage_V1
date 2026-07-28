@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, String, Text
+from sqlalchemy import Boolean, DateTime, String, Text, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from stellage.database.mixins.id_mixins import IDMixin
@@ -71,6 +71,12 @@ class User(IDMixin, TimestampMixin, Base):
     is_verified: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
+        nullable=False,
+    )
+
+    stella_coins: Mapped[int] = mapped_column(
+        Integer,
+        default=0,
         nullable=False,
     )
 

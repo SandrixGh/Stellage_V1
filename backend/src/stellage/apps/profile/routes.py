@@ -15,6 +15,8 @@ from stellage.apps.profile.schemas import (
     PublicProfile,
     PublicUser,
     UpdateProfileRequest,
+    AddCoinsRequest,
+    GiftCoinsRequest,
 )
 from stellage.apps.profile.services import ProfileService
 from stellage.core.rate_limit import rate_limit
@@ -195,3 +197,40 @@ async def complete_avatar_upload(
     ]
 ) -> JSONResponse:
     return await service.complete_avatar_upload(user=user, data=data)
+
+
+@profile_router.post(
+    path="/coins/add",
+    status_code=status.HTTP_200_OK,
+)
+async def add_coins(
+    data: AddCoinsRequest,
+    service: Annotated[
+        ProfileService,
+        Depends(ProfileService)
+    ],
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ]
+) -> JSONResponse:
+    return await service.add_coins(amount=data.amount, user=user)
+
+
+@profile_router.post(
+    path="/public/{username}/coins/gift",
+    status_code=status.HTTP_200_OK,
+)
+async def gift_coins(
+    username: str,
+    data: GiftCoinsRequest,
+    service: Annotated[
+        ProfileService,
+        Depends(ProfileService)
+    ],
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ]
+) -> JSONResponse:
+    return await service.gift_coins(target_username=username, amount=data.amount, sender=user)

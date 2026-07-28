@@ -21,11 +21,10 @@
     overflow: hidden;
     background: rgba(var(--glass-rgb), 0.03);
     cursor: zoom-in;
-    transition: transform 0.14s ease, box-shadow 0.14s ease;
+    transition: box-shadow 0.14s ease;
 }
 
 .content-grid-tile:hover {
-    transform: translateY(-1px);
     box-shadow: var(--shadow-md, 0 8px 24px rgba(0, 0, 0, 0.18));
 }
 

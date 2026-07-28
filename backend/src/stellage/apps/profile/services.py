@@ -316,3 +316,55 @@ class ProfileService:
         response = JSONResponse(content={"message": "Profile updated successfully"})
 
         return response
+
+
+    async def add_coins(self, amount: int, user: UserVerifySchema) -> JSONResponse:
+        if not user.username or user.username.lower() != "sandrix":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only Sandrix can mint coins.",
+            )
+
+        full_user = await self.manager.get_user_by_id(user_id=user.id)
+        if not full_user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+        await self.manager.update_user_fields(
+            user_id=user.id,
+            stella_coins=full_user.stella_coins + amount,
+        )
+        return JSONResponse(content={"message": f"Added {amount} StellaCoins successfully."})
+
+
+    async def gift_coins(
+        self,
+        target_username: str,
+        amount: int,
+        sender: UserVerifySchema,
+    ) -> JSONResponse:
+        if amount <= 0:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Amount must be positive.")
+
+        if sender.username == target_username:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot gift coins to yourself.")
+
+        target_user = await self.manager.get_user_by_username(username=target_username)
+        if not target_user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Target user not found")
+
+        sender_user = await self.manager.get_user_by_id(user_id=sender.id)
+
+        if sender_user.stella_coins < amount:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not enough StellaCoins.")
+
+        # Ideal implementation uses a single transaction.
+        await self.manager.update_user_fields(
+            user_id=sender.id,
+            stella_coins=sender_user.stella_coins - amount,
+        )
+        await self.manager.update_user_fields(
+            user_id=target_user.id,
+            stella_coins=target_user.stella_coins + amount,
+        )
+
+        return JSONResponse(content={"message": f"Successfully gifted {amount} StellaCoins to {target_username}."})

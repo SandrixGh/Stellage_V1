@@ -4,31 +4,51 @@
 
 /* ── Search bar (full width, top) ── */
 .feed-search {
-    margin-bottom: 24px;
+    margin-bottom: 32px;
+}
+
+.feed-search-icon-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.feed-search-icon {
+    position: absolute;
+    left: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(var(--ink-rgb), 0.35);
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+.feed-search-icon-wrapper:focus-within .feed-search-icon {
+    color: var(--accent);
 }
 
 .feed-search-input {
     width: 100%;
     box-sizing: border-box;
-    padding: 16px 22px;
-    font-family: 'Inter', sans-serif;
-    font-size: 15px;
+    padding: 18px 22px 18px 56px;
+    font-family: var(--font-body);
+    font-size: 16px;
     color: var(--ink);
-    letter-spacing: -0.2px;
+    letter-spacing: -0.1px;
     background: var(--surface);
-    border: 1px solid rgba(var(--ink-rgb), 0.10);
+    border: 1px solid rgba(var(--ink-rgb), 0.08);
     border-radius: var(--radius-lg);
     outline: none;
-    transition: border-color 0.2s ease, background 0.2s ease;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .feed-search-input::placeholder {
-    color: rgba(var(--ink-rgb), 0.35);
+    color: rgba(var(--ink-rgb), 0.4);
 }
 
 .feed-search-input:focus {
-    border-color: rgba(var(--ink-rgb), 0.30);
+    border-color: var(--accent);
     background: var(--surface-hover);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
 }
 
 /* ── Two-column layout: sidebar | content ── */
@@ -69,6 +89,7 @@
 }
 
 .feed-filter-option {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -77,6 +98,7 @@
     cursor: pointer;
     user-select: none;
     transition: background 0.25s ease, color 0.25s ease;
+    overflow: hidden;
 }
 
 .feed-filter-option:hover {
@@ -85,6 +107,18 @@
 
 .feed-filter-option.is-active {
     background: rgba(var(--ink-rgb), 0.07);
+}
+
+.feed-filter-option.is-active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 60%;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
 }
 
 /* Hide native checkbox, keep it accessible */

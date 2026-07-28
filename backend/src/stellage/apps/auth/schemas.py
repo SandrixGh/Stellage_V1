@@ -44,6 +44,7 @@ class UserReturnData(GetUserByID, GetUserByEmail, VerificationStatus):
     last_seen_at: datetime.datetime | None = None
     created_at: datetime.datetime
     updated_at: datetime.datetime
+    stella_coins: int = 0
 
 
 class GetUserWithIDAndEmail(GetUserByID, CreateUser, VerificationStatus):
@@ -61,6 +62,7 @@ class UserVerifySchema(GetUserByID, GetUserByEmail):
     # 401, а не продолжать работать до истечения TTL токена. Дефолт True держит
     # валидными старые записи в Redis-кэше, где поля ещё не было.
     is_active: bool = True
+    stella_coins: int = 0
 
 
 class DeviceAccount(BaseModel):
