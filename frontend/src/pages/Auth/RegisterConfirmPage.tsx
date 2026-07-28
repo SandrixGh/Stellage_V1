@@ -34,7 +34,7 @@ export const RegisterConfirmPage = () => {
                     <>
                         <h2>Подтверждение...</h2>
                         <p className="success-message">Проверяем вашу ссылку.</p>
-                        <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
+                        <div className="auth-spinner-wrapper">
                             <div className="btn-spinner" />
                         </div>
                     </>
@@ -44,7 +44,7 @@ export const RegisterConfirmPage = () => {
                     <>
                         <h2>Готово!</h2>
                         <p className="success-message">Аккаунт подтверждён. Теперь можно войти.</p>
-                        <Link className="btn-primary" to="/login" style={{ textDecoration: "none" }}>
+                        <Link className="btn-primary" to="/login">
                             Войти
                         </Link>
                     </>
@@ -54,7 +54,7 @@ export const RegisterConfirmPage = () => {
                     <>
                         <h2>Ошибка</h2>
                         <div className="error-message">{errorMsg}</div>
-                        <Link className="btn-primary" to="/register" style={{ textDecoration: "none" }}>
+                        <Link className="btn-primary" to="/register">
                             Зарегистрироваться снова
                         </Link>
                     </>

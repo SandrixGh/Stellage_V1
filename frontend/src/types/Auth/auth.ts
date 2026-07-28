@@ -7,6 +7,7 @@ export interface UserVerifySchema {
     bio?: string | null;
     last_seen_at?: string | null;
     is_superuser?: boolean;
+    stella_coins?: number;
 }
 
 export interface UserReturnData extends UserVerifySchema {

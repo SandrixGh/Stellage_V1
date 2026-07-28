@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStellageStore } from "../../store/useStellageStore";
+import { useAuthStore } from "../../store/useAuthStore";
 import { TemplateCard } from "../../components/Stellage/TemplateCard";
-import { MOCK_TEMPLATES } from "../../data/mockTemplates";
 import "./FeedPage.css";
 
 /* ── Rarity filter definitions (label + matching value + dot color) ── */
@@ -15,8 +15,8 @@ const RARITY_FILTERS: { label: string; value: string; dot: string }[] = [
 
 export const FeedPage = () => {
     const navigate = useNavigate();
-    const { templates, fetchTemplates, isLoading } = useStellageStore();
-    const displayTemplates = templates.length > 0 ? templates : MOCK_TEMPLATES;
+    const { templates, fetchTemplates, acquireBox, isLoading } = useStellageStore();
+    const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
     const [query, setQuery] = useState("");
     const [activeRarities, setActiveRarities] = useState<Set<string>>(new Set());
@@ -41,7 +41,7 @@ export const FeedPage = () => {
 
     const filteredTemplates = useMemo(() => {
         const q = query.trim().toLowerCase();
-        return displayTemplates.filter((tpl) => {
+        return templates.filter((tpl) => {
             const matchesQuery =
                 q === "" || tpl.title.toLowerCase().includes(q);
             const matchesRarity =
@@ -49,7 +49,18 @@ export const FeedPage = () => {
                 activeRarities.has((tpl.rarity ?? "").toLowerCase());
             return matchesQuery && matchesRarity;
         });
-    }, [displayTemplates, query, activeRarities]);
+    }, [templates, query, activeRarities]);
+
+    const handleAcquire = async (e: React.MouseEvent, templateId: string) => {
+        e.stopPropagation();
+        if (!isAuthenticated) {
+            navigate("/auth");
+            return;
+        }
+        await acquireBox(templateId);
+        // Optionally show a toast or change button state, but for now it'll just acquire it silently or show an error via store
+        navigate("/inventory");
+    };
 
     return (
         <div className="feed-page">
@@ -107,11 +118,19 @@ export const FeedPage = () => {
                         <div className="feed-grid">
                             {filteredTemplates.length > 0 ? (
                                 filteredTemplates.map((tpl) => (
-                                    <TemplateCard
-                                        key={tpl.id}
-                                        template={tpl}
-                                        onClick={() => navigate(`/box/${tpl.id}`)}
-                                    />
+                                        <TemplateCard
+                                            key={tpl.id}
+                                            template={tpl}
+                                            onClick={() => navigate(`/box/${tpl.id}`)}
+                                            actionNode={
+                                                <button
+                                                    className="feed-acquire-button"
+                                                    onClick={(e) => handleAcquire(e, tpl.id)}
+                                                >
+                                                    Получить
+                                                </button>
+                                            }
+                                        />
                                 ))
                             ) : (
                                 <p className="empty-message">

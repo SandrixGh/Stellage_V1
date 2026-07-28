@@ -257,6 +257,7 @@
     gap: 10px;
     position: relative;
     overflow: hidden;
+    text-decoration: none;
 }
 
 .btn-primary::after {
@@ -292,6 +293,12 @@
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
     flex-shrink: 0;
+}
+
+.auth-spinner-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
 }
 
 /* ===== FOOTER ===== */

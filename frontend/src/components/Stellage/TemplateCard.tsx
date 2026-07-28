@@ -9,10 +9,12 @@ export const TemplateCard = ({
     template,
     onClick,
     size = 200,
+    actionNode,
 }: {
     template: BoxTemplate;
     onClick: () => void;
     size?: number;
+    actionNode?: React.ReactNode;
 }) => {
     const { rarityGlow, rarityClass, boxColor } = resolveRarityVisual(
         template.rarity ?? "common",
@@ -38,9 +40,13 @@ export const TemplateCard = ({
                     <span className={`rarity-tag rarity-tag-${rarityClass}`}>
                         {template.rarity}
                     </span>
-                    <span className="template-price">
-                        {formatPrice(template.price, template.currency)}
-                    </span>
+                    {actionNode ? (
+                        actionNode
+                    ) : (
+                        <span className="template-price">
+                            {formatPrice(template.price, template.currency)}
+                        </span>
+                    )}
                 </div>
             </div>
         </div>

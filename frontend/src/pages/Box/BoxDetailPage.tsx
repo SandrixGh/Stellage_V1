@@ -4,22 +4,14 @@ import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { useStellageStore } from "../../store/useStellageStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import {
-    MOCK_TEMPLATES,
-    MOCK_BOX_EXTRAS,
     formatPrice,
     getRarityClass,
     resolveRarityVisual,
     resolveContentType,
-    type BoxExtra,
 } from "../../data/mockTemplates";
 import "./BoxDetailPage.css";
 
-/* ── Fallback extras for any box id missing from the mock map ── */
-const DEFAULT_EXTRA: BoxExtra = {
-    owner: "stellage",
-    stellage: null,
-    is_public: "public",
-};
+
 
 /* Format an ISO date string into a readable Russian date, e.g. "28 июня 2026". */
 const formatDate = (iso: string): string => {
@@ -51,9 +43,8 @@ export const BoxDetailPage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Resolve the box from the same source the feed used, falling back to the demo data.
-    const source = templates.length > 0 ? templates : MOCK_TEMPLATES;
-    const template = source.find((t) => t.id === id);
+    // Resolve the box from the templates store.
+    const template = templates.find((t) => t.id === id);
 
     if (!template) {
         // Still fetching — don't bounce a valid box back to the feed prematurely.
@@ -63,10 +54,10 @@ export const BoxDetailPage = () => {
         return <Navigate to="/feed" replace />;
     }
 
-    const extras: BoxExtra = (id && MOCK_BOX_EXTRAS[id]) || DEFAULT_EXTRA;
     const { rarityGlow, boxColor } = resolveRarityVisual(template.rarity);
     const rarityClass = getRarityClass(template.rarity);
-    const isPublic = extras.is_public === "public";
+    // As it's a public template from the feed, we can assume its instances can be public
+    const isPublic = true;
 
     // Платную коробку пока получить нельзя (платёжка не выбрана) — кнопка задизейблена.
     const isFree = Number(template.price) === 0;

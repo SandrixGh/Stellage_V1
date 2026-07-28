@@ -5,6 +5,7 @@ import { NotificationBell } from "../../Notifications/NotificationBell";
 import { MessagesButton } from "../../Messages/MessagesButton";
 import { AccountMenu } from "./AccountMenu";
 import { getMyProfile } from "../../../api/profile";
+import { StellaCoinBadge } from "./StellaCoinBadge";
 import "./Header.css";
 import { Logo } from "../../Logo/Logo";
 
@@ -59,6 +60,7 @@ export const Header = () => {
                 <div className="header-actions">
                     {isAuthenticated ? (
                         <>
+                            <StellaCoinBadge />
                             <MessagesButton />
                             <NotificationBell />
                             <AccountMenu avatarUrl={avatarUrl} />
