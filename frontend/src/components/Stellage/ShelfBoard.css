@@ -8,8 +8,8 @@
        по числу рядов) остаётся нижней границей на случай, если сайдбар короче. */
     height: 100%;
     border-radius: var(--radius-lg);
-    background: var(--surface);
-    border: 1px solid rgba(var(--ink-rgb), 0.09);
+    background: transparent;
+    border: none;
     overflow: visible;
     touch-action: none; /* чтобы pointer-drag не конфликтовал со скроллом на тач-экранах */
 }
@@ -24,11 +24,11 @@
     background: linear-gradient(
         90deg,
         transparent,
-        rgba(var(--ink-rgb), 0.35) 6%,
-        rgba(var(--ink-rgb), 0.35) 94%,
+        rgba(255, 255, 255, 0.15) 15%,
+        rgba(255, 255, 255, 0.15) 85%,
         transparent
     );
-    box-shadow: 0 6px 18px -6px rgba(var(--ink-rgb), 0.25);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.03);
     pointer-events: none;
 }
 
@@ -45,6 +45,7 @@
     pointer-events: none;
     transition: left 0.18s cubic-bezier(0.22, 1, 0.36, 1),
                 top 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: left, top;
 }
 
 /* Коробку всегда можно открыть по клику. */
@@ -59,7 +60,8 @@
 .shelf-cell.is-dragging {
     transition: none;
     z-index: 50;
-    filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.55));
+    filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.25));
+    will-change: left, top, transform;
 }
 
 .shelf-board.is-editable .shelf-cell.is-dragging .shelf-cell-inner {
@@ -84,73 +86,75 @@
     transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Бирка коробки: тёмный прямоугольник, висящий ПОД линией полки. */
+/* Бирка коробки: минималистичная парящая подпись без тяжелых рамок. */
 .shelf-box-label {
     position: absolute;
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
-    margin-top: 10px;
-    /* Поверх соседних коробок и их свечения, чтобы бирки не «наползали». */
+    margin-top: 6px;
     z-index: 5;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
-    padding: 3px 7px 4px;
-    background: rgba(var(--chrome-rgb), 0.96);
-    border: 1px solid rgba(var(--ink-rgb), 0.13);
-    border-radius: var(--radius-xs);
+    gap: 1px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
     pointer-events: none;
     white-space: nowrap;
     box-sizing: border-box;
-    /* Бирку держим в пределах её ячейки-колонки: не даём наползать на соседние
-       коробки и выходить за край стеллажа у крайних коробок. */
     width: max-content;
-    max-width: calc(100% - 10px);
+    max-width: calc(100% - 4px);
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shelf-cell-inner:hover .shelf-box-label {
+    transform: translateX(-50%) translateY(1px);
 }
 
 .shelf-box-name {
     font-family: var(--font-display);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--ink);
-    /* Фиксированная (не max-) ширина гарантирует, что обрезка с многоточием
-       всегда применяется и бирка никогда не «вылезает» за пределы стеллажа;
-       text-align: center — чтобы текст не прилипал к левому краю с разными
-       отступами по бокам. */
     display: block;
     max-width: 100%;
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-/* Редкость сверху, лайки — отдельной строкой ПОД редкостью (как просил
-   пользователь). Дополнительную высоту компенсируем поднятием полок
-   (TOP_PADDING) и увеличенным LABEL_SPACE в ShelfBoard.tsx. */
 .shelf-box-tags {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 1px;
+    gap: 3px;
 }
 
 .shelf-box-rarity {
-    font-family: "Inter", sans-serif;
-    font-size: 8px;
-    font-weight: 600;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: rgba(var(--ink-rgb), 0.55);
+    font-family: var(--font-body);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    text-transform: lowercase;
+    opacity: 0.85;
 }
 
+/* Цвет подписи редкости */
+.shelf-box-label[data-rarity="rare"] .shelf-box-rarity { color: var(--tag-rare); }
+.shelf-box-label[data-rarity="golden"] .shelf-box-rarity { color: var(--tag-golden); }
+.shelf-box-label[data-rarity="dev"] .shelf-box-rarity { color: var(--tag-dev); }
+.shelf-box-label[data-rarity="common"] .shelf-box-rarity { color: rgba(255, 255, 255, 0.5); }
+
 .shelf-box-likes {
-    font-family: "Inter", sans-serif;
-    font-size: 8px;
-    font-weight: 600;
-    color: #e6465a;
+    font-family: var(--font-body);
+    font-size: 9px;
+    font-weight: 500;
+    color: #FF4D6D;
     white-space: nowrap;
 }
 

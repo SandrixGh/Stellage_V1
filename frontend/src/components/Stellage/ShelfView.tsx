@@ -59,27 +59,30 @@ export const ShelfView = ({ shelf, editable, onMove, onOpen, rightPanel, isMain,
 
     return (
         <div className="shelf-view">
-            <ShelfSidebar
-                shelf={shelf}
-                boxes={allBoxes}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                activeRarities={activeRarities}
-                onToggleRarity={toggleRarity}
-                isPublic={shelf?.is_public ?? false}
-                editable={editable}
-                isMain={isMain}
-                onMakeMain={onMakeMain}
-            />
-            <div className="shelf-view-board">
-                <ShelfBoard
-                    boxes={filteredBoxes}
+            <div className="shelf-view-main">
+                <ShelfSidebar
+                    shelf={shelf}
+                    boxes={allBoxes}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    activeRarities={activeRarities}
+                    onToggleRarity={toggleRarity}
+                    isPublic={shelf?.is_public ?? false}
                     editable={editable}
-                    onMove={onMove}
-                    onOpen={onOpen}
+                    isMain={isMain}
+                    onMakeMain={onMakeMain}
                 />
+                <div className="shelf-view-board">
+                    <ShelfBoard
+                        boxes={filteredBoxes}
+                        editable={editable}
+                        onMove={onMove}
+                        onOpen={onOpen}
+                    />
+                </div>
             </div>
             {rightPanel && <div className="shelf-view-rail">{rightPanel}</div>}
         </div>
     );
 };
+

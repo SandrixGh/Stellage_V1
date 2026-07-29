@@ -1,46 +1,39 @@
-/* ===== SHELF VIEW (sidebar + board + rail layout) ===== */
+/* ===== SHELF VIEW ===== */
 .shelf-view {
     display: flex;
-    /* stretch (по умолчанию) — сайдбар и доска растягиваются на высоту самой
-       высокой колонки, иначе их нижние края «обрезаются» на разной высоте. */
-    align-items: stretch;
+    align-items: flex-start;
     justify-content: center;
-    gap: 28px;
+    gap: 24px;
     width: 100%;
     margin: 0 auto;
 }
 
-/* Доска фиксированной ширины — не растягивается вместе с экраном. */
+.shelf-view-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
 .shelf-view-board {
-    flex: 0 0 auto;
-    width: 820px;
-    max-width: 100%;
+    width: 100%;
 }
 
-/* Правая колонка со списком стеллажей. */
+/* Right rail actions & shelf list */
 .shelf-view-rail {
-    flex: 0 0 auto;
-    width: 220px;
-}
-
-@media (max-width: 1180px) {
-    .shelf-view {
-        flex-wrap: wrap;
-    }
-    .shelf-view-board {
-        order: 3;
-        width: 100%;
-    }
+    flex: 0 0 220px;
+    position: sticky;
+    top: 88px;
 }
 
 @media (max-width: 900px) {
     .shelf-view {
         flex-direction: column;
-        flex-wrap: nowrap;
     }
-    .shelf-view-board,
     .shelf-view-rail {
-        order: 0;
         width: 100%;
+        position: static;
     }
 }
+

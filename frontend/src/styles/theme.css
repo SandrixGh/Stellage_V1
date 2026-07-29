@@ -81,41 +81,79 @@
 }
 
 :root[data-theme="dark"] {
-    --ink: #E7E9EA;
-    --ink-rgb: 231, 233, 234;
+    --ink: #FFFFFF;
+    --ink-rgb: 255, 255, 255;
+    
+    --ink-secondary: #8E8E93;
+    --ink-tertiary: rgba(255, 255, 255, 0.45);
 
-    --ground: #0C0E0F;
-    --surface: #16191B;
-    --surface-hover: #1D2123;
+    --ground: #0A0C0F;
+    --background-image: none; /* flat dark background #0A0C0F handled by --ground */
+    --surface: #14171D;
+    --surface-hover: #1C2028;
+    --surface-elevated: #222630;
+    --border-subtle: transparent;
+    --border-hover: rgba(255, 255, 255, 0.12);
 
     --glass-rgb: 255, 255, 255;
-    --chrome-rgb: 12, 14, 15;
+    --chrome-rgb: 20, 23, 29;
 
-    --box-common: #A6ADB1;
-    --box-rare: #8BB8FF;
-    --box-golden: #E8CB82;
-    --box-dev: #C882FF;
+    /* Muted Metallic Color Palette */
+    --box-common: #8E959E;
+    --box-rare: #4A82D1;
+    --box-golden: #C5A059;
+    --box-dev: #8B62B5;
 
-    --tag-rare: #9cc0ff;
-    --tag-rare-rgb: 156, 192, 255;
-    --tag-golden: #e8cb82;
-    --tag-golden-rgb: 232, 203, 130;
-    --tag-dev: #d9a8ff;
-    --tag-dev-rgb: 217, 168, 255;
-    --tag-sealed: #A6ADB1;
-    --verified: #8fd49a;
+    --tag-rare: #4A82D1;
+    --tag-rare-rgb: 74, 130, 209;
+    --tag-golden: #C5A059;
+    --tag-golden-rgb: 197, 160, 89;
+    --tag-dev: #8B62B5;
+    --tag-dev-rgb: 139, 98, 181;
+    --tag-sealed: #8E959E;
+    --verified: #4FA98E;
 
-    /* Тот же петроль, осветлённый — чтобы читался на near-black. */
+    /* Soft tint badge backgrounds */
+    --badge-common-bg: rgba(255, 255, 255, 0.08);
+    --badge-rare-bg: rgba(74, 130, 209, 0.15);
+    --badge-golden-bg: rgba(197, 160, 89, 0.15);
+    --badge-dev-bg: rgba(139, 98, 181, 0.15);
+
+    /* Фирменный акцент — Stellage Teal (#4FA98E) */
     --accent: #4FA98E;
     --accent-rgb: 79, 169, 142;
-    --accent-hover: #5FBB9E;
-    --accent-contrast: #08130F;
+    --accent-hover: #43937B;
+    --accent-contrast: #07120E;
     --accent-bright: #5FC2A6;
 
     --btn-primary-bg: var(--accent);
     --btn-primary-text: var(--accent-contrast);
     --btn-primary-bg-hover: var(--accent-hover);
 
-    --error-text: #ffaaaa;
+    --error-text: #ff8888;
     --error-bg-rgb: 255, 80, 80;
 }
+
+/* ── Apple & Spotify Glass & Component Utilities ── */
+.glass-panel {
+    background: rgba(18, 21, 25, 0.75);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36);
+}
+
+.glass-header {
+    background: rgba(9, 11, 14, 0.8) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+/* Instant press feedback for Apple-style fluid response */
+button:active, .btn:active, a.btn:active {
+    transform: scale(0.97);
+    transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+

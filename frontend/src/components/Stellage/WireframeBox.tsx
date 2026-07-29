@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { memo } from "react";
 import { getContentGlyph } from "./contentGlyphs";
 
 interface WireframeBoxProps {
@@ -120,33 +120,23 @@ const CORNER_RADIUS = 1.5;
    Неон переселён с интерфейса на сам товар: Common — чистые линии без свечения,
    у редких коробок — цветная аура растущей силы. Цвет ауры = currentColor
    (цвет редкости), поэтому она следует за темой автоматически. */
-const GLOW_BY_RARITY: Record<
-    "rare" | "golden" | "dev",
-    { blur: number; opacity: number }
+const GRAD_BY_RARITY: Record<
+    "common" | "rare" | "golden" | "dev",
+    { stroke1: string; stroke2: string; opacity: number }
 > = {
-    rare: { blur: 3.5, opacity: 0.7 },
-    golden: { blur: 5, opacity: 0.85 },
-    dev: { blur: 6.5, opacity: 1 },
+    common: { stroke1: "#475569", stroke2: "#94A3B8", opacity: 0.85 },
+    rare: { stroke1: "#1E3A8A", stroke2: "#3B82F6", opacity: 0.9 },
+    golden: { stroke1: "#78350F", stroke2: "#D97706", opacity: 0.95 },
+    dev: { stroke1: "#581C87", stroke2: "#A855F7", opacity: 0.95 },
 };
 
-/* Плотность заливки граней. Коробка — объёмный объект (не призрачный контур):
-   верхняя грань самая светлая, передняя средняя, боковая тёмная — даёт объём. */
-const FACE_OPACITY = {
-    top: 0.42,
-    front: 0.26,
-    right: 0.14,
-} as const;
-
-/* ── Content glyph placement (front face «canvas») ──
-   Передняя грань — прямоугольник frontWidth×frontHeight в точке (A). Глиф
-   рисуется в сетке 24×24 (центр 12,12), масштабируется и центрируется на грани. */
+/* ── Content glyph placement (front face «canvas») ── */
 const GLYPH_SCALE = 2.2;
 const GLYPH_STROKE = 1.8;
 const GLYPH_CENTER = {
     x: V.A.x + LAYOUT.frontWidth / 2,
     y: V.A.y + LAYOUT.frontHeight / 2,
 };
-// Ниже этого размера глиф не читается — грань оставляем пустой.
 const GLYPH_MIN_SIZE = 44;
 
 // Outer silhouette of the cube (single closed, rounded loop).
@@ -160,22 +150,22 @@ const FRONT_FILL = roundedPath([V.A, V.B, V.C, V.D], CORNER_RADIUS, true);
 const TOP_FILL = `M ${V.A.x},${V.A.y} L ${V.E.x},${V.E.y} L ${V.F.x},${V.F.y} L ${V.B.x},${V.B.y} Z`;
 const RIGHT_FILL = `M ${V.B.x},${V.B.y} L ${V.F.x},${V.F.y} L ${V.G.x},${V.G.y} L ${V.C.x},${V.C.y} Z`;
 
-export const WireframeBox = ({
+export const WireframeBox = memo(({
     className,
     color = "var(--box-common)",
     size = 120,
     rarityGlow = null,
     contentType = null,
 }: WireframeBoxProps) => {
-    const uid = useId();
-    const glow = rarityGlow ? GLOW_BY_RARITY[rarityGlow] : null;
-    const filterId = `wf-glow-${uid}`;
-    const clipId = `wf-front-clip-${uid}`;
-    const poolBlurId = `wf-pool-blur-${uid}`;
-    const glyphGlowId = `wf-glyph-glow-${uid}`;
+    const rarityKey = rarityGlow || "common";
+    const rarityTheme = GRAD_BY_RARITY[rarityKey];
+    
+    const strokeGradId = `wf-metal-grad-${rarityKey}`;
+    const clipId = `wf-front-clip`;
+    const poolRadialId = `wf-pool-radial-${rarityKey}`;
+    const topGradId = `wf-top-grad`;
+    const frontGradId = `wf-front-grad`;
     const glyph = size >= GLYPH_MIN_SIZE ? getContentGlyph(contentType) : null;
-    // На полке (size 80) глиф должен быть простым, без ореола — как в ленте
-    const isSmallBox = size < 100;
 
     return (
         <svg
@@ -189,78 +179,65 @@ export const WireframeBox = ({
             style={{ color, maxWidth: "100%", height: "auto", overflow: "visible" }}
         >
             <defs>
-                {glow && (
-                    <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation={glow.blur} result="blur" />
-                        <feFlood floodColor="currentColor" floodOpacity={glow.opacity} result="color" />
-                        <feComposite in="color" in2="blur" operator="in" result="glow" />
-                        <feMerge>
-                            <feMergeNode in="glow" />
-                            <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                    </filter>
-                )}
+                {/* Metallic gradient for wireframe edges */}
+                <linearGradient id={strokeGradId} x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor={rarityTheme.stroke1} />
+                    <stop offset="100%" stopColor={rarityTheme.stroke2} />
+                </linearGradient>
+
                 {glyph && (
                     <>
-                        {/* Пул света ограничиваем передней гранью — свет «внутри» коробки. */}
                         <clipPath id={clipId}>
                             <path d={FRONT_FILL} />
                         </clipPath>
-                        <filter id={poolBlurId} x="-50%" y="-50%" width="200%" height="200%">
-                            <feGaussianBlur stdDeviation="5.5" />
-                        </filter>
-                        {/* Свечение глифа: бирюзовый ореол вокруг линий — будто он горит. */}
-                        <filter id={glyphGlowId} x="-60%" y="-60%" width="220%" height="220%">
-                            <feGaussianBlur in="SourceAlpha" stdDeviation="2.4" result="b" />
-                            <feFlood floodColor="currentColor" floodOpacity="0.9" result="c" />
-                            <feComposite in="c" in2="b" operator="in" result="g" />
-                            <feMerge>
-                                <feMergeNode in="g" />
-                                <feMergeNode in="g" />
-                                <feMergeNode in="SourceGraphic" />
-                            </feMerge>
-                        </filter>
+                        <radialGradient id={poolRadialId} cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stopColor={rarityTheme.stroke2} stopOpacity="0.10" />
+                            <stop offset="100%" stopColor={rarityTheme.stroke2} stopOpacity="0" />
+                        </radialGradient>
                     </>
                 )}
+                <linearGradient id={topGradId} x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="currentColor" stopOpacity="0.1" />
+                    <stop offset="100%" stopColor="currentColor" stopOpacity="0.02" />
+                </linearGradient>
+                <linearGradient id={frontGradId} x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="currentColor" stopOpacity="0.06" />
+                    <stop offset="100%" stopColor="currentColor" stopOpacity="0.01" />
+                </linearGradient>
             </defs>
 
             <g
-                filter={glow ? `url(#${filterId})` : undefined}
-                stroke="currentColor"
+                stroke={`url(#${strokeGradId})`}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                opacity={rarityTheme.opacity}
             >
-                {/* ── Solid shaded faces (коробка как объём, а не контур) ── */}
-                <path className="wf-face" d={TOP_FILL} fill="currentColor" stroke="none" opacity={FACE_OPACITY.top} />
-                <path className="wf-face" d={RIGHT_FILL} fill="currentColor" stroke="none" opacity={FACE_OPACITY.right} />
-                <path className="wf-face" d={FRONT_FILL} fill="currentColor" stroke="none" opacity={FACE_OPACITY.front} />
+                {/* ── Solid glass shaded faces ── */}
+                <path className="wf-face" d={TOP_FILL} fill={`url(#${topGradId})`} stroke="none" />
+                <path className="wf-face" d={RIGHT_FILL} fill="currentColor" stroke="none" opacity={0.02} />
+                <path className="wf-face" d={FRONT_FILL} fill={`url(#${frontGradId})`} stroke="none" />
 
-                {/* ── Hidden edges (one element → no opacity build-up) ── */}
-                <path className="wf-edge wf-edge-hidden" d={HIDDEN} pathLength={1} fill="none" strokeWidth="1.2" opacity="0.34" />
+                {/* ── Hidden interior edges ── */}
+                <path className="wf-edge wf-edge-hidden" d={HIDDEN} pathLength={1} fill="none" strokeWidth="1" opacity={0.2} />
 
-                {/* ── Visible wireframe (crisp, rounded) ── */}
-                <path className="wf-edge" d={SILHOUETTE} pathLength={1} fill="none" strokeWidth="1.8" />
-                <path className="wf-edge" d={INTERIOR} pathLength={1} fill="none" strokeWidth="1.8" />
+                {/* ── Visible wireframe silhouette & interior ── */}
+                <path className="wf-edge" d={SILHOUETTE} pathLength={1} fill="none" strokeWidth="1.6" />
+                <path className="wf-edge" d={INTERIOR} pathLength={1} fill="none" strokeWidth="1.6" />
             </g>
 
-            {/* ── Content-type glyph «горит внутри» коробки ──
-               Свет типа контента — в цвете самой коробки (currentColor), мягкий пул
-               света под глифом ограничен передней гранью — будто горит внутри. */}
+            {/* ── Content-type glyph floating inside the glass cube ── */}
             {glyph && (
                 <>
                     <g clipPath={`url(#${clipId})`}>
                         <circle
                             cx={GLYPH_CENTER.x}
                             cy={GLYPH_CENTER.y}
-                            r={20}
-                            fill="currentColor"
-                            opacity={0.22}
-                            filter={`url(#${poolBlurId})`}
+                            r={25}
+                            fill={`url(#${poolRadialId})`}
                         />
                     </g>
                     <g
                         className="wf-glyph"
-                        filter={!isSmallBox ? `url(#${glyphGlowId})` : undefined}
                         transform={`translate(${GLYPH_CENTER.x} ${GLYPH_CENTER.y}) scale(${GLYPH_SCALE}) translate(-12 -12)`}
                         fill="none"
                         stroke="currentColor"
@@ -274,4 +251,4 @@ export const WireframeBox = ({
             )}
         </svg>
     );
-};
+});

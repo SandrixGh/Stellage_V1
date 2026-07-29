@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "./WireframeBox";
 import { BoxNameLabel } from "./BoxNameLabel";
@@ -5,24 +6,24 @@ import { resolveRarityVisual, resolveBoxContentType } from "../../data/mockTempl
 import { formatCount } from "../../utils/formatCount";
 import "./BoxCard.css";
 
-export const BoxCard = ({ box }: { box: Box }) => {
+export const BoxCard = memo(({ box }: { box: Box }) => {
     const rarityKey = box.template.rarity?.toLowerCase();
-    // Тот же визуал, что в ленте: цветные линии wireframe + свечение по редкости.
     const { rarityGlow, boxColor } = resolveRarityVisual(box.template.rarity ?? "common");
-    // Глиф по реальному содержимому экземпляра (с бэка), а не хэш по id.
     const contentType = resolveBoxContentType(box);
 
     return (
         <div className={`box-card rarity-${rarityKey}`}>
-            <div className="box-card-serial">
-                <span className="serial">#{box.serial_number}</span>
-                {box.is_verified === "verified" && (
-                    <span className="verified-badge">✓</span>
-                )}
-            </div>
-
             <div className="box-card-visual">
-                <WireframeBox size={110} rarityGlow={rarityGlow} color={boxColor} contentType={contentType} />
+                <span className={`template-badge rarity-badge-${rarityKey}`}>
+                    {box.template.rarity}
+                </span>
+                <div className="box-card-serial">
+                    <span className="serial">#{box.serial_number}</span>
+                    {box.is_verified === "verified" && (
+                        <span className="verified-badge">✓</span>
+                    )}
+                </div>
+                <WireframeBox size={140} rarityGlow={rarityGlow} color={boxColor} contentType={contentType} />
             </div>
 
             <div className="box-card-info">
@@ -30,9 +31,6 @@ export const BoxCard = ({ box }: { box: Box }) => {
                     <BoxNameLabel name={box.template.title} max={22} className="box-title-text" />
                 </h3>
                 <div className="box-card-meta">
-                    <span className={`rarity-tag rarity-tag-${rarityKey}`} style={{ color: boxColor }}>
-                        {box.template.rarity}
-                    </span>
                     {box.likes_count > 0 && (
                         <span className="box-likes-tag" title={`${box.likes_count} лайков`}>
                             ♥ {formatCount(box.likes_count)}
@@ -45,4 +43,5 @@ export const BoxCard = ({ box }: { box: Box }) => {
             </div>
         </div>
     );
-};
+});
+

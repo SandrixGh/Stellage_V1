@@ -69,11 +69,13 @@ export const resolveContentType = (
  * реального контента у нас ещё нет.
  */
 export const resolveBoxContentType = (box: {
+    is_sealed?: string | null;
     content_type?: string | null;
     template: { id?: string; contentType?: string | null };
 }): string => {
+    if (box.is_sealed === "sealed") return "sealed";
     if (box.content_type) {
-        return box.content_type === "empty" ? "" : box.content_type;
+        return box.content_type === "empty" ? "sealed" : box.content_type;
     }
     return resolveContentType(box.template);
 };

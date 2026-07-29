@@ -150,6 +150,8 @@ export const ShelfBoard = ({
         [colCount, rowCount]
     );
 
+    const dragRafRef = useRef<number | null>(null);
+
     const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>, p: PlacedBox) => {
         // Жест начинаем всегда — даже на read-only полке, чтобы по клику
         // (без перетаскивания) можно было открыть коробку.
@@ -188,11 +190,26 @@ export const ShelfBoard = ({
         const moved =
             drag.moved ||
             Math.hypot(x - drag.startX, y - drag.startY) > DRAG_THRESHOLD;
-        // Визуально таскаем коробку только на редактируемой полке.
-        setDrag({ ...drag, x: editable ? x : drag.x, y: editable ? y : drag.y, moved });
+
+        // Используем requestAnimationFrame для троттлинга обновлений состояния
+        // на частоту кадров дисплея (60 FPS max), избегая лагов при перетаскивании.
+        const nextX = editable ? x : drag.x;
+        const nextY = editable ? y : drag.y;
+
+        if (dragRafRef.current === null) {
+            dragRafRef.current = requestAnimationFrame(() => {
+                dragRafRef.current = null;
+                setDrag((prev) => (prev ? { ...prev, x: nextX, y: nextY, moved } : null));
+            });
+        }
     };
 
     const endDrag = (e: ReactPointerEvent<HTMLDivElement>) => {
+        if (dragRafRef.current !== null) {
+            cancelAnimationFrame(dragRafRef.current);
+            dragRafRef.current = null;
+        }
+
         if (!drag || e.pointerId !== drag.pointerId) return;
         const id = drag.id;
         const moved = drag.moved;
@@ -234,11 +251,8 @@ export const ShelfBoard = ({
             {/* Коробки. */}
             {placed.map((p) => {
                 const isDragging = editable && drag?.id === p.box.id && drag.moved;
-                // template может отсутствовать в неполном ответе — не роняем всю
-                // доску, показываем безопасные фолбэки.
                 const template = p.box.template;
                 const rarityKey = template?.rarity?.toLowerCase() ?? "";
-                // Тот же визуал, что в ленте (TemplateCard): цвет линий + свечение.
                 const { rarityGlow, boxColor } = resolveRarityVisual(
                     template?.rarity ?? "common"
                 );
@@ -268,7 +282,7 @@ export const ShelfBoard = ({
                         <div className="shelf-cell-inner">
                             <WireframeBox size={80} rarityGlow={rarityGlow} color={boxColor} contentType={resolveBoxContentType(p.box)} />
                         </div>
-                        <div className="shelf-box-label">
+                        <div className="shelf-box-label" data-rarity={rarityKey}>
                             <span className="shelf-box-name">
                                 {template?.title ?? "Коробка"}
                             </span>

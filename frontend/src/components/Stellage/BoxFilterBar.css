@@ -13,26 +13,25 @@
 .box-filter-search {
     flex: 1;
     min-width: 200px;
-    padding: 12px 16px;
-    border-radius: var(--radius-lg);
-    background: rgba(var(--glass-rgb), 0.03);
-    border: 1px solid rgba(var(--ink-rgb), 0.15);
+    padding: 12px 20px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
     color: var(--ink);
     font-size: 14px;
     outline: none;
-    transition: border-color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .box-filter-search::placeholder {
-    color: rgba(var(--ink-rgb), 0.35);
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .box-filter-search:focus {
-    border-color: rgba(var(--ink-rgb), 0.4);
+    background: rgba(255, 255, 255, 0.09);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
 }
 
-/* Кастомный селект сортировки не растягивается на всю строку, а сидит рядом
-   с поиском фиксированной ширины. */
 .box-filter-sort-select {
     flex: 0 0 auto;
     width: 180px;
@@ -48,22 +47,24 @@
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.5px;
-    text-transform: uppercase;
-    padding: 6px 12px;
+    text-transform: capitalize;
+    padding: 6px 14px;
     border-radius: 999px;
-    color: rgba(var(--ink-rgb), 0.6);
-    background: rgba(var(--ink-rgb), 0.05);
-    border: 1px solid rgba(var(--ink-rgb), 0.18);
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.06);
+    border: none;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .box-filter-chip:hover {
-    border-color: rgba(var(--ink-rgb), 0.4);
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.12);
 }
 
 .box-filter-chip.active {
-    background: rgba(var(--ink-rgb), 0.14);
-    border-color: rgba(var(--ink-rgb), 0.5);
-    color: var(--ink);
+    color: var(--accent-bright);
+    background: rgba(79, 169, 142, 0.18);
+    border: 1px solid rgba(79, 169, 142, 0.35);
+    font-weight: 600;
 }

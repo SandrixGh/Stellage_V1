@@ -13,21 +13,21 @@ import "./MainPage.css";
 export const MyStellagePage = () => {
     const navigate = useNavigate();
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-    const {
-        shelves,
-        mainShelf,
-        selectedShelf,
-        fetchShelves,
-        fetchMainShelf,
-        fetchShelfWithBoxes,
-        updateBoxPosition,
-        createShelf,
-        setMainShelf,
-        instances,
-        fetchInstances,
-        moveBox,
-        isLoading,
-    } = useStellageStore();
+    const shelves = useStellageStore((s) => s.shelves);
+
+    const mainShelf = useStellageStore((s) => s.mainShelf);
+    const selectedShelf = useStellageStore((s) => s.selectedShelf);
+    const fetchShelves = useStellageStore((s) => s.fetchShelves);
+    const fetchMainShelf = useStellageStore((s) => s.fetchMainShelf);
+    const fetchShelfWithBoxes = useStellageStore((s) => s.fetchShelfWithBoxes);
+    const updateBoxPosition = useStellageStore((s) => s.updateBoxPosition);
+    const createShelf = useStellageStore((s) => s.createShelf);
+    const setMainShelf = useStellageStore((s) => s.setMainShelf);
+    const instances = useStellageStore((s) => s.instances);
+    const fetchInstances = useStellageStore((s) => s.fetchInstances);
+    const moveBox = useStellageStore((s) => s.moveBox);
+    const isLoading = useStellageStore((s) => s.isLoading);
+
 
     // id активной (открытой на доске) полки. null = ещё не выбрана.
     const [activeShelfId, setActiveShelfId] = useState<string | null>(null);

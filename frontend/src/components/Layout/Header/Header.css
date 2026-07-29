@@ -12,11 +12,15 @@
     display: flex;
     align-items: center;
     box-sizing: border-box;
-    background: rgba(var(--chrome-rgb), 0.82);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(var(--ink-rgb), 0.10);
+    background: rgba(11, 14, 17, 0.78);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    will-change: transform;
+    transform: translateZ(0);
 }
+
 
 .header-container {
     width: 100%;
@@ -40,16 +44,13 @@
 
 .header-logo-title {
     font-family: var(--font-display);
-    font-size: 22px;
+    font-size: 21px;
     font-weight: 700;
-    /* Small, deliberate tracking between the letters of the wordmark. */
     line-height: 1.2;
-    /* Вордмарк — фирменным зелёным (усиливаем ассоциацию с цветом). */
-    color: var(--accent-bright);
+    color: var(--accent);
+    letter-spacing: -0.2px;
 }
 
-/* Logo asset is ~877x817 — let width follow the real aspect ratio
-   instead of forcing a square box that letterboxes the mark. */
 .header-logo-icon {
     display: block;
     height: 34px;
@@ -67,11 +68,11 @@
 
 .nav-link {
     position: relative;
-    color: rgba(var(--ink-rgb), 0.5);
+    color: var(--ink-secondary);
     text-decoration: none;
     font-family: var(--font-body);
     font-weight: 500;
-    font-size: 15px;
+    font-size: 14px;
     letter-spacing: 0.1px;
     padding: 8px 2px;
     transition: color 0.2s ease;
@@ -81,22 +82,25 @@
     content: "";
     position: absolute;
     left: 0;
-    bottom: 0;
+    bottom: -2px;
     width: 100%;
     height: 2px;
     background: var(--accent);
+    border-radius: 2px;
     transform: scaleX(0);
     transform-origin: left center;
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .nav-link:hover {
-    color: rgba(var(--ink-rgb), 0.85);
+    color: var(--ink);
 }
 
 .nav-link.active {
     color: var(--ink);
+    font-weight: 600;
 }
+
 
 .nav-link.active::after {
     transform: scaleX(1);
@@ -119,18 +123,22 @@
     width: 40px;
     height: 40px;
     flex-shrink: 0;
-    border-radius: var(--radius-md);
-    background: rgba(var(--glass-rgb), 0.04);
-    border: 1px solid rgba(var(--ink-rgb), 0.15);
-    color: rgba(var(--ink-rgb), 0.7);
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    color: rgba(var(--ink-rgb), 0.8);
     text-decoration: none;
-    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    transition: all 0.25s ease;
 }
 
 .settings-link:hover {
-    background: rgba(var(--glass-rgb), 0.08);
-    border-color: rgba(var(--ink-rgb), 0.35);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.3);
     color: var(--ink);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .settings-link.active {
@@ -145,44 +153,44 @@
 }
 
 .settings-link:hover .settings-icon {
-    transform: rotate(45deg);
+    /* removed rotate(45deg) for calm animation */
 }
 
 .user-profile {
     display: flex;
     align-items: center;
     gap: 9px;
-    background: rgba(var(--glass-rgb), 0.04);
-    padding: 6px 14px 6px 6px;
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(var(--ink-rgb), 0.15);
+    background: var(--surface);
+    padding: 5px 14px 5px 5px;
+    border-radius: 999px;
+    border: 1px solid var(--border-subtle);
     cursor: pointer;
     user-select: none;
     text-decoration: none;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .user-profile:hover {
-    background: rgba(var(--glass-rgb), 0.08);
-    border-color: rgba(var(--ink-rgb), 0.35);
+    background: var(--surface-hover);
+    border-color: var(--border-hover);
 }
 
 .user-profile.active {
-    border-color: rgba(var(--ink-rgb), 0.4);
-    background: rgba(var(--glass-rgb), 0.07);
+    border-color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.1);
 }
 
 .user-avatar {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     flex-shrink: 0;
-    border-radius: var(--radius-sm);
-    background: rgba(var(--ink-rgb), 0.12);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
     color: var(--ink);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 14px;
     font-weight: 700;
     line-height: 1;
@@ -190,8 +198,8 @@
 
 .user-email {
     color: var(--ink);
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
     max-width: 180px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -200,26 +208,24 @@
 
 /* ===== LOGIN BUTTON (guest) ===== */
 .login-btn {
-    padding: 10px 24px;
-    /* Signature accent: one confident solid CTA, inverted vs. the ground. */
+    padding: 9px 22px;
     background: var(--btn-primary-bg);
     color: var(--btn-primary-text);
-    border: 1px solid var(--btn-primary-bg);
-    border-radius: var(--radius-md);
-    font-size: 14px;
+    border: none;
+    border-radius: 999px;
+    font-size: 13px;
     font-weight: 700;
-    letter-spacing: 0.2px;
+    letter-spacing: -0.01em;
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .login-btn:hover {
-    background: var(--btn-primary-bg-hover);
-    border-color: var(--btn-primary-bg-hover);
+    background: var(--accent-bright);
 }
 
 .login-btn:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
 }
 
 /* ===== STELLACOIN BADGE ===== */
@@ -227,20 +233,21 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    height: 40px;
-    padding: 0 14px 0 6px;
-    border-radius: var(--radius-md);
-    background: rgba(var(--glass-rgb), 0.04);
-    border: 1px solid rgba(var(--ink-rgb), 0.15);
+    height: 38px;
+    padding: 0 16px 0 6px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
     box-sizing: border-box;
     user-select: none;
     overflow: hidden;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .stellacoin-badge:hover {
-    background: rgba(var(--glass-rgb), 0.08);
-    border-color: rgba(var(--ink-rgb), 0.35);
+    background: var(--surface-hover);
+    border-color: var(--border-hover);
 }
 
 .stellacoin-icon {

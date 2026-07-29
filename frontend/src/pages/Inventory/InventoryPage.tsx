@@ -12,7 +12,8 @@ import "./InventoryPage.css";
 
 export const InventoryPage = () => {
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-    const { instances, fetchInstances } = useStellageStore();
+    const instances = useStellageStore((s) => s.instances);
+    const fetchInstances = useStellageStore((s) => s.fetchInstances);
 
     const [query, setQuery] = useState("");
     const [activeRarities, setActiveRarities] = useState<string[]>([]);
@@ -22,6 +23,7 @@ export const InventoryPage = () => {
     useEffect(() => {
         if (isAuthenticated) fetchInstances();
     }, [isAuthenticated, fetchInstances]);
+
 
     const rarities = useMemo(() => collectRarities(instances), [instances]);
     const visible = useMemo(

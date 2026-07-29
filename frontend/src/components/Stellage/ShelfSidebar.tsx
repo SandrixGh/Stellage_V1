@@ -37,7 +37,6 @@ export const ShelfSidebar = ({
     isMain,
     onMakeMain,
 }: ShelfSidebarProps) => {
-    // Группируем по редкости и считаем общую стоимость за один проход.
     const { rarityCounts, totalPrice, currency } = useMemo(() => {
         const counts = new Map<string, number>();
         let price = 0;
@@ -60,11 +59,11 @@ export const ShelfSidebar = ({
     const owner = shelf?.owner_username ?? "—";
 
     return (
-        <aside className="shelf-sidebar">
-            <h2 className="shelf-sidebar-title">{shelf?.title ?? "Stellage Info"}</h2>
 
-            {shelf && (
-                <div className="shelf-sidebar-actions">
+        <header className="shelf-toolbar glass-panel">
+            <div className="shelf-toolbar-top">
+                <div className="shelf-toolbar-title-group">
+                    <h2 className="shelf-toolbar-title">{shelf?.title ?? "Stellage Info"}</h2>
                     <span className={`badge ${isPublic ? "badge--public" : "badge--private"}`}>
                         {isPublic ? "Публичная" : "Приватная"}
                     </span>
@@ -74,78 +73,60 @@ export const ShelfSidebar = ({
                             className="make-main-btn"
                             onClick={onMakeMain}
                         >
-                            Назначить главным
+                            ★ Назначить главным
                         </button>
                     )}
                 </div>
-            )}
 
-            <dl className="shelf-stats">
-                <div className="shelf-stat-row">
-                    <dt>Владелец</dt>
-                    <dd>{owner}</dd>
+                <div className="shelf-toolbar-stats">
+                    <span className="toolbar-stat-pill">Владелец: <strong>@{owner}</strong></span>
+                    <span className="toolbar-stat-pill">Коробок: <strong>{boxes.length}</strong></span>
+                    {totalPrice > 0 && (
+                        <span className="toolbar-stat-pill">Ценность: <strong>{formatPrice(totalPrice)} {currency}</strong></span>
+                    )}
                 </div>
-                <div className="shelf-stat-row">
-                    <dt>Кол-во коробок</dt>
-                    <dd>{boxes.length}</dd>
-                </div>
-                <div className="shelf-stat-row">
-                    <dt>Цена стеллажа</dt>
-                    <dd>
-                        {formatPrice(totalPrice)}
-                        {currency ? ` ${currency}` : ""}
-                    </dd>
-                </div>
-            </dl>
-
-            {rarities.length > 0 && (
-                <div className="shelf-section">
-                    <h3 className="shelf-section-title">По редкости</h3>
-                    <ul className="shelf-rarity-list">
-                        {rarities.map((rarity) => (
-                            <li key={rarity} className="shelf-rarity-row">
-                                <span className="shelf-rarity-name">{rarity}</span>
-                                <span className="shelf-rarity-count">
-                                    {rarityCounts.get(rarity)}
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-
-            <div className="shelf-section">
-                <h3 className="shelf-section-title">Поиск коробки</h3>
-                <input
-                    type="text"
-                    className="shelf-search"
-                    placeholder="Название или серийный номер…"
-                    value={searchQuery}
-                    onChange={(e) => onSearchChange(e.target.value)}
-                />
             </div>
 
-            {rarities.length > 0 && (
-                <div className="shelf-section">
-                    <h3 className="shelf-section-title">Фильтр по редкости</h3>
-                    <div className="shelf-rarity-chips">
+            <div className="shelf-toolbar-bottom">
+                <div className="shelf-search-wrapper">
+                    <input
+                        type="text"
+                        className="shelf-search-input"
+                        placeholder="Поиск коробки по имени или #номеру…"
+                        value={searchQuery}
+                        onChange={(e) => onSearchChange(e.target.value)}
+                    />
+                </div>
+
+                {rarities.length > 0 && (
+                    <div className="shelf-filter-chips">
+                        <button
+                            type="button"
+                            className={`shelf-chip ${activeRarities.length === 0 ? "is-active" : ""}`}
+                            onClick={() => {
+                                for (const r of activeRarities) onToggleRarity(r);
+                            }}
+                        >
+                            Все ({boxes.length})
+                        </button>
                         {rarities.map((rarity) => {
                             const active = activeRarities.includes(rarity);
+                            const count = rarityCounts.get(rarity);
                             return (
                                 <button
                                     key={rarity}
                                     type="button"
                                     className={`shelf-chip ${active ? "is-active" : ""}`}
-                                    aria-pressed={active}
                                     onClick={() => onToggleRarity(rarity)}
                                 >
-                                    {rarity}
+                                    {rarity} ({count})
                                 </button>
                             );
                         })}
                     </div>
-                </div>
-            )}
-        </aside>
+                )}
+            </div>
+        </header>
     );
 };
+

@@ -1,49 +1,79 @@
 .profile-stats {
     display: flex;
-    gap: 10px;
-    margin-top: 4px;
-    margin-bottom: 10px;
+    align-items: center;
+    gap: 0;
+    margin-top: 16px;
+    margin-bottom: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    padding: 4px;
 }
 
 .profile-stat {
     flex: 1;
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 3px;
     padding: 14px 10px;
-    border-radius: var(--radius-md);
-    background: var(--surface-hover);
-    border: 1px solid rgba(var(--ink-rgb), 0.1);
+    border-radius: 12px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    transition: background 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.profile-stat + .profile-stat::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 22%;
+    bottom: 22%;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .profile-stat-clickable {
     font-family: inherit;
     cursor: pointer;
-    transition: border-color 0.16s ease, background 0.16s ease;
 }
 
 .profile-stat-clickable:hover {
-    border-color: rgba(var(--ink-rgb), 0.28);
-    background: var(--surface);
+    background: var(--surface-hover);
+    transform: translateY(-1px);
+}
+
+.profile-stat-clickable:active {
+    transform: scale(0.97);
+    transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .profile-stat-value {
-    font-family: 'Inter', sans-serif;
-    font-size: 22px;
+    font-family: var(--font-body);
+    font-size: 20px;
     font-weight: 700;
     color: var(--ink);
-    line-height: 1;
+    line-height: 1.1;
     font-variant-numeric: tabular-nums;
 }
 
 .profile-stat-label {
     font-size: 12px;
-    color: rgba(var(--ink-rgb), 0.55);
+    font-weight: 500;
+    color: var(--ink-secondary);
     text-align: center;
+    letter-spacing: 0.1px;
 }
 
 @media (max-width: 520px) {
-    .profile-stat-value { font-size: 19px; }
+    .profile-stats { gap: 8px; }
+    .profile-stat { padding: 12px 8px; border-radius: 10px; }
+    .profile-stat-value { font-size: 18px; }
     .profile-stat-label { font-size: 11px; }
 }
+

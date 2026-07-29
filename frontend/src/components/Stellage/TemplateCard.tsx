@@ -1,11 +1,10 @@
+import { memo } from "react";
 import type { BoxTemplate } from "../../types/Stellage/boxes";
 import { WireframeBox } from "./WireframeBox";
 import { formatPrice, resolveRarityVisual, resolveContentType } from "../../data/mockTemplates";
 import "./TemplateCard.css";
 
-/* Shared box tile used by the Feed grid and the Home feed-teaser.
-   Styling lives in FeedPage.css (.template-card*) so both surfaces read identically. */
-export const TemplateCard = ({
+export const TemplateCard = memo(({
     template,
     onClick,
     size = 200,
@@ -31,15 +30,15 @@ export const TemplateCard = ({
             }}
         >
             <div className="template-card-visual">
+                <span className={`template-badge rarity-badge-${rarityClass}`}>
+                    {template.rarity}
+                </span>
                 <WireframeBox size={size} rarityGlow={rarityGlow} color={boxColor} contentType={resolveContentType(template)} />
             </div>
 
             <div className="template-card-footer">
                 <h3 className="template-title">{template.title}</h3>
-                <div className="template-meta">
-                    <span className={`rarity-tag rarity-tag-${rarityClass}`}>
-                        {template.rarity}
-                    </span>
+                <div className="template-action-row">
                     {actionNode ? (
                         actionNode
                     ) : (
@@ -51,4 +50,5 @@ export const TemplateCard = ({
             </div>
         </div>
     );
-};
+});
+

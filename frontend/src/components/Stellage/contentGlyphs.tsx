@@ -21,7 +21,9 @@ export type ContentType =
     // Типы, которые отдаёт бэкенд (box_content_type): mixed ≈ hybrid,
     // empty — контента нет (или он скрыт), глиф не рисуем.
     | "mixed"
-    | "empty";
+    | "empty"
+    | "sealed"
+    | "lock";
 
 const GLYPHS: Record<ContentType, ReactNode> = {
     // Фото — рамка с «солнцем» и линией гор.
@@ -86,6 +88,21 @@ const GLYPHS: Record<ContentType, ReactNode> = {
     ),
     // Пусто — глифа нет; грань куба остаётся чистой.
     empty: null,
+    // Запечатана — аккуратный замочек внутри.
+    sealed: (
+        <>
+            <rect x="7.5" y="11" width="9" height="7.5" rx="1.5" strokeWidth="1.4" />
+            <path d="M9.5 11V8.2a2.5 2.5 0 015 0V11" strokeWidth="1.4" />
+            <circle cx="12" cy="14.5" r="0.9" fill="currentColor" stroke="none" />
+        </>
+    ),
+    lock: (
+        <>
+            <rect x="7.5" y="11" width="9" height="7.5" rx="1.5" strokeWidth="1.4" />
+            <path d="M9.5 11V8.2a2.5 2.5 0 015 0V11" strokeWidth="1.4" />
+            <circle cx="12" cy="14.5" r="0.9" fill="currentColor" stroke="none" />
+        </>
+    ),
 };
 
 /** Вернуть элементы глифа для типа контента (или null, если тип неизвестен/не задан). */
