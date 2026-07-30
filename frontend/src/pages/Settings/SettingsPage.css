@@ -9,7 +9,7 @@
 }
 
 .settings-avatar-edit {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 12px;
     font-weight: 600;
     padding: 5px 12px;
@@ -35,7 +35,7 @@
     resize: vertical;
     min-height: 68px;
     line-height: 1.5;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
 }
 
 /* ===== APPEARANCE: theme toggle ===== */
@@ -49,7 +49,7 @@
 }
 
 .theme-toggle-option {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.2px;

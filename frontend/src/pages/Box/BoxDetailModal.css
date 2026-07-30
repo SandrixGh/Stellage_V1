@@ -1,7 +1,7 @@
 .box-modal-overlay {
     /* Модалка рендерится порталом в <body>, вне .app-shell — поэтому базовый
        шрифт приложения нужно задать здесь явно, иначе откатывается на дефолтный. */
-    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    font-family: var(--font-body);
     position: fixed;
     inset: 0;
     z-index: 200;
@@ -101,7 +101,7 @@
 
 .box-modal-title {
     margin: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-display);
     font-size: 24px;
     font-weight: 700;
     color: var(--ink);
@@ -176,7 +176,7 @@
 
 .box-modal-content-title {
     margin: 0 0 12px;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 15px;
     font-weight: 600;
     color: var(--ink);
@@ -238,7 +238,7 @@
     min-width: 120px;
     padding: 11px 16px;
     border-radius: var(--radius-sm);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.2px;
@@ -290,7 +290,7 @@
 /* ── Edit form ── */
 .box-modal-edit-title {
     margin: 0 0 18px;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-display);
     font-size: 20px;
     font-weight: 700;
     color: var(--ink);
@@ -324,7 +324,7 @@
     background: rgba(var(--glass-rgb), 0.04);
     border: 1px solid rgba(var(--ink-rgb), 0.15);
     color: var(--ink);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 14px;
     outline: none;
     transition: border-color 0.18s ease, background 0.18s ease;

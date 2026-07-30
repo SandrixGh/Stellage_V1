@@ -99,7 +99,7 @@
     letter-spacing: 0.8px;
     text-transform: uppercase;
     padding: 3px 10px;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     color: var(--ink-secondary);
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -130,7 +130,7 @@
     font-weight: 600;
     letter-spacing: 0.3px;
     padding: 3px 9px;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     color: #e6465a;
     background: rgba(230, 70, 90, 0.08);
     border: 1px solid rgba(230, 70, 90, 0.25);
@@ -143,7 +143,7 @@
     font-weight: 500;
     letter-spacing: 0.4px;
     padding: 3px 9px;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--ink-secondary);
 }

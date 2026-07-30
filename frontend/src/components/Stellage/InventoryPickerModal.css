@@ -63,7 +63,7 @@
 
 .picker-title {
     margin: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 22px;
     font-weight: 700;
     color: var(--ink);

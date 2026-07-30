@@ -18,7 +18,7 @@
 }
 
 .avatar-monogram span {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-weight: 700;
     color: var(--ink);
     line-height: 1;

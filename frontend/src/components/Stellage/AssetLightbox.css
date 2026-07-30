@@ -2,7 +2,7 @@
    Тёмный нейтральный фон — чтобы вся энергия была на самом контенте; кадр
    читается одинаково в обеих темах. */
 .lightbox-overlay {
-    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    font-family: var(--font-body);
     position: fixed;
     inset: 0;
     z-index: 300;

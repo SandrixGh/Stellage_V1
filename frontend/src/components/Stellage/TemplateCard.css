@@ -139,7 +139,7 @@
 
 /* ── Price ── */
 .template-price {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 13px;
     font-weight: 600;
     color: rgba(var(--ink-rgb), 0.75);

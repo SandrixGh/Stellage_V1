@@ -75,7 +75,7 @@
 
 .box-page-title {
     margin: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 28px;
     font-weight: 700;
     color: var(--ink);
@@ -189,7 +189,7 @@ a.box-page-owner:hover {
 
 .box-page-content-title {
     margin: 0 0 18px;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 18px;
     font-weight: 600;
     color: var(--ink);

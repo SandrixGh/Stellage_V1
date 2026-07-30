@@ -37,7 +37,7 @@
 
 /* ── Попап с полным названием ── */
 .box-name-pop-overlay {
-    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    font-family: var(--font-body);
     position: fixed;
     inset: 0;
     z-index: 300;
@@ -94,7 +94,7 @@
     background: rgba(var(--ink-rgb), 0.1);
     border: 1px solid rgba(var(--ink-rgb), 0.25);
     color: var(--ink);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;

@@ -32,7 +32,7 @@
 .msg-list-title {
     margin: 0;
     padding: 20px 18px 14px;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 18px;
     font-weight: 700;
     color: var(--ink);

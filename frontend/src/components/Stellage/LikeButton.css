@@ -7,7 +7,7 @@
     background: rgba(var(--glass-rgb), 0.04);
     border: 1px solid rgba(var(--ink-rgb), 0.15);
     color: rgba(var(--ink-rgb), 0.75);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;

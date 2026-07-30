@@ -103,7 +103,7 @@
 
 .shelf-modal-title {
     margin: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-display);
     font-size: 24px;
     font-weight: 800;
     color: var(--ink);
@@ -117,7 +117,7 @@
     border: 1px solid rgba(var(--ink-rgb), 0.2);
     border-radius: var(--radius-sm);
     color: var(--ink);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 14px;
     outline: none;
     transition: border-color 0.2s ease;
@@ -131,7 +131,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 13px;
     color: rgba(var(--ink-rgb), 0.7);
     cursor: pointer;
@@ -147,7 +147,7 @@
 .shelf-modal-btn {
     padding: 10px 20px;
     border-radius: var(--radius-sm);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.4px;
@@ -283,7 +283,7 @@
     color: var(--ink);
     border: 1px solid rgba(var(--ink-rgb), 0.25);
     border-radius: var(--radius-sm);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.5px;
@@ -330,9 +330,9 @@
     width: 100%;
     padding: 12px 20px;
     text-align: center;
-    background: rgba(255, 255, 255, 0.12);
-    color: #FFFFFF;
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(var(--ink-rgb), 0.08);
+    color: var(--ink);
+    border: 1px solid rgba(var(--ink-rgb), 0.12);
     border-radius: var(--radius-sm);
     font-family: var(--font-body);
     font-size: 13.5px;
@@ -343,16 +343,16 @@
 }
 
 .add-box-btn:hover {
-    background: #FFFFFF;
-    color: #000000;
-    border-color: #FFFFFF;
+    background: var(--ink);
+    color: var(--ground);
+    border-color: var(--ink);
 }
 
-.create-shelf-btn {
+.shelf-rail .create-shelf-btn {
     padding: 10px 18px;
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(var(--ink-rgb), 0.04);
+    color: rgba(var(--ink-rgb), 0.7);
+    border: 1px solid rgba(var(--ink-rgb), 0.1);
     border-radius: var(--radius-sm);
     font-family: var(--font-body);
     font-size: 13px;
@@ -361,10 +361,10 @@
     transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.create-shelf-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #FFFFFF;
+.shelf-rail .create-shelf-btn:hover {
+    background: rgba(var(--ink-rgb), 0.08);
+    border-color: rgba(var(--ink-rgb), 0.2);
+    color: var(--ink);
 }
 
 .shelf-rail-add {
@@ -378,9 +378,9 @@
     gap: 8px;
     width: 100%;
     padding: 10px 16px;
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(var(--ink-rgb), 0.04);
+    color: rgba(var(--ink-rgb), 0.7);
+    border: 1px solid rgba(var(--ink-rgb), 0.08);
     border-radius: var(--radius-md);
     font-family: var(--font-body);
     font-size: 13px;
@@ -390,15 +390,15 @@
 }
 
 .shelf-rail-item:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.18);
-    color: #FFFFFF;
+    background: rgba(var(--ink-rgb), 0.08);
+    border-color: rgba(var(--ink-rgb), 0.18);
+    color: var(--ink);
 }
 
 .shelf-rail-item.active {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: #FFFFFF;
+    background: rgba(var(--ink-rgb), 0.12);
+    border-color: rgba(var(--ink-rgb), 0.3);
+    color: var(--ink);
     font-weight: 600;
 }
 

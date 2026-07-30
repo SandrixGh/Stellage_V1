@@ -1,6 +1,6 @@
 .follow-btn {
     height: 36px;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 13px;
     font-weight: 600;
     padding: 0 18px;

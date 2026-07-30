@@ -163,7 +163,7 @@
     background: transparent;
     border-radius: var(--radius-md);
     text-align: left;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 14px;
     font-weight: 500;
     color: var(--ink);

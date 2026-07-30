@@ -42,10 +42,16 @@
 :root[data-theme="light"] {
     --ink: #14181A;
     --ink-rgb: 20, 24, 26;
+    --ink-secondary: #6B7075;
+    --ink-tertiary: rgba(20, 24, 26, 0.45);
 
     --ground: #EEF1F1;
+    --background-image: none;
     --surface: #FFFFFF;
     --surface-hover: #F4F7F6;
+    --surface-elevated: #FAFBFB;
+    --border-subtle: rgba(20, 24, 26, 0.08);
+    --border-hover: rgba(20, 24, 26, 0.18);
 
     /* Базовый rgb для «стеклянных» полупрозрачных заливок (glass tint). */
     --glass-rgb: 0, 0, 0;
@@ -58,8 +64,11 @@
     --box-dev: #8E45C9;
 
     --tag-rare: #2E5FB8;
+    --tag-rare-rgb: 46, 95, 184;
     --tag-golden: #9A6E1A;
+    --tag-golden-rgb: 154, 110, 26;
     --tag-dev: #7E3BB5;
+    --tag-dev-rgb: 126, 59, 181;
     --tag-sealed: #6B7075;
     --verified: #3E9E58;
 
@@ -136,15 +145,15 @@
 
 /* ── Apple & Spotify Glass & Component Utilities ── */
 .glass-panel {
-    background: rgba(18, 21, 25, 0.75);
+    background: rgba(var(--chrome-rgb), 0.78);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid var(--border-subtle);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36);
+    box-shadow: 0 8px 32px rgba(var(--glass-rgb), 0.12);
 }
 
 .glass-header {
-    background: rgba(9, 11, 14, 0.8) !important;
+    background: rgba(var(--chrome-rgb), 0.82) !important;
     backdrop-filter: blur(24px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
     border-bottom: 1px solid var(--border-subtle) !important;
@@ -156,4 +165,17 @@ button:active, .btn:active, a.btn:active {
     transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-
+/* ── Accessibility: reduced motion ──
+   Honour system preference by disabling decorative transitions
+   and animations globally. Functional transforms (e.g. modal
+   positioning) are kept static. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
