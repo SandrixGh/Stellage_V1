@@ -20,8 +20,12 @@ When assigned a task, you MUST execute it using the following **Artifact-driven 
    * Do NOT invent external libraries. Rely on the existing tech stack.
    * Do NOT expose secrets or raw S3 keys (`s3_key`) in API schemas.
 
-3. **Phase 3: Automated Verification (Required)**
+3. **Phase 3: Automated Verification & Health Check (Required)**
    * **Backend Verification:** Always run `poetry run python -m pytest tests` via terminal agent upon completing python changes.
+   * **Mandatory Backend Health & Migration Check:** Whenever modifying backend schemas, DB models, or frontend code, ALWAYS verify database migrations and server health:
+     - Run Alembic migrations (`docker exec stellage-backend alembic upgrade head`) if new columns or DB models were added.
+     - Inspect docker logs (`docker logs --tail 50 stellage-backend`) to ensure no DB crashes or runtime exceptions occurred.
+     - Verify API response (`curl.exe -s http://localhost:8000/health`) to ensure the backend container and website remain fully functional.
    * **Frontend Verification:** Always execute `npm run build` in `frontend/` to ensure TypeScript compilation and type safety.
    * **UI Testing:** Use the Browser Agent to inspect UI changes if modifying Stellage shelf/grid components.
 
