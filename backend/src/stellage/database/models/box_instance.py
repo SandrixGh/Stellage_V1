@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, CheckConstraint, ForeignKey, Index, Integer, UniqueConstraint, text
+from sqlalchemy import JSON, Boolean, CheckConstraint, ForeignKey, Index, Integer, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import ENUM as PostgresEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -49,6 +49,20 @@ class BoxInstance(IDMixin, TimestampMixin, Base):
             "users.id",
             ondelete="CASCADE"
         )
+    )
+
+    gifted_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey(
+            "users.id",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
+    )
+
+    is_gift_public: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        server_default=text("true"),
     )
 
     is_sealed: Mapped[SealingEnum] = mapped_column(
@@ -108,7 +122,13 @@ class BoxInstance(IDMixin, TimestampMixin, Base):
 
     owner: Mapped[User] = relationship(
         "User",
+        foreign_keys=[user_id],
         back_populates="boxes",
+    )
+
+    gifted_by: Mapped[User | None] = relationship(
+        "User",
+        foreign_keys=[gifted_by_id],
     )
 
     # Без cascade delete-orphan: удаление ассетов всегда явное (через статус

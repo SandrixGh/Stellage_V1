@@ -2,6 +2,7 @@ import enum
 
 
 class CurrencyEnum(str, enum.Enum):
+    STELLA = "stella"  # Стеллакоины Stellage
     USD = "usd"  # Доллар США
     RUB = "rub"  # Российский рубль
     EUR = "eur"  # Евро

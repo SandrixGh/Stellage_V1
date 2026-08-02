@@ -7,15 +7,19 @@ __all__ = (
     "BoxAsset",
     "Follow",
     "BoxLike",
+    "BoxComment",
     "Notification",
     "Message",
+    "CoinGift",
 )
 
 from .base import Base
 from .box_asset import BoxAsset
+from .box_comment import BoxComment
 from .box_instance import BoxInstance
 from .box_like import BoxLike
 from .box_template import BoxTemplate
+from .coin_gift import CoinGift
 from .follow import Follow
 from .message import Message
 from .notification import Notification

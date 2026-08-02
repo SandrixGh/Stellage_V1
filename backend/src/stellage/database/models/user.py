@@ -44,6 +44,20 @@ class User(IDMixin, TimestampMixin, Base):
         nullable=True,
     )
 
+    # Ключ объекта баннера/обложки в S3 (не URL — наружу отдаётся presigned GET).
+    banner_key: Mapped[str | None] = mapped_column(
+        String(512),
+        nullable=True,
+    )
+
+    # Вертикальное выравнивание баннера в процентах (0..100), по умолчанию 50%
+    banner_pos_y: Mapped[int] = mapped_column(
+        Integer,
+        default=50,
+        server_default="50",
+        nullable=False,
+    )
+
     # Короткое описание «о себе» для витрины профиля.
     bio: Mapped[str | None] = mapped_column(
         String(280),
@@ -74,6 +88,13 @@ class User(IDMixin, TimestampMixin, Base):
         nullable=False,
     )
 
+    is_developer: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        server_default="false",
+        nullable=False,
+    )
+
     stella_coins: Mapped[int] = mapped_column(
         Integer,
         default=0,
@@ -88,6 +109,7 @@ class User(IDMixin, TimestampMixin, Base):
 
     boxes: Mapped[list["BoxInstance"]] = relationship(
         "BoxInstance",
+        foreign_keys="BoxInstance.user_id",
         back_populates="owner",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
