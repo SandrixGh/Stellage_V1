@@ -49,6 +49,7 @@ class UpdateProfileRequest(BaseModel):
             strip_whitespace=True,
         )
     ] = None
+    banner_pos_y: int | None = None
 
 
 class AvatarInitiateRequest(BaseModel):
@@ -71,6 +72,11 @@ class AvatarCompleteRequest(BaseModel):
     key: str
     mime: Annotated[str, StringConstraints(min_length=3, max_length=100)]
     size_bytes: int
+    banner_pos_y: int | None = 50
+
+
+class UpdateBannerPositionRequest(BaseModel):
+    banner_pos_y: int
 
 
 class ProfileStats(BaseModel):
@@ -105,7 +111,10 @@ class PublicUser(BaseModel):
     bio: str | None = None
     # Presigned GET на аватар (живёт минуты); None — аватар не загружен.
     avatar_url: str | None = None
+    banner_url: str | None = None
+    banner_pos_y: int = 50
     last_seen_at: datetime.datetime | None = None
+    is_developer: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -114,6 +123,32 @@ class PublicProfile(PublicUser):
     """Публичный профиль: карточка + главный публичный стеллаж + статистика."""
     stats: ProfileStats = ProfileStats()
     shelf: "ShelfWithBoxInstances | None" = None
+
+
+class GiftSenderView(BaseModel):
+    id: uuid.UUID
+    username: str | None = None
+    nickname: str | None = None
+    avatar_url: str | None = None
+
+
+class GiftItemReturn(BaseModel):
+    id: uuid.UUID
+    serial_number: int | None = None
+    is_sealed: str | None = None
+    is_public: str | None = None
+    is_gift_public: bool = True
+    created_at: datetime.datetime
+    template_id: uuid.UUID | None = None
+    template_title: str | None = None
+    template_rarity: str | None = None
+    gift_type: str = "box"
+    coins_amount: int | None = None
+    sender: GiftSenderView | None = None
+
+
+class ToggleGiftVisibilityRequest(BaseModel):
+    is_gift_public: bool
 
 
 from stellage.apps.shelves.schemas import ShelfWithBoxInstances

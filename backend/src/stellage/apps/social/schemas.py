@@ -1,5 +1,8 @@
+import datetime
+import uuid
+from pydantic import BaseModel, ConfigDict, Field
 
-from pydantic import BaseModel
+from stellage.apps.profile.schemas import PublicUser
 
 
 class FollowCounts(BaseModel):
@@ -28,3 +31,21 @@ class LikeActionResult(BaseModel):
     """Результат лайка/снятия лайка."""
     is_liked: bool
     likes: int
+
+
+class CommentCreate(BaseModel):
+    template_id: uuid.UUID | None = None
+    instance_id: uuid.UUID | None = None
+    text: str = Field(..., min_length=1, max_length=500)
+
+
+class CommentReturn(BaseModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    template_id: uuid.UUID | None = None
+    instance_id: uuid.UUID | None = None
+    text: str
+    author: PublicUser
+    created_at: datetime.datetime
+
+    model_config = ConfigDict(from_attributes=True)

@@ -8,6 +8,7 @@ from stellage.apps.auth.handlers import AuthHandler
 from stellage.apps.auth.managers import UserManager
 from stellage.apps.auth.schemas import (
     AuthUser,
+    ChangePasswordSchema,
     CreateUser,
     DeviceAccount,
     DeviceAccountView,
@@ -410,6 +411,24 @@ class UserService:
 
         return response
 
+
+    async def change_password(
+        self,
+        user_id: str,
+        payload: ChangePasswordSchema,
+    ) -> None:
+        current_hash = await self.manager.get_user_password_hash(user_id)
+        if not current_hash or not await self.handler.verify_password(
+            raw_password=payload.current_password,
+            hashed_password=current_hash,
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Текущий пароль указан неверно",
+            )
+        new_hash = await self.handler.get_hashed_password(payload.new_password)
+        await self.manager.update_password(user_id, new_hash)
+        logger.info("Password changed for user_id=%s", user_id)
 
     async def delete_account(
         self,

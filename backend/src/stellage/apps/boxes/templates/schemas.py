@@ -29,15 +29,10 @@ class BoxTemplateBase(BaseModel):
 
 
 class BoxTemplateCreate(BoxTemplateBase):
-    # creator_id НЕ принимается из тела запроса: его проставляет сервер
-    # (creator_id=текущий пользователь), иначе клиент мог бы подделать авторство
-    # шаблона или выдать его за платформенный (creator_id=null). См. роуты.
     pass
 
 
 class BoxTemplatePatch(BaseModel):
-    """Частичное обновление шаблона коробки. Любое поле опционально —
-    меняется только то, что прислано (rarity — только для суперюзеров, см. роут)."""
     title: str | None = None
     description: str | None = None
     price: Decimal | None = None
@@ -46,11 +41,12 @@ class BoxTemplatePatch(BaseModel):
 
 
 class BoxTemplateReturn(GetBoxTemplateById, BoxTemplateBase, BoxTemplateTimeStamps):
-    # Имя автора коробки (username или local-part email). None — коробка платформы.
     owner_username: str | None = None
-    # id создателя — фронт сравнивает с текущим пользователем, чтобы показать
-    # действия владельца (редактирование доступно только создателю коробки).
+    owner_nickname: str | None = None
+    owner_avatar_url: str | None = None
     creator_id: uuid.UUID | None = None
+    likes_count: int = 0
+    comments_count: int = 0
 
     model_config = ConfigDict(
         from_attributes=True

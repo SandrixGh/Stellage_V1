@@ -145,6 +145,7 @@ class UserManager:
                     self.model.last_seen_at,
                     self.model.is_superuser,
                     self.model.is_active,
+                    self.model.stella_coins,
                 )
                 .where(self.model.id == user_id)
             )
@@ -167,6 +168,29 @@ class UserManager:
             return await client.delete(f"{user_id}:{session_id}")
 
 
+    async def get_user_password_hash(
+        self,
+        user_id: uuid.UUID | str,
+    ) -> str | None:
+        async with self.db.db_session() as session:
+            query = select(self.model.hashed_password).where(self.model.id == user_id)
+            result = await session.execute(query)
+            return result.scalar_one_or_none()
+
+    async def update_password(
+        self,
+        user_id: uuid.UUID | str,
+        new_hashed_password: str,
+    ) -> None:
+        async with self.db.db_session() as session:
+            query = (
+                update(self.model)
+                .where(self.model.id == user_id)
+                .values(hashed_password=new_hashed_password)
+            )
+            await session.execute(query)
+            await session.commit()
+
     async def delete_account(
         self,
         user_id: uuid.UUID | str,
@@ -175,4 +199,4 @@ class UserManager:
             query = delete(self.model).where(self.model.id == user_id)
 
             await session.execute(query)
-            await session.commit()
+            await session.commit()

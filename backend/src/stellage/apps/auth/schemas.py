@@ -31,6 +31,14 @@ class AuthUser(GetUserByEmail):
     )] = None
 
 
+class ChangePasswordSchema(BaseModel):
+    current_password: str
+    new_password: Annotated[str, StringConstraints(
+        min_length=8,
+        max_length=128,
+    )]
+
+
 class CreateUser(GetUserByEmail):
     hashed_password: str
     username: str | None = None
@@ -39,6 +47,7 @@ class CreateUser(GetUserByEmail):
 class UserReturnData(GetUserByID, GetUserByEmail, VerificationStatus):
     is_active: bool = False
     is_superuser: bool = False
+    is_developer: bool = False
     username: str | None = None
     nickname: str | None = None
     last_seen_at: datetime.datetime | None = None
@@ -58,6 +67,7 @@ class UserVerifySchema(GetUserByID, GetUserByEmail):
     bio: str | None = None
     last_seen_at: datetime.datetime | None = None
     is_superuser: bool = False
+    is_developer: bool = False
     # Активен ли аккаунт: деактивированный (бан) с живой сессией должен получать
     # 401, а не продолжать работать до истечения TTL токена. Дефолт True держит
     # валидными старые записи в Redis-кэше, где поля ещё не было.

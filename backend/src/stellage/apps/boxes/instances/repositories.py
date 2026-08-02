@@ -53,14 +53,41 @@ class BoxInstanceRepository:
             # IDOR-защита: шаблон обязан существовать, а полка (если указана) —
             # принадлежать создателю. Иначе можно было бы размножать чужой
             # шаблон (порча нумерации серий) или класть коробку в чужой стеллаж.
-            template_exists = await session.execute(
-                select(BoxTemplate.id).where(BoxTemplate.id == data.template_id)
+            template_res = await session.execute(
+                select(BoxTemplate).where(BoxTemplate.id == data.template_id)
             )
-            if template_exists.scalar_one_or_none() is None:
+            template = template_res.scalar_one_or_none()
+            if template is None:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Template not found",
                 )
+
+            # Оплата StellaCoins для платных шаблонов
+            price_coins = int(template.price) if template.price else 0
+            if price_coins > 0:
+                buyer_res = await session.execute(
+                    select(User).where(User.id == user_id).with_for_update()
+                )
+                buyer = buyer_res.scalar_one_or_none()
+                if buyer is None or buyer.stella_coins < price_coins:
+                    current_coins = buyer.stella_coins if buyer else 0
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Недостаточно Stellacoin на балансе ({current_coins} из {price_coins})",
+                    )
+
+                # Списываем монеты у покупателя
+                buyer.stella_coins -= price_coins
+
+                # Если шаблон создал другой пользователь — начисляем ему
+                if template.creator_id and template.creator_id != user_id:
+                    creator_res = await session.execute(
+                        select(User).where(User.id == template.creator_id).with_for_update()
+                    )
+                    creator = creator_res.scalar_one_or_none()
+                    if creator:
+                        creator.stella_coins += price_coins
 
             if data.shelf_id is not None:
                 owned_shelf = await session.execute(
@@ -544,3 +571,16 @@ class BoxInstanceRepository:
 
             await session.execute(query)
             await session.commit()
+
+    async def is_gift_participant(self, instance_id: uuid.UUID, user_id: uuid.UUID) -> bool:
+        from sqlalchemy import or_
+        from stellage.database.models import Message
+        async with self.db.db_session() as session:
+            result = await session.execute(
+                select(Message.id).where(
+                    Message.gift_instance_id == instance_id,
+                    or_(Message.sender_id == user_id, Message.recipient_id == user_id),
+                ).limit(1)
+            )
+            return result.scalar_one_or_none() is not None
+

@@ -1,11 +1,16 @@
+import logging
 import uuid
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
-from sqlalchemy import delete, insert, select, update
+from sqlalchemy import delete, func, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 from starlette import status
+
+logger = logging.getLogger(__name__)
+
+from stellage.apps.profile.avatar import AvatarManager
 
 from stellage.apps.boxes.templates.schemas import (
     BoxTemplateCreate,
@@ -24,9 +29,14 @@ class BoxTemplateRepository:
         db: Annotated[
             DBDependency,
             Depends(DBDependency)
-        ]
+        ],
+        avatar_manager: Annotated[
+            AvatarManager,
+            Depends(AvatarManager)
+        ],
     ) -> None:
         self.db = db
+        self.avatar_manager = avatar_manager
         self.template_model = BoxTemplate
 
 
@@ -124,23 +134,74 @@ class BoxTemplateRepository:
     async def get_templates(
         self,
     ) -> list[BoxTemplateReturn]:
+        from stellage.database.models import BoxComment, BoxLike
         async with self.db.db_session() as session:
             query = (
                 select(self.template_model)
                 .options(joinedload(self.template_model.creator))
             )
             result = await session.execute(query)
+            scalars = list(result.unique().scalars().all())
+
+            # Fetch likes counts and comments counts with fail-safe error protection
+            likes_map = {}
+            try:
+                likes_stmt = (
+                    select(BoxLike.template_id, func.count(BoxLike.id))
+                    .where(BoxLike.template_id.isnot(None))
+                    .group_by(BoxLike.template_id)
+                )
+                likes_map = dict((await session.execute(likes_stmt)).all())
+            except Exception:
+                pass
+
+            comments_map = {}
+            try:
+                comments_stmt = (
+                    select(BoxComment.template_id, func.count(BoxComment.id))
+                    .where(BoxComment.template_id.isnot(None))
+                    .group_by(BoxComment.template_id)
+                )
+                comments_map = dict((await session.execute(comments_stmt)).all())
+            except Exception:
+                pass
+
             templates = []
-            for template in result.unique().scalars():
-                data = BoxTemplateReturn.model_validate(template)
-                # Автор коробки: предпочитаем username, иначе local-part email
-                # (полный email — PII — наружу не отдаём). None = коробка платформы.
-                if template.creator:
-                    data.owner_username = (
-                        template.creator.username
-                        or template.creator.email.split("@")[0]
-                    )
-                templates.append(data)
+            try:
+                async with self.avatar_manager.s3.get_signing_client() as s3_client:
+                    for template in scalars:
+                        data = BoxTemplateReturn.model_validate(template)
+                        if template.creator:
+                            data.owner_username = (
+                                template.creator.username
+                                or template.creator.email.split("@")[0]
+                            )
+                            data.owner_nickname = template.creator.nickname
+                            if getattr(template.creator, "avatar_key", None):
+                                try:
+                                    data.owner_avatar_url = await self.avatar_manager.presign_avatar(
+                                        s3_client,
+                                        template.creator.avatar_key,
+                                    )
+                                except Exception:
+                                    pass
+                        data.likes_count = likes_map.get(template.id, 0)
+                        data.comments_count = comments_map.get(template.id, 0)
+                        templates.append(data)
+            except Exception as exc:
+                logger.exception("Error in presigning template avatars: %s", exc)
+                for template in scalars:
+                    data = BoxTemplateReturn.model_validate(template)
+                    if template.creator:
+                        data.owner_username = (
+                            template.creator.username
+                            or template.creator.email.split("@")[0]
+                        )
+                        data.owner_nickname = template.creator.nickname
+                    data.likes_count = likes_map.get(template.id, 0)
+                    data.comments_count = comments_map.get(template.id, 0)
+                    templates.append(data)
+
             return templates
 
 

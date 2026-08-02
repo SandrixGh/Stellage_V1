@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import Annotated
+from typing import Annotated, Any
 
 from botocore.exceptions import ClientError
 from fastapi import Depends, HTTPException, status
@@ -153,6 +153,117 @@ class AvatarManager:
         return await client.generate_presigned_url(
             "get_object",
             Params={"Bucket": self.s3.bucket, "Key": avatar_key},
+            ExpiresIn=expires_in,
+        )
+
+    async def initiate_banner_upload(
+        self,
+        user_id: uuid.UUID,
+        mime: str,
+        size_bytes: int,
+    ) -> AvatarUploadTarget:
+        if mime not in AVATAR_MIME_TYPES:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Unsupported image type",
+            )
+        if size_bytes > AVATAR_MAX_BYTES:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"Image too large: limit is {AVATAR_MAX_BYTES} bytes",
+            )
+
+        pending_key = f"users/{user_id}/banner/{uuid.uuid4()}{MIME_EXTENSIONS[mime]}"
+        expires_in = settings.s3_settings.upload_url_expire_seconds
+        async with self.s3.get_signing_client() as client:
+            presigned = await client.generate_presigned_post(
+                Bucket=self.s3.bucket,
+                Key=pending_key,
+                Fields={"Content-Type": mime},
+                Conditions=[
+                    {"key": pending_key},
+                    {"Content-Type": mime},
+                    ["content-length-range", 1, AVATAR_MAX_BYTES],
+                ],
+                ExpiresIn=expires_in,
+            )
+
+        logger.info("banner upload initiated: user_id=%s", user_id)
+        return AvatarUploadTarget(
+            key=pending_key,
+            url=presigned["url"],
+            fields=presigned["fields"],
+            expires_in=expires_in,
+            mime=mime,
+            size_bytes=size_bytes,
+        )
+
+    async def complete_banner_upload(
+        self,
+        user_id: uuid.UUID,
+        key: str,
+        mime: str,
+        size_bytes: int,
+        banner_pos_y: int | None = None,
+    ) -> None:
+        if not key.startswith(f"users/{user_id}/banner/"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid banner key",
+            )
+
+        async with self.s3.get_client() as client:
+            try:
+                head = await client.head_object(Bucket=self.s3.bucket, Key=key)
+            except ClientError as err:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Image was not uploaded to storage",
+                ) from err
+
+            if head.get("ContentLength") != size_bytes or head.get("ContentType") != mime:
+                await self._discard(client, key)
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Uploaded image does not match declared size or type",
+                )
+
+            probe = await client.get_object(
+                Bucket=self.s3.bucket,
+                Key=key,
+                Range=f"bytes=0-{MAGIC_PROBE_BYTES - 1}",
+            )
+            head_bytes = await probe["Body"].read()
+            if not matches_magic(mime, head_bytes):
+                await self._discard(client, key)
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Image content does not match declared type",
+                )
+
+            old_key = await self.profile_manager.get_banner_key(user_id=user_id)
+            update_data: dict[str, Any] = {"banner_key": key}
+            if banner_pos_y is not None:
+                update_data["banner_pos_y"] = banner_pos_y
+
+            await self.profile_manager.update_user_fields(
+                user_id=user_id,
+                **update_data,
+            )
+            if old_key and old_key != key:
+                await self._discard(client, old_key)
+
+        logger.info("banner upload completed: user_id=%s", user_id)
+
+    async def get_banner_url(self, banner_key: str) -> str:
+        async with self.s3.get_signing_client() as client:
+            return await self.presign_banner(client, banner_key)
+
+    async def presign_banner(self, client, banner_key: str) -> str:
+        expires_in = settings.s3_settings.download_url_expire_seconds
+        return await client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": self.s3.bucket, "Key": banner_key},
             ExpiresIn=expires_in,
         )
 

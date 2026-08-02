@@ -218,12 +218,23 @@ class InstanceService:
             )
 
         box, owner, shelf_is_public = found
-        if not can_see_box(
-            viewer_id=viewer_id,
-            owner_id=box.user_id,
-            is_public=box.is_public,
-            shelf_id=box.shelf_id,
-            shelf_is_public=shelf_is_public,
+
+        is_gift_participant = False
+        if viewer_id is not None:
+            is_gift_participant = await self.repository.is_gift_participant(
+                instance_id=instance_id,
+                user_id=viewer_id,
+            )
+
+        if not (
+            is_gift_participant
+            or can_see_box(
+                viewer_id=viewer_id,
+                owner_id=box.user_id,
+                is_public=box.is_public,
+                shelf_id=box.shelf_id,
+                shelf_is_public=shelf_is_public,
+            )
         ):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

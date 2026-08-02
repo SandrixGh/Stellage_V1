@@ -268,6 +268,22 @@ class MessageService:
         )
         await self._broadcast_message(msg, event_type="message.new")
 
+    async def create_coin_gift_message(
+        self,
+        giver_id: uuid.UUID,
+        recipient_id: uuid.UUID,
+        amount: int,
+    ) -> None:
+        """Системная карточка подарка Stellacoin в диалоге + real-time событие обоим."""
+        msg = await self.repository.create(
+            sender_id=giver_id,
+            recipient_id=recipient_id,
+            text=f"+{amount} Stellacoin",
+            kind=MessageKindEnum.GIFT,
+            gift_instance_id=None,
+        )
+        await self._broadcast_message(msg, event_type="message.new")
+
     async def initiate_attachment(
         self,
         sender: UserVerifySchema,

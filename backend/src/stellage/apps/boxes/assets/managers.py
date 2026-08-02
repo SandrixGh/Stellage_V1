@@ -17,6 +17,7 @@ from stellage.apps.boxes.assets.limits import (
     matches_magic,
 )
 from stellage.apps.boxes.assets.repositories import BoxAssetRepository
+from stellage.apps.boxes.instances.repositories import BoxInstanceRepository
 from stellage.apps.boxes.assets.schemas import (
     AssetDownloadUrl,
     AssetUploadInitiate,
@@ -53,6 +54,10 @@ class AssetManager:
             BoxAssetRepository,
             Depends(BoxAssetRepository)
         ],
+        instance_repository: Annotated[
+            BoxInstanceRepository,
+            Depends(BoxInstanceRepository)
+        ],
         s3: Annotated[
             S3Dependency,
             Depends(S3Dependency)
@@ -67,6 +72,7 @@ class AssetManager:
         ],
     ) -> None:
         self.repository = repository
+        self.instance_repository = instance_repository
         self.s3 = s3
         self.instance_cache_manager = instance_cache_manager
         self.shelf_cache_manager = shelf_cache_manager
@@ -244,12 +250,23 @@ class AssetManager:
             )
 
         asset, access = pair
-        if asset.status != AssetStatusEnum.READY or not can_view_box_content(
-            viewer_id=viewer_id,
-            owner_id=access.owner_id,
-            is_public=access.is_public,
-            shelf_id=access.shelf_id,
-            shelf_is_public=access.shelf_is_public,
+
+        is_gift_participant = False
+        if viewer_id is not None and asset.instance_id is not None:
+            is_gift_participant = await self.instance_repository.is_gift_participant(
+                instance_id=asset.instance_id,
+                user_id=viewer_id,
+            )
+
+        if asset.status != AssetStatusEnum.READY or not (
+            is_gift_participant
+            or can_view_box_content(
+                viewer_id=viewer_id,
+                owner_id=access.owner_id,
+                is_public=access.is_public,
+                shelf_id=access.shelf_id,
+                shelf_is_public=access.shelf_is_public,
+            )
         ):
             # Тот же 404, что и для несуществующего — не подтверждаем
             # существование чужого контента.
@@ -282,12 +299,22 @@ class AssetManager:
     ) -> list[BoxAssetRead]:
         access = await self.repository.get_box_access(instance_id=instance_id)
 
-        if access is None or not can_view_box_content(
-            viewer_id=viewer_id,
-            owner_id=access.owner_id,
-            is_public=access.is_public,
-            shelf_id=access.shelf_id,
-            shelf_is_public=access.shelf_is_public,
+        is_gift_participant = False
+        if viewer_id is not None:
+            is_gift_participant = await self.instance_repository.is_gift_participant(
+                instance_id=instance_id,
+                user_id=viewer_id,
+            )
+
+        if access is None or not (
+            is_gift_participant
+            or can_view_box_content(
+                viewer_id=viewer_id,
+                owner_id=access.owner_id,
+                is_public=access.is_public,
+                shelf_id=access.shelf_id,
+                shelf_is_public=access.shelf_is_public,
+            )
         ):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

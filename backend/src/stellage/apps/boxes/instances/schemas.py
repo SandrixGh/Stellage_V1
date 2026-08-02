@@ -42,9 +42,6 @@ class GetParentsIds(
 
 
 class BoxTextContent(BaseModel):
-    """Типизированный текстовый контент коробки. Бинарный контент (фото/видео)
-    живёт в S3 и адресуется через box_assets; здесь — только текст. extra=forbid
-    отсекает контрабанду произвольного JSON через поле content."""
     model_config = ConfigDict(extra="forbid")
 
     text: Annotated[str, StringConstraints(max_length=10_000)] | None = None
@@ -54,9 +51,6 @@ class BoxInstanceBase(BaseModel):
     is_sealed: SealingEnum = SealingEnum.SEALED
     is_public: VisibilityEnum = VisibilityEnum.PRIVATE
     content: BoxTextContent | None = None
-    # is_verified СПЕЦИАЛЬНО не здесь: значок верификации — доверенный статус
-    # модерации, его нельзя выставлять из тела запроса при создании коробки.
-    # Для отдачи наружу поле объявлено в BoxInstanceReturn ниже.
 
 
 class BoxInstanceTimeStamps(BaseModel):
@@ -73,23 +67,15 @@ class BoxInstanceReturn(
     serial_number: int
     shelf_row: int | None = None
     shelf_col: int | None = None
-    # Статус верификации — только для ОТДАЧИ (читается из БД). В create-схему
-    # не входит: выставить его из тела запроса нельзя (см. BoxInstanceBase).
     is_verified: VerifyEnum = VerifyEnum.NOT_VERIFIED
-    # Метаданные S3-ассетов (без ключей и ссылок). Дефолт [] сохраняет
-    # валидность старых записей в Redis-кэше.
     assets: list[BoxAssetRead] = []
-    # Число лайков коробки (column_property, один SQL-подзапрос без N+1).
-    # Дефолт 0 держит валидными старые записи в Redis-кэше.
     likes_count: int = 0
+    comments_count: int = 0
     model_config = ConfigDict(from_attributes=True)
 
     @computed_field
     @property
     def content_type(self) -> BoxContentTypeEnum:
-        """Тип наполнения — выводится из текста и ассетов, не хранится в БД.
-        Скрытый правилом видимости контент (content=None, assets=[]) честно
-        даёт EMPTY."""
         has_text = bool(self.content and self.content.text)
         return resolve_content_type(
             has_text=has_text,
@@ -102,7 +88,6 @@ class BoxInstanceWithTemplate(BoxInstanceReturn):
 
 
 class GiftBoxRequest(BaseModel):
-    """Дарение коробки: username получателя."""
     to_username: Annotated[str, StringConstraints(min_length=1, max_length=30)]
 
 
@@ -123,9 +108,6 @@ class BoxInstanceCreate(BoxInstanceBase, GetTemplateId, GetShelfId):
 
 
 class BoxUpdate(BaseModel):
-    """Частичное редактирование коробки владельцем: поля шаблона (title/description/
-    price/currency, rarity — только суперюзеру) + content экземпляра. Любое поле
-    опционально; content различаем по model_fields_set, чтобы не затереть его None."""
     title: str | None = None
     description: str | None = None
     price: Decimal | None = None
@@ -135,16 +117,10 @@ class BoxUpdate(BaseModel):
 
 
 class CustomBoxCreate(BaseModel):
-    """Создание пользовательской коробки: новый шаблон + 1 экземпляр в инвентарь.
-
-    Редкость по умолчанию COMMON. Запрошенная клиентом rarity применяется только
-    для суперюзеров — обычным пользователям бэкенд форсит COMMON (см. роут).
-    Готовый экземпляр кладётся в инвентарь (shelf_id=None).
-    """
     title: str
     description: str | None = None
     price: Decimal = Decimal("0")
-    currency: CurrencyEnum = CurrencyEnum.RUB
+    currency: CurrencyEnum = CurrencyEnum.STELLA
     content: BoxTextContent | None = None
     rarity: BoxRarity | None = None
 

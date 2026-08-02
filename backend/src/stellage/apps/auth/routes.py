@@ -6,6 +6,7 @@ from starlette.responses import JSONResponse
 from stellage.apps.auth.depends import get_current_user
 from stellage.apps.auth.schemas import (
     AuthUser,
+    ChangePasswordSchema,
     DeviceAccountView,
     UserReturnData,
     UserVerifySchema,
@@ -181,6 +182,26 @@ async def logout(
         user=user,
         device_cookie=request.cookies.get(DEVICE_COOKIE),
     )
+
+
+@auth_router.post(
+    path="/change-password",
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(max_calls=5, window_seconds=60))],
+)
+async def change_password(
+    data: ChangePasswordSchema,
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ],
+    service: Annotated[
+        UserService,
+        Depends(UserService)
+    ],
+) -> dict[str, str]:
+    await service.change_password(user_id=str(user.id), payload=data)
+    return {"message": "Пароль успешно изменён"}
 
 
 @auth_router.get(

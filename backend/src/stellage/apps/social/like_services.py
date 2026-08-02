@@ -25,10 +25,6 @@ class LikeService:
         instance_id: uuid.UUID,
         viewer: UserVerifySchema | None,
     ):
-        """Лайкать/видеть лайки можно у коробки, которая видна как ОБЪЕКТ на
-        витрине (можно лайкнуть даже запечатанную — важен куб, не содержимое).
-        Невидимая или несуществующая — одинаковый 404 (без оракула). Возвращает
-        access, чтобы вызывающий знал владельца (для уведомления)."""
         access = await self.repository.get_box_access(instance_id=instance_id)
         if access is None or not can_see_box(
             viewer_id=viewer.id if viewer else None,
@@ -49,8 +45,6 @@ class LikeService:
         instance_id: uuid.UUID,
     ) -> LikeActionResult:
         access = await self._require_visible_box(instance_id=instance_id, viewer=user)
-        # Новизна лайка определяется самим insert (RETURNING) атомарно —
-        # уведомление владельцу уходит ровно один раз даже при гонке двух лайков.
         is_new = await self.repository.like(user_id=user.id, instance_id=instance_id)
         if is_new:
             await self.notifications.notify(
@@ -84,5 +78,39 @@ class LikeService:
             is_liked = await self.repository.is_liked(
                 user_id=viewer.id,
                 instance_id=instance_id,
+            )
+        return LikeState(likes=likes, is_liked=is_liked)
+
+    # ── Template Likes ──
+
+    async def like_template(
+        self,
+        user: UserVerifySchema,
+        template_id: uuid.UUID,
+    ) -> LikeActionResult:
+        await self.repository.like_template(user_id=user.id, template_id=template_id)
+        likes = await self.repository.count_template_likes(template_id=template_id)
+        return LikeActionResult(is_liked=True, likes=likes)
+
+    async def unlike_template(
+        self,
+        user: UserVerifySchema,
+        template_id: uuid.UUID,
+    ) -> LikeActionResult:
+        await self.repository.unlike_template(user_id=user.id, template_id=template_id)
+        likes = await self.repository.count_template_likes(template_id=template_id)
+        return LikeActionResult(is_liked=False, likes=likes)
+
+    async def get_template_state(
+        self,
+        template_id: uuid.UUID,
+        viewer: UserVerifySchema | None,
+    ) -> LikeState:
+        likes = await self.repository.count_template_likes(template_id=template_id)
+        is_liked: bool | None = None
+        if viewer is not None:
+            is_liked = await self.repository.is_template_liked(
+                user_id=viewer.id,
+                template_id=template_id,
             )
         return LikeState(likes=likes, is_liked=is_liked)

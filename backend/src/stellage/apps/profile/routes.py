@@ -7,16 +7,18 @@ from starlette.responses import JSONResponse
 from stellage.apps.auth.depends import get_current_user
 from stellage.apps.auth.schemas import UserVerifySchema
 from stellage.apps.profile.schemas import (
+    AddCoinsRequest,
     AvatarCompleteRequest,
     AvatarInitiateRequest,
     AvatarUploadTarget,
     ChangeEmailRequest,
     ChangePasswordRequest,
+    GiftCoinsRequest,
+    GiftItemReturn,
     PublicProfile,
     PublicUser,
+    ToggleGiftVisibilityRequest,
     UpdateProfileRequest,
-    AddCoinsRequest,
-    GiftCoinsRequest,
 )
 from stellage.apps.profile.services import ProfileService
 from stellage.core.rate_limit import rate_limit
@@ -200,6 +202,43 @@ async def complete_avatar_upload(
 
 
 @profile_router.post(
+    path="/banner/initiate",
+    status_code=status.HTTP_200_OK,
+    response_model=AvatarUploadTarget,
+)
+async def initiate_banner_upload(
+    data: AvatarInitiateRequest,
+    service: Annotated[
+        ProfileService,
+        Depends(ProfileService)
+    ],
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ]
+) -> AvatarUploadTarget:
+    return await service.initiate_banner_upload(user=user, data=data)
+
+
+@profile_router.post(
+    path="/banner/complete",
+    status_code=status.HTTP_200_OK,
+)
+async def complete_banner_upload(
+    data: AvatarCompleteRequest,
+    service: Annotated[
+        ProfileService,
+        Depends(ProfileService)
+    ],
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ]
+) -> JSONResponse:
+    return await service.complete_banner_upload(user=user, data=data)
+
+
+@profile_router.post(
     path="/coins/add",
     status_code=status.HTTP_200_OK,
 )
@@ -234,3 +273,41 @@ async def gift_coins(
     ]
 ) -> JSONResponse:
     return await service.gift_coins(target_username=username, amount=data.amount, sender=user)
+
+
+@profile_router.get(
+    path="/public/{username}/gifts",
+    status_code=status.HTTP_200_OK,
+    response_model=list[GiftItemReturn],
+)
+async def get_public_gifts(
+    username: str,
+    service: Annotated[
+        ProfileService,
+        Depends(ProfileService)
+    ],
+) -> list[GiftItemReturn]:
+    return await service.get_public_gifts(target_username=username)
+
+
+@profile_router.patch(
+    path="/gifts/{instance_id}/visibility",
+    status_code=status.HTTP_200_OK,
+)
+async def toggle_gift_visibility(
+    instance_id: str,
+    data: ToggleGiftVisibilityRequest,
+    service: Annotated[
+        ProfileService,
+        Depends(ProfileService)
+    ],
+    user: Annotated[
+        UserVerifySchema,
+        Depends(get_current_user)
+    ],
+) -> JSONResponse:
+    return await service.toggle_gift_visibility(
+        instance_id=instance_id,
+        is_gift_public=data.is_gift_public,
+        user=user,
+    )

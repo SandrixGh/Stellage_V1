@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from stellage.apps.boxes.assets.schemas import BoxContentAccess
 from stellage.core.core_dependencies.db_dependency import DBDependency
-from stellage.database.models import BoxInstance, BoxLike, Shelf
+from stellage.database.models import BoxInstance, BoxLike, BoxTemplate, Shelf
 
 
 class LikeRepository:
@@ -48,10 +48,6 @@ class LikeRepository:
             )
 
     async def like(self, user_id: uuid.UUID, instance_id: uuid.UUID) -> bool:
-        """Ставит лайк идемпотентно. Возвращает True, только если строка реально
-        вставлена (лайк НОВЫЙ) — определяется атомарно по RETURNING после
-        ON CONFLICT DO NOTHING, без отдельного чтения is_liked (иначе гонка двух
-        лайков слала бы два уведомления)."""
         async with self.db.db_session() as session:
             stmt = (
                 pg_insert(BoxLike)
@@ -86,5 +82,45 @@ class LikeRepository:
                 select(func.count())
                 .select_from(BoxLike)
                 .where(BoxLike.instance_id == instance_id)
+            )
+            return (await session.execute(stmt)).scalar_one()
+
+    # ── Template Likes ──
+
+    async def like_template(self, user_id: uuid.UUID, template_id: uuid.UUID) -> bool:
+        async with self.db.db_session() as session:
+            stmt = (
+                pg_insert(BoxLike)
+                .values(user_id=user_id, template_id=template_id)
+                .on_conflict_do_nothing(constraint="uq_box_template_like_pair")
+                .returning(BoxLike.id)
+            )
+            inserted = (await session.execute(stmt)).scalar_one_or_none()
+            await session.commit()
+            return inserted is not None
+
+    async def unlike_template(self, user_id: uuid.UUID, template_id: uuid.UUID) -> None:
+        async with self.db.db_session() as session:
+            stmt = delete(BoxLike).where(
+                BoxLike.user_id == user_id,
+                BoxLike.template_id == template_id,
+            )
+            await session.execute(stmt)
+            await session.commit()
+
+    async def is_template_liked(self, user_id: uuid.UUID, template_id: uuid.UUID) -> bool:
+        async with self.db.db_session() as session:
+            stmt = select(BoxLike.id).where(
+                BoxLike.user_id == user_id,
+                BoxLike.template_id == template_id,
+            )
+            return (await session.execute(stmt)).scalar() is not None
+
+    async def count_template_likes(self, template_id: uuid.UUID) -> int:
+        async with self.db.db_session() as session:
+            stmt = (
+                select(func.count())
+                .select_from(BoxLike)
+                .where(BoxLike.template_id == template_id)
             )
             return (await session.execute(stmt)).scalar_one()

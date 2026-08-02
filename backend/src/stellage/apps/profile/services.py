@@ -5,6 +5,8 @@ from starlette.responses import JSONResponse
 
 from stellage.apps.auth.handlers import AuthHandler
 from stellage.apps.auth.schemas import UserVerifySchema
+from stellage.apps.messaging.services import MessageService
+from stellage.apps.notifications.services import NotificationService
 from stellage.apps.profile.avatar import AvatarManager
 from stellage.apps.profile.managers import ProfileManager
 from stellage.apps.profile.schemas import (
@@ -13,6 +15,8 @@ from stellage.apps.profile.schemas import (
     AvatarUploadTarget,
     ChangeEmailRequest,
     ChangePasswordRequest,
+    GiftItemReturn,
+    GiftSenderView,
     PublicProfile,
     PublicUser,
     UpdateProfileRequest,
@@ -20,6 +24,7 @@ from stellage.apps.profile.schemas import (
 from stellage.apps.profile.tasks import send_confirmation_code
 from stellage.apps.shelves.managers import ShelfManager
 from stellage.core.settings import settings
+from stellage.database.enums.notification_type import NotificationTypeEnum
 
 
 class ProfileService:
@@ -41,11 +46,21 @@ class ProfileService:
             AvatarManager,
             Depends(AvatarManager),
         ],
+        notifications: Annotated[
+            NotificationService,
+            Depends(NotificationService),
+        ],
+        messages: Annotated[
+            MessageService,
+            Depends(MessageService),
+        ],
     ) -> None:
         self.manager = manager
         self.handler = handler
         self.shelf_manager = shelf_manager
         self.avatar_manager = avatar_manager
+        self.notifications = notifications
+        self.messages = messages
 
 
     async def _to_public_users(self, users: list) -> list[PublicUser]:
@@ -99,6 +114,10 @@ class ProfileService:
             profile.avatar_url = await self.avatar_manager.get_avatar_url(
                 avatar_key=user.avatar_key,
             )
+        if user.banner_key:
+            profile.banner_url = await self.avatar_manager.get_banner_url(
+                banner_key=user.banner_key,
+            )
         return profile
 
 
@@ -125,6 +144,10 @@ class ProfileService:
         if full_user.avatar_key:
             profile.avatar_url = await self.avatar_manager.get_avatar_url(
                 avatar_key=full_user.avatar_key,
+            )
+        if full_user.banner_key:
+            profile.banner_url = await self.avatar_manager.get_banner_url(
+                banner_key=full_user.banner_key,
             )
         return profile
 
@@ -153,6 +176,33 @@ class ProfileService:
             size_bytes=data.size_bytes,
         )
         return JSONResponse(content={"message": "Avatar updated successfully"})
+
+
+    async def initiate_banner_upload(
+        self,
+        user: UserVerifySchema,
+        data: AvatarInitiateRequest,
+    ) -> AvatarUploadTarget:
+        return await self.avatar_manager.initiate_banner_upload(
+            user_id=user.id,
+            mime=data.mime,
+            size_bytes=data.size_bytes,
+        )
+
+
+    async def complete_banner_upload(
+        self,
+        user: UserVerifySchema,
+        data: AvatarCompleteRequest,
+    ) -> JSONResponse:
+        await self.avatar_manager.complete_banner_upload(
+            user_id=user.id,
+            key=data.key,
+            mime=data.mime,
+            size_bytes=data.size_bytes,
+            banner_pos_y=data.banner_pos_y,
+        )
+        return JSONResponse(content={"message": "Banner uploaded successfully"})
 
 
     async def change_email_request(
@@ -329,11 +379,16 @@ class ProfileService:
         if not full_user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
+        add_amount = amount if amount > 0 else 1
+        new_balance = full_user.stella_coins + add_amount
         await self.manager.update_user_fields(
             user_id=user.id,
-            stella_coins=full_user.stella_coins + amount,
+            stella_coins=new_balance,
         )
-        return JSONResponse(content={"message": f"Added {amount} StellaCoins successfully."})
+        return JSONResponse(content={
+            "message": f"Added {add_amount} Stellacoin successfully.",
+            "stella_coins": new_balance,
+        })
 
 
     async def gift_coins(
@@ -355,7 +410,7 @@ class ProfileService:
         sender_user = await self.manager.get_user_by_id(user_id=sender.id)
 
         if sender_user.stella_coins < amount:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not enough StellaCoins.")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Недостаточно Stellacoin.")
 
         # Ideal implementation uses a single transaction.
         await self.manager.update_user_fields(
@@ -367,4 +422,119 @@ class ProfileService:
             stella_coins=target_user.stella_coins + amount,
         )
 
-        return JSONResponse(content={"message": f"Successfully gifted {amount} StellaCoins to {target_username}."})
+        # Сохранение записи подарка Stellacoin
+        await self.manager.create_coin_gift(
+            sender_id=sender.id,
+            recipient_id=target_user.id,
+            amount=amount,
+        )
+
+        # Отправка уведомления получателю
+        await self.notifications.notify(
+            recipient_id=target_user.id,
+            actor_id=sender.id,
+            type_=NotificationTypeEnum.GIFT,
+        )
+
+        # Системное карточка-сообщение подарка Stellacoin в чат с WebSocket broadcast
+        await self.messages.create_coin_gift_message(
+            giver_id=sender.id,
+            recipient_id=target_user.id,
+            amount=amount,
+        )
+
+        return JSONResponse(content={"message": f"Successfully gifted {amount} Stellacoin to {target_username}."})
+
+    async def get_public_gifts(
+        self,
+        target_username: str,
+        viewer: UserVerifySchema | None = None,
+    ) -> list[GiftItemReturn]:
+        target_user = await self.manager.get_user_by_username(username=target_username)
+        if not target_user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+        is_owner = viewer is not None and str(viewer.id) == str(target_user.id)
+        instances = await self.manager.get_user_gifts(
+            user_id=target_user.id,
+            include_private=is_owner,
+        )
+        coin_gifts = await self.manager.get_user_coin_gifts(
+            user_id=target_user.id,
+            include_private=is_owner,
+        )
+
+        gifts: list[GiftItemReturn] = []
+        for inst in instances:
+            sender_view = None
+            if inst.gifted_by:
+                avatar_url = None
+                if inst.gifted_by.avatar_key:
+                    avatar_url = await self.avatar_manager.get_avatar_url(
+                        avatar_key=inst.gifted_by.avatar_key
+                    )
+                sender_view = GiftSenderView(
+                    id=inst.gifted_by.id,
+                    username=inst.gifted_by.username,
+                    nickname=inst.gifted_by.nickname,
+                    avatar_url=avatar_url,
+                )
+
+            gifts.append(
+                GiftItemReturn(
+                    id=inst.id,
+                    serial_number=inst.serial_number,
+                    is_sealed=inst.is_sealed.value if hasattr(inst.is_sealed, 'value') else str(inst.is_sealed),
+                    is_public=inst.is_public.value if hasattr(inst.is_public, 'value') else str(inst.is_public),
+                    is_gift_public=inst.is_gift_public,
+                    created_at=inst.created_at,
+                    template_id=inst.template_id,
+                    template_title=inst.template.title,
+                    template_rarity=inst.template.rarity.value if hasattr(inst.template.rarity, 'value') else str(inst.template.rarity),
+                    gift_type="box",
+                    sender=sender_view,
+                )
+            )
+
+        for cg in coin_gifts:
+            sender_view = None
+            if cg.sender:
+                avatar_url = None
+                if cg.sender.avatar_key:
+                    avatar_url = await self.avatar_manager.get_avatar_url(
+                        avatar_key=cg.sender.avatar_key
+                    )
+                sender_view = GiftSenderView(
+                    id=cg.sender.id,
+                    username=cg.sender.username,
+                    nickname=cg.sender.nickname,
+                    avatar_url=avatar_url,
+                )
+
+            gifts.append(
+                GiftItemReturn(
+                    id=cg.id,
+                    is_gift_public=cg.is_gift_public,
+                    created_at=cg.created_at,
+                    gift_type="coins",
+                    coins_amount=cg.amount,
+                    template_title=f"+{cg.amount} Stellacoin",
+                    sender=sender_view,
+                )
+            )
+
+        gifts.sort(key=lambda g: g.created_at, reverse=True)
+        return gifts
+
+    async def toggle_gift_visibility(
+        self,
+        instance_id: str,
+        is_gift_public: bool,
+        user: UserVerifySchema,
+    ) -> JSONResponse:
+        await self.manager.toggle_gift_visibility(
+            instance_id=instance_id,
+            user_id=user.id,
+            is_gift_public=is_gift_public,
+        )
+        return JSONResponse(content={"message": "Gift visibility updated"})

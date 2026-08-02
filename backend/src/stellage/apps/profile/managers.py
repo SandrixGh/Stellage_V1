@@ -2,12 +2,13 @@ import uuid
 
 from fastapi import Depends
 from sqlalchemy import func, or_, select, update
+from sqlalchemy.orm import joinedload
 
 from stellage.apps.profile.schemas import ProfileStats
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.core.core_dependencies.redis_dependency import RedisDependency
 from stellage.database.enums.visibility import VisibilityEnum
-from stellage.database.models import BoxInstance, Shelf, User
+from stellage.database.models import BoxInstance, BoxTemplate, CoinGift, Shelf, User
 
 
 class ProfileManager:
@@ -67,6 +68,18 @@ class ProfileManager:
         async with self.db.db_session() as session:
             query = (
                 select(self.user_model.avatar_key)
+                .where(self.user_model.id == user_id)
+            )
+            result = await session.execute(query)
+            return result.scalar()
+
+    async def get_banner_key(
+        self,
+        user_id: uuid.UUID | str,
+    ) -> str | None:
+        async with self.db.db_session() as session:
+            query = (
+                select(self.user_model.banner_key)
                 .where(self.user_model.id == user_id)
             )
             result = await session.execute(query)
@@ -255,3 +268,82 @@ class ProfileManager:
     ) -> None:
         async with self.redis.get_client() as client:
             await client.delete(self._email_change_key(user_id))
+
+    async def get_user_gifts(
+        self,
+        user_id: uuid.UUID | str,
+        include_private: bool = False,
+    ) -> list[BoxInstance]:
+        """Возвращает список коробок-подарков пользователя с предзагруженными
+        данными шаблона и отправителя (gifted_by)."""
+        async with self.db.db_session() as session:
+            stmt = (
+                select(BoxInstance)
+                .options(
+                    joinedload(BoxInstance.template),
+                    joinedload(BoxInstance.gifted_by),
+                )
+                .where(
+                    BoxInstance.user_id == user_id,
+                )
+            )
+            if not include_private:
+                stmt = stmt.where(BoxInstance.is_gift_public.is_(True))
+            stmt = stmt.order_by(BoxInstance.created_at.desc())
+            result = await session.execute(stmt)
+            return list(result.scalars().all())
+
+    async def toggle_gift_visibility(
+        self,
+        instance_id: uuid.UUID | str,
+        user_id: uuid.UUID | str,
+        is_gift_public: bool,
+    ) -> None:
+        async with self.db.db_session() as session:
+            stmt = (
+                update(BoxInstance)
+                .where(
+                    BoxInstance.id == instance_id,
+                    BoxInstance.user_id == user_id,
+                )
+                .values(is_gift_public=is_gift_public)
+            )
+            await session.execute(stmt)
+            await session.commit()
+
+    async def create_coin_gift(
+        self,
+        sender_id: uuid.UUID,
+        recipient_id: uuid.UUID,
+        amount: int,
+    ) -> CoinGift:
+        """Создает запись подарка Stellacoin в БД."""
+        async with self.db.db_session() as session:
+            gift = CoinGift(
+                sender_id=sender_id,
+                recipient_id=recipient_id,
+                amount=amount,
+                is_gift_public=True,
+            )
+            session.add(gift)
+            await session.commit()
+            await session.refresh(gift)
+            return gift
+
+    async def get_user_coin_gifts(
+        self,
+        user_id: uuid.UUID | str,
+        include_private: bool = False,
+    ) -> list[CoinGift]:
+        """Возвращает подарки Stellacoin пользователя."""
+        async with self.db.db_session() as session:
+            stmt = (
+                select(CoinGift)
+                .options(joinedload(CoinGift.sender))
+                .where(CoinGift.recipient_id == user_id)
+            )
+            if not include_private:
+                stmt = stmt.where(CoinGift.is_gift_public.is_(True))
+            stmt = stmt.order_by(CoinGift.created_at.desc())
+            result = await session.execute(stmt)
+            return list(result.scalars().all())
