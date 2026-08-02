@@ -25,13 +25,16 @@ export const ProfileStatsRow = ({
     onOpenFollowers,
     onOpenFollowing,
 }: ProfileStatsRowProps) => {
+    const boxesCount = stats?.boxes ?? 0;
+    const shelvesCount = stats?.shelves ?? 0;
+
     const items: {
         value: number;
         label: string;
         onClick?: () => void;
     }[] = [
-        { value: stats.boxes, label: plural(stats.boxes, "коробка", "коробки", "коробок") },
-        { value: stats.shelves, label: plural(stats.shelves, "стеллаж", "стеллажа", "стеллажей") },
+        { value: boxesCount, label: plural(boxesCount, "коробка", "коробки", "коробок") },
+        { value: shelvesCount, label: plural(shelvesCount, "стеллаж", "стеллажа", "стеллажей") },
     ];
 
     if (followers !== undefined) {

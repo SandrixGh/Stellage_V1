@@ -115,7 +115,7 @@ export const PublicProfilePage = () => {
                             src={profile.banner_url}
                             alt=""
                             className="profile-banner-img"
-                            style={{ objectPosition: `center ${profile.banner_pos_y ?? 50}%` }}
+                            style={{ objectPosition: `center ${profile?.banner_pos_y ?? 50}%` }}
                         />
                     )}
                     <div className="profile-banner-tile-overlay" />

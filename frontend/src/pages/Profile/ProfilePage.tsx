@@ -127,7 +127,7 @@ export const ProfilePage = () => {
                             src={banner_url}
                             alt=""
                             className="profile-banner-img"
-                            style={{ objectPosition: `center ${profile.banner_pos_y ?? 50}%` }}
+                            style={{ objectPosition: `center ${profile?.banner_pos_y ?? 50}%` }}
                         />
                     )}
                     <div className="profile-banner-tile-overlay" />
@@ -260,7 +260,7 @@ export const ProfilePage = () => {
                 isOpen={isBannerModalOpen}
                 onClose={() => setIsBannerModalOpen(false)}
                 currentBannerUrl={banner_url}
-                currentBannerPosY={profile.banner_pos_y}
+                currentBannerPosY={profile?.banner_pos_y}
                 avatarUrl={avatar_url}
                 displayName={displayName}
                 onSuccess={loadData}
