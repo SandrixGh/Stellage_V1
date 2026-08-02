@@ -55,7 +55,7 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
     const handleToggleLike = async (e: React.MouseEvent) => {
         e.stopPropagation();
         if (!isAuthenticated) {
-            navigate("/auth");
+            navigate("/login");
             return;
         }
         if (!endpoint || isLoading) return;

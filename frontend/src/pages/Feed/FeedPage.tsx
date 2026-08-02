@@ -63,7 +63,7 @@ export const FeedPage = () => {
 
     const handleAcquireClick = (template: BoxTemplate) => {
         if (!isAuthenticated) {
-            navigate("/auth");
+            navigate("/login");
             return;
         }
         setSelectedTemplateForBuy(template);
