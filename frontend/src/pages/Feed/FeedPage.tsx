@@ -33,11 +33,13 @@ export const FeedPage = () => {
     };
 
     const filteredTemplates = useMemo(() => {
+        const safeTemplates = Array.isArray(templates) ? templates : [];
         const q = query.trim().toLowerCase();
-        let list = templates.filter((tpl) => {
+        let list = safeTemplates.filter((tpl) => {
+            if (!tpl) return false;
             const matchesQuery =
                 q === "" ||
-                tpl.title.toLowerCase().includes(q) ||
+                (tpl.title ?? "").toLowerCase().includes(q) ||
                 (tpl.description ?? "").toLowerCase().includes(q);
             const matchesRarity =
                 activeRarities.size === 0 ||
@@ -47,15 +49,15 @@ export const FeedPage = () => {
 
         list = [...list].sort((a, b) => {
             if (sortBy === "price_asc") {
-                return Number(a.price) - Number(b.price);
+                return Number(a.price || 0) - Number(b.price || 0);
             }
             if (sortBy === "price_desc") {
-                return Number(b.price) - Number(a.price);
+                return Number(b.price || 0) - Number(a.price || 0);
             }
             if (sortBy === "date_asc") {
-                return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
             }
-            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
         });
 
         return list;

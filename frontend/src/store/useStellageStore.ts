@@ -101,9 +101,9 @@ export const useStellageStore = create<StellageState>((set, get) => ({
         set({ isLoading: true });
         try {
             const res = await api.get<Shelf[]>("/shelf/get-shelves");
-            set({ shelves: res.data, isLoading: false });
+            set({ shelves: Array.isArray(res.data) ? res.data : [], isLoading: false });
         } catch (err: any) {
-            set({ error: "Ошибка загрузки полок", isLoading: false });
+            set({ shelves: [], error: "Ошибка загрузки полок", isLoading: false });
         }
     },
 
@@ -111,9 +111,10 @@ export const useStellageStore = create<StellageState>((set, get) => ({
         set({ isLoading: true });
         try {
             const res = await api.get<Shelf>("/shelf/main-shelf-with-boxes");
-            set({ mainShelf: res.data, currentBoxes: res.data.boxes, isLoading: false });
+            const boxes = Array.isArray(res.data?.boxes) ? res.data.boxes : [];
+            set({ mainShelf: res.data ? { ...res.data, boxes } : null, currentBoxes: boxes, isLoading: false });
         } catch (err: any) {
-            set({ error: "Главная полка не найдена", isLoading: false });
+            set({ mainShelf: null, currentBoxes: [], error: "Главная полка не найдена", isLoading: false });
         }
     },
 
@@ -124,9 +125,10 @@ export const useStellageStore = create<StellageState>((set, get) => ({
             const res = await api.get<Shelf>("/shelf/get-shelf-with-boxes", {
                 params: { shelf_id: shelfId }
             });
-            set({ selectedShelf: res.data, currentBoxes: res.data.boxes, isLoading: false });
+            const boxes = Array.isArray(res.data?.boxes) ? res.data.boxes : [];
+            set({ selectedShelf: res.data ? { ...res.data, boxes } : null, currentBoxes: boxes, isLoading: false });
         } catch (err: any) {
-            set({ error: "Не удалось загрузить содержимое полки", isLoading: false });
+            set({ selectedShelf: null, currentBoxes: [], error: "Не удалось загрузить содержимое полки", isLoading: false });
         }
     },
 
@@ -137,9 +139,10 @@ export const useStellageStore = create<StellageState>((set, get) => ({
             const res = await api.get<Shelf>("/shelf/public-shelf-with-boxes", {
                 params: { shelf_id: shelfId }
             });
-            set({ publicShelf: res.data, currentBoxes: res.data.boxes, isLoading: false });
+            const boxes = Array.isArray(res.data?.boxes) ? res.data.boxes : [];
+            set({ publicShelf: res.data ? { ...res.data, boxes } : null, currentBoxes: boxes, isLoading: false });
         } catch (err: any) {
-            set({ error: "Публичная полка не найдена", isLoading: false });
+            set({ publicShelf: null, currentBoxes: [], error: "Публичная полка не найдена", isLoading: false });
         }
     },
 
@@ -147,9 +150,9 @@ export const useStellageStore = create<StellageState>((set, get) => ({
         set({ isLoading: true, error: null });
         try {
             const res = await api.get<BoxTemplate[]>("/boxes/get-box-templates");
-            set({ templates: res.data, isLoading: false });
+            set({ templates: Array.isArray(res.data) ? res.data : [], isLoading: false });
         } catch (err: any) {
-            set({ error: "Не удалось загрузить ленту", isLoading: false });
+            set({ templates: [], error: "Не удалось загрузить ленту", isLoading: false });
         }
     },
 
@@ -157,9 +160,9 @@ export const useStellageStore = create<StellageState>((set, get) => ({
     fetchInstances: async () => {
         try {
             const res = await api.get<Box[]>("/boxes/get-box-instances");
-            set({ instances: res.data });
+            set({ instances: Array.isArray(res.data) ? res.data : [] });
         } catch (err: any) {
-            set({ error: "Не удалось загрузить инвентарь" });
+            set({ instances: [], error: "Не удалось загрузить инвентарь" });
         }
     },
 
