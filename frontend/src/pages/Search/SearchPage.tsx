@@ -26,7 +26,7 @@ export const SearchPage = () => {
                 const res = await api.get<PublicUser[]>("/profile/search", {
                     params: { q },
                 });
-                setResults(res.data);
+                setResults(Array.isArray(res.data) ? res.data : []);
             } catch {
                 setResults([]);
             } finally {
