@@ -29,3 +29,14 @@ export async function switchAccount(userId: string): Promise<void> {
 export async function unlinkAccount(userId: string): Promise<void> {
     await api.delete(`/auth/sessions/${userId}`);
 }
+
+export interface ChangePasswordPayload {
+    current_password: string;
+    new_password: string;
+}
+
+/** Изменить пароль текущего аккаунта. */
+export async function changePassword(payload: ChangePasswordPayload): Promise<void> {
+    await api.post("/auth/change-password", payload);
+}
+

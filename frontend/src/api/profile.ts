@@ -60,6 +60,39 @@ export async function uploadAvatar(file: File): Promise<void> {
     });
 }
 
+/** Загрузка обложки/баннера профиля в S3. */
+export async function uploadBanner(file: File, posY?: number): Promise<void> {
+    if (!AVATAR_MIME_TYPES.includes(file.type)) {
+        throw new Error("Поддерживаются только изображения (JPEG, PNG, WebP, GIF)");
+    }
+    if (file.size > AVATAR_MAX_BYTES) {
+        throw new Error("Изображение больше 5 МБ");
+    }
+
+    const { data: target } = await api.post<AvatarUploadTarget>(
+        "/profile/banner/initiate",
+        { mime: file.type, size_bytes: file.size },
+    );
+
+    const form = new FormData();
+    Object.entries(target.fields).forEach(([k, v]) => form.append(k, v));
+    form.append("file", file);
+
+    await axios.post(target.url, form, { withCredentials: false });
+
+    await api.post("/profile/banner/complete", {
+        key: target.key,
+        mime: target.mime,
+        size_bytes: target.size_bytes,
+        banner_pos_y: posY ?? 50,
+    });
+}
+
+/** Сохранение только вертикального выравнивания баннера. */
+export async function updateBannerPosition(posY: number): Promise<void> {
+    await api.patch("/profile/update", { banner_pos_y: posY });
+}
+
 /** Человекочитаемое сообщение из ошибки загрузки аватара. */
 export function avatarErrorMessage(err: unknown): string {
     if (err instanceof Error && err.message && !("response" in err)) return err.message;
@@ -75,3 +108,37 @@ export async function addStellaCoins(amount: number): Promise<void> {
 export async function giftStellaCoins(targetUsername: string, amount: number): Promise<void> {
     await api.post(`/profile/public/${targetUsername}/coins/gift`, { amount });
 }
+
+export interface GiftSender {
+    id: string;
+    username: string | null;
+    nickname: string | null;
+    avatar_url: string | null;
+}
+
+export interface GiftItem {
+    id: string;
+    serial_number?: number;
+    is_sealed?: string;
+    is_public?: string;
+    is_gift_public: boolean;
+    created_at: string;
+    template_id?: string;
+    template_title?: string;
+    template_rarity?: string;
+    gift_type?: "box" | "coins";
+    coins_amount?: number;
+    sender: GiftSender | null;
+}
+
+/** Получить список подарков пользователя. */
+export async function getPublicGifts(username: string): Promise<GiftItem[]> {
+    const res = await api.get<GiftItem[]>(`/profile/public/${username}/gifts`);
+    return res.data;
+}
+
+/** Включить/скрыть видимость подарка на витрине. */
+export async function toggleGiftVisibility(instanceId: string, isPublic: boolean): Promise<void> {
+    await api.patch(`/profile/gifts/${instanceId}/visibility`, { is_gift_public: isPublic });
+}
+

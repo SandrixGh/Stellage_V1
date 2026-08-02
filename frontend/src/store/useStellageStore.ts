@@ -69,6 +69,11 @@ interface StellageState {
     /** Подарить коробку пользователю по username; убирает её из своего состояния. */
     giftBox: (instanceId: string, toUsername: string) => Promise<boolean>;
 
+    /** Мгновенное реактивное обновление количества лайков коробки на стеллаже. */
+    updateBoxLikes: (boxId: string, likesCount: number) => void;
+    /** Мгновенное реактивное обновление количества лайков шаблона в ленте. */
+    updateTemplateLikes: (templateId: string, likesCount: number) => void;
+
     /** Сбросить всё пользовательское состояние (вызывается при смене аккаунта). */
     reset: () => void;
 }
@@ -181,7 +186,7 @@ export const useStellageStore = create<StellageState>((set, get) => ({
                 title: data.title,
                 description: data.description ?? null,
                 price: data.price ?? 0,
-                currency: (data.currency ?? "RUB").toLowerCase(),
+                currency: (data.currency ?? "stella").toLowerCase(),
                 content: data.content ?? null,
                 rarity: data.rarity ?? null,
             });
@@ -404,5 +409,32 @@ export const useStellageStore = create<StellageState>((set, get) => ({
             set({ error: "Не удалось подарить коробку" });
             return false;
         }
-    }
+    },
+
+    updateBoxLikes: (boxId: string, likesCount: number) => {
+        set((state) => {
+            const patchBox = (b: Box) => (b.id === boxId ? { ...b, likes_count: likesCount } : b);
+            return {
+                instances: state.instances.map(patchBox),
+                currentBoxes: state.currentBoxes.map(patchBox),
+                mainShelf: state.mainShelf
+                    ? { ...state.mainShelf, boxes: state.mainShelf.boxes.map(patchBox) }
+                    : null,
+                selectedShelf: state.selectedShelf
+                    ? { ...state.selectedShelf, boxes: state.selectedShelf.boxes.map(patchBox) }
+                    : null,
+                publicShelf: state.publicShelf
+                    ? { ...state.publicShelf, boxes: state.publicShelf.boxes.map(patchBox) }
+                    : null,
+            };
+        });
+    },
+
+    updateTemplateLikes: (templateId: string, likesCount: number) => {
+        set((state) => ({
+            templates: state.templates.map((t) =>
+                t.id === templateId ? { ...t, likes_count: likesCount } : t
+            ),
+        }));
+    },
 }));
