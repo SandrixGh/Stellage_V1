@@ -9,14 +9,34 @@ const SORT_OPTIONS = (Object.keys(SORT_LABELS) as BoxSort[]).map((s) => ({
     label: SORT_LABELS[s],
 }));
 
-interface BoxFilterBarProps {
-    query: string;
-    onQueryChange: (q: string) => void;
+export interface BoxFilterBarProps {
+    query?: string;
+    onQueryChange?: (q: string) => void;
     rarities: string[];
     activeRarities: string[];
     onToggleRarity: (rarity: string) => void;
-    sort: BoxSort;
-    onSortChange: (sort: BoxSort) => void;
+    sort?: BoxSort;
+    onSortChange?: (sort: BoxSort) => void;
+    searchPlaceholder?: string;
+    countsByRarity?: Record<string, number>;
+    totalCount?: number;
+}
+
+const RARITY_DOTS: Record<string, string> = {
+    common: "#9AA0A4",
+    rare: "#8BB8FF",
+    golden: "#E8CB82",
+    "developer's": "#C882FF",
+    dev: "#C882FF",
+};
+
+function formatRarityLabel(r: string): string {
+    const key = r.toLowerCase();
+    if (key === "common") return "Common";
+    if (key === "rare") return "Rare";
+    if (key === "golden") return "Golden";
+    if (key === "developer's" || key === "dev") return "Developer's";
+    return r.charAt(0).toUpperCase() + r.slice(1);
 }
 
 /** Панель поиска + фильтра по редкости + сортировки. Общая для инвентаря и пикера. */
@@ -28,38 +48,62 @@ export const BoxFilterBar = ({
     onToggleRarity,
     sort,
     onSortChange,
+    searchPlaceholder = "Поиск по названию или #номеру...",
+    countsByRarity,
+    totalCount,
 }: BoxFilterBarProps) => {
+    const showTopRow = Boolean((onQueryChange && query !== undefined) || (onSortChange && sort !== undefined));
+
     return (
         <div className="box-filter-bar">
-            <div className="box-filter-top">
-                <input
-                    type="text"
-                    className="box-filter-search"
-                    placeholder="Поиск по названию или #номеру"
-                    value={query}
-                    onChange={(e) => onQueryChange(e.target.value)}
-                />
-                <Select
-                    className="box-filter-sort-select"
-                    value={sort}
-                    options={SORT_OPTIONS}
-                    onChange={(v) => onSortChange(v as BoxSort)}
-                    ariaLabel="Сортировка"
-                />
-            </div>
+            {showTopRow && (
+                <div className="box-filter-top">
+                    {onQueryChange && query !== undefined && (
+                        <input
+                            type="text"
+                            className="box-filter-search"
+                            placeholder={searchPlaceholder}
+                            value={query}
+                            onChange={(e) => onQueryChange(e.target.value)}
+                        />
+                    )}
+                    {onSortChange && sort !== undefined && (
+                        <Select
+                            className="box-filter-sort-select"
+                            value={sort}
+                            options={SORT_OPTIONS}
+                            onChange={(v) => onSortChange(v as BoxSort)}
+                            ariaLabel="Сортировка"
+                        />
+                    )}
+                </div>
+            )}
 
             {rarities.length > 0 && (
                 <div className="box-filter-rarities">
+                    <button
+                        type="button"
+                        className={`box-filter-chip${activeRarities.length === 0 ? " active" : ""}`}
+                        onClick={() => {
+                            for (const r of activeRarities) onToggleRarity(r);
+                        }}
+                    >
+                        Все{totalCount !== undefined ? ` (${totalCount})` : ""}
+                    </button>
                     {rarities.map((r) => {
                         const active = activeRarities.includes(r);
+                        const key = rarityKey(r);
+                        const dotColor = RARITY_DOTS[key] || "#9AA0A4";
+                        const count = countsByRarity?.[key] ?? countsByRarity?.[r];
                         return (
                             <button
                                 key={r}
                                 type="button"
-                                className={`box-filter-chip rarity-tag-${rarityKey(r)}${active ? " active" : ""}`}
+                                className={`box-filter-chip chip-${key}${active ? " active" : ""}`}
                                 onClick={() => onToggleRarity(r)}
                             >
-                                {r}
+                                <span className="box-filter-chip-dot" style={{ background: dotColor }} />
+                                {formatRarityLabel(r)}{count !== undefined ? ` (${count})` : ""}
                             </button>
                         );
                     })}

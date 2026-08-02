@@ -4,6 +4,9 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { Select } from "../../components/UI/Select";
+import { Avatar } from "../../components/UI/Avatar";
+import { StellaCoinIcon } from "../../components/UI/StellaCoinIcon";
+import { resolveRarityVisual } from "../../data/mockTemplates";
 import {
     ACCEPT_ATTR,
     MAX_ASSETS_PER_BOX,
@@ -15,9 +18,6 @@ import {
 } from "../../api/assets";
 import type { AssetKind } from "../../types/Stellage/boxes";
 import "./CreateBoxPage.css";
-
-const CURRENCIES = ["RUB", "USD", "EUR", "GBP", "CNY", "JPY", "KZT", "BYN", "TRY"];
-const CURRENCY_OPTIONS = CURRENCIES.map((c) => ({ value: c, label: c }));
 
 // Значения совпадают с BoxRarity на бэкенде. Доступно только суперюзерам —
 // обычным пользователям сервер всё равно форсит COMMON.
@@ -54,6 +54,7 @@ const validateFile = (file: File): Pick<StagedFile, "kind" | "status" | "error">
 
 export const CreateBoxPage = () => {
     const navigate = useNavigate();
+    const user = useAuthStore((s) => s.user);
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
     const isSuperuser = useAuthStore((s) => s.user?.is_superuser ?? false);
     const createBox = useStellageStore((s) => s.createBox);
@@ -62,7 +63,6 @@ export const CreateBoxPage = () => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("0");
-    const [currency, setCurrency] = useState("RUB");
     const [rarity, setRarity] = useState("common");
     const [content, setContent] = useState("");
     const [files, setFiles] = useState<StagedFile[]>([]);
@@ -71,7 +71,7 @@ export const CreateBoxPage = () => {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user) {
         return (
             <div className="create-box-gate">
                 <div className="create-box-gate-visual">
@@ -85,6 +85,11 @@ export const CreateBoxPage = () => {
             </div>
         );
     }
+
+    const authorNickname = user.nickname?.trim() || user.username || "Создатель";
+    const authorUsername = user.username ? `@${user.username}` : "@stellage";
+    const { rarityGlow, boxColor } = resolveRarityVisual(isSuperuser ? rarity : "common");
+    const priceNum = Math.max(0, Number(price) || 0);
 
     const patchFile = (id: string, patch: Partial<StagedFile>) => {
         setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, ...patch } : f)));
@@ -142,8 +147,7 @@ export const CreateBoxPage = () => {
         setSaving(true);
         setError(null);
 
-        // Шаг 1: создаём коробку (один раз — при частичном фейле загрузки
-        // повторный сабмит только догружает файлы).
+        // Шаг 1: создаём коробку (валюта форсируется в "stella" - Stellacoin)
         let boxId = createdBoxId;
         if (!boxId) {
             const text = content.trim();
@@ -151,7 +155,7 @@ export const CreateBoxPage = () => {
                 title: trimmed,
                 description: description.trim() || undefined,
                 price: Number(price) || 0,
-                currency,
+                currency: "stella",
                 content: text ? { text } : undefined,
                 rarity: isSuperuser ? rarity : undefined,
             });
@@ -184,81 +188,130 @@ export const CreateBoxPage = () => {
     return (
         <section className="create-box-page">
             <header className="create-box-head">
-                <div className="create-box-visual">
-                    <WireframeBox size={130} />
-                </div>
-                <div>
-                    <h1 className="create-box-title">Создать коробку</h1>
-                    <p className="create-box-sub">
-                        Новая коробка попадёт в твой инвентарь.
-                        {!isSuperuser && " Редкость — Common."}
-                    </p>
-                </div>
+                <h1 className="create-box-title">Создать коробку</h1>
+                <p className="create-box-sub">
+                    Новая коробка попадёт в твой инвентарь.
+                    {!isSuperuser && " Редкость — Common."}
+                </p>
             </header>
 
-            <form className="create-box-form" onSubmit={handleSubmit}>
-                <label className="create-box-field">
-                    <span className="create-box-label">Название</span>
-                    <input
-                        className="create-box-input"
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Название коробки"
-                        maxLength={100}
-                        disabled={metaLocked}
-                        autoFocus
-                    />
-                </label>
+            <div className="create-box-split-layout">
+                {/* ── LEFT COLUMN: LIVE CARD PREVIEW ── */}
+                <div className="create-box-preview-side">
+                    <span className="create-preview-badge">Live Preview</span>
+                    <div className={`create-preview-card rarity-${rarity.toLowerCase()}`}>
+                        <div className="template-card-header">
+                            <div className="template-card-author">
+                                <Avatar name={authorNickname} size={34} />
+                                <div className="author-text-meta">
+                                    <span className="author-nickname">{authorNickname}</span>
+                                    <span className="author-username">{authorUsername}</span>
+                                </div>
+                            </div>
+                        </div>
 
-                <label className="create-box-field">
-                    <span className="create-box-label">Описание</span>
-                    <textarea
-                        className="create-box-input create-box-textarea"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="О чём эта коробка?"
-                        maxLength={100}
-                        rows={2}
-                        disabled={metaLocked}
-                    />
-                </label>
+                        <div className="template-card-visual">
+                            <WireframeBox
+                                size={140}
+                                rarityGlow={rarityGlow}
+                                color={boxColor}
+                            />
+                        </div>
 
-                <div className="create-box-row">
+                        <div className="template-card-body">
+                            <h3 className="template-card-title">
+                                {title.trim() || "Название коробки"}
+                            </h3>
+                        </div>
+
+                        <div className="template-card-footer">
+                            <div className="template-card-price-row">
+                                <div className="template-card-price">
+                                    {priceNum === 0 ? (
+                                        <span className="price-free">Бесплатно</span>
+                                    ) : (
+                                        <span className="price-stella">
+                                            <StellaCoinIcon size={18} /> {priceNum.toLocaleString("ru-RU")}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+
+                            <button type="button" className="template-card-buy-btn" disabled>
+                                {priceNum === 0 ? (
+                                    "Забрать бесплатно"
+                                ) : (
+                                    <>
+                                        <span>Забрать за</span>
+                                        <StellaCoinIcon size={15} />
+                                        <span>{priceNum.toLocaleString("ru-RU")}</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── RIGHT COLUMN: CREATION FORM ── */}
+                <form className="create-box-form" onSubmit={handleSubmit}>
                     <label className="create-box-field">
-                        <span className="create-box-label">Цена</span>
+                        <span className="create-box-label">Название *</span>
                         <input
                             className="create-box-input"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={price}
-                            onChange={(e) => setPrice(e.target.value)}
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            placeholder="Название вашей коробки"
+                            maxLength={100}
+                            disabled={metaLocked}
+                            autoFocus
+                        />
+                    </label>
+
+                    <label className="create-box-field">
+                        <span className="create-box-label">Описание</span>
+                        <textarea
+                            className="create-box-input create-box-textarea"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="О чём эта коробка?"
+                            maxLength={100}
+                            rows={2}
                             disabled={metaLocked}
                         />
                     </label>
-                    <div className="create-box-field">
-                        <span className="create-box-label">Валюта</span>
-                        <Select
-                            value={currency}
-                            options={CURRENCY_OPTIONS}
-                            onChange={setCurrency}
-                            ariaLabel="Валюта"
-                        />
-                    </div>
-                </div>
 
-                {isSuperuser && (
-                    <div className="create-box-field">
-                        <span className="create-box-label">Редкость</span>
-                        <Select
-                            value={rarity}
-                            options={RARITY_OPTIONS}
-                            onChange={setRarity}
-                            ariaLabel="Редкость"
-                        />
+                    <div className="create-box-row">
+                        <label className="create-box-field">
+                            <span className="create-box-label">Цена в Stellacoin</span>
+                            <div className="create-box-price-input-wrap">
+                                <input
+                                    className="create-box-input"
+                                    type="number"
+                                    min="0"
+                                    step="1"
+                                    value={price}
+                                    onChange={(e) => setPrice(e.target.value)}
+                                    disabled={metaLocked}
+                                />
+                                <span className="price-coin-suffix">
+                                    <StellaCoinIcon size={18} />
+                                </span>
+                            </div>
+                        </label>
+
+                        {isSuperuser && (
+                            <div className="create-box-field">
+                                <span className="create-box-label">Редкость</span>
+                                <Select
+                                    value={rarity}
+                                    options={RARITY_OPTIONS}
+                                    onChange={setRarity}
+                                    ariaLabel="Редкость"
+                                />
+                            </div>
+                        )}
                     </div>
-                )}
 
                 <label className="create-box-field">
                     <span className="create-box-label">Текст</span>
@@ -357,6 +410,7 @@ export const CreateBoxPage = () => {
                     </button>
                 </div>
             </form>
+            </div>
         </section>
     );
 };

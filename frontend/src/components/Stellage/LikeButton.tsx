@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getBoxLikes, likeBox, unlikeBox } from "../../api/social";
+import { useStellageStore } from "../../store/useStellageStore";
 import { formatCount } from "../../utils/formatCount";
 import "./LikeButton.css";
 
@@ -40,15 +41,23 @@ export const LikeButton = ({ instanceId, canLike }: LikeButtonProps) => {
         if (busy || !canLike) return;
         setBusy(true);
         const was = isLiked;
-        setIsLiked(!was);
-        setLikes((n) => n + (was ? -1 : 1));
+        const nextLiked = !was;
+        const nextLikes = likes + (was ? -1 : 1);
+
+        setIsLiked(nextLiked);
+        setLikes(nextLikes);
+        useStellageStore.getState().updateBoxLikes(instanceId, nextLikes);
+
         try {
             const res = was ? await unlikeBox(instanceId) : await likeBox(instanceId);
             setIsLiked(res.is_liked);
             setLikes(res.likes);
+            useStellageStore.getState().updateBoxLikes(instanceId, res.likes);
         } catch {
             setIsLiked(was);
-            setLikes((n) => n + (was ? 1 : -1));
+            const rollbackLikes = likes;
+            setLikes(rollbackLikes);
+            useStellageStore.getState().updateBoxLikes(instanceId, rollbackLikes);
         } finally {
             setBusy(false);
         }

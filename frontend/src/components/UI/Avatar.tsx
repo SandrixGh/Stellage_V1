@@ -28,13 +28,14 @@ export const Avatar = ({ url, name, size = 96, className = "" }: AvatarProps) =>
 
     if (url && !failed) {
         return (
-            <div className={`avatar ${className}`} style={style}>
+            <div className={`avatar ${className}`} style={style} data-yandex-image-search-skip="true" data-no-search="true">
                 <img
                     className="avatar-img"
                     src={url}
                     alt={name ?? "Аватар"}
                     onError={() => setFailed(true)}
                 />
+                <div className="avatar-tile-overlay" />
             </div>
         );
     }

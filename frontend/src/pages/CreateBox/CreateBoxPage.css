@@ -1,34 +1,72 @@
 .create-box-page {
-    max-width: 620px;
+    max-width: 980px;
     margin: 0 auto;
-    padding: 40px 24px 64px;
+    padding: 32px 24px 64px;
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: 24px;
 }
 
 .create-box-head {
     display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.create-box-visual {
-    flex-shrink: 0;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .create-box-title {
     margin: 0;
-    font-family: var(--font-body);
-    font-size: 30px;
-    font-weight: 700;
-    color: var(--ink);
+    font-family: var(--font-heading, "Manrope", sans-serif);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--ink, #F0F4F6);
 }
 
 .create-box-sub {
-    margin: 8px 0 0;
-    font-size: 14px;
-    color: rgba(var(--ink-rgb), 0.5);
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--ink-secondary, #9AA0A4);
+}
+
+.create-box-split-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 28px;
+    align-items: start;
+}
+
+@media (max-width: 840px) {
+    .create-box-split-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.create-box-preview-side {
+    position: sticky;
+    top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.create-preview-badge {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent, #4FA98E);
+}
+
+.create-preview-card {
+    background: var(--surface, #1A1F22);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-radius: var(--radius-lg, 12px);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
 }
 
 .create-box-form {
@@ -38,7 +76,7 @@
     padding: 28px;
     border-radius: var(--radius-lg);
     background: var(--surface);
-    border: 1px solid rgba(var(--ink-rgb), 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: var(--shadow-md);
 }
 
@@ -83,6 +121,26 @@
 .create-box-textarea {
     resize: vertical;
     min-height: 56px;
+}
+
+.create-box-price-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.create-box-price-input-wrap .create-box-input {
+    width: 100%;
+    padding-right: 44px;
+}
+
+.price-coin-suffix {
+    position: absolute;
+    right: 14px;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
 }
 
 .create-box-input[type="number"] {

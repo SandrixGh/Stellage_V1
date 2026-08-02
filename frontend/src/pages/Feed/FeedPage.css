@@ -1,67 +1,172 @@
 .feed-page {
     width: 100%;
+    padding-bottom: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-/* ── Search bar (full width, top) ── */
-.feed-search {
-    margin-bottom: 32px;
+/* ── Controls Row (Search Input + Custom Sort Dropdown) ── */
+.feed-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
 }
 
 .feed-search-icon-wrapper {
     position: relative;
-    width: 100%;
+    flex: 1;
 }
 
 .feed-search-icon {
     position: absolute;
-    left: 22px;
+    left: 18px;
     top: 50%;
     transform: translateY(-50%);
-    color: rgba(var(--ink-rgb), 0.35);
+    color: var(--ink-secondary, #9AA0A4);
     pointer-events: none;
     transition: color 0.2s ease;
 }
 
 .feed-search-icon-wrapper:focus-within .feed-search-icon {
-    color: var(--accent);
+    color: var(--accent, #4FA98E);
 }
 
 .feed-search-input {
     width: 100%;
-    box-sizing: border-box;
-    padding: 14px 22px 14px 54px;
-    font-family: var(--font-body);
-    font-size: 15px;
-    color: var(--ink);
-    letter-spacing: -0.1px;
+    box-sizing: border-color 0.2s ease;
+    padding: 12px 18px 12px 46px;
+    font-family: var(--font-body, "Inter", sans-serif);
+    font-size: 13.5px;
+    color: var(--ink, #F0F4F6);
     background: rgba(255, 255, 255, 0.05);
-    border: none;
-    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
     outline: none;
-    transition: all 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .feed-search-input::placeholder {
-    color: rgba(var(--ink-rgb), 0.4);
+    color: var(--ink-secondary, #9AA0A4);
 }
 
 .feed-search-input:focus {
-    background: rgba(255, 255, 255, 0.09);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent, #4FA98E);
 }
 
-.feed-header-section {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-bottom: 24px;
+/* ── Custom Styled Sort Dropdown ── */
+.custom-sort-dropdown {
+    position: relative;
+    flex-shrink: 0;
 }
 
-.feed-filter-chips {
+.custom-sort-trigger {
     display: flex;
     align-items: center;
     gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 11px 16px;
+    font-family: var(--font-body, "Inter", sans-serif);
+    font-size: 13.5px;
+    color: var(--ink, #F0F4F6);
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    white-space: nowrap;
+}
+
+.custom-sort-trigger:hover,
+.custom-sort-trigger.is-open {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent, #4FA98E);
+}
+
+.sort-label-prefix {
+    color: var(--ink-secondary, #9AA0A4);
+}
+
+.sort-label-value {
+    font-weight: 600;
+    color: var(--ink, #F0F4F6);
+}
+
+.sort-arrow {
+    transition: transform 0.2s ease;
+    color: var(--ink-secondary, #9AA0A4);
+}
+
+.sort-arrow.is-active {
+    transform: rotate(180deg);
+}
+
+.custom-sort-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 200px;
+    background: var(--surface, #1A1F22);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    backdrop-filter: blur(12px);
+}
+
+.custom-sort-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: var(--ink-secondary, #9AA0A4);
+    font-family: var(--font-body, "Inter", sans-serif);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.custom-sort-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--ink, #F0F4F6);
+}
+
+.custom-sort-item.is-selected {
+    color: var(--accent, #4FA98E);
+    font-weight: 600;
+    background: rgba(79, 169, 142, 0.1);
+}
+
+.sort-check {
+    font-weight: 700;
+    font-size: 12px;
+}
+
+/* ── Original Category Chips Bar (Exact Match Screenshot 1) ── */
+.feed-filter-chips {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 6px;
+    background: rgba(20, 24, 27, 0.92);
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    width: fit-content;
     flex-wrap: wrap;
+    margin-bottom: 8px;
 }
 
 .feed-chip {
@@ -69,26 +174,27 @@
     align-items: center;
     gap: 8px;
     padding: 7px 16px;
-    border-radius: 999px;
-    font-family: var(--font-body);
-    font-size: 13px;
+    border-radius: 9999px;
+    font-family: var(--font-body, "Inter", sans-serif);
+    font-size: 12.5px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.7);
-    background: rgba(255, 255, 255, 0.06);
-    border: none;
+    color: var(--ink-secondary, #9AA0A4);
+    background: transparent;
+    border: 1px solid transparent;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .feed-chip:hover {
-    color: #FFFFFF;
-    background: rgba(255, 255, 255, 0.12);
+    color: var(--ink, #F0F4F6);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .feed-chip.is-active {
-    color: var(--accent-bright);
-    background: rgba(79, 169, 142, 0.18);
-    border: 1px solid rgba(79, 169, 142, 0.35);
+    color: #FFFFFF;
+    background: rgba(79, 169, 142, 0.35);
+    border: 1px solid rgba(79, 169, 142, 0.55);
+    box-shadow: 0 4px 16px rgba(79, 169, 142, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.35);
     font-weight: 600;
 }
 
@@ -99,50 +205,23 @@
     flex-shrink: 0;
 }
 
-/* Hero Banner removed per redesign */
-
-/* ── Content column & full width grid ── */
+/* ── Content Grid ── */
 .feed-content {
     width: 100%;
 }
 
 .feed-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 20px;
 }
 
-
-.feed-grid .empty-message {
+.empty-message,
+.status-info {
+    color: var(--ink-secondary, #9AA0A4);
+    font-size: 14.5px;
+    padding: 64px 0;
+    text-align: center;
+    font-style: italic;
     grid-column: 1 / -1;
 }
-
-/* ── Responsive: collapse sidebar on top for narrow screens ── */
-@media (max-width: 820px) {
-    .feed-layout {
-        flex-direction: column;
-    }
-
-    .feed-sidebar {
-        position: static;
-        top: auto;
-        width: 100%;
-        flex: 1 1 auto;
-    }
-
-    .feed-filter-group {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 6px;
-    }
-
-    .feed-filter-option {
-        flex: 0 0 auto;
-    }
-
-    .feed-content {
-        width: 100%;
-    }
-}
-
-

@@ -1,156 +1,162 @@
 .box-card {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0;
     border-radius: var(--radius-lg);
     background: var(--surface);
     border: 1px solid var(--border-subtle);
     box-shadow: var(--shadow-sm);
-    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-color 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
     overflow: hidden;
-    contain: content;
+    padding: 16px;
 }
 
 .box-card:hover {
-    border-color: var(--border-hover);
     background: var(--surface-hover);
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-md);
 }
 
 .box-card:active {
-    transform: translateY(-1px) scale(0.98);
+    transform: scale(0.97);
     transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ── Wireframe visual area ── */
+/* ── Spotify Ambient Visual Asset Container ── */
 .box-card-visual {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 32px 14px 16px;
-    position: relative;
-    min-height: 150px;
-    background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.04) 0%, transparent 75%);
+    padding: 24px 12px 16px;
+    min-height: 140px;
+    background: rgba(0, 0, 0, 0.18);
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+    overflow: hidden;
 }
 
-.box-card.rarity-rare .box-card-visual {
-    background: radial-gradient(circle at 50% 45%, rgba(var(--tag-rare-rgb), 0.04) 0%, transparent 75%);
-}
-
-.box-card.rarity-golden .box-card-visual {
-    background: radial-gradient(circle at 50% 45%, rgba(var(--tag-golden-rgb), 0.04) 0%, transparent 75%);
-}
-
-.box-card.rarity-developer\'s .box-card-visual,
-.box-card.rarity-dev .box-card-visual {
-    background: radial-gradient(circle at 50% 45%, rgba(var(--tag-dev-rgb), 0.04) 0%, transparent 75%);
-}
-
-/* ── Serial / verified badge floating top-left ── */
-.box-card-serial {
+.box-card-visual::before {
+    content: "";
     position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 5;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    filter: blur(30px);
+    opacity: 0.15;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
 }
 
-.serial {
-    font-family: var(--font-body);
-    font-size: 10px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.5);
-    letter-spacing: 0.3px;
+.rarity-common .box-card-visual::before { background: var(--glow-common); opacity: 0.15; }
+.rarity-rare .box-card-visual::before   { background: var(--glow-rare); opacity: 0.22; }
+.rarity-golden .box-card-visual::before { background: var(--glow-golden); opacity: 0.25; }
+.rarity-developer\'s .box-card-visual::before,
+.rarity-dev .box-card-visual::before    { background: var(--glow-dev); opacity: 0.25; }
+
+.box-card:hover .box-card-visual::before {
+    opacity: 0.4;
+    transform: scale(1.06);
 }
 
-/* ── Info section ── */
+/* ── Info Section ── */
 .box-card-info {
-    padding: 0 18px 20px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 4px;
+    padding: 0 2px;
 }
 
 .box-title {
     font-family: var(--font-display);
     margin: 0;
-    font-size: 17px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--ink);
     letter-spacing: -0.2px;
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-height: 42px;
+    max-height: 42px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
-.box-card-meta {
+.box-card-sub {
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-/* ── Rarity tag ── */
-.rarity-tag {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    padding: 3px 10px;
-    border-radius: var(--radius-md);
+    gap: 6px;
+    font-size: 12px;
     color: var(--ink-secondary);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.rarity-tag-rare {
-    color: var(--tag-rare);
-    border-color: rgba(var(--tag-rare-rgb), 0.3);
-    background: rgba(var(--tag-rare-rgb), 0.12);
-}
-
-.rarity-tag-golden {
-    color: var(--tag-golden);
-    border-color: rgba(var(--tag-golden-rgb), 0.35);
-    background: rgba(var(--tag-golden-rgb), 0.12);
-}
-
-.rarity-tag-developer\'s,
-.rarity-tag-dev {
-    color: var(--tag-dev);
-    border-color: rgba(var(--tag-dev-rgb), 0.3);
-    background: rgba(var(--tag-dev-rgb), 0.12);
-}
-
-/* ── Likes tag ── */
-.box-likes-tag {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    padding: 3px 9px;
-    border-radius: var(--radius-md);
-    color: #e6465a;
-    background: rgba(230, 70, 90, 0.08);
-    border: 1px solid rgba(230, 70, 90, 0.25);
-    white-space: nowrap;
-}
-
-/* ── Status tag ── */
-.status-tag {
-    font-size: 10px;
     font-weight: 500;
-    letter-spacing: 0.4px;
-    padding: 3px 9px;
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.box-serial {
+    font-weight: 600;
     color: var(--ink-secondary);
 }
 
-.status-tag.sealed {
-    color: var(--tag-sealed);
-    border-color: rgba(255, 255, 255, 0.12);
+.dot-sep {
+    opacity: 0.4;
+    font-size: 10px;
 }
 
+.rarity-name {
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.rarity-color-common {
+    color: var(--box-common);
+}
+
+.rarity-color-rare {
+    color: var(--tag-rare);
+}
+
+.rarity-color-golden {
+    color: var(--tag-golden);
+}
+
+.rarity-color-developer\'s,
+.rarity-color-dev {
+    color: var(--tag-dev);
+}
+
+.status-name {
+    opacity: 0.8;
+}
+
+.box-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    min-height: 20px;
+}
+
+.likes-count {
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s ease;
+}
+
+.likes-count.has-likes {
+    color: #ff4d6d;
+}
+
+.likes-count.zero-likes {
+    color: var(--ink-secondary);
+    opacity: 0.5;
+}
 

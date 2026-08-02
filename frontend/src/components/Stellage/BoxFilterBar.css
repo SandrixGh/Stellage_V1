@@ -1,70 +1,119 @@
 .box-filter-bar {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
 }
 
 .box-filter-top {
     display: flex;
     gap: 12px;
+    align-items: center;
     flex-wrap: wrap;
 }
 
 .box-filter-search {
     flex: 1;
-    min-width: 200px;
-    padding: 12px 20px;
-    border-radius: 999px;
+    min-width: 220px;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
     background: rgba(255, 255, 255, 0.05);
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--ink);
-    font-size: 14px;
+    font-family: var(--font-body);
+    font-size: 13px;
     outline: none;
-    transition: all 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .box-filter-search::placeholder {
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--ink-secondary);
 }
 
 .box-filter-search:focus {
-    background: rgba(255, 255, 255, 0.09);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79, 169, 142, 0.2);
 }
 
 .box-filter-sort-select {
     flex: 0 0 auto;
-    width: 180px;
+    width: 170px;
 }
 
 .box-filter-rarities {
-    display: flex;
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
     flex-wrap: wrap;
-    gap: 8px;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 6px;
+    background: rgba(20, 24, 27, 0.92);
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    width: fit-content;
 }
 
 .box-filter-chip {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-transform: capitalize;
-    padding: 6px 14px;
-    border-radius: 999px;
-    color: rgba(255, 255, 255, 0.7);
-    background: rgba(255, 255, 255, 0.06);
-    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 7px 16px;
+    border-radius: var(--radius-pill);
+    color: var(--ink-secondary);
+    background: transparent;
+    border: 1px solid transparent;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .box-filter-chip:hover {
-    color: #FFFFFF;
-    background: rgba(255, 255, 255, 0.12);
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.08);
 }
 
+/* Liquid Glass Active Category Pill (Uses parent blur without nested backdrop-filter to prevent Blink rendering bugs) */
 .box-filter-chip.active {
-    color: var(--accent-bright);
-    background: rgba(79, 169, 142, 0.18);
-    border: 1px solid rgba(79, 169, 142, 0.35);
+    color: #FFFFFF;
+    background: rgba(79, 169, 142, 0.35);
+    border: 1px solid rgba(79, 169, 142, 0.55);
+    box-shadow: 0 4px 16px rgba(79, 169, 142, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.35);
     font-weight: 600;
 }
+
+.box-filter-chip.active.chip-common {
+    background: rgba(154, 160, 164, 0.32);
+    border-color: rgba(154, 160, 164, 0.55);
+    box-shadow: 0 4px 16px rgba(154, 160, 164, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+}
+
+.box-filter-chip.active.chip-rare {
+    background: rgba(139, 184, 255, 0.32);
+    border-color: rgba(139, 184, 255, 0.6);
+    box-shadow: 0 4px 16px rgba(139, 184, 255, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+}
+
+.box-filter-chip.active.chip-golden {
+    background: rgba(232, 203, 130, 0.32);
+    border-color: rgba(232, 203, 130, 0.6);
+    box-shadow: 0 4px 16px rgba(232, 203, 130, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+}
+
+.box-filter-chip.active.chip-developer\'s,
+.box-filter-chip.active.chip-dev {
+    background: rgba(200, 130, 255, 0.32);
+    border-color: rgba(200, 130, 255, 0.6);
+    box-shadow: 0 4px 16px rgba(200, 130, 255, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+}
+
+.box-filter-chip-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+

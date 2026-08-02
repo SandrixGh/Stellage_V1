@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useAuthStore } from "../../../store/useAuthStore";
-import coinLogo from "../../Logo/StellaCoin.png";
+import { StellaCoinIcon } from "../../UI/StellaCoinIcon";
 import { addStellaCoins } from "../../../api/profile";
+import { formatCount } from "../../../utils/formatCount";
 import "./Header.css";
 
 export const StellaCoinBadge = () => {
@@ -15,8 +16,10 @@ export const StellaCoinBadge = () => {
         setIsLoading(true);
         try {
             const amount = parseInt(adminAmount, 10);
-            await addStellaCoins(isNaN(amount) ? 1 : amount);
+            const addVal = isNaN(amount) || amount <= 0 ? 1 : amount;
+            await addStellaCoins(addVal);
             await useAuthStore.getState().getUser();
+            setAdminAmount("");
         } catch (error) {
             console.error("Failed to add coins", error);
         } finally {
@@ -25,30 +28,34 @@ export const StellaCoinBadge = () => {
     };
 
     return (
-        <div className="stellacoin-badge" title="Ваш баланс StellaCoin">
-            <img
-                src={coinLogo}
-                alt="StellaCoin"
-                className="stellacoin-icon"
-                width={32}
-                height={32}
-            />
-            <span className="stellacoin-count">{coins.toLocaleString("ru-RU")}</span>
+        <div
+            className="stellacoin-badge"
+            title={`Ваш баланс: ${coins.toLocaleString("ru-RU")} Stellacoin`}
+        >
+            <StellaCoinIcon size={22} />
+            <span className="stellacoin-count">{formatCount(coins)}</span>
             {user?.username?.toLowerCase() === "sandrix" && (
-                <div className="stellacoin-admin-add">
+                <div className="stellacoin-admin-add" onClick={(e) => e.stopPropagation()}>
                     <input
                         type="text"
                         inputMode="numeric"
                         className="stellacoin-admin-input"
                         value={adminAmount}
                         onChange={(e) => setAdminAmount(e.target.value.replace(/\D/g, ""))}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") handleAddCoins();
+                        }}
+                        onClick={(e) => e.stopPropagation()}
                         placeholder="1"
                     />
                     <button
                         className="add-coins-btn"
-                        onClick={handleAddCoins}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddCoins();
+                        }}
                         disabled={isLoading}
-                        title="Добавить StellaCoin"
+                        title="Добавить Stellacoin"
                     >
                         +
                     </button>

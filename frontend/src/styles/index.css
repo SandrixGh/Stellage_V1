@@ -1,0 +1,157 @@
+/* Global Root Resets & Typography Enhancements (Apple / Spotify / Telegram style) */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Universal Image Protection (disables browser image search/AI popups on hover) */
+img {
+  pointer-events: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+}
+
+.img-tile-wrap {
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+}
+
+.img-tile-overlay,
+.img-tile-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: auto;
+  background: transparent;
+}
+
+
+/* Glass panel utility (Apple Liquid Glass Overlay) */
+.glass-panel {
+  background: rgba(var(--chrome-rgb), 0.72) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: 
+    var(--shadow-glass),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.15) !important;
+  border-radius: var(--radius-lg);
+}
+
+/* Glass modal utility */
+.glass-modal {
+  background: rgba(var(--chrome-rgb), 0.82) !important;
+  backdrop-filter: blur(32px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), inset 0 1px 1px 0 rgba(255, 255, 255, 0.25) !important;
+  border-radius: var(--radius-xl) !important;
+}
+
+/* Liquid Glass Interactive Action Buttons (Apple / Telegram pill style) */
+.glass-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.glass-button-primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(79, 169, 142, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.glass-button-primary:hover {
+  background: var(--accent-bright);
+  box-shadow: 0 6px 20px rgba(79, 169, 142, 0.48), inset 0 1px 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Spotify Ambient Color Glows (Visual Depth behind visual assets) */
+.ambient-glow-wrapper {
+  position: relative;
+}
+
+.ambient-glow-common::before,
+.ambient-glow-rare::before,
+.ambient-glow-golden::before,
+.ambient-glow-dev::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  border-radius: 50%;
+  filter: blur(36px);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ambient-glow-common::before { background: var(--glow-common); }
+.ambient-glow-rare::before   { background: var(--glow-rare); }
+.ambient-glow-golden::before { background: var(--glow-golden); }
+.ambient-glow-dev::before    { background: var(--glow-dev); }
+
+.ambient-glow-wrapper:hover ::before {
+  opacity: 0.8;
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { NotificationBell } from "../../Notifications/NotificationBell";
 import { MessagesButton } from "../../Messages/MessagesButton";
@@ -20,7 +20,37 @@ export const Header = () => {
     const { isAuthenticated } = useAuthStore();
     const userId = useAuthStore((s) => s.user?.id);
     const navigate = useNavigate();
+    const location = useLocation();
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+    const navRef = useRef<HTMLDivElement>(null);
+    const [pillStyle, setPillStyle] = useState<{ left: number; width: number; opacity: number }>({
+        left: 0,
+        width: 0,
+        opacity: 0,
+    });
+
+    useEffect(() => {
+        const updatePill = () => {
+            if (!navRef.current) return;
+            const activeLink = navRef.current.querySelector<HTMLElement>(".nav-link.active");
+            if (activeLink) {
+                const navRect = navRef.current.getBoundingClientRect();
+                const linkRect = activeLink.getBoundingClientRect();
+                setPillStyle({
+                    left: linkRect.left - navRect.left,
+                    width: linkRect.width,
+                    opacity: 1,
+                });
+            } else {
+                setPillStyle((s) => ({ ...s, opacity: 0 }));
+            }
+        };
+
+        updatePill();
+        window.addEventListener("resize", updatePill);
+        return () => window.removeEventListener("resize", updatePill);
+    }, [location.pathname]);
 
     // Свой аватар для шапки (presigned из /profile/me). Пере-запрашиваем при
     // смене активного аккаунта (userId), а не только при входе/выходе.
@@ -42,7 +72,15 @@ export const Header = () => {
                     <span className="header-logo-title">Stellage</span>
                 </NavLink>
 
-                <nav className="header-nav">
+                <nav className="header-nav" ref={navRef}>
+                    <div
+                        className="nav-active-pill"
+                        style={{
+                            transform: `translateX(${pillStyle.left}px)`,
+                            width: `${pillStyle.width}px`,
+                            opacity: pillStyle.opacity,
+                        }}
+                    />
                     {NAV_ITEMS.map((item) => (
                         <NavLink
                             key={item.to}
@@ -64,30 +102,6 @@ export const Header = () => {
                             <MessagesButton />
                             <NotificationBell />
                             <AccountMenu avatarUrl={avatarUrl} />
-                            <NavLink
-                                to="/settings"
-                                aria-label="Настройки аккаунта"
-                                title="Настройки аккаунта"
-                                className={({ isActive }) =>
-                                    `settings-link${isActive ? " active" : ""}`
-                                }
-                            >
-                                <svg
-                                    className="settings-icon"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="1.6"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    aria-hidden="true"
-                                >
-                                    <circle cx="12" cy="12" r="3" />
-                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                                </svg>
-                            </NavLink>
                         </>
                     ) : (
                         <button

@@ -1,0 +1,117 @@
+.msg-delete-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 250;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    animation: msg-delete-fade 0.16s ease;
+}
+
+@keyframes msg-delete-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.msg-delete-modal {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 24px 22px;
+    border-radius: var(--radius-xl);
+    background: var(--surface);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-lg), 0 20px 48px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    animation: msg-delete-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes msg-delete-pop {
+    from { opacity: 0; transform: translateY(12px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.msg-delete-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(230, 70, 90, 0.12);
+    border: 1px solid rgba(230, 70, 90, 0.25);
+    color: #e6465a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.msg-delete-title {
+    margin: 0 0 6px 0;
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+}
+
+.msg-delete-text {
+    margin: 0 0 22px 0;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: var(--ink-secondary);
+}
+
+.msg-delete-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.msg-delete-cancel,
+.msg-delete-confirm {
+    flex: 1;
+    height: 42px;
+    border-radius: var(--radius-lg);
+    border: none;
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+}
+
+.msg-delete-cancel {
+    background: var(--surface-hover);
+    border: 1px solid var(--border-subtle);
+    color: var(--ink);
+}
+
+.msg-delete-cancel:hover {
+    background: var(--surface-elevated);
+}
+
+.msg-delete-cancel:active {
+    transform: scale(0.96);
+}
+
+.msg-delete-confirm {
+    background: linear-gradient(135deg, #e6465a 0%, #d03045 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(230, 70, 90, 0.35);
+}
+
+.msg-delete-confirm:hover {
+    opacity: 0.95;
+    box-shadow: 0 6px 18px rgba(230, 70, 90, 0.45);
+}
+
+.msg-delete-confirm:active {
+    transform: scale(0.96);
+}

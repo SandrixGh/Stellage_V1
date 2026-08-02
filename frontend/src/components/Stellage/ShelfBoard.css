@@ -1,20 +1,18 @@
 /* ===== SHELF BOARD ===== */
-/* Доска со стеллажными линиями; коробки абсолютно позиционируются по сетке. */
 .shelf-board {
     position: relative;
     width: 100%;
-    /* Заполняет собой обёртку .shelf-view-board, которая растянута на высоту
-       соседнего сайдбара (align-items: stretch в .shelf-view). min-height (инлайн,
-       по числу рядов) остаётся нижней границей на случай, если сайдбар короче. */
     height: 100%;
-    border-radius: var(--radius-lg);
-    background: transparent;
-    border: none;
+    border-radius: var(--radius-xl);
+    background: rgba(14, 17, 23, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
     overflow: visible;
-    touch-action: none; /* чтобы pointer-drag не конфликтовал со скроллом на тач-экранах */
+    touch-action: none;
 }
 
-/* Горизонтальная линия полки. */
+/* Horizontal shelf line with Apple light catch */
 .shelf-line {
     position: absolute;
     left: 1%;
@@ -24,31 +22,27 @@
     background: linear-gradient(
         90deg,
         transparent,
-        rgba(255, 255, 255, 0.15) 15%,
-        rgba(255, 255, 255, 0.15) 85%,
+        rgba(255, 255, 255, 0.22) 15%,
+        rgba(255, 255, 255, 0.22) 85%,
         transparent
     );
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.03);
+    box-shadow: 0 4px 16px rgba(255, 255, 255, 0.06);
     pointer-events: none;
 }
 
-/* Ячейка-обёртка вокруг коробки (абсолютно позиционируется).
-   pointer-events отключены, чтобы пустое пространство над коробкой не
-   перехватывало захват — кликабельна только сама коробка (.shelf-cell-inner). */
 .shelf-cell {
     position: absolute;
     box-sizing: border-box;
     padding: 0 10px;
     display: flex;
-    align-items: flex-end; /* коробка «стоит» на линии полки */
+    align-items: flex-end;
     justify-content: center;
     pointer-events: none;
-    transition: left 0.18s cubic-bezier(0.22, 1, 0.36, 1),
-                top 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: left 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                top 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     will-change: left, top;
 }
 
-/* Коробку всегда можно открыть по клику. */
 .shelf-cell-inner {
     cursor: pointer;
 }
@@ -60,7 +54,7 @@
 .shelf-cell.is-dragging {
     transition: none;
     z-index: 50;
-    filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.25));
+    filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.4));
     will-change: left, top, transform;
 }
 
@@ -69,24 +63,24 @@
 }
 
 .shelf-cell.is-dragging .shelf-cell-inner {
-    transform: scale(1.04) rotate(-1.5deg);
+    transform: scale(1.06) rotate(-1.5deg);
 }
 
-/* Внутренний контейнер: голый wireframe коробки, стоящий нижней гранью на линии. */
 .shelf-cell-inner {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
     width: 100%;
-    pointer-events: auto; /* захват возможен только по самой коробке */
-    /* Опускаем коробку на ~2px, чтобы она «стояла» на полке-линии без зазора
-       (у нижней грани SVG есть небольшой внутренний отступ). */
-    transform: translateY(2px);
-    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: auto;
+    transition: opacity 0.2s ease;
 }
 
-/* Бирка коробки: минималистичная парящая подпись без тяжелых рамок. */
+.shelf-cell-inner:hover {
+    opacity: 0.95;
+}
+
+/* Floating label below box */
 .shelf-box-label {
     position: absolute;
     top: 100%;
@@ -97,26 +91,29 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1px;
-    padding: 0;
-    background: transparent;
-    border: none;
-    box-shadow: none;
+    gap: 2px;
+    padding: 3px 8px;
+    background: rgba(14, 17, 23, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     pointer-events: none;
     white-space: nowrap;
     box-sizing: border-box;
     width: max-content;
     max-width: calc(100% - 4px);
-    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .shelf-cell-inner:hover .shelf-box-label {
-    transform: translateX(-50%) translateY(1px);
+    background: rgba(14, 17, 23, 0.95);
+    border-color: rgba(255, 255, 255, 0.25);
 }
 
 .shelf-box-name {
     font-family: var(--font-display);
-    font-size: 11px;
+    font-size: 11.5px;
     font-weight: 600;
     color: var(--ink);
     display: block;
@@ -125,37 +122,42 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    letter-spacing: -0.01em;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    letter-spacing: -0.1px;
 }
 
 .shelf-box-tags {
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: 4px;
 }
 
 .shelf-box-rarity {
     font-family: var(--font-body);
-    font-size: 9px;
-    font-weight: 500;
+    font-size: 9.5px;
+    font-weight: 600;
     letter-spacing: 0.3px;
-    text-transform: lowercase;
-    opacity: 0.85;
+    text-transform: uppercase;
 }
 
-/* Цвет подписи редкости */
 .shelf-box-label[data-rarity="rare"] .shelf-box-rarity { color: var(--tag-rare); }
 .shelf-box-label[data-rarity="golden"] .shelf-box-rarity { color: var(--tag-golden); }
 .shelf-box-label[data-rarity="dev"] .shelf-box-rarity { color: var(--tag-dev); }
-.shelf-box-label[data-rarity="common"] .shelf-box-rarity { color: rgba(255, 255, 255, 0.5); }
+.shelf-box-label[data-rarity="common"] .shelf-box-rarity { color: var(--ink-secondary); }
 
 .shelf-box-likes {
     font-family: var(--font-body);
-    font-size: 9px;
-    font-weight: 500;
-    color: #FF4D6D;
+    font-size: 9.5px;
+    font-weight: 600;
     white-space: nowrap;
+}
+
+.shelf-box-likes.has-likes {
+    color: #FF4D6D;
+}
+
+.shelf-box-likes.zero-likes {
+    color: var(--ink-secondary);
+    opacity: 0.4;
 }
 
 .shelf-board-empty {
@@ -164,9 +166,10 @@
     margin: auto;
     height: fit-content;
     text-align: center;
-    color: rgba(var(--ink-rgb), 0.45);
-    font-family: "Inter", system-ui, sans-serif;
-    font-size: 15px;
+    color: var(--ink-secondary);
+    font-family: var(--font-body);
+    font-size: 14.5px;
     padding: 0 24px;
     pointer-events: none;
 }
+

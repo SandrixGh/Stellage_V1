@@ -40,7 +40,6 @@ export const SearchPage = () => {
     return (
         <div className="search-page">
             <h1 className="page-title">Поиск</h1>
-            <p className="page-subtitle">Найдите пользователя по нику или юзернейму</p>
 
             <div className="search-bar">
                 <svg className="search-icon-svg" viewBox="0 0 20 20" fill="none">

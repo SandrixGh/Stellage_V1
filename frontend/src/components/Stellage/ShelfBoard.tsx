@@ -293,11 +293,12 @@ export const ShelfBoard = ({
                                 >
                                     {template?.rarity}
                                 </span>
-                                {p.box.likes_count > 0 && (
-                                    <span className="shelf-box-likes" title={`${p.box.likes_count} лайков`}>
-                                        ♥ {formatCount(p.box.likes_count)}
-                                    </span>
-                                )}
+                                <span
+                                    className={`shelf-box-likes ${p.box.likes_count > 0 ? "has-likes" : "zero-likes"}`}
+                                    title={`${p.box.likes_count ?? 0} лайков`}
+                                >
+                                    ♥ {formatCount(p.box.likes_count ?? 0)}
+                                </span>
                             </span>
                         </div>
                     </div>

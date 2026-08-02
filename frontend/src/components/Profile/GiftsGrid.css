@@ -1,0 +1,247 @@
+/* ===== TELEGRAM-STYLE GIFTS GRID ===== */
+.gifts-grid-container {
+    width: 100%;
+}
+
+.gifts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+/* CARDS */
+.gift-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 12px 14px 12px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg, 16px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+.gift-card:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-md);
+}
+
+.gift-card.rarity-common {
+    border-color: rgba(154, 160, 164, 0.25);
+}
+
+.gift-card.rarity-rare {
+    border-color: rgba(139, 184, 255, 0.35);
+    box-shadow: 0 8px 24px rgba(139, 184, 255, 0.1);
+}
+
+.gift-card.rarity-golden {
+    border-color: rgba(232, 203, 130, 0.4);
+    box-shadow: 0 8px 24px rgba(232, 203, 130, 0.12);
+}
+
+.gift-card.rarity-developer\'s,
+.gift-card.rarity-dev {
+    border-color: rgba(200, 130, 255, 0.4);
+    box-shadow: 0 8px 24px rgba(200, 130, 255, 0.12);
+}
+
+.gift-card.gift-hidden {
+    opacity: 0.55;
+    filter: grayscale(0.4);
+}
+
+/* SENDER AVATAR BADGE OVERLAY (TELEGRAM STYLE IN TOP-LEFT CORNER) */
+.gift-sender-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(255, 255, 255, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+}
+
+.gift-sender-badge:hover {
+    transform: scale(1.15);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), 0 0 0 2px var(--accent, #4FA98E);
+}
+
+.gift-sender-badge.anonymous {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.gift-sender-avatar {
+    flex-shrink: 0;
+}
+
+/* 3D GRAPHIC WRAPPER */
+.gift-visual-wrap {
+    margin: 8px 0 12px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100px;
+    width: 100%;
+}
+
+/* DETAILS */
+.gift-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    text-align: center;
+}
+
+.gift-title {
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.gift-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.gift-rarity-pill {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 2px 7px;
+    border-radius: var(--radius-pill, 999px);
+    text-transform: uppercase;
+}
+
+.gift-rarity-pill.rarity-common {
+    background: rgba(142, 157, 166, 0.16);
+    color: #8E9DA6;
+    border: 1px solid rgba(142, 157, 166, 0.3);
+}
+
+.gift-rarity-pill.rarity-rare {
+    background: rgba(59, 130, 246, 0.16);
+    color: #60A5FA;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.gift-rarity-pill.rarity-golden {
+    background: rgba(245, 158, 11, 0.16);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.gift-rarity-pill.rarity-developer,
+.gift-rarity-pill[class*="developer"] {
+    background: rgba(168, 85, 247, 0.16);
+    color: #C084FC;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.gift-serial {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(var(--ink-rgb), 0.5);
+}
+
+.gift-from-line {
+    font-size: 11px;
+    color: rgba(var(--ink-rgb), 0.5);
+    margin-top: 2px;
+}
+
+.gift-from-name {
+    font-weight: 600;
+    color: rgba(var(--ink-rgb), 0.85);
+}
+
+.gift-from-name-link {
+    font-weight: 600;
+    color: var(--accent, #4FA98E);
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.gift-from-name-link:hover {
+    text-decoration: underline;
+    opacity: 0.85;
+}
+
+/* TOGGLE VISIBILITY */
+.gift-visibility-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.gift-visibility-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.gift-visibility-toggle.hidden {
+    background: rgba(239, 68, 68, 0.2);
+    color: #EF4444;
+}
+
+/* EMPTY STATE */
+.gifts-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 20px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg, 16px);
+}
+
+.gifts-empty-visual {
+    margin-bottom: 16px;
+    opacity: 0.8;
+}
+
+.gifts-empty-title {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+}
+
+.gifts-empty-sub {
+    font-size: 13px;
+    color: rgba(var(--ink-rgb), 0.5);
+    max-width: 360px;
+    margin: 0;
+    line-height: 1.5;
+}

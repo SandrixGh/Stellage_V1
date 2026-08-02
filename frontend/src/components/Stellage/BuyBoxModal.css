@@ -1,0 +1,227 @@
+.buy-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.buy-modal-content {
+    background: var(--surface, #1A1F22);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+    border-radius: 16px;
+    width: 100%;
+    max-width: 440px;
+    padding: 24px;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.buy-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: var(--ink-secondary, #9AA0A4);
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.15s ease;
+}
+
+.buy-modal-close:hover {
+    color: var(--ink, #F0F4F6);
+}
+
+.buy-modal-visual {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px 0;
+}
+
+.buy-modal-details {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+}
+
+.buy-modal-title {
+    font-family: var(--font-heading, "Manrope", sans-serif);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--ink, #F0F4F6);
+    margin: 0;
+}
+
+.buy-modal-desc {
+    font-size: 0.88rem;
+    color: var(--ink-secondary, #9AA0A4);
+    margin: 0;
+}
+
+.buy-modal-balance-card {
+    width: 100%;
+    background: var(--ground, #14181A);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.balance-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.88rem;
+    color: var(--ink-secondary, #9AA0A4);
+}
+
+.balance-row strong {
+    color: var(--ink, #F0F4F6);
+    font-family: var(--font-heading, "Manrope", sans-serif);
+}
+
+.coin-value {
+    color: #4FA98E !important;
+    font-size: 1rem;
+}
+
+.balance-divider {
+    border: none;
+    border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    margin: 4px 0;
+}
+
+.remaining-row .enough {
+    color: #4FA98E;
+    font-weight: 600;
+}
+
+.remaining-row .not-enough {
+    color: #E57373;
+    font-weight: 600;
+}
+
+.buy-modal-warning {
+    font-size: 0.82rem;
+    color: #E57373;
+    background: rgba(229, 115, 115, 0.1);
+    padding: 8px 12px;
+    border-radius: 8px;
+    width: 100%;
+}
+
+.buy-modal-error {
+    font-size: 0.82rem;
+    color: #E57373;
+}
+
+.buy-modal-actions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.buy-btn-confirm {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--accent, #4FA98E);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-family: var(--font-heading, "Manrope", sans-serif);
+    font-size: 0.94rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.buy-btn-confirm:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.buy-btn-confirm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.buy-btn-topup {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #E8CB82;
+    color: #14181A;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-family: var(--font-heading, "Manrope", sans-serif);
+    font-size: 0.94rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.buy-btn-topup:hover {
+    opacity: 0.9;
+}
+
+.buy-btn-secondary {
+    flex: 1;
+    background: var(--surface-subtle, rgba(255, 255, 255, 0.06));
+    color: var(--ink, #F0F4F6);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-family: var(--font-heading, "Manrope", sans-serif);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.buy-modal-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.success-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(79, 169, 142, 0.15);
+    color: var(--accent, #4FA98E);
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}

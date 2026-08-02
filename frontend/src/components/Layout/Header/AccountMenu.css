@@ -3,7 +3,7 @@
     flex-shrink: 0;
 }
 
-/* Триггер повторяет вид .user-profile, но это кнопка с раскрытием. */
+/* Триггер в шапке */
 .account-trigger {
     display: flex;
     align-items: center;
@@ -19,28 +19,29 @@
     user-select: none;
     color: var(--ink);
     font-family: var(--font-body);
-    transition: all 0.25s ease;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .account-trigger:hover,
 .account-trigger.open {
     background: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .account-trigger-name {
     font-size: 14px;
     font-weight: 500;
-    max-width: 150px;
+    font-family: var(--font-heading);
+    max-width: 140px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .account-chevron {
-    color: rgba(var(--ink-rgb), 0.5);
-    transition: transform 0.2s ease;
+    color: rgba(var(--ink-rgb), 0.55);
+    transition: transform 0.25s ease;
     flex-shrink: 0;
 }
 
@@ -48,139 +49,313 @@
     transform: rotate(180deg);
 }
 
-/* ===== DROPDOWN ===== */
+/* ===== ВЫПАДАЮЩЕЕ ОКНО (DROPDOWN) ===== */
 .account-dropdown {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    min-width: 260px;
-    max-width: 320px;
-    padding: 8px;
+    width: 280px;
+    padding: 10px;
     box-sizing: border-box;
-    background: rgba(22, 25, 27, 0.82);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    z-index: 200;
-    animation: account-pop 0.16s ease;
+    background: rgba(20, 24, 26, 0.94);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-lg, 16px);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    z-index: 250;
+    outline: none;
+    animation: account-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes account-pop {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
-.account-row {
+/* КАРТОЧКА ПРОФИЛЯ В ВЕРХНЕЙ ЧАСТИ МЕНЮ */
+.account-header-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md, 12px);
+}
+
+.account-header-info {
     display: flex;
     align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.account-header-avatar {
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.account-header-details {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 2px;
+}
+
+.account-header-name {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.25;
+}
+
+.account-header-handle {
+    font-size: 12px;
+    color: rgba(var(--ink-rgb), 0.55);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.account-header-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     width: 100%;
-    gap: 10px;
-    padding: 8px;
-    box-sizing: border-box;
+    padding: 7px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-sm, 8px);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.account-header-link:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+}
+
+.account-header-link svg {
+    transition: transform 0.18s ease;
+}
+
+.account-header-link:hover svg {
+    transform: translateX(3px);
+}
+
+/* РАЗДЕЛИТЕЛЬ */
+.account-divider {
+    height: 1px;
+    margin: 8px 4px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* ГРУППА ДЕЙСТВИЙ (С ИКОНКАМИ) */
+.account-actions-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.account-item-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 9px 10px;
     border: none;
     background: transparent;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-md, 10px);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.account-item-btn:hover {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.account-item-btn:active {
+    transform: scale(0.99);
+}
+
+.account-item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm, 8px);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(var(--ink-rgb), 0.85);
+    flex-shrink: 0;
+    transition: all 0.18s ease;
+}
+
+.account-item-btn:hover .account-item-icon {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+}
+
+/* Специфические мягкие акценты на иконки */
+.account-item-btn:hover .icon-profile {
+    color: #4FA98E;
+    background: rgba(79, 169, 142, 0.16);
+}
+
+.account-item-btn:hover .icon-shelf {
+    color: #60A5FA;
+    background: rgba(96, 165, 250, 0.16);
+}
+
+.account-item-btn:hover .icon-inventory {
+    color: #F59E0B;
+    background: rgba(245, 158, 11, 0.16);
+}
+
+.account-item-btn:hover .icon-settings {
+    color: #A78BFA;
+    background: rgba(167, 139, 250, 0.16);
+}
+
+.account-item-label {
+    flex-grow: 1;
+}
+
+/* РАЗДЕЛ ПЕРЕКЛЮЧЕНИЯ АККАУНТОВ */
+.account-section-header {
+    padding: 6px 10px 4px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    color: rgba(var(--ink-rgb), 0.45);
+    text-transform: uppercase;
+}
+
+.account-switch-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.account-switch-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    border-radius: var(--radius-md, 10px);
     cursor: pointer;
     text-align: left;
     color: var(--ink);
-    transition: background 0.15s ease;
+    transition: all 0.15s ease;
 }
 
-.account-row:hover {
-    background: rgba(var(--ink-rgb), 0.06);
+.account-switch-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.08);
 }
 
-.account-row-switch:disabled {
+.account-switch-item:disabled {
     opacity: 0.6;
     cursor: default;
 }
 
-.account-row-text {
+.account-switch-info {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    flex-grow: 1;
     gap: 1px;
 }
 
-.account-row-name {
-    font-size: 14px;
+.account-switch-name {
+    font-size: 13px;
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.account-row-sub {
-    font-size: 12px;
+.account-switch-sub {
+    font-size: 11px;
     color: rgba(var(--ink-rgb), 0.5);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.account-forget {
-    flex-shrink: 0;
-    width: 28px;
-    height: 28px;
-    margin-right: 6px;
-    border: none;
-    background: transparent;
-    border-radius: var(--radius-sm);
-    color: rgba(var(--ink-rgb), 0.4);
-    font-size: 18px;
-    line-height: 1;
-    cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
-}
-
-.account-forget:hover {
-    background: rgba(var(--ink-rgb), 0.08);
-    color: var(--ink);
-}
-
-.account-divider {
-    height: 1px;
-    margin: 6px 8px;
-    background: rgba(var(--ink-rgb), 0.10);
-}
-
-.account-section-title {
-    padding: 4px 8px;
+.account-switch-badge {
     font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    color: rgba(var(--ink-rgb), 0.45);
+    padding: 3px 8px;
+    border-radius: var(--radius-pill, 999px);
+    background: rgba(79, 169, 142, 0.12);
+    color: var(--accent, #4FA98E);
+    border: 1px solid rgba(79, 169, 142, 0.25);
+    flex-shrink: 0;
+    transition: all 0.15s ease;
 }
 
-.account-action {
-    display: block;
+.account-switch-item:hover .account-switch-badge {
+    background: var(--accent, #4FA98E);
+    color: #ffffff;
+}
+
+/* КНОПКА ВЫХОДА */
+.account-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     width: 100%;
-    padding: 9px 8px;
+    padding: 9px 10px;
     border: none;
     background: transparent;
-    border-radius: var(--radius-md);
-    text-align: left;
+    border-radius: var(--radius-md, 10px);
+    color: #EF4444;
     font-family: var(--font-body);
     font-size: 14px;
-    font-weight: 500;
-    color: var(--ink);
+    font-weight: 600;
     cursor: pointer;
+    text-align: left;
     transition: background 0.15s ease;
 }
 
-.account-action:hover {
-    background: rgba(var(--ink-rgb), 0.06);
+.account-logout-btn .account-item-icon {
+    background: rgba(239, 68, 68, 0.10);
+    color: #EF4444;
 }
 
-.account-action-danger {
-    color: #d1483f;
+.account-logout-btn:hover {
+    background: rgba(239, 68, 68, 0.12);
 }
 
-.account-action-danger:hover {
-    background: rgba(209, 72, 63, 0.10);
+.account-logout-btn:hover .account-item-icon {
+    background: #EF4444;
+    color: #ffffff;
 }
 
 @media (max-width: 720px) {
@@ -188,3 +363,4 @@
         max-width: 80px;
     }
 }
+

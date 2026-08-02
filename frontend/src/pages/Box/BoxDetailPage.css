@@ -1,343 +1,330 @@
-/* ──────────────────────────────────────────────────────────────────────────
-   Box detail page — тихая светлая сцена, 50/50 split. Вся «энергия» редкости
-   идёт от самой коробки (SVG-аура WireframeBox), а не от фонового свечения.
-   ────────────────────────────────────────────────────────────────────────── */
-
-.box-detail {
+.box-detail-page {
     width: 100%;
-    max-width: 1180px;
+    min-height: 100vh;
+    padding-bottom: 60px;
+}
+
+.box-detail-container {
+    max-width: 1100px;
     margin: 0 auto;
-    color: var(--ink);
-}
-
-/* ── Back link ── */
-.box-detail-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-family: var(--font-body);
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.2px;
-    color: rgba(var(--ink-rgb), 0.55);
-    text-decoration: none;
-    padding: 8px 14px 8px 12px;
-    margin-bottom: 28px;
-    border-radius: var(--radius-sm);
-    border: 1px solid rgba(var(--ink-rgb), 0.1);
-    background: rgba(var(--glass-rgb), 0.02);
-    transition: color 0.22s ease, border-color 0.22s ease,
-                transform 0.22s ease, background 0.22s ease;
-}
-
-.box-detail-back:hover {
-    color: var(--ink);
-    border-color: rgba(var(--ink-rgb), 0.24);
-    background: rgba(var(--glass-rgb), 0.04);
-    transform: translateX(-2px);
-}
-
-/* ── Split layout ── */
-.box-detail-split {
-    display: flex;
-    align-items: flex-start;
-    gap: 56px;
-}
-
-.box-detail-visual,
-.box-detail-info {
-    flex: 1 1 50%;
-    min-width: 0;
-}
-
-/* ── LEFT: sticky wireframe stage (тихая сцена без фонового свечения) ── */
-.box-detail-visual {
-    position: sticky;
-    top: 88px;
-}
-
-.box-detail-visual-inner {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 540px;
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(var(--ink-rgb), 0.1);
-    background: var(--surface);
-    box-shadow: var(--shadow-md);
-    overflow: hidden;
-}
-
-/* Фоновый ореол убран: редкость несёт сама коробка (SVG-аура WireframeBox).
-   Элемент оставлен скрытым, чтобы не трогать разметку. */
-.box-detail-aura {
-    display: none;
-}
-
-.box-detail-visual-inner svg {
-    position: relative;
-    z-index: 1;
-}
-
-/* ── RIGHT: vertical info stack ── */
-.box-detail-info {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 24px;
-    padding-top: 8px;
-}
-
-/* Rarity tag (shared visual language with the feed) */
-.box-detail-info .rarity-tag {
-    font-family: var(--font-body);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.7px;
-    text-transform: uppercase;
-    padding: 5px 12px;
-    border-radius: var(--radius-xs);
-    color: rgba(var(--ink-rgb), 0.6);
-    background: rgba(var(--ink-rgb), 0.07);
-    border: 1px solid rgba(var(--ink-rgb), 0.18);
-}
-
-.box-detail-info .rarity-tag-rare {
-    color: var(--tag-rare);
-    border-color: rgba(120, 170, 255, 0.35);
-    background: rgba(120, 170, 255, 0.07);
-}
-
-.box-detail-info .rarity-tag-golden {
-    color: var(--tag-golden);
-    border-color: rgba(230, 200, 120, 0.4);
-    background: rgba(230, 200, 120, 0.07);
-}
-
-.box-detail-info .rarity-tag-developers {
-    color: var(--tag-dev);
-    border-color: rgba(200, 130, 255, 0.4);
-    background: rgba(200, 130, 255, 0.07);
-}
-
-/* Title */
-.box-detail-title {
-    font-family: var(--font-body);
-    margin: 0;
-    font-size: clamp(34px, 4vw, 48px);
-    font-weight: 700;
-    line-height: 1.05;
-    letter-spacing: -1px;
-    color: var(--ink);
-}
-
-/* Price */
-.box-detail-price {
-    font-family: var(--font-body);
-    margin: 0;
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: -0.4px;
-    color: rgba(var(--ink-rgb), 0.92);
-}
-
-/* Divider */
-.box-detail-divider {
-    width: 100%;
-    height: 1px;
-    border: none;
-    margin: 0;
-    background: rgba(var(--ink-rgb), 0.08);
-}
-
-/* Description */
-.box-detail-description {
-    font-family: var(--font-body);
-    margin: 0;
-    font-size: 16px;
-    line-height: 1.65;
-    color: rgba(var(--ink-rgb), 0.62);
-}
-
-/* ── Metadata ── */
-.box-detail-meta {
-    width: 100%;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.box-detail-meta-row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
     gap: 20px;
 }
 
-.box-detail-meta-row dt {
-    font-family: var(--font-body);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: rgba(var(--ink-rgb), 0.38);
-}
-
-.box-detail-meta-row dd {
-    font-family: var(--font-body);
-    margin: 0;
-    font-size: 15px;
-    font-weight: 500;
-    text-align: right;
-    color: rgba(var(--ink-rgb), 0.85);
-}
-
-/* ── Content block (public) ── */
-.box-detail-content {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.box-detail-content-title {
-    font-family: var(--font-body);
-    margin: 0;
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: -0.3px;
-    color: var(--ink);
-}
-
-.box-detail-content-tiles {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-}
-
-.box-detail-tile {
-    aspect-ratio: 16 / 10;
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(var(--ink-rgb), 0.1);
-    background:
-        linear-gradient(
-            135deg,
-            rgba(var(--ink-rgb), 0.06) 0%,
-            rgba(var(--ink-rgb), 0.015) 100%
-        );
-    position: relative;
-    overflow: hidden;
-}
-
-.box-detail-tile::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-        circle at 30% 25%,
-        rgba(var(--ink-rgb), 0.07) 0%,
-        transparent 60%
-    );
-}
-
-.box-detail-content-lines {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.box-detail-line {
-    height: 12px;
-    border-radius: var(--radius-xs);
-    background: rgba(var(--ink-rgb), 0.07);
-}
-
-.box-detail-line.short {
-    width: 60%;
-}
-
-/* ── Locked state (private) ── */
-.box-detail-locked {
-    width: 100%;
-    display: flex;
+.box-detail-back-btn {
+    display: inline-flex;
     align-items: center;
-    gap: 14px;
-    padding: 22px 24px;
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(var(--ink-rgb), 0.1);
-    background: rgba(var(--glass-rgb), 0.02);
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: var(--radius-md, 6px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--ink-secondary, #9AA0A4);
+    font-family: var(--font-body, "Inter", sans-serif);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    width: fit-content;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-.box-detail-lock {
+.box-detail-back-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--ink, #F0F4F6);
+}
+
+.box-detail-layout {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 28px;
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .box-detail-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Left Column: Preview Card ── */
+.box-detail-preview-card {
+    position: relative;
+    background: var(--surface, #1A1F22);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-radius: var(--radius-lg, 12px);
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    min-height: 320px;
+    overflow: hidden;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+.preview-ambient-glow {
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+.preview-box-wrapper {
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 42px;
-    height: 42px;
-    flex-shrink: 0;
-    border-radius: var(--radius-md);
-    color: rgba(var(--ink-rgb), 0.6);
-    background: rgba(var(--ink-rgb), 0.05);
-    border: 1px solid rgba(var(--ink-rgb), 0.14);
 }
 
-.box-detail-locked-text {
-    font-family: var(--font-body);
+.preview-specs-chips {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 2;
+}
+
+.detail-spec-chip {
+    padding: 5px 12px;
+    border-radius: var(--radius-sm, 4px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--ink-secondary, #9AA0A4);
+    font-family: var(--font-body, "Inter", sans-serif);
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+/* ── Right Column: Content Card ── */
+.box-detail-content-card {
+    background: var(--surface, #1A1F22);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-radius: var(--radius-lg, 12px);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+.box-detail-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.detail-rarity-chip {
+    padding: 5px 12px;
+    border-radius: var(--radius-sm, 4px);
+    font-family: var(--font-body, "Inter", sans-serif);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.detail-rarity-chip.rarity-common {
+    background: rgba(154, 160, 164, 0.12);
+    color: #9AA0A4;
+    border: 1px solid rgba(154, 160, 164, 0.25);
+}
+
+.detail-rarity-chip.rarity-rare {
+    background: rgba(139, 184, 255, 0.12);
+    color: #8BB8FF;
+    border: 1px solid rgba(139, 184, 255, 0.3);
+}
+
+.detail-rarity-chip.rarity-golden {
+    background: rgba(232, 203, 130, 0.12);
+    color: #E8CB82;
+    border: 1px solid rgba(232, 203, 130, 0.3);
+}
+
+.detail-rarity-chip.rarity-developer\'s,
+.detail-rarity-chip.rarity-dev {
+    background: rgba(200, 130, 255, 0.12);
+    color: #C882FF;
+    border: 1px solid rgba(200, 130, 255, 0.3);
+}
+
+/* ── Main Title (Word Wrap Fix) ── */
+.box-detail-main-title {
+    font-family: var(--font-heading, "Manrope", sans-serif);
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--ink, #F0F4F6);
     margin: 0;
-    font-size: 15px;
-    font-weight: 500;
-    color: rgba(var(--ink-rgb), 0.6);
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
 }
 
-/* ── Responsive: stack below ~860px ── */
-@media (max-width: 860px) {
-    .box-detail-split {
+/* ── Creator Card ── */
+.box-detail-creator-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: var(--radius-md, 6px);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    width: fit-content;
+}
+
+.creator-meta {
+    display: flex;
+    flex-direction: column;
+}
+
+.creator-nickname {
+    font-family: var(--font-heading, "Manrope", sans-serif);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink, #F0F4F6);
+}
+
+.creator-username {
+    font-family: var(--font-body, "Inter", sans-serif);
+    font-size: 12px;
+    color: var(--ink-secondary, #9AA0A4);
+}
+
+/* ── Description ── */
+.box-detail-description-block p {
+    font-family: var(--font-body, "Inter", sans-serif);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink-secondary, #9AA0A4);
+    margin: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* ── Price & Action Card ── */
+.box-detail-action-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 20px;
+    border-radius: var(--radius-md, 8px);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 600px) {
+    .box-detail-action-card {
         flex-direction: column;
-        gap: 36px;
-    }
-
-    .box-detail-visual {
-        position: static;
-        top: auto;
-        width: 100%;
-    }
-
-    .box-detail-visual,
-    .box-detail-info {
-        flex: 1 1 auto;
-        width: 100%;
-    }
-
-    .box-detail-visual-inner {
-        min-height: 420px;
+        align-items: stretch;
     }
 }
 
-/* ── Кнопка получения коробки ─────────────────────────────────────── */
-.box-detail-acquire {
-    align-self: flex-start;
-    margin-top: 18px;
-    padding: 13px 30px;
-    background: var(--accent);
-    color: var(--accent-contrast);
-    border: 1px solid var(--accent);
-    border-radius: var(--radius-md);
-    font-family: var(--font-body);
+.box-detail-price-box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.price-label {
+    font-family: var(--font-body, "Inter", sans-serif);
+    font-size: 12px;
+    color: var(--ink-secondary, #9AA0A4);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.price-value {
+    font-family: var(--font-heading, "Manrope", sans-serif);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--ink, #F0F4F6);
+}
+
+.free-tag {
+    color: var(--accent, #4FA98E);
+}
+
+.coin-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.box-detail-acquire-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: var(--radius-md, 6px);
+    background: var(--accent, #4FA98E);
+    border: none;
+    color: #FFFFFF;
+    font-family: var(--font-body, "Inter", sans-serif);
     font-size: 14px;
     font-weight: 600;
-    letter-spacing: 0.4px;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: background 0.2s ease, opacity 0.2s ease;
 }
 
-.box-detail-acquire:hover:not(:disabled) {
-    background: var(--accent-hover);
-    border-color: var(--accent-hover);
+.box-detail-acquire-btn:hover {
+    background: #44967d;
 }
 
-.box-detail-acquire:disabled {
-    opacity: 0.45;
+.box-detail-acquire-btn:disabled {
+    opacity: 0.6;
     cursor: not-allowed;
+}
+
+/* ── Meta Grid ── */
+.box-detail-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.meta-item-label {
+    font-family: var(--font-body, "Inter", sans-serif);
+    font-size: 12px;
+    color: var(--ink-secondary, #9AA0A4);
+}
+
+.meta-item-val {
+    font-family: var(--font-body, "Inter", sans-serif);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink, #F0F4F6);
+}
+
+.box-detail-divider {
+    display: none;
+}
+
+/* ── Comments Section ── */
+.box-detail-comments-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.comments-heading {
+    font-family: var(--font-heading, "Manrope", sans-serif);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink, #F0F4F6);
+    margin: 0;
 }

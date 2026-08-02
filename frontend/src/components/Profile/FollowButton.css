@@ -13,6 +13,8 @@
     background: var(--accent);
     border: 1px solid var(--accent);
     color: var(--accent-contrast);
+    white-space: nowrap;
+    flex-shrink: 0;
     transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
 }
 

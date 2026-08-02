@@ -1,41 +1,41 @@
 /**
- * Тема оформления: светлая (чистый нейтральный, без крема) и тёмная —
- * переключаются атрибутом data-theme на <html>. Все компоненты читают цвет
- * только через эти переменные — не хардкодить hex/rgb в компонентах.
- *
- * Тон: спокойный, массовый, нейтральный (FB/Telegram). Единственный цвет —
- * фирменный петроль-зелёный (--accent) на действиях. Вся остальная энергия — на
- * коробках; интерфейс тихий: тесная шкала радиусов, лёгкие тени, без стекла/неона.
+ * Stellage Theme — Fusion of Apple (Liquid Glass, Spring Fluidity, Optical Type),
+ * Spotify (Deep Dark Canvas, Ambient Radial Glow, High Contrast), and Telegram (Pill Controls, Floating Chrome).
  */
 
-/* ── Тема-независимые токены (радиус, тень, отступы) ──────────────────────
-   Тени завязаны на --ink-rgb (переопределяется в тёмной теме), поэтому
-   var() подставляется лениво и тень сама адаптируется под тему. */
 :root {
-    /* Радиус — единая шкала (тише/строже, было 17 разных значений). */
-    --radius-xs: 2px;   /* чипы, теги, мелкие бейджи */
-    --radius-sm: 4px;   /* инпуты, кнопки, мелкие карточки */
-    --radius-md: 6px;   /* карточки, панели */
-    --radius-lg: 10px;  /* модалки, крупные поверхности */
-    --radius-pill: 999px; /* только истинные пилюли: тумблеры */
+    /* Geometry & Radius Scale */
+    --radius-xs: 3px;   /* badges, micro tags */
+    --radius-sm: 6px;   /* inputs, chips, small buttons, inner cards */
+    --radius-md: 8px;   /* box cards, standard containers */
+    --radius-lg: 10px;  /* floating panels, main cards */
+    --radius-xl: 14px;  /* modal sheets */
+    --radius-pill: 999px; /* true pill toggles ONLY */
 
-    /* Тени — лёгкая шкала на цвете чернил (не тёмный rgba(0,0,0,.5-.7)). */
-    --shadow-sm: 0 1px 2px rgba(var(--ink-rgb), 0.06);
-    --shadow-md: 0 4px 14px rgba(var(--ink-rgb), 0.08);
-    --shadow-lg: 0 14px 40px rgba(var(--ink-rgb), 0.12);
+    /* Shadows & Elevation */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.12);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.24);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.36);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.28);
 
-    /* Отступы — базовая шкала для консистентности. */
+    /* Spacing Scale */
     --space-1: 4px;
     --space-2: 8px;
     --space-3: 12px;
     --space-4: 16px;
     --space-5: 24px;
     --space-6: 32px;
+    --space-7: 48px;
 
-    /* Шрифтовые роли: Inter — рабочий текст/UI (масс-тон, Telegram/FB);
-       Manrope — сдержанный дисплей на именах/заголовках. */
+    /* Typography */
     --font-body: "Inter", system-ui, -apple-system, sans-serif;
     --font-display: "Manrope", "Inter", system-ui, sans-serif;
+
+    /* Ambient Rarity Color Glows (Spotify Visual Depth) */
+    --glow-common: rgba(142, 149, 158, 0.18);
+    --glow-rare: rgba(74, 130, 209, 0.25);
+    --glow-golden: rgba(197, 160, 89, 0.28);
+    --glow-dev: rgba(139, 98, 181, 0.28);
 }
 
 :root,
@@ -53,10 +53,10 @@
     --border-subtle: rgba(20, 24, 26, 0.08);
     --border-hover: rgba(20, 24, 26, 0.18);
 
-    /* Базовый rgb для «стеклянных» полупрозрачных заливок (glass tint). */
     --glass-rgb: 0, 0, 0;
-    /* Базовый rgb для полупрозрачной шапки/чипсов поверх контента. */
     --chrome-rgb: 255, 255, 255;
+    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass-border: rgba(20, 24, 26, 0.12);
 
     --box-common: #565C60;
     --box-rare: #2E5FB8;
@@ -72,13 +72,10 @@
     --tag-sealed: #6B7075;
     --verified: #3E9E58;
 
-    /* Фирменный акцент — зелёный. Единственный «цвет действия»
-       в тихом интерфейсе: первичные кнопки, выбранное/активное состояние, фокус. */
     --accent: #4FA98E;
     --accent-rgb: 79, 169, 142;
     --accent-hover: #3D9A7D;
     --accent-contrast: #F4F7F6;
-    /* Осветлённый вариант — для выделения/hover. */
     --accent-bright: #5FC2A6;
 
     --btn-primary-bg: var(--accent);
@@ -93,21 +90,23 @@
     --ink: #FFFFFF;
     --ink-rgb: 255, 255, 255;
     
-    --ink-secondary: #8E8E93;
+    --ink-secondary: #9B9E9E;
     --ink-tertiary: rgba(255, 255, 255, 0.45);
 
-    --ground: #0A0C0F;
-    --background-image: none; /* flat dark background #0A0C0F handled by --ground */
-    --surface: #14171D;
-    --surface-hover: #1C2028;
-    --surface-elevated: #222630;
-    --border-subtle: transparent;
-    --border-hover: rgba(255, 255, 255, 0.12);
+    --ground: #0B0D11;
+    --background-image: none;
+    --surface: #14171E;
+    --surface-hover: #1E222B;
+    --surface-elevated: #252A36;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.16);
 
     --glass-rgb: 255, 255, 255;
-    --chrome-rgb: 20, 23, 29;
+    --chrome-rgb: 14, 17, 22;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.12);
 
-    /* Muted Metallic Color Palette */
+    /* Metallic Rarity Colors */
     --box-common: #8E959E;
     --box-rare: #4A82D1;
     --box-golden: #C5A059;
@@ -122,13 +121,12 @@
     --tag-sealed: #8E959E;
     --verified: #4FA98E;
 
-    /* Soft tint badge backgrounds */
     --badge-common-bg: rgba(255, 255, 255, 0.08);
-    --badge-rare-bg: rgba(74, 130, 209, 0.15);
-    --badge-golden-bg: rgba(197, 160, 89, 0.15);
-    --badge-dev-bg: rgba(139, 98, 181, 0.15);
+    --badge-rare-bg: rgba(74, 130, 209, 0.18);
+    --badge-golden-bg: rgba(197, 160, 89, 0.18);
+    --badge-dev-bg: rgba(139, 98, 181, 0.18);
 
-    /* Фирменный акцент — Stellage Teal (#4FA98E) */
+    /* Accent — Stellage Teal (#4FA98E) */
     --accent: #4FA98E;
     --accent-rgb: 79, 169, 142;
     --accent-hover: #43937B;
@@ -143,32 +141,32 @@
     --error-bg-rgb: 255, 80, 80;
 }
 
-/* ── Apple & Spotify Glass & Component Utilities ── */
+/* ── Apple & Spotify Liquid Glass & Interactive Utilities ── */
 .glass-panel {
-    background: rgba(var(--chrome-rgb), 0.78);
+    background: rgba(var(--chrome-rgb), 0.72);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid var(--border-subtle);
-    box-shadow: 0 8px 32px rgba(var(--glass-rgb), 0.12);
+    border: 1px solid var(--glass-border);
+    box-shadow: 
+        var(--shadow-glass),
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-lg);
 }
 
 .glass-header {
-    background: rgba(var(--chrome-rgb), 0.82) !important;
+    background: rgba(var(--chrome-rgb), 0.76) !important;
     backdrop-filter: blur(24px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
     border-bottom: 1px solid var(--border-subtle) !important;
 }
 
-/* Instant press feedback for Apple-style fluid response */
-button:active, .btn:active, a.btn:active {
+/* Apple Fluidity Instant Press Feedback */
+button:active, .btn:active, a.btn:active, .interactive-card:active {
     transform: scale(0.97);
     transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ── Accessibility: reduced motion ──
-   Honour system preference by disabling decorative transitions
-   and animations globally. Functional transforms (e.g. modal
-   positioning) are kept static. */
+/* Accessibility: reduced motion */
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -179,3 +177,4 @@ button:active, .btn:active, a.btn:active {
         scroll-behavior: auto !important;
     }
 }
+

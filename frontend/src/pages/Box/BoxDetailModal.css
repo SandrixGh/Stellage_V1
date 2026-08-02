@@ -102,11 +102,10 @@
 .box-modal-title {
     margin: 0;
     font-family: var(--font-display);
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
+    letter-spacing: -0.01em;
     color: var(--ink);
-    /* Длинное имя без пробелов переносим внутри доступной ширины, а не
-       выпихиваем бирку редкости на отдельную строку с пустотой рядом. */
     flex: 1 1 auto;
     min-width: 0;
     word-break: break-word;
@@ -115,17 +114,15 @@
 
 .box-modal-rarity {
     flex: 0 0 auto;
-    /* Прижимаем к верхней строке заголовка, а не к его вертикальному центру. */
-    margin-top: 5px;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    padding: 3px 9px;
-    border-radius: var(--radius-xs);
-    color: rgba(var(--ink-rgb), 0.6);
-    background: rgba(var(--ink-rgb), 0.07);
-    border: 1px solid rgba(var(--ink-rgb), 0.18);
+    margin-top: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: capitalize;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    color: var(--ink-secondary);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .box-modal-desc {

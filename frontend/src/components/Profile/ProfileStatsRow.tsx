@@ -31,8 +31,6 @@ export const ProfileStatsRow = ({
         onClick?: () => void;
     }[] = [
         { value: stats.boxes, label: plural(stats.boxes, "коробка", "коробки", "коробок") },
-        // Понятнее, чем «на витрине»: сколько коробок видно другим.
-        { value: stats.public_boxes, label: "публичных" },
         { value: stats.shelves, label: plural(stats.shelves, "стеллаж", "стеллажа", "стеллажей") },
     ];
 
