@@ -25,7 +25,7 @@ def upgrade() -> None:
     op.execute("ALTER TYPE boxrarity ADD VALUE IF NOT EXISTS 'common';")
     op.execute("ALTER TYPE boxrarity ADD VALUE IF NOT EXISTS 'rare';")
     op.execute("ALTER TYPE boxrarity ADD VALUE IF NOT EXISTS 'golden';")
-    op.execute("ALTER TYPE boxrarity ADD VALUE IF NOT EXISTS 'developer\'s';")
+    op.execute("ALTER TYPE boxrarity ADD VALUE IF NOT EXISTS 'developer''s';")
 
 
 def downgrade() -> None:
