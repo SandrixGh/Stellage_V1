@@ -54,9 +54,7 @@ img {
   backdrop-filter: blur(24px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
   border: 1px solid var(--border-subtle) !important;
-  box-shadow: 
-    var(--shadow-glass),
-    var(--glass-specular, inset 0 1px 1px 0 rgba(255, 255, 255, 0.85)) !important;
+  box-shadow: var(--shadow-glass), var(--glass-specular) !important;
   border-radius: var(--radius-lg);
 }
 
@@ -66,7 +64,7 @@ img {
   backdrop-filter: blur(32px) saturate(200%) !important;
   -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
   border: 1px solid var(--border-subtle) !important;
-  box-shadow: var(--shadow-lg), var(--glass-specular, inset 0 1px 1px 0 rgba(255, 255, 255, 0.85)) !important;
+  box-shadow: var(--shadow-lg), var(--glass-specular) !important;
   border-radius: var(--radius-xl) !important;
 }
 

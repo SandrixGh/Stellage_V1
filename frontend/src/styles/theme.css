@@ -154,9 +154,11 @@
     --accent-contrast: #07120E;
     --accent-bright: #5FC2A6;
 
-    --btn-primary-bg: var(--accent);
-    --btn-primary-text: var(--accent-contrast);
-    --btn-primary-bg-hover: var(--accent-hover);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.24);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.36);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.48);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    --glass-specular: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 
     --error-text: #ff8888;
     --error-bg-rgb: 255, 80, 80;
