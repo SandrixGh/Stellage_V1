@@ -61,6 +61,8 @@ Stellage is a digital content trading & collection platform based on **Boxes** a
   * Accent: `--accent #4FA98E` (used **ONLY** for primary call-to-actions).
   * Typography: `Inter` for body/UI, `Manrope` for headings and user names.
   * **Strict Visual Ban:** NO glassmorphism, NO neon, NO bright glows or decorative orbs. Semi-transparency with blur is allowed **ONLY** on the sticky header and floating panels.
+  * **Strict Divider Rule (No Line Abuse):** NEVER abuse horizontal divider lines (`border-bottom`, stacked `<hr>`). Dividers should be omitted or kept strictly to a single subtle separator (`rgba(255, 255, 255, 0.06)`). Rely on soft spatial padding and subtle background color differences instead of sharp border lines everywhere.
+  * **Strict SVG Icon Rule:** All SVG icons MUST be aligned inline with text (`display: inline-flex; align-items: center; gap: 6px; vertical-align: middle;`). Icons must never float or sit misaligned relative to text baselines.
   * **Shelf Render Rule:** Render wireframe box geometry directly on shelf grid lines with a tag (`NAME · RARITY`). Avoid heavy card containers.
 
 ---

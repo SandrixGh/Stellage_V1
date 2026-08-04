@@ -1,0 +1,164 @@
+from __future__ import annotations
+
+import uuid
+from typing import TYPE_CHECKING
+
+from sqlalchemy import JSON, Boolean, CheckConstraint, ForeignKey, Index, Integer, UniqueConstraint, text
+from sqlalchemy.dialects.postgresql import ENUM as PostgresEnum
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from stellage.database.enums.box_sealing import SealingEnum
+from stellage.database.enums.verification import VerifyEnum
+from stellage.database.enums.visibility import VisibilityEnum
+from stellage.database.mixins.id_mixins import IDMixin
+from stellage.database.mixins.timestamp_mixins import TimestampMixin
+from stellage.database.models import Base
+
+if TYPE_CHECKING:
+    from .box_asset import BoxAsset
+    from .box_template import BoxTemplate
+    from .shelf import Shelf
+    from .user import User
+
+class BoxInstance(IDMixin, TimestampMixin, Base):
+    __tablename__ = "box_instances"
+
+    serial_number: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+
+    template_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(
+            "box_templates.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+    )
+
+    shelf_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(
+            "shelves.id",
+            ondelete="SET NULL"
+        ),
+        nullable=True,
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(
+            "users.id",
+            ondelete="CASCADE"
+        )
+    )
+
+    gifted_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey(
+            "users.id",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
+    )
+
+    is_gift_public: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        server_default=text("true"),
+    )
+
+    is_sealed: Mapped[SealingEnum] = mapped_column(
+        PostgresEnum(
+            SealingEnum,
+            name="sealingenum",
+            create_type=False
+        ),
+        default=SealingEnum.SEALED,
+    )
+
+    # Приватная по умолчанию. Дефолт продублирован на стороне БД: default=
+    # применяется SQLAlchemy на клиенте, поэтому INSERT в обход ORM (скрипт,
+    # миграция, будущая админка) его не увидит. Расхождение здесь означало бы
+    # публикацию чужого контента, поэтому значение задано в обоих местах и
+    # совпадает с дефолтом схемы BoxInstanceBase.
+    is_public: Mapped[VisibilityEnum] = mapped_column(
+        PostgresEnum(
+            VisibilityEnum,
+            name="visibilityenum",
+            create_type=False
+        ),
+        default=VisibilityEnum.PRIVATE,
+        server_default=text("'PRIVATE'"),
+    )
+
+    is_verified: Mapped[VerifyEnum] = mapped_column(
+        PostgresEnum(
+            VerifyEnum,
+            name="verifyenum",
+            create_type=False
+        ),
+        default=VerifyEnum.NOT_VERIFIED,
+    )
+
+    content: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+    shelf_row: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    shelf_col: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    template: Mapped[BoxTemplate] = relationship(
+        "BoxTemplate",
+        back_populates="instances"
+    )
+
+    shelf: Mapped[Shelf | None] = relationship(
+        "Shelf",
+        back_populates="boxes"
+    )
+
+    owner: Mapped[User] = relationship(
+        "User",
+        foreign_keys=[user_id],
+        back_populates="boxes",
+    )
+
+    gifted_by: Mapped[User | None] = relationship(
+        "User",
+        foreign_keys=[gifted_by_id],
+    )
+
+    # Без cascade delete-orphan: удаление ассетов всегда явное (через статус
+    # DELETING + Celery), чтобы не потерять запись о ключе объекта в S3.
+    assets: Mapped[list[BoxAsset]] = relationship(
+        "BoxAsset",
+        back_populates="instance",
+    )
+
+    __table_args__ = (
+        CheckConstraint('serial_number > 0', name='check_serial_number_positive'),
+        Index(
+            'uq_box_instances_shelf_position',
+            'shelf_id',
+            'shelf_row',
+            'shelf_col',
+            unique=True,
+            postgresql_where=text("shelf_id IS NOT NULL"),
+        ),
+        # Серийный номер уникален в пределах шаблона: защищает от гонки
+        # coalesce(max)+1 при параллельном создании экземпляров одного шаблона.
+        UniqueConstraint(
+            'template_id',
+            'serial_number',
+            name='uq_box_instances_template_serial',
+        ),
+        # Индексы на FK: частые фильтры WHERE user_id / template_id / shelf_id
+        # (инвентарь, каталог шаблона, счётчики профиля) — Postgres не создаёт
+        # индексы на внешние ключи автоматически.
+        Index('ix_box_instances_user_id', 'user_id'),
+        Index('ix_box_instances_template_id', 'template_id'),
+        Index('ix_box_instances_shelf_id', 'shelf_id'),
+    )
