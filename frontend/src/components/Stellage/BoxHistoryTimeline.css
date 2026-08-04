@@ -1,0 +1,142 @@
+.box-history-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px 0;
+}
+
+.box-history-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.box-history-title {
+    font-family: var(--font-display, "Manrope", sans-serif);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink, #FFFFFF);
+}
+
+.box-history-subtitle {
+    font-size: 13px;
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.box-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.box-history-item {
+    display: flex;
+    gap: 16px;
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.box-history-item:last-child {
+    padding-bottom: 0;
+}
+
+.box-history-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    width: 34px;
+    flex-shrink: 0;
+}
+
+.box-history-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--chrome-rgb, 18, 22, 30), 0.9);
+    border: 1px solid rgba(var(--ink-rgb, 255, 255, 255), 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+    color: var(--ink, #FFFFFF);
+    flex-shrink: 0;
+}
+
+.box-history-icon.created {
+    background: rgba(79, 169, 142, 0.18);
+    border-color: rgba(79, 169, 142, 0.35);
+    color: var(--accent, #4FA98E);
+}
+
+.box-history-icon.unsealed {
+    background: rgba(245, 158, 11, 0.18);
+    border-color: rgba(245, 158, 11, 0.35);
+    color: #f59e0b;
+}
+
+.box-history-icon.purchased {
+    background: rgba(139, 92, 246, 0.18);
+    border-color: rgba(139, 92, 246, 0.35);
+    color: #8b5cf6;
+}
+
+.box-history-line {
+    position: absolute;
+    top: 34px;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    background: rgba(var(--ink-rgb, 255, 255, 255), 0.18);
+    z-index: 1;
+}
+
+.box-history-item:last-child .box-history-line {
+    display: none;
+}
+
+.box-history-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: rgba(var(--surface-rgb, 20, 23, 30), 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(var(--ink-rgb, 255, 255, 255), 0.08);
+    border-radius: var(--radius-md, 10px);
+    padding: 12px 16px;
+}
+
+.box-history-event-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.box-history-event-head .event-type {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink, #FFFFFF);
+}
+
+.box-history-event-head .event-date {
+    font-size: 11px;
+    color: var(--ink-tertiary, rgba(255, 255, 255, 0.45));
+}
+
+.box-history-actor {
+    font-size: 12px;
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.box-history-details {
+    font-size: 12px;
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.75));
+    background: rgba(var(--ink-rgb, 255, 255, 255), 0.04);
+    border: 1px solid rgba(var(--ink-rgb, 255, 255, 255), 0.06);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 2px;
+}
