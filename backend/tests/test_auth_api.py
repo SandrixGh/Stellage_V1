@@ -32,7 +32,7 @@ def test_register_success(client, test_user_return):
 
     resp = client.post(
         "/api.v1/auth/register",
-        json={"email": "new@example.com", "password": "strongpass1"},
+        json={"email": "new@example.com", "password": "strongpass1", "invite_code": "STELLAGE-TEST-1234"},
     )
     assert resp.status_code == 201
     assert resp.json()["email"] == "test@example.com"
@@ -42,7 +42,7 @@ def test_register_success(client, test_user_return):
 def test_register_password_too_short_returns_422(client):
     resp = client.post(
         "/api.v1/auth/register",
-        json={"email": "user@example.com", "password": "short"},
+        json={"email": "user@example.com", "password": "short", "invite_code": "STELLAGE-TEST-1234"},
     )
     assert resp.status_code == 422
 
@@ -50,7 +50,7 @@ def test_register_password_too_short_returns_422(client):
 def test_register_invalid_email_returns_422(client):
     resp = client.post(
         "/api.v1/auth/register",
-        json={"email": "not-an-email", "password": "validpass1"},
+        json={"email": "not-an-email", "password": "validpass1", "invite_code": "STELLAGE-TEST-1234"},
     )
     assert resp.status_code == 422
 
@@ -64,7 +64,7 @@ def test_register_duplicate_email_returns_400(client):
 
     resp = client.post(
         "/api.v1/auth/register",
-        json={"email": "dup@example.com", "password": "strongpass1"},
+        json={"email": "dup@example.com", "password": "strongpass1", "invite_code": "STELLAGE-TEST-1234"},
     )
     assert resp.status_code == 400
     assert "already exists" in resp.json()["detail"]

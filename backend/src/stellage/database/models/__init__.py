@@ -11,6 +11,7 @@ __all__ = (
     "Notification",
     "Message",
     "CoinGift",
+    "InviteCode",
 )
 
 from .base import Base
@@ -21,6 +22,7 @@ from .box_like import BoxLike
 from .box_template import BoxTemplate
 from .coin_gift import CoinGift
 from .follow import Follow
+from .invite import InviteCode
 from .message import Message
 from .notification import Notification
 from .shelf import Shelf

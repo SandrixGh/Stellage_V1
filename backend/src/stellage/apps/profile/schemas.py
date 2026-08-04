@@ -50,6 +50,7 @@ class UpdateProfileRequest(BaseModel):
         )
     ] = None
     banner_pos_y: int | None = None
+    study_mode_enabled: bool | None = None
 
 
 class AvatarInitiateRequest(BaseModel):
@@ -115,6 +116,7 @@ class PublicUser(BaseModel):
     banner_pos_y: int = 50
     last_seen_at: datetime.datetime | None = None
     is_developer: bool = False
+    study_mode_enabled: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -12,9 +12,12 @@ from stellage.apps.auth.schemas import (
     CreateUser,
     DeviceAccount,
     DeviceAccountView,
+    LoginUserSchema,
     UserReturnData,
     UserVerifySchema,
 )
+from stellage.apps.invites.repositories import InviteRepository
+from stellage.apps.invites.services import InviteService
 from stellage.apps.profile.avatar import AvatarManager
 from stellage.apps.profile.managers import ProfileManager
 from stellage.core.settings import settings
@@ -38,16 +41,33 @@ class UserService:
         self.serializer = URLSafeTimedSerializer(secret_key=settings.secret_key.get_secret_value())
 
     async def register_user(self, user: AuthUser) -> UserReturnData:
+        inv_repo = InviteRepository(self.manager.db)
+        invite = await inv_repo.get_by_code(user.invite_code)
+        if not invite or not invite.is_active or invite.uses_count >= invite.max_uses:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Недействительный или уже использованный инвайт-код",
+            )
+
         hashed_password = await self.handler.get_hashed_password(user.password)
 
         new_user = CreateUser(
             email=user.email,
             hashed_password=hashed_password,
             username=user.username,
+            invited_by_id=invite.creator_id,
         )
 
         user_data = await self.manager.create_user(new_user)
-        logger.info("User registered: %s", user_data.email)
+
+        # Отмечаем инвайт-код как использованный данным пользователем
+        await inv_repo.use_invite(invite.id, user_data.id)
+
+        # Выдаем новому пользователю 3 инвайт-кода для приглашения друзей
+        inv_service = InviteService(inv_repo)
+        await inv_service.create_user_default_invites(user_data.id, count=3)
+
+        logger.info("User registered via invite code %s: %s", user.invite_code, user_data.email)
 
         confirmation_token = self.serializer.dumps(user_data.email)
         try:
@@ -190,7 +210,7 @@ class UserService:
 
     async def login_user(
         self,
-        user: AuthUser,
+        user: LoginUserSchema,
         device_cookie: str | None = None,
     ) -> JSONResponse:
         exist_user = await self.manager.get_user_by_email(email=str(user.email))

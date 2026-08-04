@@ -19,16 +19,24 @@ class VerificationStatus(BaseModel):
     is_verified: bool = False
 
 
-class AuthUser(GetUserByEmail):
+class LoginUserSchema(GetUserByEmail):
     password: Annotated[str, StringConstraints(
         min_length=8,
         max_length=128,
     )]
+
+
+class AuthUser(LoginUserSchema):
     username: Annotated[str | None, StringConstraints(
         min_length=3,
         max_length=30,
         strip_whitespace=True,
     )] = None
+    invite_code: Annotated[str, StringConstraints(
+        min_length=4,
+        max_length=32,
+        strip_whitespace=True,
+    )]
 
 
 class ChangePasswordSchema(BaseModel):
@@ -42,6 +50,7 @@ class ChangePasswordSchema(BaseModel):
 class CreateUser(GetUserByEmail):
     hashed_password: str
     username: str | None = None
+    invited_by_id: uuid.UUID | None = None
 
 
 class UserReturnData(GetUserByID, GetUserByEmail, VerificationStatus):

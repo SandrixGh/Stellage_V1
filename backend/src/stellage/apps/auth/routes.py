@@ -8,6 +8,7 @@ from stellage.apps.auth.schemas import (
     AuthUser,
     ChangePasswordSchema,
     DeviceAccountView,
+    LoginUserSchema,
     UserReturnData,
     UserVerifySchema,
 )
@@ -60,7 +61,7 @@ async def confirm_registration(
     dependencies=[Depends(rate_limit(max_calls=5, window_seconds=60))],
 )
 async def login_user(
-    user: AuthUser,
+    user: LoginUserSchema,
     request: Request,
     service: Annotated[
         UserService,
