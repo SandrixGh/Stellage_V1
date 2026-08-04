@@ -48,9 +48,14 @@ class BoxTemplateRepository:
         async with self.db.db_session() as session:
             # creator_id проставляется сервером, а не из тела запроса — защита
             # от подделки авторства/выдачи шаблона за платформенный.
+            dump = data.model_dump()
+            if dump.get("rarity") is not None:
+                dump["rarity"] = BoxRarity(dump["rarity"]).name
+            if dump.get("currency") is not None:
+                dump["currency"] = CurrencyEnum(dump["currency"]).value
             query = (
                 insert(self.template_model)
-                .values(**data.model_dump(), creator_id=creator_id)
+                .values(**dump, creator_id=creator_id)
                 .returning(self.template_model)
             )
             try:

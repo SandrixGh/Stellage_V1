@@ -104,6 +104,10 @@ class BoxInstanceRepository:
 
             base_data = data.model_dump()
             base_data["user_id"] = user_id
+            if base_data.get("is_public") is not None:
+                base_data["is_public"] = VisibilityEnum(base_data["is_public"]).name
+            if base_data.get("is_sealed") is not None:
+                base_data["is_sealed"] = SealingEnum(base_data["is_sealed"]).name
 
             # serial = max(serial)+1 в пределах шаблона. При параллельном
             # создании два запроса могут получить одинаковый serial — теперь это
