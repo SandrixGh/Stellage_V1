@@ -7,12 +7,20 @@ from stellage.core.settings import settings
 # зависимость на КАЖДЫЙ запрос (Depends(DBDependency)) — это плодило новый
 # engine и пул на каждый запрос без dispose, быстро исчерпывая соединения БД.
 # Теперь конструктор зависимости дешёвый и лишь ссылается на общий пул.
+_connect_args = {}
+if "pooler" in settings.db_settings.db_host or "neon.tech" in settings.db_settings.db_host:
+    _connect_args = {
+        "statement_cache_size": 0,
+        "prepared_statement_cache_size": 0,
+    }
+
 _engine = create_async_engine(
     url=settings.db_settings.db_url,
     echo=settings.db_settings.db_echo,
     pool_size=10,
     max_overflow=20,
     pool_pre_ping=True,
+    connect_args=_connect_args,
 )
 
 _session_factory = async_sessionmaker(
