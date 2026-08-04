@@ -25,6 +25,32 @@ from stellage.database.enums.currency import CurrencyEnum
 from stellage.database.models import BoxAsset, BoxInstance, BoxTemplate
 
 
+def _to_rarity_value(val: object) -> str:
+    if isinstance(val, BoxRarity):
+        return val.value
+    if isinstance(val, str):
+        if val in BoxRarity.__members__:
+            return BoxRarity[val].value
+        try:
+            return BoxRarity(val).value
+        except ValueError:
+            pass
+    return str(val)
+
+
+def _to_currency_value(val: object) -> str:
+    if isinstance(val, CurrencyEnum):
+        return val.value
+    if isinstance(val, str):
+        if val in CurrencyEnum.__members__:
+            return CurrencyEnum[val].value
+        try:
+            return CurrencyEnum(val).value
+        except ValueError:
+            pass
+    return str(val)
+
+
 class BoxTemplateRepository:
     def __init__(
         self,
@@ -52,9 +78,9 @@ class BoxTemplateRepository:
             # от подделки авторства/выдачи шаблона за платформенный.
             dump = data.model_dump()
             if dump.get("rarity") is not None:
-                dump["rarity"] = BoxRarity(dump["rarity"]).value
+                dump["rarity"] = _to_rarity_value(dump["rarity"])
             if dump.get("currency") is not None:
-                dump["currency"] = CurrencyEnum(dump["currency"]).value
+                dump["currency"] = _to_currency_value(dump["currency"])
             query = (
                 insert(self.template_model)
                 .values(**dump, creator_id=creator_id)
@@ -87,6 +113,10 @@ class BoxTemplateRepository:
         """Обновляет поля шаблона. Менять можно только СВОЙ шаблон (creator_id):
         каталожные/чужие шаблоны редактировать нельзя (404 — как будто не найден)."""
         values = data.model_dump(exclude_none=True)
+        if values.get("rarity") is not None:
+            values["rarity"] = _to_rarity_value(values["rarity"])
+        if values.get("currency") is not None:
+            values["currency"] = _to_currency_value(values["currency"])
 
         async with self.db.db_session() as session:
             if values:
