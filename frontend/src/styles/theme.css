@@ -31,6 +31,11 @@
     --font-body: "Inter", system-ui, -apple-system, sans-serif;
     --font-display: "Manrope", "Inter", system-ui, sans-serif;
 
+    /* Mobile Layout Dimensions */
+    --mobile-padding: 16px;
+    --mobile-header-height: 56px;
+    --mobile-tab-bar-height: 56px;
+
     /* Ambient Rarity Color Glows (Spotify Visual Depth) */
     --glow-common: rgba(142, 149, 158, 0.18);
     --glow-rare: rgba(74, 130, 209, 0.25);

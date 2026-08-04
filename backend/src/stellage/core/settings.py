@@ -19,13 +19,16 @@ class DbSettings(BaseAppSettings):
     db_user: str
     db_password: SecretStr
     db_host: str
-    db_port: int
-    db_echo: bool
+    db_port: int = 5432
+    db_echo: bool = False
+    db_ssl: bool = False
 
     @property
-    def db_url(self):
-        return \
-            f"postgresql+asyncpg://{self.db_user}:{self.db_password.get_secret_value()}@{self.db_host}:{self.db_port}/{self.db_name}"
+    def db_url(self) -> str:
+        base = f"postgresql+asyncpg://{self.db_user}:{self.db_password.get_secret_value()}@{self.db_host}:{self.db_port}/{self.db_name}"
+        if self.db_ssl or "neon.tech" in self.db_host:
+            return f"{base}?ssl=require"
+        return base
 
 
 class EmailSettings(BaseAppSettings):
@@ -38,13 +41,15 @@ class EmailSettings(BaseAppSettings):
 class RedisSettings(BaseAppSettings):
     redis_host: str
     redis_port: int
-    redis_db: int
+    redis_db: int = 0
+    redis_password: SecretStr | None = None
 
     @property
-    def redis_url(self):
-        return (
-            f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
-        )
+    def redis_url(self) -> str:
+        if self.redis_password and self.redis_password.get_secret_value():
+            pwd = self.redis_password.get_secret_value()
+            return f"rediss://default:{pwd}@{self.redis_host}:{self.redis_port}/{self.redis_db}"
+        return f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
 
 
 class S3Settings(BaseAppSettings):

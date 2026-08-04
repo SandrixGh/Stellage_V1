@@ -140,3 +140,10 @@
     opacity: 0.5;
 }
 
+@media (max-width: 480px) {
+    .box-card { padding: 12px; }
+    .box-title { font-size: 13.5px; min-height: 38px; max-height: 38px; }
+    .box-card-visual { padding: 16px 8px 12px; min-height: 110px; }
+}
+
+

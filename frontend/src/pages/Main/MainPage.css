@@ -444,3 +444,15 @@
     margin: 0;
     flex-wrap: wrap;
 }
+
+@media (max-width: 480px) {
+    .stellage-gate { gap: 24px; padding: 20px 0; }
+    .stellage-gate-title { font-size: 28px; }
+    .stellage-gate-sub { font-size: 14px; }
+    .stellage-gate-visual svg { width: 140px; height: auto; }
+    .boxes-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+    .shelf-info { flex-direction: column; gap: 10px; }
+    .shelf-modal { padding: 24px 20px; }
+    .shelf-rail { position: static; width: 100%; box-sizing: border-box; }
+}
+

@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { Header } from "./Header/Header";
+import { MobileTabBar } from "./MobileTabBar";
 import "./AppLayout.css";
 
 export const AppLayout = () => {
@@ -10,6 +11,9 @@ export const AppLayout = () => {
             <main className="app-content">
                 <Outlet />
             </main>
+
+            <MobileTabBar />
         </div>
     );
 };
+

@@ -357,3 +357,12 @@
     font-weight: 600;
     text-decoration: none;
 }
+
+@media (max-width: 480px) {
+    .create-box-page { padding: 16px 12px 64px; }
+    .create-box-title { font-size: 22px; }
+    .create-box-form { padding: 20px 16px; }
+    .create-box-preview-side { position: static; }
+    .create-box-row { grid-template-columns: 1fr; }
+}
+

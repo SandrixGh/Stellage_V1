@@ -290,3 +290,12 @@
     padding: 24px;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
 }
+
+@media (max-width: 480px) {
+    .box-detail-page { padding: 16px 12px 48px; }
+    .box-detail-main-title { font-size: 22px; }
+    .box-detail-nav-tabs { overflow-x: auto; flex-wrap: nowrap; }
+    .box-detail-nav-tab { flex: 0 0 auto; }
+    .box-detail-tab-content { padding: 16px; }
+}
+

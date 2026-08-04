@@ -545,3 +545,12 @@
     font-size: 15px;
     color: rgba(var(--ink-rgb, 20, 24, 26), 0.6);
 }
+
+@media (max-width: 480px) {
+    .box-instance-page { padding: 16px 12px 48px; }
+    .box-instance-title { font-size: 22px; }
+    .box-instance-tabs { overflow-x: auto; flex-wrap: nowrap; }
+    .box-instance-tab { flex: 0 0 auto; }
+    .box-instance-pane { padding: 16px; }
+}
+

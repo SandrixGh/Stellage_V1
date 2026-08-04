@@ -191,3 +191,10 @@
     opacity: 0.9;
     transform: scale(0.98);
 }
+
+@media (max-width: 480px) {
+    .template-card { padding: 12px; }
+    .template-card-title { font-size: 13.5px; }
+    .template-card-visual { min-height: 110px; }
+}
+

@@ -2,6 +2,8 @@
 .shelf-board {
     position: relative;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     height: 100%;
     border-radius: var(--radius-xl);
     background: rgba(14, 17, 23, 0.4);
@@ -10,6 +12,7 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
     overflow: visible;
     touch-action: none;
+    box-sizing: border-box;
 }
 
 /* Horizontal shelf line with Apple light catch */
@@ -33,7 +36,7 @@
 .shelf-cell {
     position: absolute;
     box-sizing: border-box;
-    padding: 0 10px;
+    padding: 0 4px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -87,14 +90,14 @@
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
-    margin-top: 6px;
+    margin-top: 4px;
     z-index: 5;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
-    padding: 3px 8px;
-    background: rgba(14, 17, 23, 0.85);
+    gap: 1px;
+    padding: 3px 6px;
+    background: rgba(14, 17, 23, 0.88);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--radius-sm);
@@ -102,22 +105,26 @@
     pointer-events: none;
     white-space: nowrap;
     box-sizing: border-box;
-    width: max-content;
-    max-width: calc(100% - 4px);
-    transition: background 0.2s ease, border-color 0.2s ease;
+    max-width: calc(100% + 8px);
+    overflow: hidden;
+    transition: background 0.2s ease, border-color 0.2s ease, z-index 0.2s ease, transform 0.2s ease;
 }
 
 .shelf-cell-inner:hover .shelf-box-label {
-    background: rgba(14, 17, 23, 0.95);
-    border-color: rgba(255, 255, 255, 0.25);
+    z-index: 25;
+    background: rgba(14, 17, 23, 0.96);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+    max-width: fit-content;
 }
 
 .shelf-box-name {
     font-family: var(--font-display);
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--ink);
     display: block;
+    width: 100%;
     max-width: 100%;
     text-align: center;
     white-space: nowrap;
@@ -129,15 +136,22 @@
 .shelf-box-tags {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .shelf-box-rarity {
     font-family: var(--font-body);
-    font-size: 9.5px;
+    font-size: 9px;
     font-weight: 600;
     letter-spacing: 0.3px;
     text-transform: uppercase;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 76px;
 }
 
 .shelf-box-label[data-rarity="rare"] .shelf-box-rarity { color: var(--tag-rare); }
@@ -201,7 +215,7 @@
     border: 1px dashed rgba(255, 255, 255, 0.18);
 }
 
-/* Static Cell Status Indicators (Fixed to Shelf Grid Matrix) */
+/* Static Cell Status Indicators */
 .shelf-static-cell[data-cell-status="urgent"] {
     border-left: 3px solid #E54D4D !important;
     background: linear-gradient(90deg, rgba(229, 77, 77, 0.12) 0%, transparent 60%);
@@ -218,5 +232,31 @@
     border-left: 3px solid var(--accent, #4FA98E) !important;
     background: linear-gradient(90deg, rgba(79, 169, 142, 0.12) 0%, transparent 60%);
 }
+
+@media (max-width: 600px) {
+    .shelf-cell {
+        padding: 0 2px;
+    }
+    .shelf-box-label {
+        padding: 2px 4px;
+        margin-top: 2px;
+        gap: 0px;
+        border-radius: 4px;
+        max-width: 100%;
+    }
+    .shelf-box-name {
+        font-size: 9.5px;
+        line-height: 1.1;
+    }
+    .shelf-box-rarity {
+        font-size: 8px;
+        max-width: 50px;
+    }
+    .shelf-box-likes {
+        font-size: 8px;
+    }
+}
+
+
 
 

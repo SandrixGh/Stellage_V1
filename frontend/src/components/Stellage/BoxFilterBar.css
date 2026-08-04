@@ -117,3 +117,11 @@
     flex-shrink: 0;
 }
 
+@media (max-width: 480px) {
+    .box-filter-top { flex-direction: column; align-items: stretch; }
+    .box-filter-sort-select { width: 100%; }
+    .box-filter-rarities { width: 100%; overflow-x: auto; flex-wrap: nowrap; box-sizing: border-box; }
+    .box-filter-chip { flex: 0 0 auto; padding: 6px 12px; font-size: 11.5px; }
+}
+
+

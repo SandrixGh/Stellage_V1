@@ -32,7 +32,7 @@ interface PlacedBox {
 }
 
 /** Высота одной полки в пикселях (включает зону для коробки + полку под ней). */
-const ROW_HEIGHT = 128;
+const DEFAULT_ROW_HEIGHT = 128;
 
 /** Отступ сверху доски: визуально «приподнимает» все полки, освобождая место
  * снизу под двухстрочную бирку (редкость + лайки) нижнего ряда. */
@@ -124,6 +124,7 @@ export const ShelfBoard = ({
     const boardRef = useRef<HTMLDivElement>(null);
     const [drag, setDrag] = useState<DragState | null>(null);
     const [cellWidth, setCellWidth] = useState(0);
+    const [rowHeight, setRowHeight] = useState(DEFAULT_ROW_HEIGHT);
 
     const [activePicker, setActivePicker] = useState<{
         row: number;
@@ -140,7 +141,11 @@ export const ShelfBoard = ({
     useLayoutEffect(() => {
         const measure = () => {
             const el = boardRef.current;
-            if (el) setCellWidth(el.clientWidth / colCount);
+            if (el) {
+                const w = el.clientWidth / colCount;
+                setCellWidth(w);
+                setRowHeight(Math.max(88, Math.min(DEFAULT_ROW_HEIGHT, Math.round(w * 1.3))));
+            }
         };
         measure();
         window.addEventListener("resize", measure);
@@ -158,12 +163,12 @@ export const ShelfBoard = ({
             const localY = clientY - rect.top;
             const colW = rect.width / colCount;
             let col = Math.round((localX - colW / 2) / colW);
-            let row = Math.round((localY - TOP_PADDING - ROW_HEIGHT / 2) / ROW_HEIGHT);
+            let row = Math.round((localY - TOP_PADDING - rowHeight / 2) / rowHeight);
             col = Math.max(0, Math.min(colCount - 1, col));
             row = Math.max(0, Math.min(rowCount - 1, row));
             return { row, col };
         },
-        [colCount, rowCount]
+        [colCount, rowCount, rowHeight]
     );
 
     const handleEmptyCellClick = (e: React.MouseEvent, row: number, col: number) => {
@@ -186,7 +191,7 @@ export const ShelfBoard = ({
         if (!el) return;
         const rect = el.getBoundingClientRect();
         const boxLeft = p.col * (rect.width / colCount);
-        const boxTop = TOP_PADDING + p.row * ROW_HEIGHT;
+        const boxTop = TOP_PADDING + p.row * rowHeight;
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         // Захват ставим на сам board (стабильный элемент), а не на e.target —
@@ -256,11 +261,13 @@ export const ShelfBoard = ({
         }
     };
 
+    const boxSize = Math.min(160, Math.max(70, Math.round((cellWidth || 100) * 1.35)));
+
     return (
         <div
             ref={boardRef}
             className={`shelf-board ${editable ? "is-editable" : ""} ${studyLabels ? "has-study-labels" : ""}`}
-            style={{ minHeight: TOP_PADDING + rowCount * ROW_HEIGHT + LABEL_SPACE }}
+            style={{ minHeight: TOP_PADDING + rowCount * rowHeight + LABEL_SPACE }}
             onPointerMove={handlePointerMove}
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
@@ -273,7 +280,7 @@ export const ShelfBoard = ({
                     rowCount={rowCount}
                     colCount={colCount}
                     topPadding={TOP_PADDING}
-                    rowHeight={ROW_HEIGHT}
+                    rowHeight={rowHeight}
                 />
             )}
 
@@ -282,7 +289,7 @@ export const ShelfBoard = ({
                 <div
                     key={`line-${row}`}
                     className="shelf-line"
-                    style={{ top: TOP_PADDING + (row + 1) * ROW_HEIGHT - 1 }}
+                    style={{ top: TOP_PADDING + (row + 1) * rowHeight - 1 }}
                 />
             ))}
 
@@ -299,9 +306,9 @@ export const ShelfBoard = ({
                                 data-cell-status={status ?? undefined}
                                 style={{
                                     left: `${col * cellWidthPct}%`,
-                                    top: TOP_PADDING + row * ROW_HEIGHT,
+                                    top: TOP_PADDING + row * rowHeight,
                                     width: `${cellWidthPct}%`,
-                                    height: ROW_HEIGHT,
+                                    height: rowHeight,
                                 }}
                                 onClick={(e) => studyLabels && handleEmptyCellClick(e, row, col)}
                                 title={status ? `Статус: ${status}` : studyLabels ? "Кликните, чтобы задать статус ячейки" : undefined}
@@ -321,20 +328,20 @@ export const ShelfBoard = ({
                 );
 
                 const boardW = cellWidth * colCount;
-                const boardH = TOP_PADDING + rowCount * ROW_HEIGHT;
+                const boardH = TOP_PADDING + rowCount * rowHeight;
                 const cellW = cellWidth || 0;
                 const style: React.CSSProperties = isDragging
                     ? {
                           left: Math.max(0, Math.min(drag!.x - drag!.grabDx, boardW - cellW)),
-                          top: Math.max(TOP_PADDING, Math.min(drag!.y - drag!.grabDy, boardH - ROW_HEIGHT)),
+                          top: Math.max(TOP_PADDING, Math.min(drag!.y - drag!.grabDy, boardH - rowHeight)),
                           width: cellW || undefined,
-                          height: ROW_HEIGHT,
+                          height: rowHeight,
                       }
                     : {
                           left: `${p.col * cellWidthPct}%`,
-                          top: TOP_PADDING + p.row * ROW_HEIGHT,
+                          top: TOP_PADDING + p.row * rowHeight,
                           width: `${cellWidthPct}%`,
-                          height: ROW_HEIGHT,
+                          height: rowHeight,
                       };
                 return (
                     <div
@@ -345,7 +352,7 @@ export const ShelfBoard = ({
                     >
                         <div className="shelf-cell-inner">
                             <WireframeBox
-                                size={135}
+                                size={boxSize}
                                 rarityGlow={rarityGlow}
                                 color={boxColor}
                                 contentType={resolveBoxContentType(p.box)}
@@ -357,20 +364,18 @@ export const ShelfBoard = ({
                             <span className="shelf-box-name">
                                 {template?.title ?? "Коробка"}
                             </span>
-                            <span className="shelf-box-tags">
-                                <span
-                                    className={`shelf-box-rarity rarity-tag-${rarityKey}`}
-                                    style={{ color: boxColor }}
-                                >
-                                    {template?.rarity}
-                                </span>
-                                <span
-                                    className={`shelf-box-likes ${p.box.likes_count > 0 ? "has-likes" : "zero-likes"}`}
-                                    title={`${p.box.likes_count ?? 0} лайков`}
-                                >
-                                    <HeartIcon size={10} />
-                                    <span>{formatCount(p.box.likes_count ?? 0)}</span>
-                                </span>
+                            <span
+                                className={`shelf-box-rarity rarity-tag-${rarityKey}`}
+                                style={{ color: boxColor }}
+                            >
+                                {template?.rarity?.toLowerCase().includes("dev") ? "DEV" : template?.rarity}
+                            </span>
+                            <span
+                                className={`shelf-box-likes ${p.box.likes_count > 0 ? "has-likes" : "zero-likes"}`}
+                                title={`${p.box.likes_count ?? 0} лайков`}
+                            >
+                                <HeartIcon size={9} />
+                                <span>{formatCount(p.box.likes_count ?? 0)}</span>
                             </span>
                         </div>
                     </div>

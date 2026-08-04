@@ -358,9 +358,11 @@
     color: #ffffff;
 }
 
-@media (max-width: 720px) {
-    .account-trigger-name {
-        max-width: 80px;
-    }
+@media (max-width: 768px) {
+    .account-trigger-name { display: none; }
+    .account-chevron { display: none; }
+    .account-trigger { padding: 4px; }
+    .account-dropdown { right: -8px; width: calc(100vw - 32px); max-width: 300px; }
 }
+
 
