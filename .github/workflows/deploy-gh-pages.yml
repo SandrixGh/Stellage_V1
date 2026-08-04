@@ -37,7 +37,7 @@ jobs:
 
       - name: Build Frontend
         env:
-          VITE_API_URL: https://stellage-backend.onrender.com/api.v1
+          VITE_API_URL: https://api.stellage.tech/api.v1
         run: |
           cd frontend
           npm run build

@@ -86,12 +86,14 @@ async def get_current_user(
                     token=new_token,
                     session_id=session_id,
                 )
+                is_secure = settings.cookie_secure or settings.is_production
+                samesite = "none" if is_secure else "lax"
                 response.set_cookie(
                     key="Authorization",
                     value=new_token,
                     httponly=True,
-                    secure=settings.cookie_secure,
-                    samesite="lax",
+                    secure=is_secure,
+                    samesite=samesite,
                     max_age=settings.access_token_expire,
                 )
     except Exception:

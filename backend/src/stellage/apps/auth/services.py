@@ -185,6 +185,21 @@ class UserService:
             path=self.REFRESH_COOKIE_PATH,
         )
 
+    def _clear_auth_cookies(self, response: JSONResponse) -> None:
+        is_secure = settings.cookie_secure or settings.is_production
+        samesite = "none" if is_secure else "lax"
+        response.delete_cookie(
+            key="Authorization",
+            secure=is_secure,
+            samesite=samesite,
+        )
+        response.delete_cookie(
+            key="RefreshToken",
+            path=self.REFRESH_COOKIE_PATH,
+            secure=is_secure,
+            samesite=samesite,
+        )
+
     async def _issue_session(
         self,
         user_id,
@@ -422,8 +437,7 @@ class UserService:
         )
 
         response = JSONResponse(content={"message": "Logged out"})
-        response.delete_cookie(key="Authorization")
-        response.delete_cookie(key="RefreshToken", path=self.REFRESH_COOKIE_PATH)
+        self._clear_auth_cookies(response)
 
         # Убираем текущий аккаунт из реестра устройства (но остальные оставляем —
         # можно тут же переключиться на другой без пароля).
@@ -471,8 +485,7 @@ class UserService:
         logger.info("Account deleted: user_id=%s", user.id)
 
         response = JSONResponse(content={"message": "Deleting the account was successful"})
-        response.delete_cookie(key="Authorization")
-        response.delete_cookie(key="RefreshToken", path=self.REFRESH_COOKIE_PATH)
+        self._clear_auth_cookies(response)
         accounts = self._read_device_accounts(device_cookie)
         remaining = [a for a in accounts if str(a.id) != str(user.id)]
         self._set_device_cookie(response, remaining)
