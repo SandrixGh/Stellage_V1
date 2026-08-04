@@ -14,3 +14,5 @@ COPY templates/ ./templates/
 COPY src/ ./src/
 
 ENV PYTHONPATH=/app/src
+
+CMD ["sh", "-c", "alembic upgrade head && uvicorn stellage.main:app --host 0.0.0.0 --port ${PORT:-10000}"]
