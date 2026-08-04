@@ -15,7 +15,34 @@ from stellage.apps.boxes.instances.schemas import (
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.enums.asset_status import AssetStatusEnum
 from stellage.database.enums.box_sealing import SealingEnum
+from stellage.database.enums.visibility import VisibilityEnum
 from stellage.database.models import BoxAsset, BoxInstance, BoxTemplate, Shelf, User
+
+
+def _to_visibility_enum(val: object) -> VisibilityEnum:
+    if isinstance(val, VisibilityEnum):
+        return val
+    if isinstance(val, str):
+        if val in VisibilityEnum.__members__:
+            return VisibilityEnum[val]
+        try:
+            return VisibilityEnum(val)
+        except ValueError:
+            pass
+    return VisibilityEnum.PRIVATE
+
+
+def _to_sealing_enum(val: object) -> SealingEnum:
+    if isinstance(val, SealingEnum):
+        return val
+    if isinstance(val, str):
+        if val in SealingEnum.__members__:
+            return SealingEnum[val]
+        try:
+            return SealingEnum(val)
+        except ValueError:
+            pass
+    return SealingEnum.SEALED
 
 
 class BoxInstanceRepository:
@@ -105,9 +132,9 @@ class BoxInstanceRepository:
             base_data = data.model_dump()
             base_data["user_id"] = user_id
             if base_data.get("is_public") is not None:
-                base_data["is_public"] = VisibilityEnum(base_data["is_public"]).name
+                base_data["is_public"] = _to_visibility_enum(base_data["is_public"]).name
             if base_data.get("is_sealed") is not None:
-                base_data["is_sealed"] = SealingEnum(base_data["is_sealed"]).name
+                base_data["is_sealed"] = _to_sealing_enum(base_data["is_sealed"]).name
 
             # serial = max(serial)+1 в пределах шаблона. При параллельном
             # создании два запроса могут получить одинаковый serial — теперь это
