@@ -32,15 +32,15 @@ class DbSettings(BaseAppSettings):
 
 
 class EmailSettings(BaseAppSettings):
-    email_host: str
-    email_port: int
-    email_username: str
-    email_password: SecretStr
+    email_host: str = "smtp.gmail.com"
+    email_port: int = 465
+    email_username: str = ""
+    email_password: SecretStr = SecretStr("")
 
 
 class RedisSettings(BaseAppSettings):
-    redis_host: str
-    redis_port: int
+    redis_host: str = "127.0.0.1"
+    redis_port: int = 6379
     redis_db: int = 0
     redis_password: SecretStr | None = None
 
@@ -53,11 +53,11 @@ class RedisSettings(BaseAppSettings):
 
 
 class S3Settings(BaseAppSettings):
-    s3_endpoint_url: str
-    s3_region: str
-    s3_access_key_id: str
-    s3_secret_access_key: SecretStr
-    s3_bucket_name: str
+    s3_endpoint_url: str = "s3.ru-3.storage.selcloud.ru"
+    s3_region: str = "ru-3"
+    s3_access_key_id: str = ""
+    s3_secret_access_key: SecretStr = SecretStr("")
+    s3_bucket_name: str = "box-content-bucket"
 
     # Браузерный endpoint для presigned-ссылок. SigV4 подписывает заголовок Host,
     # поэтому подпись обязана делаться под адрес, по которому пойдёт браузер:
@@ -80,14 +80,14 @@ class S3Settings(BaseAppSettings):
 class AppSettings(BaseAppSettings):
     db_settings: DbSettings = DbSettings()
 
-    secret_key: SecretStr
+    secret_key: SecretStr = SecretStr("default-production-secret-key-change-me")
 
     email_settings: EmailSettings = EmailSettings()
     redis_settings: RedisSettings = RedisSettings()
     s3_settings: S3Settings = S3Settings()
 
     templates_dir: str = TEMPLATES_DIR
-    frontend_url: str
+    frontend_url: str = "http://localhost:5173"
 
     # Разрешённые CORS-origin'ы. Задаётся в .env как строка через запятую
     # (CORS_ORIGINS=https://app.example.com,https://www.example.com); дефолт —
@@ -102,13 +102,13 @@ class AppSettings(BaseAppSettings):
             origins.append(self.frontend_url)
         return origins
 
-    access_token_expire: int
+    access_token_expire: int = 3600
     # Долгоживущий refresh-токен: пока он жив, короткий access молча
     # перевыпускается через POST /auth/refresh, поэтому пользователя не
     # выкидывает по истечении часа. По умолчанию 30 дней.
     refresh_token_expire: int = 60 * 60 * 24 * 30
 
-    confirmation_code_length: int
+    confirmation_code_length: int = 6
 
     # "development" | "production"
     environment: str = "development"
