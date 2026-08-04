@@ -48,7 +48,7 @@ class RedisSettings(BaseAppSettings):
     def redis_url(self) -> str:
         if self.redis_password and self.redis_password.get_secret_value():
             pwd = self.redis_password.get_secret_value()
-            return f"rediss://default:{pwd}@{self.redis_host}:{self.redis_port}/{self.redis_db}"
+            return f"rediss://default:{pwd}@{self.redis_host}:{self.redis_port}/{self.redis_db}?ssl_cert_reqs=none"
         return f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
 
 
