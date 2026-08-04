@@ -14,6 +14,8 @@ body {
   margin: 0;
   padding: 0;
   background-color: var(--ground);
+  background-image: var(--background-image);
+  background-attachment: fixed;
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 14px;
@@ -48,23 +50,23 @@ img {
 
 /* Glass panel utility (Apple Liquid Glass Overlay) */
 .glass-panel {
-  background: rgba(var(--chrome-rgb), 0.72) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border: 1px solid var(--glass-border) !important;
+  background: rgba(var(--chrome-rgb), 0.84) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid var(--border-subtle) !important;
   box-shadow: 
     var(--shadow-glass),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.15) !important;
+    var(--glass-specular, inset 0 1px 1px 0 rgba(255, 255, 255, 0.85)) !important;
   border-radius: var(--radius-lg);
 }
 
 /* Glass modal utility */
 .glass-modal {
-  background: rgba(var(--chrome-rgb), 0.82) !important;
+  background: rgba(var(--chrome-rgb), 0.92) !important;
   backdrop-filter: blur(32px) saturate(200%) !important;
   -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), inset 0 1px 1px 0 rgba(255, 255, 255, 0.25) !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: var(--shadow-lg), var(--glass-specular, inset 0 1px 1px 0 rgba(255, 255, 255, 0.85)) !important;
   border-radius: var(--radius-xl) !important;
 }
 
@@ -78,33 +80,33 @@ img {
   font-size: 13px;
   font-weight: 500;
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px) saturate(160%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--surface-elevated);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--border-hover);
   border-radius: var(--radius-pill);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-sm), var(--glass-specular);
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
 }
 
 .glass-button:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.28);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  background: var(--surface-elevated);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md), 0 0 12px rgba(var(--accent-rgb), 0.2);
 }
 
 .glass-button-primary {
   background: var(--accent);
   color: var(--accent-contrast);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 16px rgba(79, 169, 142, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.32), inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .glass-button-primary:hover {
   background: var(--accent-bright);
-  box-shadow: 0 6px 20px rgba(79, 169, 142, 0.48), inset 0 1px 1px 0 rgba(255, 255, 255, 0.5);
+  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.42), inset 0 1px 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 /* Spotify Ambient Color Glows (Visual Depth behind visual assets) */

@@ -2,25 +2,24 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: linear-gradient(110deg, #161A20 0%, #202732 40%, #161A20 80%);
-    background-size: 200% 100%;
-    color: #E2E8F0;
-    border: 1px solid rgba(79, 169, 142, 0.4);
+    background: var(--surface-hover);
+    color: var(--ink);
+    border: 1px solid rgba(var(--accent-rgb), 0.4);
     border-radius: var(--radius-pill, 9999px);
     font-family: var(--font-body, "Inter", sans-serif);
     font-weight: 600;
     user-select: none;
     vertical-align: middle;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow-sm), var(--glass-specular);
     position: relative;
     overflow: hidden;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 
 .stellage-developer-badge:hover {
-    border-color: rgba(79, 169, 142, 0.85);
-    box-shadow: 0 2px 10px rgba(79, 169, 142, 0.2);
-    /* No jumping on hover */
+    background: var(--surface-elevated);
+    border-color: var(--accent);
+    box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.25), var(--glass-specular);
     transform: none;
 }
 
@@ -37,17 +36,17 @@
 }
 
 .stellage-developer-badge__icon {
-    color: var(--accent, #4FA98E);
+    color: var(--accent);
     flex-shrink: 0;
     transition: color 0.3s ease;
 }
 
 .stellage-developer-badge:hover .stellage-developer-badge__icon {
-    color: #6EE7B7;
+    color: var(--accent-bright);
 }
 
 .stellage-developer-badge__text {
-    background: linear-gradient(110deg, #FFFFFF 0%, #6EE7B7 35%, #3B82F6 70%, #FFFFFF 100%);
+    background: linear-gradient(110deg, var(--ink) 0%, var(--accent) 50%, var(--tag-dev) 100%);
     background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

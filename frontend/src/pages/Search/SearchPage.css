@@ -35,8 +35,8 @@
 .search-input {
     width: 100%;
     padding: 14px 20px 14px 54px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
     border-radius: 999px;
     font-family: var(--font-body);
     font-size: 14.5px;
@@ -45,17 +45,18 @@
     box-sizing: border-box;
     outline: none;
     caret-color: var(--accent);
+    box-shadow: var(--shadow-sm), var(--glass-specular);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .search-input::placeholder {
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--ink-secondary);
 }
 
 .search-input:focus {
-    border-color: rgba(255, 255, 255, 0.25);
-    background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+    border-color: var(--accent);
+    background: var(--surface-elevated);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.2), var(--glass-specular);
 }
 
 

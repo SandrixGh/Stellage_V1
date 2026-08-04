@@ -5,9 +5,9 @@ export type Theme = "light" | "dark";
 const STORAGE_KEY = "stellage-theme";
 
 const readInitialTheme = (): Theme => {
-    if (typeof window === "undefined") return "light";
+    if (typeof window === "undefined") return "dark";
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    return stored === "dark" ? "dark" : "light";
+    return stored === "light" ? "light" : "dark";
 };
 
 const applyTheme = (theme: Theme) => {

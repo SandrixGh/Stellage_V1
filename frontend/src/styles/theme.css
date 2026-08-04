@@ -47,47 +47,59 @@
 :root[data-theme="light"] {
     --ink: #14181A;
     --ink-rgb: 20, 24, 26;
-    --ink-secondary: #6B7075;
+    --ink-secondary: #5C6266;
     --ink-tertiary: rgba(20, 24, 26, 0.45);
 
-    --ground: #EEF1F1;
-    --ground-rgb: 238, 241, 241;
-    --background-image: none;
-    --surface: #FFFFFF;
+    --ground: #EAEFEF;
+    --ground-rgb: 234, 239, 239;
+    --background-image: radial-gradient(at 0% 0%, rgba(215, 226, 224, 0.6) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(225, 234, 232, 0.7) 0px, transparent 50%);
+    --surface: rgba(255, 255, 255, 0.78);
     --surface-rgb: 255, 255, 255;
-    --surface-hover: #F4F7F6;
-    --surface-elevated: #FAFBFB;
+    --surface-hover: rgba(238, 243, 242, 0.9);
+    --surface-elevated: #FFFFFF;
     --border-subtle: rgba(20, 24, 26, 0.08);
     --border-hover: rgba(20, 24, 26, 0.18);
 
-    --glass-rgb: 0, 0, 0;
+    --glass-rgb: 255, 255, 255;
     --chrome-rgb: 255, 255, 255;
-    --glass-bg: rgba(255, 255, 255, 0.65);
-    --glass-border: rgba(20, 24, 26, 0.12);
+    --glass-bg: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(20, 24, 26, 0.10);
+    --glass-specular: inset 0 1px 0 rgba(255, 255, 255, 0.85);
 
-    --box-common: #565C60;
-    --box-rare: #2E5FB8;
-    --box-golden: #B0801E;
-    --box-dev: #8E45C9;
+    --box-common: #4B5256;
+    --box-rare: #2355B5;
+    --box-golden: #A37416;
+    --box-dev: #7B35B8;
 
-    --tag-rare: #2E5FB8;
-    --tag-rare-rgb: 46, 95, 184;
-    --tag-golden: #9A6E1A;
-    --tag-golden-rgb: 154, 110, 26;
-    --tag-dev: #7E3BB5;
-    --tag-dev-rgb: 126, 59, 181;
-    --tag-sealed: #6B7075;
-    --verified: #3E9E58;
+    --tag-rare: #2355B5;
+    --tag-rare-rgb: 35, 85, 181;
+    --tag-golden: #946714;
+    --tag-golden-rgb: 148, 103, 20;
+    --tag-dev: #7432B0;
+    --tag-dev-rgb: 116, 50, 176;
+    --tag-sealed: #5C6266;
+    --verified: #236B56;
 
-    --accent: #4FA98E;
-    --accent-rgb: 79, 169, 142;
-    --accent-hover: #3D9A7D;
-    --accent-contrast: #F4F7F6;
-    --accent-bright: #5FC2A6;
+    --badge-common-bg: rgba(20, 24, 26, 0.06);
+    --badge-rare-bg: rgba(35, 85, 181, 0.12);
+    --badge-golden-bg: rgba(148, 103, 20, 0.12);
+    --badge-dev-bg: rgba(116, 50, 176, 0.12);
+
+    /* Accent — Stellage Deep Emerald Teal (#236B56) for crisp contrast on light canvas */
+    --accent: #236B56;
+    --accent-rgb: 35, 107, 86;
+    --accent-hover: #1B5443;
+    --accent-contrast: #FFFFFF;
+    --accent-bright: #2E856B;
 
     --btn-primary-bg: var(--accent);
     --btn-primary-text: var(--accent-contrast);
     --btn-primary-bg-hover: var(--accent-hover);
+
+    --shadow-sm: 0 2px 8px rgba(20, 24, 26, 0.06);
+    --shadow-md: 0 8px 24px rgba(20, 24, 26, 0.08);
+    --shadow-lg: 0 16px 40px rgba(20, 24, 26, 0.12);
+    --shadow-glass: 0 8px 32px 0 rgba(20, 24, 26, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.85);
 
     --error-text: #b23a3a;
     --error-bg-rgb: 178, 58, 58;
