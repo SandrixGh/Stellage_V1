@@ -135,12 +135,14 @@ class UserService:
     ) -> None:
         payload = [{"id": str(a.id), "session_id": a.session_id} for a in accounts]
         value = self.serializer.dumps(payload)
+        is_secure = settings.cookie_secure or settings.is_production
+        samesite = "none" if is_secure else "lax"
         response.set_cookie(
             key=self.DEVICE_COOKIE,
             value=value,
             httponly=True,
-            secure=settings.cookie_secure,
-            samesite="lax",
+            secure=is_secure,
+            samesite=samesite,
             max_age=settings.refresh_token_expire,
             path=self.REFRESH_COOKIE_PATH,
         )
@@ -159,22 +161,26 @@ class UserService:
         return [head, *rest][: self.DEVICE_COOKIE_MAX]
 
     def _set_access_cookie(self, response: JSONResponse, token: str) -> None:
+        is_secure = settings.cookie_secure or settings.is_production
+        samesite = "none" if is_secure else "lax"
         response.set_cookie(
             key="Authorization",
             value=token,
             httponly=True,
-            secure=settings.cookie_secure,
-            samesite="lax",
+            secure=is_secure,
+            samesite=samesite,
             max_age=settings.access_token_expire,
         )
 
     def _set_refresh_cookie(self, response: JSONResponse, token: str) -> None:
+        is_secure = settings.cookie_secure or settings.is_production
+        samesite = "none" if is_secure else "lax"
         response.set_cookie(
             key="RefreshToken",
             value=token,
             httponly=True,
-            secure=settings.cookie_secure,
-            samesite="lax",
+            secure=is_secure,
+            samesite=samesite,
             max_age=settings.refresh_token_expire,
             path=self.REFRESH_COOKIE_PATH,
         )
