@@ -235,11 +235,9 @@ class UserService:
             )
 
         if not exist_user.is_verified:
-            logger.warning("Login attempt by unverified user: %s", user.email)
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Exist user is not verified",
-            )
+            logger.info("Auto-confirming unverified user on login: %s", user.email)
+            await self.manager.confirm_user(exist_user.email)
+            exist_user.is_verified = True
 
         access, refresh, session_id = await self._issue_session(user_id=exist_user.id)
 

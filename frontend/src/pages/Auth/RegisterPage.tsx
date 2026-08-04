@@ -6,10 +6,12 @@ import { AuthForm } from "../../components/Auth/AuthForm";
 import { AuthCard } from "../../components/Auth/AuthCard";
 import { AuthLayout } from "../../components/Auth/AuthLayout";
 import { validateInviteCodeApi } from "../../api/invites";
+import { useAuthStore } from "../../store/useAuthStore";
 
 export const RegisterPage = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const login = useAuthStore((state) => state.login);
 
     const [inviteCode, setInviteCode] = useState("");
     const [username, setUsername] = useState("");
@@ -17,9 +19,28 @@ export const RegisterPage = () => {
     const [password, setPassword] = useState("");
 
     const [inviteNotice, setInviteNotice] = useState<string | null>(null);
-    const [isSent, setIsSent] = useState(false);
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+
+    /* 
+    // Для включения окна с просьбой проверить почту в будущем раскомментируйте этот блок и setIsSent(true) в handleSubmit:
+    const [isSent, setIsSent] = useState(false);
+    if (isSent) {
+        return (
+            <AuthLayout>
+                <div className="auth-card">
+                    <h2>Проверьте почту</h2>
+                    <p className="success-message">
+                        Мы отправили письмо на <strong>{email}</strong> для подтверждения аккаунта.
+                    </p>
+                    <button onClick={() => navigate("/login")} className="btn-primary" style={{ marginTop: '20px' }}>
+                        К логину
+                    </button>
+                </div>
+            </AuthLayout>
+        );
+    }
+    */
 
     useEffect(() => {
         const queryInvite = searchParams.get("invite");
@@ -52,32 +73,16 @@ export const RegisterPage = () => {
             if (username.trim()) payload.username = username.trim();
 
             await api.post("/auth/register/", payload);
-            setIsSent(true);
+
+            // Мгновенная автоматическая авторизация пользователя без показа лишних окон
+            await login(email, password);
+            navigate("/");
         } catch (err: any) {
             setError(err.response?.data?.detail || "Ошибка при регистрации. Проверьте инвайт-код.");
         } finally {
             setIsLoading(false);
         }
     };
-
-    if (isSent) {
-        return (
-            <AuthLayout>
-                <div className="auth-card">
-                    <h2>Проверьте почту</h2>
-                    <p className="success-message">
-                        Мы отправили письмо на <strong>{email}</strong> для подтверждения аккаунта.
-                    </p>
-                    <p style={{ marginTop: '12px', fontSize: '0.9rem', color: 'var(--ink-secondary, #666)' }}>
-                        После подтверждения вам будут доступны 3 инвайт-кода для приглашения друзей!
-                    </p>
-                    <button onClick={() => navigate("/login")} className="btn-primary" style={{ marginTop: '20px' }}>
-                        К логину
-                    </button>
-                </div>
-            </AuthLayout>
-        );
-    }
 
     return (
         <AuthLayout>
