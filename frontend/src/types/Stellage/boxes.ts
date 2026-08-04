@@ -11,6 +11,7 @@ export interface BoxTemplate {
     owner_avatar_url?: string | null;
     creator_id?: string | null;
     likes_count?: number;
+    is_liked?: boolean | null;
     comments_count?: number;
     created_at: string;
     updated_at: string;
@@ -48,6 +49,7 @@ export interface Box {
     assets: BoxAsset[];
     content_type: BoxContentType;
     likes_count: number;
+    is_liked?: boolean | null;
     comments_count?: number;
     template: BoxTemplate;
     created_at: string;

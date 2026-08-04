@@ -142,3 +142,16 @@ export async function toggleGiftVisibility(instanceId: string, isPublic: boolean
     await api.patch(`/profile/gifts/${instanceId}/visibility`, { is_gift_public: isPublic });
 }
 
+export interface UpdateProfileData {
+    username?: string;
+    nickname?: string;
+    bio?: string;
+    banner_pos_y?: number;
+    study_mode_enabled?: boolean;
+}
+
+export async function updateProfile(data: UpdateProfileData): Promise<void> {
+    await api.patch("/profile/update", data);
+}
+
+

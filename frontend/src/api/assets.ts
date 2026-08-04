@@ -28,8 +28,10 @@ export const MAX_ASSETS_PER_BOX = 10;
 export const ACCEPT_ATTR = [...PHOTO_MIME_TYPES, ...VIDEO_MIME_TYPES].join(",");
 
 export function kindForMime(mime: string): AssetKind | null {
-    if (PHOTO_MIME_TYPES.includes(mime)) return "photo";
-    if (VIDEO_MIME_TYPES.includes(mime)) return "video";
+    if (!mime) return null;
+    const cleanMime = mime.toLowerCase().split(";")[0].trim();
+    if (PHOTO_MIME_TYPES.includes(cleanMime) || cleanMime.startsWith("image/")) return "photo";
+    if (VIDEO_MIME_TYPES.includes(cleanMime) || cleanMime.startsWith("video/")) return "video";
     return null;
 }
 

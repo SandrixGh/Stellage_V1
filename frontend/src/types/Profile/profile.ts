@@ -7,6 +7,7 @@ export interface PublicUser {
     nickname: string | null;
     last_seen_at: string | null;
     is_developer?: boolean;
+    study_mode_enabled?: boolean;
     // Presigned-ссылка на аватар (может истечь); null — аватара нет.
     avatar_url?: string | null;
     banner_url?: string | null;

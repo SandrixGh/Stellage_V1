@@ -1,7 +1,5 @@
 .box-modal-overlay {
-    /* Модалка рендерится порталом в <body>, вне .app-shell — поэтому базовый
-       шрифт приложения нужно задать здесь явно, иначе откатывается на дефолтный. */
-    font-family: var(--font-body);
+    font-family: var(--font-body, "Inter", sans-serif);
     position: fixed;
     inset: 0;
     z-index: 200;
@@ -10,6 +8,7 @@
     justify-content: center;
     padding: 24px;
     background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
     animation: box-modal-fade 0.18s ease;
 }
 
@@ -21,17 +20,17 @@
 .box-modal {
     position: relative;
     width: 100%;
-    max-width: 520px;
-    max-height: 88vh;
+    max-width: 640px;
+    max-height: 90vh;
     overflow-y: auto;
-    padding: 30px 30px 32px;
-    border-radius: var(--radius-lg);
+    padding: 28px;
+    border-radius: var(--radius-lg, 20px);
     /* Liquid glass surface */
-    background: rgba(var(--chrome-rgb), 0.85);
+    background: rgba(var(--chrome-rgb, 255, 255, 255), 0.88);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(var(--ink-rgb), 0.1);
-    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(var(--ink-rgb, 20, 24, 26), 0.12);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
     animation: box-modal-pop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -49,532 +48,548 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-sm);
-    background: rgba(var(--glass-rgb), 0.04);
-    border: 1px solid rgba(var(--ink-rgb), 0.15);
-    color: rgba(var(--ink-rgb), 0.7);
+    border-radius: 50%;
+    background: rgba(var(--ink-rgb, 20, 24, 26), 0.05);
+    border: 1px solid rgba(var(--ink-rgb, 20, 24, 26), 0.1);
+    color: var(--ink, #14181A);
     font-size: 14px;
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: background 0.15s ease, transform 0.1s ease;
+    z-index: 10;
 }
 
 .box-modal-close:hover {
-    background: rgba(var(--glass-rgb), 0.08);
-    color: var(--ink);
+    background: rgba(var(--ink-rgb, 20, 24, 26), 0.12);
 }
 
 .box-modal-visual {
     display: flex;
     justify-content: center;
-    padding: 8px 0 20px;
+    padding: 10px 0 16px;
     transition: transform 0.2s ease;
 }
 
-/* Запечатанная коробка чуть «дремлет» — приглушена и слегка меньше,
-   подчёркивая, что её ещё не вскрывали. */
 .box-modal-visual.is-sealed {
-    opacity: 0.82;
-    transform: scale(0.97);
+    opacity: 0.85;
+    transform: scale(0.96);
 }
 
-/* Момент вскрытия: короткая встряска + вспышка, затем контент раскрывается. */
 .box-modal-visual.is-unsealing {
-    animation: box-unseal 0.62s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+    animation: box-unseal 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 
 @keyframes box-unseal {
-    0%   { transform: scale(0.97); filter: brightness(1); }
-    15%  { transform: translateX(-3px) rotate(-1.5deg); }
-    30%  { transform: translateX(3px) rotate(1.5deg); }
-    45%  { transform: translateX(-2px) rotate(-1deg); }
-    60%  { transform: translateX(2px) rotate(1deg); }
-    72%  { transform: scale(1.06); filter: brightness(1.5); }
+    0%   { transform: scale(0.96); filter: brightness(1); }
+    30%  { transform: translateX(3px) rotate(2deg); }
+    60%  { transform: translateX(-3px) rotate(-2deg); }
+    80%  { transform: scale(1.08); filter: brightness(1.4); }
     100% { transform: scale(1); filter: brightness(1); }
 }
 
 .box-modal-head {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: space-between;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 6px;
 }
 
 .box-modal-title {
     margin: 0;
-    font-family: var(--font-display);
+    font-family: var(--font-display, "Manrope", sans-serif);
     font-size: 22px;
     font-weight: 700;
-    letter-spacing: -0.01em;
-    color: var(--ink);
-    flex: 1 1 auto;
-    min-width: 0;
+    color: var(--ink, #14181A);
     word-break: break-word;
-    overflow-wrap: anywhere;
+}
+
+.box-modal-price-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: rgba(79, 169, 142, 0.15);
+    border: 1px solid rgba(79, 169, 142, 0.3);
+    color: var(--accent, #4FA98E);
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.box-modal-subhead {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: rgba(var(--ink-rgb, 20, 24, 26), 0.6);
+    margin-bottom: 12px;
+}
+
+.box-modal-subhead .dot {
+    opacity: 0.4;
 }
 
 .box-modal-rarity {
-    flex: 0 0 auto;
-    margin-top: 3px;
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: capitalize;
-    padding: 3px 10px;
-    border-radius: var(--radius-pill);
-    color: var(--ink-secondary);
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .box-modal-desc {
-    margin: 0 0 20px;
     font-size: 14px;
-    line-height: 1.6;
-    color: rgba(var(--ink-rgb), 0.7);
+    color: rgba(var(--ink-rgb, 20, 24, 26), 0.75);
+    margin: 0 0 16px;
+    line-height: 1.5;
 }
 
-.box-modal-meta {
-    margin: 0 0 22px;
+/* Liquid Glass Navigation Tabs */
+.box-modal-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 6px;
+    background: rgba(var(--chrome-rgb, 18, 22, 30), 0.72);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(var(--ink-rgb, 255, 255, 255), 0.1);
+    border-radius: var(--radius-md, 12px);
+    margin-bottom: 18px;
+    overflow-x: auto;
+}
+
+.box-modal-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm, 8px);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.65));
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+}
+
+.box-modal-tab svg {
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.box-modal-tab:hover {
+    color: var(--ink, #FFFFFF);
+    background: rgba(var(--ink-rgb, 255, 255, 255), 0.08);
+}
+
+.box-modal-tab.active {
+    background: rgba(var(--accent-rgb, 79, 169, 142), 0.22);
+    color: var(--accent, #4FA98E);
+    border-color: rgba(var(--accent-rgb, 79, 169, 142), 0.45);
+    box-shadow: 0 4px 16px rgba(79, 169, 142, 0.18);
+}
+
+.box-modal-tab-pane {
+    min-height: 160px;
+    margin-bottom: 16px;
+}
+
+/* Sealed Banner & Notice */
+.sealed-secret-card {
+    text-align: center;
+    padding: 24px;
+    border-radius: 12px;
+    background: rgba(var(--surface-rgb, 20, 23, 30), 0.6);
+    border: 1px dashed rgba(var(--ink-rgb, 255, 255, 255), 0.2);
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink, #FFFFFF);
+}
+
+.sealed-secret-card h4 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--ink, #FFFFFF);
+}
+
+.sealed-secret-card p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.65));
+    max-width: 360px;
+}
+
+.creator-sealed-notice {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    background: rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: #a78bfa;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+}
+
+.box-modal-text-block {
+    background: rgba(var(--surface-rgb, 20, 23, 30), 0.6);
+    border: 1px solid rgba(var(--ink-rgb, 255, 255, 255), 0.08);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+}
+
+.box-modal-content-text {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink, #FFFFFF);
+}
+
+.box-modal-readmore {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    color: var(--accent, #4FA98E);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    padding: 0;
+}
+
+/* Specs meta */
+.box-modal-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .box-modal-meta-row {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    gap: 16px;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(var(--ink-rgb), 0.08);
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: rgba(var(--surface-rgb, 20, 23, 30), 0.6);
+    border: 1px solid rgba(var(--ink-rgb, 255, 255, 255), 0.08);
+    font-size: 13px;
 }
 
 .box-modal-meta-row dt {
-    font-size: 13px;
-    color: rgba(var(--ink-rgb), 0.5);
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.6));
 }
 
 .box-modal-meta-row dd {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--ink);
-    text-align: right;
-}
-
-.box-modal-like {
-    margin: 0 0 20px;
-}
-
-/* Блок содержимого отделяем снизу, чтобы кнопка «Посмотреть детальнее» не
-   прилипала к сетке превью. */
-.box-modal-content {
-    margin-bottom: 20px;
-}
-
-.box-modal-content-title {
-    margin: 0 0 12px;
-    font-family: var(--font-body);
-    font-size: 15px;
     font-weight: 600;
-    color: var(--ink);
-}
-
-.box-modal-content-list {
+    color: var(--ink, #FFFFFF);
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
 }
 
-.box-modal-content-item {
+.price-dd {
     display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Footer & Action Buttons */
+.box-modal-footer {
+    display: flex;
+    align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 10px 14px;
-    border-radius: var(--radius-md);
-    background: rgba(var(--glass-rgb), 0.03);
-    border: 1px solid rgba(var(--ink-rgb), 0.1);
+    gap: 12px;
+    padding-top: 12px;
 }
 
-.box-modal-content-item dt {
-    font-size: 13px;
-    color: rgba(var(--ink-rgb), 0.55);
-}
-
-.box-modal-content-item dd {
-    margin: 0;
-    font-size: 13px;
-    color: var(--ink);
-    word-break: break-word;
-    text-align: right;
-}
-
-.box-modal-content-empty {
-    margin: 0;
-    padding: 16px;
-    border-radius: var(--radius-md);
-    background: rgba(var(--glass-rgb), 0.02);
-    border: 1px dashed rgba(var(--ink-rgb), 0.18);
-    font-size: 13px;
-    color: rgba(var(--ink-rgb), 0.5);
-    text-align: center;
-}
-
-/* ── Owner actions row ── */
-.box-modal-actions {
-    margin-top: 22px;
-    padding-top: 18px;
-    border-top: 1px solid rgba(var(--ink-rgb), 0.08);
+.box-modal-footer-btns {
     display: flex;
+    gap: 8px;
     flex-wrap: wrap;
-    gap: 10px;
 }
 
 .box-modal-btn {
-    flex: 1;
-    min-width: 120px;
-    padding: 11px 16px;
-    border-radius: var(--radius-sm);
-    font-family: var(--font-body);
+    padding: 9px 18px;
+    border-radius: var(--radius-sm, 8px);
     font-size: 13px;
     font-weight: 600;
-    letter-spacing: 0.2px;
+    border: 1px solid transparent;
     cursor: pointer;
-    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease,
-        opacity 0.18s ease;
-}
-
-.box-modal-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.box-modal-btn.ghost {
-    background: rgba(var(--glass-rgb), 0.04);
-    border: 1px solid rgba(var(--ink-rgb), 0.2);
-    color: rgba(var(--ink-rgb), 0.85);
-}
-
-.box-modal-btn.ghost:hover:not(:disabled) {
-    background: rgba(var(--glass-rgb), 0.08);
-    border-color: rgba(var(--ink-rgb), 0.4);
-    color: var(--ink);
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
 .box-modal-btn.primary {
-    background: var(--accent);
-    border: 1px solid var(--accent);
-    color: var(--accent-contrast);
+    background: var(--accent, #4FA98E);
+    color: #FFFFFF;
+    border-color: var(--accent, #4FA98E);
 }
 
-.box-modal-btn.primary:hover:not(:disabled) {
-    background: var(--accent-hover);
-    border-color: var(--accent-hover);
+.box-modal-btn.primary:hover {
+    background: var(--accent-hover, #3D9A7D);
+}
+
+.box-modal-btn.secondary {
+    background: rgba(var(--ink-rgb, 255, 255, 255), 0.08);
+    color: var(--ink, #FFFFFF);
+    border-color: rgba(var(--ink-rgb, 255, 255, 255), 0.12);
+}
+
+.box-modal-btn.secondary:hover {
+    background: rgba(var(--ink-rgb, 255, 255, 255), 0.15);
 }
 
 .box-modal-btn.danger {
-    background: rgba(255, 92, 92, 0.08);
-    border: 1px solid rgba(255, 92, 92, 0.32);
-    color: #ff8d8d;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
 }
 
-.box-modal-btn.danger:hover:not(:disabled) {
-    background: rgba(255, 92, 92, 0.16);
-    border-color: rgba(255, 92, 92, 0.55);
-    color: #ffb0b0;
+.box-modal-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.25);
 }
 
-/* ── Edit form ── */
+/* Gift section */
+.box-modal-gift {
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 10px;
+    background: rgba(var(--surface-rgb, 20, 23, 30), 0.8);
+    border: 1px solid rgba(var(--ink-rgb, 255, 255, 255), 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.box-modal-gift-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink, #FFFFFF);
+}
+
+.box-modal-gift-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Edit Mode Form */
+.box-modal-edit {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px 24px 24px;
+}
+
 .box-modal-edit-title {
-    margin: 0 0 18px;
-    font-family: var(--font-display);
-    font-size: 20px;
+    margin: 0 0 4px 0;
+    font-family: var(--font-display, "Manrope", sans-serif);
+    font-size: 18px;
     font-weight: 700;
-    color: var(--ink);
+    color: var(--ink, #FFFFFF);
 }
 
 .box-modal-field {
     display: flex;
     flex-direction: column;
-    gap: 7px;
-    margin-bottom: 14px;
+    align-items: flex-start;
+    gap: 6px;
+    width: 100%;
 }
 
-.box-modal-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-.box-modal-label {
+.box-modal-field > span {
     font-size: 12px;
     font-weight: 600;
-    letter-spacing: 0.3px;
-    color: rgba(var(--ink-rgb), 0.55);
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.7));
 }
 
-.box-modal-input {
+.box-modal-field input[type="text"],
+.box-modal-field input[type="number"],
+.box-modal-field textarea,
+.box-modal-field select {
     width: 100%;
     box-sizing: border-box;
-    padding: 11px 14px;
-    border-radius: var(--radius-md);
-    background: rgba(var(--glass-rgb), 0.04);
-    border: 1px solid rgba(var(--ink-rgb), 0.15);
-    color: var(--ink);
-    font-family: var(--font-body);
-    font-size: 14px;
+    background: rgba(var(--surface-rgb, 20, 23, 30), 0.8);
+    border: 1px solid rgba(var(--ink-rgb, 255, 255, 255), 0.14);
+    border-radius: var(--radius-sm, 8px);
+    color: var(--ink, #FFFFFF);
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: inherit;
     outline: none;
-    transition: border-color 0.18s ease, background 0.18s ease;
+    transition: border-color 0.15s ease;
 }
 
-.box-modal-input:focus {
-    border-color: rgba(var(--ink-rgb), 0.4);
-    background: rgba(var(--glass-rgb), 0.06);
+.box-modal-field input[type="text"]:focus,
+.box-modal-field input[type="number"]:focus,
+.box-modal-field textarea:focus,
+.box-modal-field select:focus {
+    border-color: var(--accent, #4FA98E);
 }
 
-.box-modal-textarea {
-    resize: vertical;
-    min-height: 56px;
-    line-height: 1.5;
-}
-
-/* ===== Контент: текст и S3-ассеты ===== */
-.box-modal-content-text {
-    margin: 0 0 12px;
-    font-size: 14px;
-    line-height: 1.55;
-    color: var(--ink);
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-
-/* Обрезанный длинный текст в быстром просмотре. */
-.box-modal-content-text.is-clamped {
-    margin-bottom: 6px;
-}
-
-.box-modal-readmore {
-    margin: 0 0 14px;
-    padding: 0;
-    border: none;
-    background: none;
-    color: var(--accent);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.box-modal-readmore:hover {
-    text-decoration: underline;
-}
-
-/* Сетка компактных превью-плиток (быстрый просмотр): контент не рендерится
-   крупно, а выстраивается мелкими квадратами; клик разворачивает в лайтбокс. */
-.box-modal-thumbs {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-    gap: 8px;
-}
-
-.box-modal-thumb {
-    position: relative;
-    aspect-ratio: 1 / 1;
-    padding: 0;
-    border: 1px solid rgba(var(--ink-rgb), 0.1);
-    border-radius: 10px;
-    overflow: hidden;
-    background: rgba(var(--glass-rgb), 0.03);
-    cursor: zoom-in;
-    transition: box-shadow 0.14s ease;
-}
-
-.box-modal-thumb:hover {
-    box-shadow: var(--shadow-sm);
-}
-
-/* Само превью заполняет квадрат плитки. image-rendering: auto просит браузер
-   использовать качественный ресемпл при даунскейле крупного фото — так плитка
-   не выглядит «мыльной» (сам файл в S3 полноразмерный, оригинал — в лайтбоксе). */
-.box-modal-thumb .asset-viewer {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    image-rendering: auto;
-}
-
-/* Значок «play» поверх видео-превью. */
-.box-modal-thumb-play {
-    position: absolute;
-    inset: 0;
-    margin: auto;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: rgba(8, 8, 8, 0.55);
-    color: #fff;
-    font-size: 12px;
-    pointer-events: none;
-}
-
-/* Статус со встроенным действием «Распечатать». */
-.box-modal-status-dd {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.box-modal-unseal-inline {
-    padding: 3px 10px;
-    border-radius: var(--radius-xs);
-    border: 1px solid rgba(var(--ink-rgb), 0.2);
-    background: rgba(var(--ink-rgb), 0.05);
-    color: var(--ink);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.14s ease;
-}
-
-.box-modal-unseal-inline:hover:not(:disabled) {
-    background: rgba(var(--ink-rgb), 0.1);
-}
-
-.box-modal-unseal-inline:disabled {
-    opacity: 0.6;
-    cursor: default;
-}
-
-/* Кнопка перехода в детальный вид. */
-.box-modal-detail-btn {
-    width: 100%;
-    margin-bottom: 20px;
-}
-
-/* Инлайн-диалог дарения коробки. */
-.box-modal-gift {
-    margin-top: 12px;
-    padding: 14px;
-    border-radius: var(--radius-md);
-    background: rgba(var(--glass-rgb), 0.03);
-    border: 1px solid rgba(var(--ink-rgb), 0.1);
-}
-
-.box-modal-gift-hint {
-    margin: 0 0 10px;
-    font-size: 13px;
-    line-height: 1.5;
-    color: rgba(var(--ink-rgb), 0.6);
-}
-
-.box-modal-gift-row {
-    display: flex;
-    gap: 8px;
-}
-
-.box-modal-gift-row .box-modal-input {
-    flex: 1;
-    margin: 0;
-}
-
-.box-modal-gift-row .box-modal-btn {
-    flex-shrink: 0;
-}
-
-.box-modal-asset-list {
+.box-modal-assets-list {
     list-style: none;
-    margin: 0;
     padding: 0;
+    margin: 0;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.box-modal-asset-item {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    padding: 8px 12px;
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(var(--ink-rgb), 0.12);
-    background: rgba(var(--glass-rgb), 0.03);
+/* Assets Grid & Thumbs */
+.box-modal-assets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 14px;
 }
 
-.box-modal-asset-name {
-    flex: 1;
-    min-width: 0;
-    font-size: 13px;
-    color: var(--ink);
+.box-modal-thumb-btn {
+    background: rgba(var(--surface-rgb, 20, 23, 30), 0.7);
+    border: 1px solid rgba(var(--ink-rgb, 255, 255, 255), 0.1);
+    border-radius: 12px;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+    transition: all 0.15s ease;
+    width: 100%;
+    max-height: 220px;
+    box-sizing: border-box;
+}
+
+.box-modal-thumb-btn:hover {
+    border-color: var(--accent, #4FA98E);
+    background: rgba(var(--surface-rgb, 20, 23, 30), 0.9);
+    transform: translateY(-2px);
+}
+
+.box-modal-thumb-btn .asset-viewer {
+    max-height: 140px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.asset-name-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.7));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 100%;
 }
 
-.box-modal-asset-size {
+.box-modal-asset-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 8px 12px;
+    background: rgba(var(--surface-rgb, 20, 23, 30), 0.6);
+    border: 1px solid rgba(var(--ink-rgb, 255, 255, 255), 0.08);
+    border-radius: 6px;
+}
+
+.box-modal-asset-del {
+    margin-left: 12px;
+    flex-shrink: 0;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    padding: 5px 10px;
+    border-radius: 6px;
     font-size: 12px;
-    color: rgba(var(--ink-rgb), 0.45);
-    flex-shrink: 0;
-}
-
-.box-modal-asset-remove {
-    border: none;
-    background: transparent;
-    color: rgba(var(--ink-rgb), 0.45);
-    font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
-    padding: 2px 6px;
-    border-radius: 4px;
-    flex-shrink: 0;
 }
 
-.box-modal-asset-remove:hover:not(:disabled) {
-    color: var(--ink);
-    background: rgba(var(--ink-rgb), 0.08);
-}
-
-.box-modal-asset-add {
+.box-modal-upload-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 11px 14px;
-    border-radius: var(--radius-md);
-    border: 1px dashed rgba(var(--ink-rgb), 0.3);
-    color: rgba(var(--ink-rgb), 0.6);
-    font-size: 13px;
-    cursor: pointer;
-    transition: border-color 0.18s ease, color 0.18s ease;
-}
-
-.box-modal-asset-add:hover {
-    border-color: rgba(var(--ink-rgb), 0.5);
-    color: var(--ink);
-}
-
-.box-modal-asset-add:has(input:disabled) {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.box-modal-asset-progress {
-    height: 4px;
-    border-radius: 2px;
-    background: rgba(var(--ink-rgb), 0.12);
-    overflow: hidden;
-}
-
-.box-modal-asset-progress-fill {
-    height: 100%;
-    background: var(--ink);
-    border-radius: 2px;
-    transition: width 0.15s ease;
-}
-
-.box-modal-asset-error {
+    gap: 6px;
+    padding: 10px 14px;
+    background: rgba(var(--ink-rgb, 255, 255, 255), 0.06);
+    border: 1px dashed rgba(var(--ink-rgb, 255, 255, 255), 0.2);
+    border-radius: 8px;
+    color: var(--accent, #4FA98E);
     font-size: 12px;
-    color: var(--error-text);
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    transition: all 0.15s ease;
 }
+
+.box-modal-upload-btn:hover {
+    background: rgba(var(--accent-rgb, 79, 169, 142), 0.1);
+    border-color: var(--accent, #4FA98E);
+}
+
+.box-modal-upload-btn input[type="file"] {
+    display: none;
+}
+
+.box-modal-edit-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.box-modal-save-success {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(79, 169, 142, 0.15);
+    border: 1px solid rgba(79, 169, 142, 0.35);
+    border-radius: var(--radius-sm, 8px);
+    color: var(--accent, #4FA98E);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    animation: fadeInSaveSuccess 0.25s ease-out;
+}
+
+@keyframes fadeInSaveSuccess {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.create-box-price-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.create-box-price-input-wrap input {
+    width: 100%;
+    padding-right: 44px;
+    box-sizing: border-box;
+}
+
+.price-coin-suffix {
+    position: absolute;
+    right: 14px;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+}
+

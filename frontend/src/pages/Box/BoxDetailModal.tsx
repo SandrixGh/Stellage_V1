@@ -4,9 +4,22 @@ import { useNavigate } from "react-router-dom";
 import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { AssetViewer } from "../../components/Stellage/AssetViewer";
-import { AssetLightbox } from "../../components/Stellage/AssetLightbox";
-import { LikeButton } from "../../components/Stellage/LikeButton";
-import { Select } from "../../components/UI/Select";
+import { StellageVideoLightbox } from "../../components/Stellage/StellageVideoPlayer";
+import { StellageImageLightbox } from "../../components/Stellage/StellageImageLightbox";
+import { BoxHistoryTimeline, type BoxHistoryEvent } from "../../components/Stellage/BoxHistoryTimeline";
+import { CommentSection } from "../../components/Stellage/CommentSection";
+import { SmartContentInspector } from "../../components/Stellage/SmartContentInspector";
+import {
+    BoxIcon,
+    SpecsIcon,
+    HistoryIcon,
+    CommentsIcon,
+    LockIcon,
+    EyeIcon,
+    UnsealIcon,
+} from "../../components/UI/Icons";
+import { LikeButton } from "../../components/UI/LikeButton";
+import { StellaCoinIcon } from "../../components/UI/StellaCoinIcon";
 import { UserPicker } from "../../components/UI/UserPicker";
 import type { PublicUser } from "../../types/Profile/profile";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -15,8 +28,6 @@ import { rarityKey } from "../../utils/rarity";
 import { resolveRarityVisual, resolveBoxContentType } from "../../data/mockTemplates";
 import { useBodyScrollLock } from "../../hooks/useBodyScrollLock";
 import {
-    ACCEPT_ATTR,
-    MAX_ASSETS_PER_BOX,
     MAX_BYTES,
     deleteAsset,
     formatBytes,
@@ -41,20 +52,6 @@ const VISIBILITY_LABEL: Record<Box["is_public"], string> = {
     private: "Приватная",
 };
 
-/** Длиннее — текст не показываем в модалке целиком (обрезаем, полностью — в
- * детальном виде), чтобы быстрый просмотр оставался компактным. */
-const TEXT_PREVIEW_LIMIT = 280;
-
-const CURRENCIES = ["RUB", "USD", "EUR", "GBP", "CNY", "JPY", "KZT", "BYN", "TRY"];
-const CURRENCY_OPTIONS = CURRENCIES.map((c) => ({ value: c, label: c }));
-
-const RARITY_OPTIONS = [
-    { value: "common", label: "Common" },
-    { value: "rare", label: "Rare" },
-    { value: "golden", label: "Golden" },
-    { value: "developer's", label: "Developer's" },
-];
-
 const formatDate = (iso?: string) => {
     if (!iso) return "—";
     try {
@@ -68,15 +65,11 @@ const formatDate = (iso?: string) => {
     }
 };
 
-/**
- * Модалка просмотра коробки на полке: визуал, метаданные шаблона и содержимое
- * (текст + S3-ассеты через короткоживущие presigned-ссылки). Владельцу
- * доступны действия — редактировать (только создателю), снять с полки, удалить.
- */
 export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const navigate = useNavigate();
     const user = useAuthStore((s) => s.user);
     const isSuperuser = useAuthStore((s) => s.user?.is_superuser ?? false);
+
     const updateBox = useStellageStore((s) => s.updateBox);
     const giftBox = useStellageStore((s) => s.giftBox);
     const unsealBox = useStellageStore((s) => s.unsealBox);
@@ -84,39 +77,35 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const moveBox = useStellageStore((s) => s.moveBox);
     const deleteBox = useStellageStore((s) => s.deleteBox);
 
-    // Локальная копия — чтобы после сохранения сразу показать обновлённую коробку,
-    // не дожидаясь, пока родитель переоткроет модалку.
     const [current, setCurrent] = useState<Box | null>(box);
     const [mode, setMode] = useState<"view" | "edit">("view");
+    const [activeTab, setActiveTab] = useState<"content" | "specs" | "history" | "comments">("content");
     const [busy, setBusy] = useState(false);
-    // Индекс ассета, открытого в полноэкранном лайтбоксе (null — закрыт).
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-    // Проигрывается разовая анимация вскрытия — контент раскрываем после неё.
     const [unsealing, setUnsealing] = useState(false);
-    // Диалог дарения: открыт ли, выбранный получатель, ошибка.
+
+    // Gift drawer state
     const [giftOpen, setGiftOpen] = useState(false);
     const [giftRecipient, setGiftRecipient] = useState<PublicUser | null>(null);
     const [giftError, setGiftError] = useState<string | null>(null);
 
-    // Поля формы редактирования.
+    // Edit form state
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("0");
-    const [currency, setCurrency] = useState("RUB");
     const [rarity, setRarity] = useState("common");
     const [contentText, setContentText] = useState("");
-
-    // Загрузка/удаление ассетов (режим редактирования).
     const [uploadProgress, setUploadProgress] = useState<number | null>(null);
     const [assetError, setAssetError] = useState<string | null>(null);
+    const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+    const [historyEvents, setHistoryEvents] = useState<BoxHistoryEvent[]>([]);
 
-    // Блокируем прокрутку страницы, пока модалка открыта (current != null).
     useBodyScrollLock(!!current);
 
-    // Синхронизируем локальную копию и сбрасываем режим при смене коробки.
     useEffect(() => {
         setCurrent(box);
         setMode("view");
+        setActiveTab("content");
         setLightboxIndex(null);
         setUnsealing(false);
         setGiftOpen(false);
@@ -126,7 +115,6 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
 
     useEffect(() => {
         if (!current) return;
-        // Пока открыт лайтбокс, Esc гасит его (свой обработчик), а не модалку.
         const onKey = (e: KeyboardEvent) => {
             if (e.key === "Escape" && lightboxIndex === null) onClose();
         };
@@ -134,28 +122,22 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
         return () => window.removeEventListener("keydown", onKey);
     }, [current, onClose, lightboxIndex]);
 
-    // Без коробки или её шаблона рендерить модалку нечем — не падаем на
-    // доступе к template.* (иначе краш всплывёт в ErrorBoundary).
     if (!current || !current.template) return null;
 
     const { template } = current;
     const key = rarityKey(template.rarity);
     const { rarityGlow: glow, boxColor } = resolveRarityVisual(template.rarity ?? "common");
-    const contentTextValue =
-        typeof current.content?.text === "string" ? current.content.text : "";
+    const contentTextValue = typeof current.content?.text === "string" ? current.content.text : "";
     const assets = current.assets ?? [];
 
     const isOwner = !!user && current.user_id === user.id;
-    // Поля шаблона может править только создатель коробки (не покупатель каталожной).
-    const canEdit = isOwner && !!template.creator_id && template.creator_id === user?.id;
+    const isCreator = !!user && !!template.creator_id && template.creator_id === user.id;
+    const canEdit = isCreator;
     const onShelf = current.shelf_id !== null;
-    // Запечатанность — коллекционный статус («не вскрыто»), а не замок на
-    // контент: владелец видит содержимое всегда, распечатка — это ритуал/событие.
     const isSealed = current.is_sealed === "sealed";
-    // Длинный текст в модалке не разворачиваем — читается в детальном виде.
-    const longText = contentTextValue.length > TEXT_PREVIEW_LIMIT;
+    const canViewContent = !isSealed || isOwner || isCreator;
+    const priceCoins = Math.round(Number(template.price) || 0);
 
-    // Уходим на детальную страницу экземпляра коробки (второй режим просмотра).
     const goToDetail = () => {
         onClose();
         navigate(`/box/instance/${current.id}`);
@@ -164,13 +146,9 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const startEdit = () => {
         setTitle(template.title);
         setDescription(template.description ?? "");
-        setPrice(String(template.price ?? "0"));
-        setCurrency((template.currency ?? "RUB").toUpperCase());
+        setPrice(String(Math.round(Number(template.price) || 0)));
         setRarity((template.rarity ?? "common").toLowerCase());
-        const text = current.content && typeof current.content.text === "string"
-            ? current.content.text
-            : "";
-        setContentText(text);
+        setContentText(contentTextValue);
         setMode("edit");
     };
 
@@ -178,28 +156,36 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
         const trimmed = title.trim();
         if (trimmed.length < 1 || busy) return;
         setBusy(true);
+        setSaveSuccess(null);
         const text = contentText.trim();
         const updated = await updateBox(current.id, {
             title: trimmed,
             description: description.trim() || null,
-            price: Number(price) || 0,
-            currency,
+            price: Math.max(0, Math.floor(Number(price) || 0)),
+            currency: "stella",
             rarity: isSuperuser ? rarity : undefined,
             content: text ? { text } : null,
         });
         setBusy(false);
         if (updated) {
             setCurrent(updated);
+            setSaveSuccess("Изменения успешно сохранены!");
+            setTimeout(() => setSaveSuccess(null), 4000);
             setMode("view");
+            const editEvent: BoxHistoryEvent = {
+                id: `edit-${Date.now()}`,
+                eventType: "UPDATED",
+                actorName: user?.username || template.owner_username || "Автор",
+                timestamp: new Date().toISOString(),
+                details: "Содержимое и параметры коробки изменены автором",
+            };
+            setHistoryEvents((prev) => [editEvent, ...prev]);
         }
     };
 
     const handleUnseal = async () => {
         if (busy || unsealing) return;
         setUnsealing(true);
-        // Применяем свежий снимок сразу, как только бэкенд подтвердил переход
-        // (стор параллельно ресинхронизирует инвентарь и полку). Анимацию просто
-        // снимаем по таймеру — состояние коробки за ней больше не «отстаёт».
         const fresh = await unsealBox(current.id);
         if (fresh) setCurrent(fresh);
         setTimeout(() => setUnsealing(false), 500);
@@ -246,8 +232,29 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
 
     const handleAddAsset = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        e.target.value = ""; // позволяем выбрать тот же файл повторно
+        e.target.value = "";
         if (!file || busy || uploadProgress !== null) return;
+
+        // Если это файл кода / текста / markdown / LaTeX — считываем его содержимое в редактор контента
+        if (
+            file.type.startsWith("text/") ||
+            file.type.includes("latex") ||
+            file.type.includes("tex") ||
+            /\.(py|js|ts|tsx|jsx|cpp|c|h|cs|java|json|md|txt|html|css|latex|tex|sql|sh|yaml|yml)$/i.test(file.name)
+        ) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const text = event.target?.result as string;
+                if (text) {
+                    setContentText((prev) => (prev ? prev + "\n\n" + text : text));
+                    setAssetError(null);
+                    setSaveSuccess(`Текст файла «${file.name}» успешно добавлен в редактор!`);
+                    setTimeout(() => setSaveSuccess(null), 4000);
+                }
+            };
+            reader.readAsText(file);
+            return;
+        }
 
         const kind = kindForMime(file.type);
         if (!kind) {
@@ -262,7 +269,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
         setAssetError(null);
         setUploadProgress(0);
         try {
-            await uploadBoxAsset(current.id, file, setUploadProgress);
+            await uploadBoxAsset(current.id, file, (fraction) => setUploadProgress(Math.round(fraction * 100)));
             await syncCurrent();
         } catch (err) {
             setAssetError(uploadErrorMessage(err));
@@ -281,369 +288,461 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
         }
     };
 
+    const activeAsset = lightboxIndex !== null ? assets[lightboxIndex] : null;
+
     return createPortal(
         <>
-        <div className="box-modal-overlay" onClick={onClose}>
-            <div className="box-modal" onClick={(e) => e.stopPropagation()}>
-                <button
-                    type="button"
-                    className="box-modal-close"
-                    aria-label="Закрыть"
-                    onClick={onClose}
-                >
-                    ✕
-                </button>
+            <div className="box-modal-overlay" onClick={onClose}>
+                <div className="box-modal" onClick={(e) => e.stopPropagation()}>
+                    <button
+                        type="button"
+                        className="box-modal-close"
+                        aria-label="Закрыть"
+                        onClick={onClose}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
 
-                <div
-                    className={`box-modal-visual${unsealing ? " is-unsealing" : ""}${
-                        isSealed && !unsealing ? " is-sealed" : ""
-                    }`}
-                >
-                    <WireframeBox size={150} rarityGlow={glow} color={boxColor} contentType={resolveBoxContentType(current)} />
-                </div>
+                    {/* Top Visual Wireframe & Rarity Glow */}
+                    <div
+                        className={`box-modal-visual${unsealing ? " is-unsealing" : ""}${
+                            isSealed && !unsealing ? " is-sealed" : ""
+                        }`}
+                    >
+                        <WireframeBox
+                            size={180}
+                            rarityGlow={glow}
+                            color={boxColor}
+                            contentType={resolveBoxContentType(current)}
+                            variant="2.5d-slot"
+                            coverUrl={(current as any).cover_url || (current as any).preview_url || null}
+                        />
+                    </div>
 
-                {mode === "view" ? (
-                    <div className="box-modal-body">
-                        <div className="box-modal-head">
-                            <h2 className="box-modal-title">{template.title}</h2>
-                            <span
-                                className={`box-modal-rarity rarity-tag-${key}`}
-                                style={{ color: boxColor }}
-                            >
-                                {template.rarity}
-                            </span>
-                        </div>
-
-                        {template.description && (
-                            <p className="box-modal-desc">{template.description}</p>
-                        )}
-
-                        <dl className="box-modal-meta">
-                            <div className="box-modal-meta-row">
-                                <dt>Цена</dt>
-                                <dd>{template.price} {template.currency}</dd>
+                    {mode === "view" ? (
+                        <div className="box-modal-body">
+                            {saveSuccess && (
+                                <div className="box-modal-save-success">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                    <span>{saveSuccess}</span>
+                                </div>
+                            )}
+                            {/* Title & Price Header */}
+                            <div className="box-modal-head">
+                                <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                                    <h2 className="box-modal-title">{template.title}</h2>
+                                    <LikeButton
+                                        instanceId={current.id}
+                                        initialLikesCount={current.likes_count ?? 0}
+                                        initialIsLiked={current.is_liked ?? false}
+                                    />
+                                </div>
+                                <div className="box-modal-price-badge">
+                                    <StellaCoinIcon size={18} />
+                                    <span>{priceCoins}</span>
+                                </div>
                             </div>
-                            <div className="box-modal-meta-row">
-                                <dt>Серийный номер</dt>
-                                <dd>#{current.serial_number}</dd>
+
+                            <div className="box-modal-subhead">
+                                <span className={`box-modal-rarity rarity-tag-${key}`} style={{ color: boxColor }}>
+                                    {template.rarity || "COMMON"}
+                                </span>
+                                <span className="dot">•</span>
+                                <span className="box-serial">#{current.serial_number}</span>
+                                <span className="dot">•</span>
+                                <span className="box-seal-status">{SEALED_LABEL[current.is_sealed]}</span>
                             </div>
-                            <div className="box-modal-meta-row">
-                                <dt>Статус</dt>
-                                <dd className="box-modal-status-dd">
-                                    <span>
-                                        {SEALED_LABEL[current.is_sealed]} · {VISIBILITY_LABEL[current.is_public]}
-                                    </span>
-                                    {isOwner && isSealed && (
-                                        // Распечатывание — необратимое коллекционное
-                                        // событие (как вскрыть Funko Pop/Lego).
-                                        <button
-                                            type="button"
-                                            className="box-modal-unseal-inline"
-                                            onClick={handleUnseal}
-                                            disabled={busy || unsealing}
-                                            title="Распечатать — коробка перестанет быть «запечатанной коллекционной». Действие необратимо."
-                                        >
-                                            {unsealing ? "Распечатываем…" : "Распечатать"}
-                                        </button>
+
+                            {template.description && (
+                                <p className="box-modal-desc">{template.description}</p>
+                            )}
+
+                            {/* Main Navigation Tabs */}
+                            <div className="box-modal-tabs">
+                                <button
+                                    className={`box-modal-tab ${activeTab === "content" ? "active" : ""}`}
+                                    onClick={() => setActiveTab("content")}
+                                >
+                                    <BoxIcon size={16} />
+                                    <span>Содержимое</span>
+                                </button>
+                                <button
+                                    className={`box-modal-tab ${activeTab === "specs" ? "active" : ""}`}
+                                    onClick={() => setActiveTab("specs")}
+                                >
+                                    <SpecsIcon size={16} />
+                                    <span>Информация</span>
+                                </button>
+                                <button
+                                    className={`box-modal-tab ${activeTab === "history" ? "active" : ""}`}
+                                    onClick={() => setActiveTab("history")}
+                                >
+                                    <HistoryIcon size={16} />
+                                    <span>История</span>
+                                </button>
+                                <button
+                                    className={`box-modal-tab ${activeTab === "comments" ? "active" : ""}`}
+                                    onClick={() => setActiveTab("comments")}
+                                >
+                                    <CommentsIcon size={16} />
+                                    <span>Комментарии</span>
+                                </button>
+                            </div>
+
+                            {/* TAB 1: CONTENT */}
+                            {activeTab === "content" && (
+                                <div className="box-modal-tab-pane">
+                                    {!canViewContent ? (
+                                        <div className="sealed-secret-card">
+                                            <LockIcon size={32} />
+                                            <h4>Запечатанный модуль</h4>
+                                            <p>
+                                                Содержимое скрыто автором @{template.owner_username || "Stellage"}.
+                                                Заглянуть внутрь сможет только покупатель после распаковки.
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {isSealed && isCreator && (
+                                                <div className="creator-sealed-notice">
+                                                    <EyeIcon size={16} />
+                                                    <span><strong>Право создателя:</strong> Коробка запечатана для покупателей, но доступна вам как автору.</span>
+                                                </div>
+                                            )}
+
+                                            {isOwner && isSealed && (
+                                                <div className="unseal-action-banner">
+                                                    <div className="banner-text">
+                                                        <strong>Коробка запечатана</strong>
+                                                        <span>Распечатайте, чтобы навсегда раскрыть контент</span>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        className="unseal-primary-btn"
+                                                        onClick={handleUnseal}
+                                                        disabled={busy || unsealing}
+                                                    >
+                                                        <UnsealIcon size={16} />
+                                                        <span>{unsealing ? "Распаковка…" : "Распечатать"}</span>
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {/* Text & Code Content */}
+                                            {contentTextValue && (
+                                                <SmartContentInspector content={contentTextValue} boxTitle={template.title} />
+                                            )}
+
+                                            {/* Media Assets */}
+                                            {assets.length > 0 && (
+                                                <div className="box-modal-assets-grid">
+                                                    {assets.map((asset) => (
+                                                        <div key={asset.id} className="box-modal-asset-item">
+                                                            <button
+                                                                type="button"
+                                                                className="box-modal-thumb-btn"
+                                                                onClick={() => setLightboxIndex(assets.indexOf(asset))}
+                                                            >
+                                                                <AssetViewer asset={asset} thumb />
+                                                                <span className="asset-name-label">{asset.original_name}</span>
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {!contentTextValue && assets.length === 0 && (
+                                                <p className="box-modal-content-empty">
+                                                    {isOwner
+                                                        ? "Коробка пока пуста."
+                                                        : "Содержимое скрыто или коробка пуста."}
+                                                </p>
+                                            )}
+                                        </>
                                     )}
-                                </dd>
-                            </div>
-                            <div className="box-modal-meta-row">
-                                <dt>Добавлена</dt>
-                                <dd>{formatDate(current.created_at)}</dd>
-                            </div>
-                        </dl>
+                                </div>
+                            )}
 
-                        <div className="box-modal-like">
-                            <LikeButton instanceId={current.id} canLike={!!user} />
-                        </div>
+                            {/* TAB 2: SPECS */}
+                            {activeTab === "specs" && (
+                                <div className="box-modal-tab-pane">
+                                    <dl className="box-modal-meta">
+                                        <div className="box-modal-meta-row">
+                                            <dt>Стоимость</dt>
+                                            <dd className="price-dd">
+                                                <StellaCoinIcon size={16} />
+                                                <span>{priceCoins} StellaCoins</span>
+                                            </dd>
+                                        </div>
+                                        <div className="box-modal-meta-row">
+                                            <dt>Серийный экземпляр</dt>
+                                            <dd>#{current.serial_number}</dd>
+                                        </div>
+                                        <div className="box-modal-meta-row">
+                                            <dt>Статус герметичности</dt>
+                                            <dd>{SEALED_LABEL[current.is_sealed]}</dd>
+                                        </div>
+                                        <div className="box-modal-meta-row">
+                                            <dt>Доступность</dt>
+                                            <dd>{VISIBILITY_LABEL[current.is_public]}</dd>
+                                        </div>
+                                        <div className="box-modal-meta-row">
+                                            <dt>Автор / Создатель</dt>
+                                            <dd>@{template.owner_username || "Stellage"}</dd>
+                                        </div>
+                                        <div className="box-modal-meta-row">
+                                            <dt>Дата минта</dt>
+                                            <dd>{formatDate(current.created_at)}</dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                            )}
 
-                        <div className="box-modal-content">
-                            <h3 className="box-modal-content-title">Содержимое</h3>
-                            {/* Запечатанность — коллекционное состояние («не вскрыто»),
-                                а НЕ замок на контент: владелец видит содержимое всегда.
-                                Быстрый просмотр показывает контент компактной сеткой
-                                мелких превью; детально — на отдельной странице. */}
-                            {longText ? (
-                                <>
-                                    <p className="box-modal-content-text is-clamped">
-                                        {contentTextValue.slice(0, TEXT_PREVIEW_LIMIT)}…
-                                    </p>
+                            {/* TAB 3: HISTORY */}
+                            {activeTab === "history" && (
+                                <div className="box-modal-tab-pane">
+                                    <BoxHistoryTimeline
+                                        createdDate={current.created_at}
+                                        creatorUsername={template.owner_username || "Stellage"}
+                                        ownerUsername={template.owner_username ?? undefined}
+                                        isSealed={isSealed}
+                                        priceCoins={priceCoins}
+                                        events={historyEvents}
+                                    />
+                                </div>
+                            )}
+
+                            {/* TAB 4: COMMENTS */}
+                            {activeTab === "comments" && (
+                                <div className="box-modal-tab-pane">
+                                    <CommentSection instanceId={current.id} />
+                                </div>
+                            )}
+
+                            {/* Footer Actions Bar */}
+                            <div className="box-modal-footer">
+                                <div className="box-modal-footer-btns">
                                     <button
                                         type="button"
-                                        className="box-modal-readmore"
+                                        className="box-modal-btn primary"
                                         onClick={goToDetail}
                                     >
-                                        Читать полностью в детальном виде
+                                        Открыть дашборд →
                                     </button>
-                                </>
-                            ) : (
-                                contentTextValue && (
-                                    <p className="box-modal-content-text">{contentTextValue}</p>
-                                )
-                            )}
-                            {assets.length > 0 && (
-                                <div className="box-modal-thumbs">
-                                    {assets.map((asset, i) => (
-                                        <button
-                                            key={asset.id}
-                                            type="button"
-                                            className="box-modal-thumb"
-                                            onClick={() => setLightboxIndex(i)}
-                                            aria-label={`Открыть «${asset.original_name}»`}
-                                        >
-                                            <AssetViewer asset={asset} thumb />
-                                            {asset.kind === "video" && (
-                                                <span className="box-modal-thumb-play" aria-hidden="true">▶</span>
+
+                                    {isOwner && (
+                                        <>
+                                            {canEdit && (
+                                                <button
+                                                    type="button"
+                                                    className="box-modal-btn secondary"
+                                                    onClick={startEdit}
+                                                    disabled={busy}
+                                                >
+                                                    Изменить
+                                                </button>
                                             )}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                            {!contentTextValue && assets.length === 0 && (
-                                <p className="box-modal-content-empty">
-                                    {isOwner
-                                        ? "Коробка пока пуста."
-                                        : "Содержимое скрыто или коробка пуста."}
-                                </p>
-                            )}
-                        </div>
-
-                        <button
-                            type="button"
-                            className="box-modal-btn ghost box-modal-detail-btn"
-                            onClick={goToDetail}
-                        >
-                            Посмотреть детальнее →
-                        </button>
-
-                        {isOwner && (
-                            <>
-                                <div className="box-modal-actions">
-                                    {canEdit && (
-                                        <button
-                                            type="button"
-                                            className="box-modal-btn ghost"
-                                            onClick={startEdit}
-                                            disabled={busy}
-                                        >
-                                            Редактировать
-                                        </button>
-                                    )}
-                                    {onShelf && (
-                                        <button
-                                            type="button"
-                                            className="box-modal-btn ghost"
-                                            onClick={handleRemoveFromShelf}
-                                            disabled={busy}
-                                        >
-                                            Снять с полки
-                                        </button>
-                                    )}
-                                    <button
-                                        type="button"
-                                        className="box-modal-btn ghost"
-                                        onClick={() => setGiftOpen((v) => !v)}
-                                        disabled={busy}
-                                    >
-                                        Подарить
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="box-modal-btn danger"
-                                        onClick={handleDelete}
-                                        disabled={busy}
-                                    >
-                                        Удалить
-                                    </button>
-                                </div>
-
-                                {giftOpen && (
-                                    <div className="box-modal-gift">
-                                        <p className="box-modal-gift-hint">
-                                            Подарить коробку — она перейдёт к получателю и
-                                            исчезнет из вашего инвентаря. Действие необратимо.
-                                        </p>
-                                        <div className="box-modal-gift-row">
-                                            <UserPicker
-                                                value={giftRecipient}
-                                                onSelect={setGiftRecipient}
-                                                excludeUserId={user?.id}
-                                                placeholder="Найдите получателя по имени или @юзернейму"
-                                            />
+                                            {onShelf && (
+                                                <button
+                                                    type="button"
+                                                    className="box-modal-btn secondary"
+                                                    onClick={handleRemoveFromShelf}
+                                                    disabled={busy}
+                                                >
+                                                    Снять
+                                                </button>
+                                            )}
                                             <button
                                                 type="button"
-                                                className="box-modal-btn primary"
-                                                onClick={handleGift}
-                                                disabled={busy || !giftRecipient}
+                                                className="box-modal-btn secondary"
+                                                onClick={() => setGiftOpen((v) => !v)}
+                                                disabled={busy}
                                             >
-                                                {busy ? "Дарим…" : "Подтвердить"}
+                                                Подарить
                                             </button>
-                                        </div>
-                                        {giftError && (
-                                            <span className="box-modal-asset-error">{giftError}</span>
-                                        )}
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Gift Dialog Drawer */}
+                            {isOwner && giftOpen && (
+                                <div className="box-modal-gift">
+                                    <h4 className="box-modal-gift-title">Кому передать коробку?</h4>
+                                    <UserPicker
+                                        value={giftRecipient}
+                                        onSelect={setGiftRecipient}
+                                        placeholder="Найти пользователя по логину…"
+                                    />
+                                    {giftError && <p className="box-modal-asset-error">{giftError}</p>}
+                                    <div className="box-modal-gift-actions">
+                                        <button
+                                            type="button"
+                                            className="box-modal-btn primary"
+                                            onClick={handleGift}
+                                            disabled={busy || !giftRecipient}
+                                        >
+                                            Подарить сейчас
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="box-modal-btn ghost"
+                                            onClick={() => setGiftOpen(false)}
+                                            disabled={busy}
+                                        >
+                                            Отмена
+                                        </button>
                                     </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                ) : (
-                    <div className="box-modal-body">
-                        <h2 className="box-modal-edit-title">Редактирование коробки</h2>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        /* EDIT MODE */
+                        <form
+                            className="box-modal-edit"
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                handleSave();
+                            }}
+                        >
+                            <h3 className="box-modal-edit-title">Редактирование параметров</h3>
 
-                        <label className="box-modal-field">
-                            <span className="box-modal-label">Название</span>
-                            <input
-                                className="box-modal-input"
-                                type="text"
-                                value={title}
-                                maxLength={100}
-                                onChange={(e) => setTitle(e.target.value)}
-                                autoFocus
-                            />
-                        </label>
-
-                        <label className="box-modal-field">
-                            <span className="box-modal-label">Описание</span>
-                            <textarea
-                                className="box-modal-input box-modal-textarea"
-                                value={description}
-                                maxLength={100}
-                                rows={2}
-                                onChange={(e) => setDescription(e.target.value)}
-                            />
-                        </label>
-
-                        <div className="box-modal-row">
                             <label className="box-modal-field">
-                                <span className="box-modal-label">Цена</span>
+                                <span>Название</span>
                                 <input
-                                    className="box-modal-input"
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    value={price}
-                                    onChange={(e) => setPrice(e.target.value)}
+                                    type="text"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    maxLength={100}
+                                    required
                                 />
                             </label>
-                            <div className="box-modal-field">
-                                <span className="box-modal-label">Валюта</span>
-                                <Select
-                                    value={currency}
-                                    options={CURRENCY_OPTIONS}
-                                    onChange={setCurrency}
-                                    ariaLabel="Валюта"
+
+                            <label className="box-modal-field">
+                                <span>Описание</span>
+                                <textarea
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    maxLength={100}
+                                    rows={2}
                                 />
-                            </div>
-                        </div>
+                            </label>
 
-                        {isSuperuser && (
-                            <div className="box-modal-field">
-                                <span className="box-modal-label">Редкость</span>
-                                <Select
-                                    value={rarity}
-                                    options={RARITY_OPTIONS}
-                                    onChange={setRarity}
-                                    ariaLabel="Редкость"
-                                />
-                            </div>
-                        )}
-
-                        <label className="box-modal-field">
-                            <span className="box-modal-label">Текст</span>
-                            <textarea
-                                className="box-modal-input box-modal-textarea"
-                                value={contentText}
-                                rows={4}
-                                placeholder="Текст, ссылка или заметка"
-                                onChange={(e) => setContentText(e.target.value)}
-                            />
-                        </label>
-
-                        <div className="box-modal-field">
-                            <span className="box-modal-label">Файлы</span>
-
-                            {assets.length > 0 && (
-                                <ul className="box-modal-asset-list">
-                                    {assets.map((asset) => (
-                                        <li key={asset.id} className="box-modal-asset-item">
-                                            <span className="box-modal-asset-name" title={asset.original_name}>
-                                                {asset.original_name}
-                                            </span>
-                                            <span className="box-modal-asset-size">
-                                                {formatBytes(asset.size_bytes)}
-                                            </span>
-                                            <button
-                                                type="button"
-                                                className="box-modal-asset-remove"
-                                                aria-label="Удалить файл"
-                                                onClick={() => handleDeleteAsset(asset.id)}
-                                                disabled={busy || uploadProgress !== null}
-                                            >
-                                                ✕
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-
-                            {uploadProgress !== null ? (
-                                <div className="box-modal-asset-progress">
-                                    <div
-                                        className="box-modal-asset-progress-fill"
-                                        style={{ width: `${Math.round(uploadProgress * 100)}%` }}
-                                    />
-                                </div>
-                            ) : (
-                                <label className="box-modal-asset-add">
+                            <label className="box-modal-field">
+                                <span>Цена в StellaCoins</span>
+                                <div className="create-box-price-input-wrap">
                                     <input
-                                        type="file"
-                                        accept={ACCEPT_ATTR}
-                                        hidden
-                                        onChange={handleAddAsset}
-                                        disabled={busy || assets.length >= MAX_ASSETS_PER_BOX}
+                                        type="text"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        value={price}
+                                        onChange={(e) => setPrice(e.target.value.replace(/\D/g, ""))}
+                                        placeholder="0"
                                     />
-                                    + Добавить фото или видео
-                                </label>
-                            )}
+                                    <span className="price-coin-suffix">
+                                        <StellaCoinIcon size={18} />
+                                    </span>
+                                </div>
+                            </label>
 
-                            {assetError && (
-                                <span className="box-modal-asset-error">{assetError}</span>
-                            )}
-                        </div>
+                            <label className="box-modal-field">
+                                <span>Код / Markdown / LaTeX / Текст внутри коробки</span>
+                                <textarea
+                                    value={contentText}
+                                    onChange={(e) => setContentText(e.target.value)}
+                                    placeholder="Введите или вставьте Python код, Markdown, LaTeX формулы ($$\frac{a}{b}$$) или текст..."
+                                    rows={6}
+                                />
+                            </label>
 
-                        <div className="box-modal-actions">
-                            <button
-                                type="button"
-                                className="box-modal-btn ghost"
-                                onClick={() => setMode("view")}
-                                disabled={busy}
-                            >
-                                Отмена
-                            </button>
-                            <button
-                                type="button"
-                                className="box-modal-btn primary"
-                                onClick={handleSave}
-                                disabled={busy || title.trim().length < 1}
-                            >
-                                {busy ? "Сохранение…" : "Сохранить"}
-                            </button>
-                        </div>
-                    </div>
-                )}
+                            {/* Asset Management */}
+                            <div className="box-modal-field">
+                                <span>Файлы и медиа-содержимое</span>
+                                {assets.length > 0 && (
+                                    <ul className="box-modal-assets-list">
+                                        {assets.map((asset) => (
+                                            <li key={asset.id} className="box-modal-asset-row">
+                                                <span className="box-modal-asset-name">{asset.original_name}</span>
+                                                <button
+                                                    type="button"
+                                                    className="box-modal-asset-del"
+                                                    onClick={() => handleDeleteAsset(asset.id)}
+                                                    disabled={busy || uploadProgress !== null}
+                                                >
+                                                    Удалить
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                                {assets.length < 5 && (
+                                    <label className="box-modal-upload-btn">
+                                        <span>+ Загрузить картинку, видео или файл кода (.py/.md/.txt)</span>
+                                        <input
+                                            type="file"
+                                            accept="image/*,video/*,.py,.js,.ts,.tsx,.jsx,.cpp,.c,.h,.cs,.java,.json,.md,.txt,.html,.css,.latex,.tex,.sql,.sh,.yaml,.yml"
+                                            onChange={handleAddAsset}
+                                            disabled={busy || uploadProgress !== null}
+                                        />
+                                    </label>
+                                )}
+                                {uploadProgress !== null && (
+                                    <div className="box-modal-progress">
+                                        Загрузка… {uploadProgress}%
+                                    </div>
+                                )}
+                                {assetError && <div className="box-modal-asset-error">{assetError}</div>}
+                            </div>
+
+                            <div className="box-modal-edit-actions">
+                                <button type="submit" className="box-modal-btn primary" disabled={busy}>
+                                    Сохранить
+                                </button>
+                                <button
+                                    type="button"
+                                    className="box-modal-btn secondary"
+                                    onClick={() => setMode("view")}
+                                    disabled={busy}
+                                >
+                                    Отмена
+                                </button>
+                                <button
+                                    type="button"
+                                    className="box-modal-btn danger"
+                                    onClick={handleDelete}
+                                    disabled={busy}
+                                >
+                                    Удалить коробку
+                                </button>
+                            </div>
+                        </form>
+                    )}
+                </div>
             </div>
-        </div>
 
-        {lightboxIndex !== null && assets.length > 0 && (
-            <AssetLightbox
-                assets={assets}
-                startIndex={lightboxIndex}
-                onClose={() => setLightboxIndex(null)}
-            />
-        )}
-        </>,
-        document.body
-    );
+            {/* Lightbox for Images & Videos */}
+            {activeAsset && activeAsset.kind === "video" && (
+                <StellageVideoLightbox
+                    assetId={activeAsset.id}
+                    title={activeAsset.original_name}
+                    onClose={() => setLightboxIndex(null)}
+                />
+            )}
+            {activeAsset && activeAsset.kind === "photo" && (
+                <StellageImageLightbox
+                    assetId={activeAsset.id}
+                    originalName={activeAsset.original_name}
+                    mime={activeAsset.mime ?? undefined}
+                    sizeBytes={activeAsset.size_bytes}
+                    createdAt={typeof activeAsset.created_at === "string" ? activeAsset.created_at : activeAsset.created_at ? String(activeAsset.created_at) : undefined}
+                    onClose={() => setLightboxIndex(null)}
+                />
+            )}
+        </>
+    , document.body);
 };
