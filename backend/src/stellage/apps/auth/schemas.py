@@ -51,6 +51,8 @@ class CreateUser(GetUserByEmail):
     hashed_password: str
     username: str | None = None
     invited_by_id: uuid.UUID | None = None
+    is_verified: bool = True
+    is_active: bool = True
 
 
 class UserReturnData(GetUserByID, GetUserByEmail, VerificationStatus):
