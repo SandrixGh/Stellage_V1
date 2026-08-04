@@ -20,6 +20,8 @@ from stellage.apps.boxes.templates.schemas import (
 )
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.enums.asset_status import AssetStatusEnum
+from stellage.database.enums.box_rarity import BoxRarity
+from stellage.database.enums.currency import CurrencyEnum
 from stellage.database.models import BoxAsset, BoxInstance, BoxTemplate
 
 
@@ -50,7 +52,7 @@ class BoxTemplateRepository:
             # от подделки авторства/выдачи шаблона за платформенный.
             dump = data.model_dump()
             if dump.get("rarity") is not None:
-                dump["rarity"] = BoxRarity(dump["rarity"]).name
+                dump["rarity"] = BoxRarity(dump["rarity"]).value
             if dump.get("currency") is not None:
                 dump["currency"] = CurrencyEnum(dump["currency"]).value
             query = (
