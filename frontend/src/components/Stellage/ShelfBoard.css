@@ -12,7 +12,7 @@
     border: 1px solid var(--glass-border);
     box-shadow: var(--shadow-glass), var(--glass-specular);
     overflow: visible;
-    touch-action: none;
+    touch-action: pan-y;
     box-sizing: border-box;
 }
 
@@ -179,18 +179,6 @@
     opacity: 0.4;
 }
 
-.shelf-board-empty {
-    position: absolute;
-    inset: 0;
-    margin: auto;
-    height: fit-content;
-    text-align: center;
-    color: var(--ink-secondary);
-    font-family: var(--font-body);
-    font-size: 14.5px;
-    padding: 0 24px;
-    pointer-events: none;
-}
 
 /* ===== STATIC CELL GRID LAYER ===== */
 .shelf-static-grid {

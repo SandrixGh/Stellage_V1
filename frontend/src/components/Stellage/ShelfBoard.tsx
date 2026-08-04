@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "./WireframeBox";
@@ -182,11 +182,33 @@ export const ShelfBoard = ({
     };
 
     const dragRafRef = useRef<number | null>(null);
+    const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const pendingTouchRef = useRef<{
+        id: string;
+        pointerId: number;
+        startX: number;
+        startY: number;
+        grabDx: number;
+        grabDy: number;
+    } | null>(null);
+
+    const clearLongPress = useCallback(() => {
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+        pendingTouchRef.current = null;
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (longPressTimerRef.current) {
+                clearTimeout(longPressTimerRef.current);
+            }
+        };
+    }, []);
 
     const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>, p: PlacedBox) => {
-        // Жест начинаем всегда — даже на read-only полке, чтобы по клику
-        // (без перетаскивания) можно было открыть коробку.
-        e.preventDefault();
         const el = boardRef.current;
         if (!el) return;
         const rect = el.getBoundingClientRect();
@@ -194,36 +216,96 @@ export const ShelfBoard = ({
         const boxTop = TOP_PADDING + p.row * rowHeight;
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        // Захват ставим на сам board (стабильный элемент), а не на e.target —
-        // иначе при ре-рендере коробки во время drag захват теряется и
-        // pointermove перестаёт приходить (перетаскивание «залипает»).
-        el.setPointerCapture?.(e.pointerId);
-        setDrag({
-            id: p.box.id,
-            pointerId: e.pointerId,
-            grabDx: x - boxLeft,
-            grabDy: y - boxTop,
-            x,
-            y,
-            startX: x,
-            startY: y,
-            moved: false,
-        });
+        const grabDx = x - boxLeft;
+        const grabDy = y - boxTop;
+
+        clearLongPress();
+
+        if (e.pointerType === "touch" || e.pointerType === "pen") {
+            // На сенсорных устройствах НЕ вызываем e.preventDefault() сразу,
+            // чтобы браузер мог свободно выполнять вертикальный скролл страницы.
+            pendingTouchRef.current = {
+                id: p.box.id,
+                pointerId: e.pointerId,
+                startX: x,
+                startY: y,
+                grabDx,
+                grabDy,
+            };
+
+            // Если полка редактируемая — запускаем таймер зажатия (long press).
+            if (editable) {
+                longPressTimerRef.current = setTimeout(() => {
+                    const pending = pendingTouchRef.current;
+                    if (!pending) return;
+
+                    // Зажатие сработало: активируем драг и вибрацию
+                    try {
+                        navigator?.vibrate?.(40);
+                    } catch {}
+                    el.setPointerCapture?.(pending.pointerId);
+
+                    setDrag({
+                        id: pending.id,
+                        pointerId: pending.pointerId,
+                        grabDx: pending.grabDx,
+                        grabDy: pending.grabDy,
+                        x: pending.startX,
+                        y: pending.startY,
+                        startX: pending.startX,
+                        startY: pending.startY,
+                        moved: true,
+                    });
+                    pendingTouchRef.current = null;
+                    longPressTimerRef.current = null;
+                }, 300);
+            }
+        } else {
+            // Мышь — классическое перетаскивание при сдвиге
+            e.preventDefault();
+            el.setPointerCapture?.(e.pointerId);
+            setDrag({
+                id: p.box.id,
+                pointerId: e.pointerId,
+                grabDx,
+                grabDy,
+                x,
+                y,
+                startX: x,
+                startY: y,
+                moved: false,
+            });
+        }
     };
 
     const handlePointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
-        if (!drag || e.pointerId !== drag.pointerId) return;
         const el = boardRef.current;
         if (!el) return;
         const rect = el.getBoundingClientRect();
         const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
         const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+
+        // Если ожидаем зажатие на тачскрине:
+        if (pendingTouchRef.current && pendingTouchRef.current.pointerId === e.pointerId) {
+            const dx = Math.abs(x - pendingTouchRef.current.startX);
+            const dy = Math.abs(y - pendingTouchRef.current.startY);
+            // Если палец сдвинулся больше чем на 8px до срабатывания зажатия — отменяем зажатие для скролла!
+            if (dx > 8 || dy > 8) {
+                clearLongPress();
+            }
+            return;
+        }
+
+        if (!drag || e.pointerId !== drag.pointerId) return;
+
+        if (e.cancelable) {
+            e.preventDefault();
+        }
+
         const moved =
             drag.moved ||
             Math.hypot(x - drag.startX, y - drag.startY) > DRAG_THRESHOLD;
 
-        // Используем requestAnimationFrame для троттлинга обновлений состояния
-        // на частоту кадров дисплея (60 FPS max), избегая лагов при перетаскивании.
         const nextX = editable ? x : drag.x;
         const nextY = editable ? y : drag.y;
 
@@ -241,13 +323,26 @@ export const ShelfBoard = ({
             dragRafRef.current = null;
         }
 
+        const pending = pendingTouchRef.current;
+        if (pending && pending.pointerId === e.pointerId) {
+            // Быстрый клик/тап по коробке
+            const current = placed.find((p) => p.box.id === pending.id);
+            clearLongPress();
+            if (current) {
+                onOpen?.(current.box);
+            }
+            return;
+        }
+
+        clearLongPress();
+
         if (!drag || e.pointerId !== drag.pointerId) return;
         const id = drag.id;
         const moved = drag.moved;
         const current = placed.find((p) => p.box.id === id);
         setDrag(null);
 
-        // Клик без перетаскивания — открываем коробку.
+        // Клик без перетаскивания (мышь) — открываем коробку.
         if (!moved) {
             if (current) onOpen?.(current.box);
             return;
@@ -393,11 +488,7 @@ export const ShelfBoard = ({
                 />
             )}
 
-            {placed.length === 0 && !studyLabels && (
-                <p className="shelf-board-empty">
-                    Пока здесь пусто. Время добавить первую коробку!
-                </p>
-            )}
+
         </div>
     );
 };
