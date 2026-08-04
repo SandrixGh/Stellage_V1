@@ -38,8 +38,8 @@ app.add_middleware(
     # чтобы прод-домен не приходилось зашивать в код и не забыть добавить.
     allow_origins=settings.cors_origins_list,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Health — вне /api.v1: инфраструктурный контракт для healthcheck'ов, его путь
