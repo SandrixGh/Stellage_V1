@@ -8,6 +8,10 @@ interface WireframeBoxProps {
     rarityGlow?: "rare" | "golden" | "dev" | null;
     /** Тип контента коробки — рисует глиф на передней грани (photo/video/text/…). */
     contentType?: string | null;
+    /** "2.5d-slot" (для сетки полок, без зазоров) или "3d-isometric" (для модального инспектора). По умолчанию: "2.5d-slot". */
+    variant?: "2.5d-slot" | "3d-isometric";
+    /** URL фотографии/наклейки для отрисовки на передней панели коробки */
+    coverUrl?: string | null;
 }
 
 type Point = { x: number; y: number };
@@ -54,8 +58,6 @@ const createVertices = () => {
 
 const V = createVertices();
 
-/* Tight viewBox around the cube's actual content bounds (+ stroke padding) so the
-   box fills the SVG instead of floating inside ~40% of empty margin. */
 const BOX_PAD = 4;
 const VB = (() => {
     const xs = Object.values(V).map((p) => p.x);
@@ -76,13 +78,6 @@ const norm = (dx: number, dy: number) => {
 };
 const f = (n: number) => Number(n.toFixed(2));
 
-/**
- * Builds one path string for a polyline whose corners are rounded with a
- * quadratic curve of radius `r`. Drawing each polyline as a single element
- * keeps the wireframe reading as one cohesive object and — crucially — means
- * overlapping strokes at a junction are rasterised once, so semi-transparent
- * lines no longer stack into a bright dot.
- */
 const roundedPath = (pts: Point[], r: number, closed = false) => {
     const n = pts.length;
     const at = (i: number) => pts[((i % n) + n) % n];
@@ -113,13 +108,8 @@ const roundedPath = (pts: Point[], r: number, closed = false) => {
 
 const seg = (a: Point, b: Point) => `M ${a.x},${a.y} L ${b.x},${b.y}`;
 
-// Corner radius (smaller = tighter corners, fewer artifacts)
 const CORNER_RADIUS = 1.5;
 
-/* ── Rarity aura ──────────────────────────────────────────────────────────
-   Неон переселён с интерфейса на сам товар: Common — чистые линии без свечения,
-   у редких коробок — цветная аура растущей силы. Цвет ауры = currentColor
-   (цвет редкости), поэтому она следует за темой автоматически. */
 const GRAD_BY_RARITY: Record<
     "common" | "rare" | "golden" | "dev",
     { stroke1: string; stroke2: string; opacity: number }
@@ -130,7 +120,6 @@ const GRAD_BY_RARITY: Record<
     dev: { stroke1: "#581C87", stroke2: "#A855F7", opacity: 0.95 },
 };
 
-/* ── Content glyph placement (front face «canvas») ── */
 const GLYPH_SCALE = 2.2;
 const GLYPH_STROKE = 1.8;
 const GLYPH_CENTER = {
@@ -139,13 +128,9 @@ const GLYPH_CENTER = {
 };
 const GLYPH_MIN_SIZE = 44;
 
-// Outer silhouette of the cube (single closed, rounded loop).
 const SILHOUETTE = roundedPath([V.D, V.A, V.E, V.F, V.G, V.C], CORNER_RADIUS, true);
-// Visible interior edges that meet at the front-top-right corner B.
 const INTERIOR = `${roundedPath([V.A, V.B, V.C], CORNER_RADIUS)} ${seg(V.B, V.F)}`;
-// The three hidden edges that meet at the back-bottom-left corner H.
 const HIDDEN = `${roundedPath([V.D, V.H, V.E], CORNER_RADIUS)} ${seg(V.H, V.G)}`;
-// Front face for the glassy fill (rounded rectangle).
 const FRONT_FILL = roundedPath([V.A, V.B, V.C, V.D], CORNER_RADIUS, true);
 const TOP_FILL = `M ${V.A.x},${V.A.y} L ${V.E.x},${V.E.y} L ${V.F.x},${V.F.y} L ${V.B.x},${V.B.y} Z`;
 const RIGHT_FILL = `M ${V.B.x},${V.B.y} L ${V.F.x},${V.F.y} L ${V.G.x},${V.G.y} L ${V.C.x},${V.C.y} Z`;
@@ -156,17 +141,148 @@ export const WireframeBox = memo(({
     size = 120,
     rarityGlow = null,
     contentType = null,
+    variant = "2.5d-slot",
+    coverUrl = null,
 }: WireframeBoxProps) => {
     const rarityKey = rarityGlow || "common";
     const rarityTheme = GRAD_BY_RARITY[rarityKey];
     
-    const strokeGradId = `wf-metal-grad-${rarityKey}`;
-    const clipId = `wf-front-clip`;
+    const strokeGradId = `wf-metal-grad-${rarityKey}-${variant}`;
+    const clipId = `wf-front-clip-${rarityKey}`;
+    const coverClipId = `wf-cover-clip-${rarityKey}`;
     const poolRadialId = `wf-pool-radial-${rarityKey}`;
-    const topGradId = `wf-top-grad`;
-    const frontGradId = `wf-front-grad`;
+    const topGradId = `wf-top-grad-${rarityKey}`;
+    const frontGradId = `wf-front-grad-${rarityKey}`;
     const glyph = size >= GLYPH_MIN_SIZE ? getContentGlyph(contentType) : null;
 
+    /* ── Render 2.5D Slot Mode (Unified Single-Color Engineering Box) ── */
+    if (variant === "2.5d-slot") {
+        // Tight viewBox math: 0 floating gap at bottom (slotH = fy + fh = 90)
+        const slotW = 176;
+        const slotH = 90;
+        
+        // Front face geometry: x=6, y=14, w=146, h=76, rx=2 (w=146 + dx=12 = 164 total width, fits inside 176 slot)
+        const fx = 6, fy = 14, fw = 146, fh = 76, rx = 2;
+        const dx = 12, dy = -8; // Depth offset
+
+        // Exact Vertices (100% match on all 4 corners, 0 offset errors)
+        const pFTL = `${fx},${fy}`;             // 6,14
+        const pFTR = `${fx + fw},${fy}`;        // 152,14
+        const pFBR = `${fx + fw},${fy + fh}`;   // 152,90
+
+        const pBTL = `${fx + dx},${fy + dy}`;         // 18,6
+        const pBTR = `${fx + fw + dx},${fy + dy}`;    // 164,6
+        const pBBR = `${fx + fw + dx},${fy + fh + dy}`;// 164,82
+
+        // Shaded chamfer polygons (Exact 4 vertices per face)
+        const topPoints = `${pFTL} ${pBTL} ${pBTR} ${pFTR}`;
+        const rightPoints = `${pFTR} ${pBTR} ${pBBR} ${pFBR}`;
+
+        // Continuous Back Depth Outline (Single path, 100% UNIFIED COLOR)
+        const backDepthOutline = `M ${pFTL} L ${pBTL} L ${pBTR} L ${pBBR} L ${pFBR}`;
+        const topRightEdge = `M ${pFTR} L ${pBTR}`;
+
+        return (
+            <svg
+                width={size}
+                height={size * (slotH / slotW)}
+                viewBox={`0 0 ${slotW} ${slotH}`}
+                preserveAspectRatio="xMidYMid meet"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className={`wireframe-box-25d ${className || ""}`}
+                style={{ color, maxWidth: "100%", height: "auto", overflow: "visible" }}
+            >
+                <defs>
+                    <linearGradient id={strokeGradId} x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor={rarityTheme.stroke1} />
+                        <stop offset="100%" stopColor={rarityTheme.stroke2} />
+                    </linearGradient>
+                    <linearGradient id={frontGradId} x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="currentColor" stopOpacity="0.08" />
+                        <stop offset="100%" stopColor="currentColor" stopOpacity="0.01" />
+                    </linearGradient>
+                    <clipPath id={coverClipId}>
+                        <rect x={fx + 4} y={fy + 4} width={fw - 8} height={fh - 8} rx={rx} />
+                    </clipPath>
+                </defs>
+
+                {/* ── Layer 1: Dark Subtle Chamfer Fills ── */}
+                <polygon points={topPoints} fill="currentColor" fillOpacity="0.04" stroke="none" />
+                <polygon points={rightPoints} fill="currentColor" fillOpacity="0.04" stroke="none" />
+
+                {/* ── Layer 2: Back Shell & Depth Edges (100% UNIFIED COLOR matching front) ── */}
+                <path
+                    d={backDepthOutline}
+                    stroke={`url(#${strokeGradId})`}
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+                <path
+                    d={topRightEdge}
+                    stroke={`url(#${strokeGradId})`}
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                />
+
+                {/* ── Layer 3: Dominant Front Glass Face (100% UNIFIED COLOR) ── */}
+                <rect
+                    x={fx}
+                    y={fy}
+                    width={fw}
+                    height={fh}
+                    rx={rx}
+                    fill={`url(#${frontGradId})`}
+                    stroke={`url(#${strokeGradId})`}
+                    strokeWidth="1.8"
+                />
+
+                {/* ── Layer 4: PHOTO STICKER OR LARGE CLEAR GLYPH ── */}
+                {coverUrl ? (
+                    <g>
+                        <rect
+                            x={fx + 4}
+                            y={fy + 4}
+                            width={fw - 8}
+                            height={fh - 8}
+                            rx={rx}
+                            fill="rgba(0,0,0,0.4)"
+                            stroke={rarityTheme.stroke2}
+                            strokeWidth="1"
+                            strokeDasharray="3 3"
+                        />
+                        <image
+                            href={coverUrl}
+                            x={fx + 5}
+                            y={fy + 5}
+                            width={fw - 10}
+                            height={fh - 10}
+                            preserveAspectRatio="xMidYMid slice"
+                            clipPath={`url(#${coverClipId})`}
+                        />
+                    </g>
+                ) : (
+                    glyph && (
+                        <g
+                            className="wf-glyph"
+                            transform={`translate(${fx + fw / 2} ${fy + fh / 2}) scale(3.5) translate(-12 -12)`}
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={1.5}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            opacity="0.95"
+                        >
+                            {glyph}
+                        </g>
+                    )
+                )}
+            </svg>
+        );
+    }
+
+    /* ── Render Full 3D Isometric Mode (For Modal/Inspector View) ── */
     return (
         <svg
             width={size}
@@ -179,7 +295,6 @@ export const WireframeBox = memo(({
             style={{ color, maxWidth: "100%", height: "auto", overflow: "visible" }}
         >
             <defs>
-                {/* Metallic gradient for wireframe edges */}
                 <linearGradient id={strokeGradId} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor={rarityTheme.stroke1} />
                     <stop offset="100%" stopColor={rarityTheme.stroke2} />
@@ -212,20 +327,16 @@ export const WireframeBox = memo(({
                 strokeLinejoin="round"
                 opacity={rarityTheme.opacity}
             >
-                {/* ── Solid glass shaded faces ── */}
                 <path className="wf-face" d={TOP_FILL} fill={`url(#${topGradId})`} stroke="none" />
                 <path className="wf-face" d={RIGHT_FILL} fill="currentColor" stroke="none" opacity={0.02} />
                 <path className="wf-face" d={FRONT_FILL} fill={`url(#${frontGradId})`} stroke="none" />
 
-                {/* ── Hidden interior edges ── */}
                 <path className="wf-edge wf-edge-hidden" d={HIDDEN} pathLength={1} fill="none" strokeWidth="1" opacity={0.2} />
 
-                {/* ── Visible wireframe silhouette & interior ── */}
                 <path className="wf-edge" d={SILHOUETTE} pathLength={1} fill="none" strokeWidth="1.6" />
                 <path className="wf-edge" d={INTERIOR} pathLength={1} fill="none" strokeWidth="1.6" />
             </g>
 
-            {/* ── Content-type glyph floating inside the glass cube ── */}
             {glyph && (
                 <>
                     <g clipPath={`url(#${clipId})`}>
@@ -252,3 +363,4 @@ export const WireframeBox = memo(({
         </svg>
     );
 });
+

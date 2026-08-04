@@ -1,0 +1,100 @@
+.shelf-grid-labels-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.shelf-col-labels {
+    position: absolute;
+    top: -28px;
+    left: 0;
+    right: 0;
+    height: 24px;
+    display: flex;
+    pointer-events: auto;
+}
+
+.shelf-col-label-item {
+    position: absolute;
+    top: 0;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    box-sizing: border-box;
+}
+
+.shelf-col-label-item span {
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.7));
+    background: rgba(20, 24, 26, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 3px 10px;
+    border-radius: var(--radius-pill, 9999px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 95%;
+    transition: all 0.2s ease;
+}
+
+.shelf-col-label-item:hover span {
+    color: var(--accent, #4FA98E);
+    border-color: rgba(79, 169, 142, 0.4);
+    background: rgba(20, 24, 26, 0.95);
+}
+
+.shelf-row-labels {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -115px;
+    width: 110px;
+    pointer-events: auto;
+}
+
+.shelf-row-label-item {
+    position: absolute;
+    left: 0;
+    width: 110px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    padding-right: 8px;
+}
+
+.shelf-row-label-item span {
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.7));
+    background: rgba(20, 24, 26, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 3px 10px;
+    border-radius: var(--radius-pill, 9999px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    transition: all 0.2s ease;
+}
+
+.shelf-row-label-item:hover span {
+    color: var(--accent, #4FA98E);
+    border-color: rgba(79, 169, 142, 0.4);
+    background: rgba(20, 24, 26, 0.95);
+}

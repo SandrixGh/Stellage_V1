@@ -70,6 +70,7 @@ export const MiniShelf = ({
                             rarityGlow={rarityGlow}
                             color={boxColor}
                             contentType={resolveBoxContentType(p.box)}
+                            coverUrl={(p.box as any).cover_url || (p.box as any).preview_url || null}
                         />
                     </div>
                 );

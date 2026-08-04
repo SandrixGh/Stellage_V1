@@ -75,7 +75,7 @@ export const resolveBoxContentType = (box: {
 }): string => {
     if (box.is_sealed === "sealed") return "sealed";
     if (box.content_type) {
-        return box.content_type === "empty" ? "sealed" : box.content_type;
+        return box.content_type === "empty" ? "empty" : box.content_type;
     }
     return resolveContentType(box.template);
 };

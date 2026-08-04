@@ -4,6 +4,10 @@ import type { Box } from "../../types/Stellage/boxes";
 import { WireframeBox } from "./WireframeBox";
 import { resolveRarityVisual, resolveBoxContentType } from "../../data/mockTemplates";
 import { formatCount } from "../../utils/formatCount";
+import { ShelfGridLabels } from "./ShelfGridLabels";
+import { CellStatusPicker } from "./CellStatusPicker";
+import { HeartIcon } from "../UI/Icons";
+import type { CellStatus } from "../../store/useStudyStore";
 import "./ShelfBoard.css";
 
 interface ShelfBoardProps {
@@ -14,6 +18,11 @@ interface ShelfBoardProps {
     onMove?: (id: string, row: number, col: number) => void;
     /** Открыть коробку (клик без перетаскивания). Работает и на read-only полке. */
     onOpen?: (box: Box) => void;
+    studyLabels?: {
+        rowLabels: string[];
+        colLabels: string[];
+        cellStatuses: Record<string, CellStatus>;
+    };
 }
 
 interface PlacedBox {
@@ -110,11 +119,18 @@ export const ShelfBoard = ({
     colCount = 8,
     onMove,
     onOpen,
+    studyLabels,
 }: ShelfBoardProps) => {
     const boardRef = useRef<HTMLDivElement>(null);
     const [drag, setDrag] = useState<DragState | null>(null);
-    // Ширина ячейки в пикселях — нужна для центрирования коробки под курсором.
     const [cellWidth, setCellWidth] = useState(0);
+
+    const [activePicker, setActivePicker] = useState<{
+        row: number;
+        col: number;
+        x: number;
+        y: number;
+    } | null>(null);
 
     const placed = useMemo(
         () => placeBoxes(boxes, rowCount, colCount),
@@ -149,6 +165,16 @@ export const ShelfBoard = ({
         },
         [colCount, rowCount]
     );
+
+    const handleEmptyCellClick = (e: React.MouseEvent, row: number, col: number) => {
+        if (!studyLabels) return;
+        const el = boardRef.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const posX = e.clientX - rect.left;
+        const posY = e.clientY - rect.top;
+        setActivePicker({ row, col, x: posX, y: posY });
+    };
 
     const dragRafRef = useRef<number | null>(null);
 
@@ -233,12 +259,24 @@ export const ShelfBoard = ({
     return (
         <div
             ref={boardRef}
-            className={`shelf-board ${editable ? "is-editable" : ""}`}
+            className={`shelf-board ${editable ? "is-editable" : ""} ${studyLabels ? "has-study-labels" : ""}`}
             style={{ minHeight: TOP_PADDING + rowCount * ROW_HEIGHT + LABEL_SPACE }}
             onPointerMove={handlePointerMove}
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
         >
+            {/* Пространственные метки сетки в режиме учёбы */}
+            {studyLabels && (
+                <ShelfGridLabels
+                    rowLabels={studyLabels.rowLabels}
+                    colLabels={studyLabels.colLabels}
+                    rowCount={rowCount}
+                    colCount={colCount}
+                    topPadding={TOP_PADDING}
+                    rowHeight={ROW_HEIGHT}
+                />
+            )}
+
             {/* Горизонтальные линии полок. */}
             {Array.from({ length: rowCount }).map((_, row) => (
                 <div
@@ -248,6 +286,31 @@ export const ShelfBoard = ({
                 />
             ))}
 
+            {/* СТАТИЧЕСКАЯ СЕТКА ЯЧЕЕК И СТАТУСОВ (Не двигается при перетаскивании коробок) */}
+            <div className="shelf-static-grid">
+                {Array.from({ length: rowCount }).map((_, row) =>
+                    Array.from({ length: colCount }).map((__, col) => {
+                        const statusKey = `${row}:${col}`;
+                        const status = studyLabels?.cellStatuses[statusKey];
+                        return (
+                            <div
+                                key={`static-cell-${row}-${col}`}
+                                className={`shelf-static-cell ${studyLabels ? "is-clickable" : ""}`}
+                                data-cell-status={status ?? undefined}
+                                style={{
+                                    left: `${col * cellWidthPct}%`,
+                                    top: TOP_PADDING + row * ROW_HEIGHT,
+                                    width: `${cellWidthPct}%`,
+                                    height: ROW_HEIGHT,
+                                }}
+                                onClick={(e) => studyLabels && handleEmptyCellClick(e, row, col)}
+                                title={status ? `Статус: ${status}` : studyLabels ? "Кликните, чтобы задать статус ячейки" : undefined}
+                            />
+                        );
+                    })
+                )}
+            </div>
+
             {/* Коробки. */}
             {placed.map((p) => {
                 const isDragging = editable && drag?.id === p.box.id && drag.moved;
@@ -256,6 +319,7 @@ export const ShelfBoard = ({
                 const { rarityGlow, boxColor } = resolveRarityVisual(
                     template?.rarity ?? "common"
                 );
+
                 const boardW = cellWidth * colCount;
                 const boardH = TOP_PADDING + rowCount * ROW_HEIGHT;
                 const cellW = cellWidth || 0;
@@ -280,7 +344,14 @@ export const ShelfBoard = ({
                         onPointerDown={(e) => handlePointerDown(e, p)}
                     >
                         <div className="shelf-cell-inner">
-                            <WireframeBox size={80} rarityGlow={rarityGlow} color={boxColor} contentType={resolveBoxContentType(p.box)} />
+                            <WireframeBox
+                                size={135}
+                                rarityGlow={rarityGlow}
+                                color={boxColor}
+                                contentType={resolveBoxContentType(p.box)}
+                                variant="2.5d-slot"
+                                coverUrl={(p.box as any).cover_url || (p.box as any).preview_url || null}
+                            />
                         </div>
                         <div className="shelf-box-label" data-rarity={rarityKey}>
                             <span className="shelf-box-name">
@@ -297,7 +368,8 @@ export const ShelfBoard = ({
                                     className={`shelf-box-likes ${p.box.likes_count > 0 ? "has-likes" : "zero-likes"}`}
                                     title={`${p.box.likes_count ?? 0} лайков`}
                                 >
-                                    ♥ {formatCount(p.box.likes_count ?? 0)}
+                                    <HeartIcon size={10} />
+                                    <span>{formatCount(p.box.likes_count ?? 0)}</span>
                                 </span>
                             </span>
                         </div>
@@ -305,7 +377,18 @@ export const ShelfBoard = ({
                 );
             })}
 
-            {placed.length === 0 && (
+            {activePicker && (
+                <CellStatusPicker
+                    row={activePicker.row}
+                    col={activePicker.col}
+                    x={activePicker.x}
+                    y={activePicker.y}
+                    currentStatus={studyLabels?.cellStatuses[`${activePicker.row}:${activePicker.col}`]}
+                    onClose={() => setActivePicker(null)}
+                />
+            )}
+
+            {placed.length === 0 && !studyLabels && (
                 <p className="shelf-board-empty">
                     Пока здесь пусто. Время добавить первую коробку!
                 </p>

@@ -4,6 +4,7 @@ import type { Shelf } from "../../types/Stellage/shelves";
 import type { Box } from "../../types/Stellage/boxes";
 import { ShelfSidebar } from "./ShelfSidebar";
 import { ShelfBoard } from "./ShelfBoard";
+import { useStudyStore } from "../../store/useStudyStore";
 import "./ShelfView.css";
 
 interface ShelfViewProps {
@@ -20,14 +21,10 @@ interface ShelfViewProps {
     onMakeMain?: () => void;
 }
 
-/**
- * Композиция «боковая панель + доска»: держит состояние поиска и фильтра по
- * редкости, считает отфильтрованный список коробок и передаёт его в ShelfBoard.
- * Боковая панель при этом получает ПОЛНЫЙ список коробок для статистики.
- */
 export const ShelfView = ({ shelf, editable, onMove, onOpen, rightPanel, isMain, onMakeMain }: ShelfViewProps) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeRarities, setActiveRarities] = useState<string[]>([]);
+    const { studyModeEnabled, gridLabelsVisible, rowLabels, colLabels, cellStatuses } = useStudyStore();
 
     const allBoxes = shelf?.boxes ?? [];
 
@@ -57,6 +54,15 @@ export const ShelfView = ({ shelf, editable, onMove, onOpen, rightPanel, isMain,
         });
     }, [allBoxes, searchQuery, activeRarities]);
 
+    const studyLabelsProp = useMemo(() => {
+        if (!studyModeEnabled || !gridLabelsVisible) return undefined;
+        return {
+            rowLabels,
+            colLabels,
+            cellStatuses,
+        };
+    }, [studyModeEnabled, gridLabelsVisible, rowLabels, colLabels, cellStatuses]);
+
     return (
         <div className="shelf-view">
             <div className="shelf-view-main">
@@ -78,6 +84,7 @@ export const ShelfView = ({ shelf, editable, onMove, onOpen, rightPanel, isMain,
                         editable={editable}
                         onMove={onMove}
                         onOpen={onOpen}
+                        studyLabels={studyLabelsProp}
                     />
                 </div>
             </div>

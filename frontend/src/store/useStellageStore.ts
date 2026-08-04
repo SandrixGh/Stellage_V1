@@ -70,7 +70,7 @@ interface StellageState {
     giftBox: (instanceId: string, toUsername: string) => Promise<boolean>;
 
     /** Мгновенное реактивное обновление количества лайков коробки на стеллаже. */
-    updateBoxLikes: (boxId: string, likesCount: number) => void;
+    updateBoxLikes: (boxId: string, likesCount: number, isLiked?: boolean) => void;
     /** Мгновенное реактивное обновление количества лайков шаблона в ленте. */
     updateTemplateLikes: (templateId: string, likesCount: number) => void;
 
@@ -210,7 +210,10 @@ export const useStellageStore = create<StellageState>((set, get) => ({
             if (data.title !== undefined) body.title = data.title;
             if (data.description !== undefined) body.description = data.description;
             if (data.price !== undefined) body.price = data.price;
-            if (data.currency !== undefined) body.currency = data.currency.toLowerCase();
+            if (data.currency !== undefined) {
+                const raw = data.currency.toLowerCase();
+                body.currency = raw === "stellacoin" || raw === "stella" ? "stella" : raw;
+            }
             if (data.rarity !== undefined) body.rarity = data.rarity;
             if (data.content !== undefined) body.content = data.content;
 
@@ -414,9 +417,16 @@ export const useStellageStore = create<StellageState>((set, get) => ({
         }
     },
 
-    updateBoxLikes: (boxId: string, likesCount: number) => {
+    updateBoxLikes: (boxId: string, likesCount: number, isLiked?: boolean) => {
         set((state) => {
-            const patchBox = (b: Box) => (b.id === boxId ? { ...b, likes_count: likesCount } : b);
+            const patchBox = (b: Box) =>
+                b.id === boxId
+                    ? {
+                          ...b,
+                          likes_count: likesCount,
+                          is_liked: isLiked !== undefined ? isLiked : b.is_liked,
+                      }
+                    : b;
             return {
                 instances: state.instances.map(patchBox),
                 currentBoxes: state.currentBoxes.map(patchBox),

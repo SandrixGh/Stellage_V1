@@ -15,8 +15,8 @@
 /* Horizontal shelf line with Apple light catch */
 .shelf-line {
     position: absolute;
-    left: 1%;
-    right: 1%;
+    left: 0.5%;
+    right: 0.2%;
     height: 2px;
     border-radius: 2px;
     background: linear-gradient(
@@ -72,6 +72,7 @@
     align-items: center;
     justify-content: flex-end;
     width: 100%;
+    margin-bottom: 0px;
     pointer-events: auto;
     transition: opacity 0.2s ease;
 }
@@ -149,6 +150,9 @@
     font-size: 9.5px;
     font-weight: 600;
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
 }
 
 .shelf-box-likes.has-likes {
@@ -172,4 +176,47 @@
     padding: 0 24px;
     pointer-events: none;
 }
+
+/* ===== STATIC CELL GRID LAYER ===== */
+.shelf-static-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.shelf-static-cell {
+    position: absolute;
+    box-sizing: border-box;
+    border-radius: var(--radius-sm, 6px);
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.shelf-static-cell.is-clickable {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.shelf-static-cell.is-clickable:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px dashed rgba(255, 255, 255, 0.18);
+}
+
+/* Static Cell Status Indicators (Fixed to Shelf Grid Matrix) */
+.shelf-static-cell[data-cell-status="urgent"] {
+    border-left: 3px solid #E54D4D !important;
+    background: linear-gradient(90deg, rgba(229, 77, 77, 0.12) 0%, transparent 60%);
+}
+.shelf-static-cell[data-cell-status="this-week"] {
+    border-left: 3px solid #D4A843 !important;
+    background: linear-gradient(90deg, rgba(212, 168, 67, 0.12) 0%, transparent 60%);
+}
+.shelf-static-cell[data-cell-status="backlog"] {
+    border-left: 3px solid #4A82D1 !important;
+    background: linear-gradient(90deg, rgba(74, 130, 209, 0.12) 0%, transparent 60%);
+}
+.shelf-static-cell[data-cell-status="done"] {
+    border-left: 3px solid var(--accent, #4FA98E) !important;
+    background: linear-gradient(90deg, rgba(79, 169, 142, 0.12) 0%, transparent 60%);
+}
+
 
