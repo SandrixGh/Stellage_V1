@@ -11,10 +11,19 @@ export const BoxCard = memo(({ box }: { box: Box }) => {
     const contentType = resolveBoxContentType(box);
     const isSealed = box.is_sealed === "sealed";
 
+    const coverUrl = (box as any).cover_url || (box as any).preview_url || null;
+
     return (
         <div className={`box-card rarity-${rarityKey}`}>
             <div className="box-card-visual">
-                <WireframeBox size={130} rarityGlow={rarityGlow} color={boxColor} contentType={contentType} />
+                <WireframeBox
+                    size={130}
+                    rarityGlow={rarityGlow}
+                    color={boxColor}
+                    contentType={contentType}
+                    variant="2.5d-slot"
+                    coverUrl={coverUrl}
+                />
             </div>
 
             <div className="box-card-info">
@@ -36,6 +45,7 @@ export const BoxCard = memo(({ box }: { box: Box }) => {
                     <LikeButton
                         instanceId={box.id}
                         initialLikesCount={box.likes_count ?? 0}
+                        initialIsLiked={box.is_liked ?? false}
                     />
                 </div>
             </div>

@@ -68,34 +68,34 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
         setIsLiked(nextLiked);
         setLikesCount(nextCount);
 
-        const syncStore = (cnt: number) => {
+        const syncStore = (cnt: number, lk?: boolean) => {
             if (instanceId) {
-                useStellageStore.getState().updateBoxLikes(instanceId, cnt);
+                useStellageStore.getState().updateBoxLikes(instanceId, cnt, lk);
             }
             if (templateId) {
                 useStellageStore.getState().updateTemplateLikes(templateId, cnt);
             }
         };
 
-        syncStore(nextCount);
+        syncStore(nextCount, nextLiked);
 
         try {
             if (nextLiked) {
                 const res = await api.post<{ is_liked: boolean; likes: number }>(endpoint);
                 setLikesCount(res.data.likes);
                 setIsLiked(res.data.is_liked);
-                syncStore(res.data.likes);
+                syncStore(res.data.likes, res.data.is_liked);
             } else {
                 const res = await api.delete<{ is_liked: boolean; likes: number }>(endpoint);
                 setLikesCount(res.data.likes);
                 setIsLiked(res.data.is_liked);
-                syncStore(res.data.likes);
+                syncStore(res.data.likes, res.data.is_liked);
             }
         } catch {
             // Rollback on error
             setIsLiked(!nextLiked);
             setLikesCount(likesCount);
-            syncStore(likesCount);
+            syncStore(likesCount, !nextLiked);
         } finally {
             setIsLoading(false);
         }

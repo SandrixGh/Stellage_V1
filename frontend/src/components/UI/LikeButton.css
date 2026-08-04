@@ -38,7 +38,7 @@
 }
 
 .like-button-btn:active .like-icon {
-    transform: scale(0.85);
+    opacity: 0.8;
 }
 
 .like-count {

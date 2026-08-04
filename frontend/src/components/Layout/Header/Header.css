@@ -31,7 +31,14 @@
     position: relative;
 }
 
-/* ===== LOGO ===== */
+/* ===== LOGO & BRAND ===== */
+.header-brand-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
 .header-logo-wrapper {
     display: flex;
     align-items: center;
@@ -56,6 +63,29 @@
     width: auto;
     object-fit: contain;
 }
+
+.study-header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill, 9999px);
+    background: rgba(79, 169, 142, 0.12);
+    border: 1px solid rgba(79, 169, 142, 0.28);
+    color: var(--accent, #4FA98E);
+    font-family: var(--font-body);
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.study-header-badge:hover {
+    background: rgba(79, 169, 142, 0.22);
+    border-color: rgba(79, 169, 142, 0.45);
+    transform: translateY(-1px);
+}
+
 
 /* ===== NAV & LIQUID GLASS SELECTOR ===== */
 .header-nav {

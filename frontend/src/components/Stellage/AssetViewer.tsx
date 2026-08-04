@@ -80,14 +80,34 @@ export const AssetViewer = ({ asset, thumb = false }: AssetViewerProps) => {
         );
     }
 
+    if (thumb) {
+        return (
+            <div className="asset-viewer asset-viewer-thumb-video" style={{ position: "relative", width: "100%", height: "100%" }}>
+                <video
+                    className="asset-viewer-video-poster"
+                    src={url}
+                    controls={false}
+                    muted
+                    preload="metadata"
+                    onError={handleMediaError}
+                    style={{ pointerEvents: "none", width: "100%", height: "100%", objectFit: "cover" }}
+                />
+                <div className="video-thumb-play-overlay">
+                    <div className="video-thumb-play-badge">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <video
             className="asset-viewer"
             src={url}
-            // В превью-плитке контролы не нужны (клик открывает лайтбокс);
-            // грузим только метаданные ради первого кадра-постера.
-            controls={!thumb}
-            muted={thumb}
+            controls
             preload="metadata"
             onError={handleMediaError}
         />

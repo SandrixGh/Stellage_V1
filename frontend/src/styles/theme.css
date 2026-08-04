@@ -46,8 +46,10 @@
     --ink-tertiary: rgba(20, 24, 26, 0.45);
 
     --ground: #EEF1F1;
+    --ground-rgb: 238, 241, 241;
     --background-image: none;
     --surface: #FFFFFF;
+    --surface-rgb: 255, 255, 255;
     --surface-hover: #F4F7F6;
     --surface-elevated: #FAFBFB;
     --border-subtle: rgba(20, 24, 26, 0.08);
@@ -94,15 +96,17 @@
     --ink-tertiary: rgba(255, 255, 255, 0.45);
 
     --ground: #0B0D11;
+    --ground-rgb: 11, 13, 17;
     --background-image: none;
     --surface: #14171E;
+    --surface-rgb: 20, 23, 30;
     --surface-hover: #1E222B;
     --surface-elevated: #252A36;
     --border-subtle: rgba(255, 255, 255, 0.08);
     --border-hover: rgba(255, 255, 255, 0.16);
 
     --glass-rgb: 255, 255, 255;
-    --chrome-rgb: 14, 17, 22;
+    --chrome-rgb: 18, 22, 30;
     --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.12);
 
@@ -160,10 +164,9 @@
     border-bottom: 1px solid var(--border-subtle) !important;
 }
 
-/* Apple Fluidity Instant Press Feedback */
+/* Quiet Press Feedback (No Jump Animation) */
 button:active, .btn:active, a.btn:active, .interactive-card:active {
-    transform: scale(0.97);
-    transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0.88;
 }
 
 /* Accessibility: reduced motion */

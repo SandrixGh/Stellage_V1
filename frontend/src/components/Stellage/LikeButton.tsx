@@ -46,18 +46,18 @@ export const LikeButton = ({ instanceId, canLike }: LikeButtonProps) => {
 
         setIsLiked(nextLiked);
         setLikes(nextLikes);
-        useStellageStore.getState().updateBoxLikes(instanceId, nextLikes);
+        useStellageStore.getState().updateBoxLikes(instanceId, nextLikes, nextLiked);
 
         try {
             const res = was ? await unlikeBox(instanceId) : await likeBox(instanceId);
             setIsLiked(res.is_liked);
             setLikes(res.likes);
-            useStellageStore.getState().updateBoxLikes(instanceId, res.likes);
+            useStellageStore.getState().updateBoxLikes(instanceId, res.likes, res.is_liked);
         } catch {
             setIsLiked(was);
             const rollbackLikes = likes;
             setLikes(rollbackLikes);
-            useStellageStore.getState().updateBoxLikes(instanceId, rollbackLikes);
+            useStellageStore.getState().updateBoxLikes(instanceId, rollbackLikes, was);
         } finally {
             setBusy(false);
         }

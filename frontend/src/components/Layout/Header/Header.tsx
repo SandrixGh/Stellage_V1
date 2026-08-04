@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../../store/useAuthStore";
+import { useStudyStore } from "../../../store/useStudyStore";
 import { NotificationBell } from "../../Notifications/NotificationBell";
 import { MessagesButton } from "../../Messages/MessagesButton";
 import { AccountMenu } from "./AccountMenu";
@@ -19,9 +20,15 @@ const NAV_ITEMS = [
 export const Header = () => {
     const { isAuthenticated } = useAuthStore();
     const userId = useAuthStore((s) => s.user?.id);
+    const studyModeEnabled = useStudyStore((s) => s.studyModeEnabled);
     const navigate = useNavigate();
     const location = useLocation();
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+    const navItems = [
+        ...NAV_ITEMS,
+        ...(studyModeEnabled ? [{ to: "/study", label: "Study", end: false }] : []),
+    ];
 
     const navRef = useRef<HTMLDivElement>(null);
     const [pillStyle, setPillStyle] = useState<{ left: number; width: number; opacity: number }>({
@@ -50,7 +57,7 @@ export const Header = () => {
         updatePill();
         window.addEventListener("resize", updatePill);
         return () => window.removeEventListener("resize", updatePill);
-    }, [location.pathname]);
+    }, [location.pathname, studyModeEnabled]);
 
     // Свой аватар для шапки (presigned из /profile/me). Пере-запрашиваем при
     // смене активного аккаунта (userId), а не только при входе/выходе.
@@ -67,10 +74,26 @@ export const Header = () => {
     return (
         <header className="header">
             <div className="header-container">
-                <NavLink to="/" className="header-logo-wrapper">
-                    <Logo className="header-logo-icon" size={34} />
-                    <span className="header-logo-title">Stellage</span>
-                </NavLink>
+                <div className="header-brand-group">
+                    <NavLink to="/" className="header-logo-wrapper">
+                        <Logo className="header-logo-icon" size={34} />
+                        <span className="header-logo-title">Stellage</span>
+                    </NavLink>
+                    {studyModeEnabled && (
+                        <button
+                            type="button"
+                            className="study-header-badge"
+                            onClick={() => navigate("/study")}
+                            title="Перейти в Study Dashboard"
+                        >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                                <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                            </svg>
+                            <span>Study</span>
+                        </button>
+                    )}
+                </div>
 
                 <nav className="header-nav" ref={navRef}>
                     <div
@@ -81,7 +104,7 @@ export const Header = () => {
                             opacity: pillStyle.opacity,
                         }}
                     />
-                    {NAV_ITEMS.map((item) => (
+                    {navItems.map((item) => (
                         <NavLink
                             key={item.to}
                             to={item.to}
