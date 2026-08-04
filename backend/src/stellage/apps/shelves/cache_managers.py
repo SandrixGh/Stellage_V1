@@ -1,3 +1,4 @@
+import logging
 import uuid
 from typing import Annotated
 
@@ -6,6 +7,8 @@ from fastapi import Depends
 from stellage.apps.shelves.schemas import ShelfReturnData, ShelfWithBoxInstances
 from stellage.core.core_dependencies.redis_dependency import RedisDependency
 from stellage.utils.utils import pack_to_json, unpack_from_json
+
+logger = logging.getLogger(__name__)
 
 
 class ShelfCacheManager:
@@ -35,32 +38,39 @@ class ShelfCacheManager:
         shelf_id: uuid.UUID,
         is_full: bool,
     ):
-        async with self.redis.get_client() as client:
-            key = self._get_key(
-                user_id=user_id,
-                shelf_id=shelf_id,
-                is_full=is_full,
-            )
-            data = await client.get(key)
-            schema = (
-                ShelfWithBoxInstances if is_full
-                else ShelfReturnData
-            )
-            return unpack_from_json(data, schema) if data else None
+        try:
+            async with self.redis.get_client() as client:
+                key = self._get_key(
+                    user_id=user_id,
+                    shelf_id=shelf_id,
+                    is_full=is_full,
+                )
+                data = await client.get(key)
+                schema = (
+                    ShelfWithBoxInstances if is_full
+                    else ShelfReturnData
+                )
+                return unpack_from_json(data, schema) if data else None
+        except Exception:
+            logger.warning("Redis get_shelf failed, falling back to DB", exc_info=True)
+            return None
 
 
     async def store_shelf(
         self,
         shelf: ShelfReturnData | ShelfWithBoxInstances
     ) -> None:
-        async with self.redis.get_client() as client:
-            is_full = isinstance(shelf, ShelfWithBoxInstances)
-            key = self._get_key(
-                user_id=shelf.user_id,
-                shelf_id=shelf.id,
-                is_full=is_full
-            )
-            await client.set(key, pack_to_json(shelf), ex=3600)
+        try:
+            async with self.redis.get_client() as client:
+                is_full = isinstance(shelf, ShelfWithBoxInstances)
+                key = self._get_key(
+                    user_id=shelf.user_id,
+                    shelf_id=shelf.id,
+                    is_full=is_full
+                )
+                await client.set(key, pack_to_json(shelf), ex=3600)
+        except Exception:
+            logger.warning("Redis store_shelf failed", exc_info=True)
 
 
     async def delete_shelf(
@@ -68,30 +78,37 @@ class ShelfCacheManager:
         user_id: uuid.UUID,
         shelf_id: uuid.UUID,
     ) -> None:
-        async with self.redis.get_client() as client:
-            await client.delete(
-                self._get_key(
-                    user_id=user_id,
-                    shelf_id=shelf_id,
-                    is_full=True,
+        try:
+            async with self.redis.get_client() as client:
+                await client.delete(
+                    self._get_key(
+                        user_id=user_id,
+                        shelf_id=shelf_id,
+                        is_full=True,
+                    )
                 )
-            )
-            await client.delete(
-                self._get_key(
-                    user_id=user_id,
-                    shelf_id=shelf_id,
-                    is_full=False,
+                await client.delete(
+                    self._get_key(
+                        user_id=user_id,
+                        shelf_id=shelf_id,
+                        is_full=False,
+                    )
                 )
-            )
+        except Exception:
+            logger.warning("Redis delete_shelf failed", exc_info=True)
 
 
     async def get_main_shelf_id(
         self,
         user_id: uuid.UUID,
     ) -> uuid.UUID | None:
-        async with self.redis.get_client() as client:
-            data = await client.get(f"main_shelf_id:{user_id}")
-            return uuid.UUID(data) if data else None
+        try:
+            async with self.redis.get_client() as client:
+                data = await client.get(f"main_shelf_id:{user_id}")
+                return uuid.UUID(data) if data else None
+        except Exception:
+            logger.warning("Redis get_main_shelf_id failed", exc_info=True)
+            return None
 
 
     async def store_main_shelf_id(
@@ -99,17 +116,23 @@ class ShelfCacheManager:
         user_id: uuid.UUID,
         shelf_id: uuid.UUID,
     ) -> None:
-        async with self.redis.get_client() as client:
-            await client.set(
-                f"main_shelf_id:{user_id}",
-                str(shelf_id),
-                ex=3600,
-            )
+        try:
+            async with self.redis.get_client() as client:
+                await client.set(
+                    f"main_shelf_id:{user_id}",
+                    str(shelf_id),
+                    ex=3600,
+                )
+        except Exception:
+            logger.warning("Redis store_main_shelf_id failed", exc_info=True)
 
 
     async def delete_main_shelf_id(
         self,
         user_id: uuid.UUID,
     ) -> None:
-        async with self.redis.get_client() as client:
-            await client.delete(f"main_shelf_id:{user_id}")
+        try:
+            async with self.redis.get_client() as client:
+                await client.delete(f"main_shelf_id:{user_id}")
+        except Exception:
+            logger.warning("Redis delete_main_shelf_id failed", exc_info=True)
