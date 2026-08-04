@@ -1,0 +1,200 @@
+.study-container-card {
+    background: var(--surface-elevated, rgba(20, 24, 26, 0.85));
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+    border-radius: var(--radius-md, 12px);
+    overflow: hidden;
+    margin-top: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.study-container-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.study-header-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.study-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent, #4FA98E);
+}
+
+.study-focus-mode-launch-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(79, 169, 142, 0.12);
+    border: 1px solid rgba(79, 169, 142, 0.3);
+    color: var(--accent, #4FA98E);
+    padding: 5px 12px;
+    border-radius: var(--radius-pill, 9999px);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.study-focus-mode-launch-btn:hover {
+    background: rgba(79, 169, 142, 0.25);
+    border-color: rgba(79, 169, 142, 0.5);
+}
+
+.study-container-desc {
+    font-size: 13px;
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.65));
+}
+
+.study-nav-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.study-nav-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm, 6px);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink, #ffffff);
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.study-nav-tab:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.study-nav-tab.active {
+    background: var(--accent, #4FA98E);
+    color: #ffffff;
+    border-color: var(--accent, #4FA98E);
+}
+
+.study-container-content {
+    padding: 16px;
+}
+
+.study-view-code,
+.study-view-flashcards,
+.study-view-language,
+.study-view-pomodoro {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.study-lang-badge {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.study-transcription-card {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 14px 18px;
+    border-radius: var(--radius-sm, 8px);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.phrase-fr {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent, #4FA98E);
+}
+
+.phrase-ru {
+    font-size: 13px;
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.65));
+}
+
+.study-audio-preview {
+    display: flex;
+}
+
+.study-audio-btn {
+    background: var(--accent, #4FA98E);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm, 6px);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.study-audio-btn:hover {
+    opacity: 0.9;
+}
+
+.pomodoro-timer-display {
+    font-family: var(--font-display, "Manrope", sans-serif);
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--accent, #4FA98E);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    margin: 8px 0;
+}
+
+.pomodoro-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.pomodoro-btn {
+    padding: 8px 18px;
+    border-radius: var(--radius-sm, 6px);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.pomodoro-btn.primary {
+    background: var(--accent, #4FA98E);
+    color: #fff;
+}
+
+.pomodoro-btn.primary:hover {
+    background: var(--accent-hover, #42937b);
+}
+
+.pomodoro-btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--ink);
+}
+
+.pomodoro-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.18);
+}

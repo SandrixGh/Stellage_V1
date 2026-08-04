@@ -1,0 +1,83 @@
+.focus-streak-widget {
+    background: rgba(var(--chrome-rgb, 20, 24, 26), 0.75);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12));
+    border-radius: var(--radius-md, 10px);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.focus-streak-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.streak-title-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display, "Manrope", sans-serif);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.streak-flame-icon {
+    color: #D4A843;
+}
+
+.streak-total-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent, #4FA98E);
+}
+
+.focus-heatmap-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 70px;
+    gap: 8px;
+    padding-top: 8px;
+}
+
+.heatmap-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+}
+
+.heatmap-bar-container {
+    flex: 1;
+    width: 100%;
+    max-width: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+}
+
+.heatmap-bar-fill {
+    width: 100%;
+    background: linear-gradient(180deg, var(--accent, #4FA98E) 0%, rgba(79, 169, 142, 0.4) 100%);
+    border-radius: 4px;
+    transition: height 0.3s ease;
+}
+
+.heatmap-day-name {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.5));
+}

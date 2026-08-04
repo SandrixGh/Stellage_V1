@@ -1,0 +1,131 @@
+.katex-renderer-container {
+    background: var(--surface-elevated, rgba(20, 24, 26, 0.85));
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+    border-radius: var(--radius-md, 10px);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.katex-renderer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.katex-header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display, "Manrope", sans-serif);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent, #4FA98E);
+}
+
+.katex-sparkle-icon {
+    color: var(--accent, #4FA98E);
+}
+
+.katex-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--radius-sm, 6px);
+    padding: 4px 10px;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.katex-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.katex-math-display-card {
+    position: relative;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(79, 169, 142, 0.25);
+    border-radius: var(--radius-sm, 8px);
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.katex-badge {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent, #4FA98E);
+    background: rgba(79, 169, 142, 0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.katex-formula-rendered {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.katex-eq-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+}
+
+.katex-eq-num {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.5));
+}
+
+.katex-eq-math {
+    font-family: "Cambria Math", "Times New Roman", serif, monospace;
+    font-size: 17px;
+    color: #FFFFFF;
+    letter-spacing: 0.02em;
+}
+
+.katex-source-details {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-sm, 6px);
+    padding: 8px 12px;
+    font-size: 12px;
+}
+
+.katex-source-summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.7));
+    user-select: none;
+}
+
+.katex-source-code {
+    margin-top: 8px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    overflow-x: auto;
+    font-family: monospace;
+    font-size: 12px;
+    color: #94A3B8;
+}

@@ -1,0 +1,254 @@
+.smart-content-inspector {
+    background: rgba(var(--surface-rgb, 20, 23, 30), 0.75);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(var(--ink-rgb, 255, 255, 255), 0.1);
+    border-radius: var(--radius-md, 12px);
+    overflow: hidden;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.inspector-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(var(--ink-rgb, 255, 255, 255), 0.08);
+}
+
+.inspector-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.inspector-sparkle {
+    color: var(--accent, #4FA98E);
+}
+
+.inspector-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink, #FFFFFF);
+}
+
+.inspector-lang-tag {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(var(--accent-rgb, 79, 169, 142), 0.18);
+    color: var(--accent, #4FA98E);
+    border: 1px solid rgba(var(--accent-rgb, 79, 169, 142), 0.3);
+}
+
+.inspector-lines-tag {
+    font-size: 11px;
+    color: var(--ink-tertiary, rgba(255, 255, 255, 0.45));
+}
+
+.inspector-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(var(--ink-rgb, 255, 255, 255), 0.06);
+    border: 1px solid rgba(var(--ink-rgb, 255, 255, 255), 0.12);
+    color: var(--ink, #FFFFFF);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.inspector-copy-btn:hover {
+    background: rgba(var(--ink-rgb, 255, 255, 255), 0.12);
+    color: var(--accent, #4FA98E);
+}
+
+.inspector-code-body {
+    display: flex;
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-x: auto;
+    background: rgba(10, 13, 18, 0.95);
+}
+
+.inspector-gutter {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    user-select: none;
+    text-align: right;
+}
+
+.gutter-num {
+    color: rgba(255, 255, 255, 0.25);
+    font-size: 12px;
+    min-width: 24px;
+}
+
+.inspector-code-block {
+    margin: 0;
+    padding: 12px 16px;
+    color: #e2e8f0;
+    white-space: pre;
+    overflow-x: auto;
+    flex: 1;
+}
+
+.inspector-text-body {
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink, #FFFFFF);
+}
+
+.inspector-math-card {
+    padding: 12px 16px;
+    background: rgba(139, 92, 246, 0.1);
+    border-top: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.math-card-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #a78bfa;
+    margin-bottom: 4px;
+}
+
+.math-card-render {
+    font-family: "KaTeX_Main", "Latin Modern Math", "Cambria Math", "Georgia", "Times New Roman", serif;
+    font-size: 1.25rem;
+    padding: 16px;
+    background: rgba(var(--surface-rgb, 20, 23, 30), 0.8);
+    border: 1px solid rgba(var(--accent-rgb, 79, 169, 142), 0.3);
+    border-radius: 10px;
+    color: var(--accent, #4FA98E);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.math-fraction {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    padding: 0 4px;
+}
+
+.math-num {
+    border-bottom: 1.5px solid currentColor;
+    padding: 0 4px 2px;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+.math-den {
+    padding: 2px 4px 0;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+.math-func {
+    font-style: normal;
+    font-weight: 500;
+    padding: 0 2px;
+}
+
+.math-sqrt {
+    border-top: 1px solid currentColor;
+    padding: 0 2px;
+}
+
+/* Formatted LaTeX Document Pane */
+.inspector-latex-doc-pane {
+    padding: 16px;
+    background: rgba(14, 18, 24, 0.95);
+}
+
+.latex-doc-card {
+    background: rgba(20, 24, 32, 0.85);
+    border: 1px solid rgba(79, 169, 142, 0.3);
+    border-radius: var(--radius-md, 12px);
+    padding: 20px;
+    color: #e2e8f0;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.latex-doc-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--accent, #4FA98E);
+    margin-bottom: 6px;
+    text-align: center;
+    border-bottom: 1px solid rgba(79, 169, 142, 0.2);
+    padding-bottom: 10px;
+}
+
+.latex-doc-meta {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 18px;
+}
+
+.latex-doc-h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #a78bfa;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    border-bottom: 1px dashed rgba(167, 139, 250, 0.3);
+    padding-bottom: 4px;
+}
+
+.latex-doc-h4 {
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: #818cf8;
+    margin-top: 14px;
+    margin-bottom: 6px;
+}
+
+.latex-doc-p {
+    font-size: 14px;
+    line-height: 1.65;
+    margin-bottom: 12px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.latex-doc-equation {
+    background: rgba(79, 169, 142, 0.08);
+    border: 1px solid rgba(79, 169, 142, 0.25);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 14px 0;
+    text-align: center;
+    font-size: 1.15rem;
+    color: #4FA98E;
+    font-family: "KaTeX_Main", "Latin Modern Math", serif;
+}
+
+.latex-inline-math {
+    color: #4FA98E;
+    font-family: "KaTeX_Main", "Latin Modern Math", serif;
+    padding: 0 4px;
+}
+
+.latex-doc-list {
+    margin-left: 20px;
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
