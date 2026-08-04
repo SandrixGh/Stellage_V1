@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellage — 3D Hybrid Box Render Showcase</title>
+    <!-- Google Fonts: Inter & Manrope -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ground: #0B0D11;
+            --surface: #14171E;
+            --surface-elevated: #1B202A;
+            --surface-hover: #222834;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.18);
+            --ink: #FFFFFF;
+            --ink-secondary: #9B9E9E;
+            --ink-tertiary: rgba(255, 255, 255, 0.45);
+            --accent: #4FA98E;
+            --accent-hover: #3D9A7D;
+            --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-display: 'Manrope', 'Inter', system-ui, sans-serif;
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            
+            --box-common: #94A3B8;
+            --box-rare: #3B82F6;
+            --box-golden: #F59E0B;
+            --box-dev: #A855F7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--ground);
+            color: var(--ink);
+            font-family: var(--font-body);
+            padding: 32px 24px;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 28px;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 20px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            background: rgba(79, 169, 142, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(79, 169, 142, 0.3);
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        p.subtitle {
+            color: var(--ink-secondary);
+            font-size: 15px;
+            max-width: 760px;
+        }
+
+        /* Playground Card */
+        .shelf-preview-card {
+            background: var(--surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 36px;
+        }
+
+        .shelf-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .shelf-title {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: var(--ground);
+            border: 1px solid var(--border-subtle);
+            color: var(--ink-secondary);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--border-hover);
+            color: var(--ink);
+            background: var(--surface-hover);
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #0B0D11;
+            font-weight: 600;
+        }
+
+        .shelf-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            background: var(--ground);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+            min-height: 250px;
+        }
+
+        .shelf-cell {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius-sm);
+            aspect-ratio: 1.3 / 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 10px;
+            transition: all 0.25 ease;
+            cursor: pointer;
+        }
+
+        .shelf-cell:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .cell-coord {
+            position: absolute;
+            top: 6px;
+            left: 8px;
+            font-size: 9px;
+            color: var(--ink-tertiary);
+            font-weight: 600;
+        }
+
+        /* 3D HYBRID APPROACHES STYLING */
+
+        /* Approach A: 2.5D Wireframe Slot */
+        .wf-25d-box {
+            width: 130px;
+            height: 85px;
+            position: relative;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .wf-25d-box:hover {
+            transform: translateY(-3px) scale(1.03);
+        }
+
+        .wf-25d-front {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 122px;
+            height: 78px;
+            border: 1.5px solid var(--box-color);
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.02);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        /* Orthogonal Depth Chamfers */
+        .wf-25d-top {
+            position: absolute;
+            top: -6px;
+            left: 5px;
+            width: 120px;
+            height: 6px;
+            border: 1.5px solid var(--box-color);
+            border-bottom: none;
+            background: rgba(255, 255, 255, 0.04);
+            transform: skewX(-45deg);
+            z-index: 1;
+        }
+
+        .wf-25d-side {
+            position: absolute;
+            top: -3px;
+            right: 2px;
+            width: 6px;
+            height: 76px;
+            border: 1.5px solid var(--box-color);
+            border-left: none;
+            background: rgba(255, 255, 255, 0.06);
+            transform: skewY(-45deg);
+            z-index: 1;
+        }
+
+        /* Dashed Wireframe Blueprint lines inside 2.5D */
+        .blueprint-dashed-line {
+            stroke-dasharray: 3 3;
+            opacity: 0.5;
+        }
+
+        /* Hover Reveal Popup (Modal Simulation) */
+        .hover-modal-preview {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--surface-elevated);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            z-index: 100;
+            width: 240px;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20deg); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .hover-modal-title {
+            font-family: var(--font-display);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        /* Comparison Cards */
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 700;
+            margin: 32px 0 16px 0;
+        }
+
+        .grid-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .approach-card {
+            background: var(--surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .approach-card.highlight {
+            border-color: var(--accent);
+            position: relative;
+        }
+
+        .tag-pill {
+            position: absolute;
+            top: -10px;
+            right: 16px;
+            background: var(--accent);
+            color: #0B0D11;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+            text-transform: uppercase;
+        }
+
+        .card-head {
+            margin-bottom: 12px;
+        }
+
+        .card-num {
+            font-size: 11px;
+            color: var(--ink-tertiary);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 17px;
+            font-weight: 700;
+            margin: 2px 0;
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: var(--ink-secondary);
+        }
+
+        .card-viewport {
+            background: var(--ground);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 150px;
+            margin: 12px 0;
+        }
+
+        .text-detail {
+            font-size: 12px;
+            color: var(--ink-secondary);
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="badge">Stellage UI Evolution</div>
+        <h1>Сохранение Изюминки: Гибридные 3D/2.5D Подходы</h1>
+        <p class="subtitle">Как сохранить дух 3D-чертежных коробок (не превращая их в банальные плоские карточки) и одновременно сохранить чистоту 2D-сетки полок.</p>
+    </header>
+
+    <!-- PLAYGROUND -->
+    <div class="shelf-preview-card">
+        <div class="shelf-header">
+            <div class="shelf-title">Интерактивный Моделирующий Стеллаж</div>
+            <div class="controls">
+                <button class="tab-btn active" onclick="switchApproach('hybrid-hover', '1. 2.5D Wireframe Slot + 3D Hover/Modal')">1. 2.5D Slot + 3D Hover ⭐</button>
+                <button class="tab-btn" onclick="switchApproach('ortho-blueprint', '2. 2.5D Orthogonal Blueprint (Ортогональный Чертеж)')">2. 2.5D Ortho Blueprint</button>
+                <button class="tab-btn" onclick="switchApproach('dual-toggle', '3. Dual-Mode Switcher (2D Clean / 3D Isometric)')">3. Dual-Mode Switcher</button>
+            </div>
+        </div>
+
+        <div class="shelf-grid" id="interactiveShelfGrid">
+            <!-- Rendered by JS -->
+        </div>
+    </div>
+
+    <!-- APPROACHES COMPARISON -->
+    <div class="section-title">Разбор 3 Гибридных Решений</div>
+
+    <div class="grid-gallery">
+
+        <!-- Approach 1 -->
+        <div class="approach-card highlight">
+            <div class="tag-pill">Золотая Середина</div>
+            <div class="card-head">
+                <div class="card-num">Подход №1</div>
+                <div class="card-title">2.5D Slot на Полке + 3D в Деталях</div>
+                <div class="card-desc">На полке коробка смотрится как 2.5D-слот (без диагонального перекоса), а при клике разворачивается 3D-куб.</div>
+            </div>
+            <div class="card-viewport">
+                <div class="wf-25d-box" style="--box-color: var(--box-rare);">
+                    <div class="wf-25d-top"></div>
+                    <div class="wf-25d-side"></div>
+                    <div class="wf-25d-front">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--box-rare)" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <circle cx="12" cy="12" r="4"/>
+                        </svg>
+                        <div style="font-size:10px; font-weight:700; color:var(--ink); margin-top:4px;">CYBER_BOX</div>
+                        <div style="font-size:8px; color:var(--ink-secondary);">2.5D SLOT</div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-detail">
+                <b>Почему это сохраняет изюминку:</b> Сетка полок выглядит аккуратно и выровненно, но объём никуда не исчезает! Каждая коробка чувствуется как физическая кассета, а при наведении можно рассмотреть её 3D-модель.
+            </div>
+        </div>
+
+        <!-- Approach 2 -->
+        <div class="approach-card">
+            <div class="card-head">
+                <div class="card-num">Подход №2</div>
+                <div class="card-title">2.5D Orthogonal Blueprint</div>
+                <div class="card-desc">Чертежные пунктирные линии (wireframe) сохраняются внутри 2.5D-проекции.</div>
+            </div>
+            <div class="card-viewport">
+                <svg width="140" height="95" viewBox="0 0 140 95" fill="none">
+                    <!-- Front Frame -->
+                    <rect x="10" y="15" width="115" height="70" rx="3" stroke="var(--box-golden)" stroke-width="2" fill="rgba(245,158,11,0.03)"/>
+                    <!-- Ortho Chamfer lines -->
+                    <path d="M 10 15 L 20 5 L 135 5 L 125 15" stroke="var(--box-golden)" stroke-width="1.5"/>
+                    <path d="M 125 15 L 135 5 L 135 75 L 125 85" stroke="var(--box-golden)" stroke-width="1.5"/>
+                    <!-- Dashed Interior Blueprint Lines -->
+                    <path d="M 10 85 L 20 75 L 135 75" stroke="var(--box-golden)" stroke-width="1" class="blueprint-dashed-line"/>
+                    <path d="M 20 5 L 20 75" stroke="var(--box-golden)" stroke-width="1" class="blueprint-dashed-line"/>
+                    <!-- Glyph -->
+                    <polygon points="75 40 60 50 75 60 75 40" fill="none" stroke="var(--box-golden)" stroke-width="2"/>
+                </svg>
+            </div>
+            <div class="text-detail">
+                <b>Почему это сохраняет изюминку:</b> Сохраняется узнаваемый стиль «прозрачного чертежа», но благодаря вертикальным фронтальным ребрам коробка не кажется висящей в ячейке сетки.
+            </div>
+        </div>
+
+        <!-- Approach 3 -->
+        <div class="approach-card">
+            <div class="card-head">
+                <div class="card-num">Подход №3</div>
+                <div class="card-title">Dual-Mode Switcher (2D / 3D)</div>
+                <div class="card-desc">Пользователь сам выбирает режим сетки: минималистичный 2D или объемный 3D Blueprint.</div>
+            </div>
+            <div class="card-viewport">
+                <div style="background: var(--surface-elevated); padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border-hover); font-size:12px; display:flex; gap:12px; align-items:center;">
+                    <span style="color: var(--accent); font-weight:700;">• 2D Minimal</span>
+                    <span style="color: var(--ink-tertiary);">|</span>
+                    <span style="color: var(--ink-secondary);">3D Wireframe</span>
+                </div>
+            </div>
+            <div class="text-detail">
+                <b>Почему это сохраняет изюминку:</b> Нулевые компромиссы — любители классического 3D-стиля получают привычную изометрию, а ценящие строгость — минималистичную сетку.
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Simulated 3D Hover Modal Popup -->
+<div class="hover-modal-preview" id="hoverModal">
+    <div class="hover-modal-title">✨ 3D Inspector Reveal</div>
+    <svg width="120" height="90" viewBox="0 0 200 150" fill="none" stroke="var(--accent)" stroke-width="2.5">
+        <path d="M 20,30 L 110,30 L 110,90 L 20,90 Z" fill="rgba(79,169,142,0.1)"/>
+        <path d="M 20,30 L 55,5 L 145,5 L 110,30 Z" fill="rgba(79,169,142,0.15)"/>
+        <path d="M 110,30 L 145,5 L 145,65 L 110,90 Z" fill="rgba(79,169,142,0.12)"/>
+        <path d="M 20,90 L 55,65 L 145,65" stroke-dasharray="3 3" opacity="0.6"/>
+        <path d="M 55,65 L 55,5" stroke-dasharray="3 3" opacity="0.6"/>
+        <circle cx="65" cy="60" r="12" fill="none" stroke="var(--accent)" stroke-width="2"/>
+    </svg>
+    <div style="font-size:11px; font-weight:700; margin-top:6px;" id="modalBoxName">CYBER_BOX #402</div>
+    <div style="font-size:9px; color:var(--ink-secondary);">Полноценная 3D Изометрия</div>
+</div>
+
+<script>
+    const sampleBoxes = [
+        { name: 'ALPHA_BOX', rarity: 'rare', color: 'var(--box-rare)', type: 'PHOTO' },
+        { name: 'GOLDEN_LORE', rarity: 'golden', color: 'var(--box-golden)', type: 'VIDEO' },
+        { name: 'DEV_SCRIPT', rarity: 'dev', color: 'var(--box-dev)', type: 'CODE' },
+        { name: 'COMMON_DOC', rarity: 'common', color: 'var(--box-common)', type: 'TEXT' },
+        null,
+        { name: 'NEO_STORAGE', rarity: 'rare', color: 'var(--box-rare)', type: 'AUDIO' }
+    ];
+
+    let currentApproach = 'hybrid-hover';
+
+    function renderCell(box, approach) {
+        if (!box) return `<span style="font-size:11px; color: var(--ink-tertiary);">Пусто</span>`;
+
+        if (approach === 'hybrid-hover') {
+            const slotW = 176, slotH = 90;
+            const fx = 6, fy = 14, fw = 146, fh = 76, rx = 2, dx = 12, dy = -8;
+
+            return `
+                <div style="width:130px; height:80px; position:relative;" onmouseenter="showModal('${box.name}')" onmouseleave="hideModal()">
+                    <svg width="130" height="80" viewBox="0 0 ${slotW} ${slotH}" fill="none" stroke="${box.color}">
+                        <polygon points="${fx},${fy} ${fx + dx},${fy + dy} ${fx + fw + dx},${fy + dy} ${fx + fw},${fy}" fill="${box.color}" fill-opacity="0.04" stroke="none"/>
+                        <polygon points="${fx + fw},${fy} ${fx + fw + dx},${fy + dy} ${fx + fw + dx},${fy + fh + dy} ${fx + fw},${fy + fh}" fill="${box.color}" fill-opacity="0.04" stroke="none"/>
+                        <path d="M ${fx},${fy} L ${fx + dx},${fy + dy} L ${fx + fw + dx},${fy + dy} L ${fx + fw + dx},${fy + fh + dy} L ${fx + fw},${fy + fh}" stroke="${box.color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M ${fx + fw},${fy} L ${fx + fw + dx},${fy + dy}" stroke="${box.color}" stroke-width="1.5" stroke-linecap="round"/>
+                        <rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" rx="${rx}" fill="rgba(255,255,255,0.02)" stroke-width="1.8"/>
+                        <text x="${fx + fw / 2}" y="${fy + fh / 2 + 4}" text-anchor="middle" fill="${box.color}" font-size="11" font-weight="700" font-family="Inter">${box.name}</text>
+                    </svg>
+                </div>
+            `;
+        }
+
+        if (approach === 'ortho-blueprint') {
+            const fx = 10, fy = 14, fw = 110, fh = 68, rx = 5, dx = 10, dy = -9;
+            const topPath = `M ${fx + rx},${fy} L ${fx + dx + rx},${fy + dy} L ${fx + fw + dx - rx},${fy + dy} Q ${fx + fw + dx},${fy + dy} ${fx + fw + dx},${fy + dy + rx} L ${fx + fw},${fy} Z`;
+            const rightPath = `M ${fx + fw},${fy + rx} L ${fx + fw + dx},${fy + dy + rx} L ${fx + fw + dx},${fy + fh + dy - rx} Q ${fx + fw + dx},${fy + fh + dy} ${fx + fw + dx - rx},${fy + fh + dy} L ${fx + fw},${fy + fh} Z`;
+
+            return `
+                <svg width="125" height="85" viewBox="0 0 135 90" fill="none" stroke="${box.color}">
+                    <ellipse cx="${fx + fw / 2 + dx / 2}" cy="${fy + fh + 4}" rx="${fw * 0.45}" ry="3.5" fill="#000" opacity="0.55" filter="blur(2px)"/>
+                    <path d="${topPath}" stroke-width="1.5"/>
+                    <path d="${rightPath}" stroke-width="1.5"/>
+                    <rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" rx="${rx}" stroke-width="1.8"/>
+                    <path d="M ${fx} ${fy + fh} L ${fx + dx} ${fy + fh + dy} L ${fx + fw + dx} ${fy + fh + dy}" stroke-width="1" class="blueprint-dashed-line"/>
+                    <path d="M ${fx + dx} ${fy + dy} L ${fx + dx} ${fy + fh + dy}" stroke-width="1" class="blueprint-dashed-line"/>
+                </svg>
+            `;
+        }
+
+        if (approach === 'dual-toggle') {
+            return `
+                <div style="border: 1px solid ${box.color}; width:90%; height:75%; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(255,255,255,0.02);">
+                    <div style="font-size:9px; font-weight:700; color:${box.color};">${box.name}</div>
+                    <div style="font-size:7.5px; color:var(--ink-secondary);">${box.rarity.toUpperCase()}</div>
+                </div>
+            `;
+        }
+    }
+
+    function switchApproach(approach, label) {
+        currentApproach = approach;
+
+        const btns = document.querySelectorAll('.tab-btn');
+        btns.forEach(btn => btn.classList.remove('active'));
+        if (event && event.target) event.target.classList.add('active');
+
+        const grid = document.getElementById('interactiveShelfGrid');
+        grid.innerHTML = '';
+
+        sampleBoxes.forEach((box, idx) => {
+            const cell = document.createElement('div');
+            cell.className = 'shelf-cell';
+            cell.innerHTML = `
+                <div class="cell-coord">[0, ${idx}]</div>
+                ${renderCell(box, approach)}
+            `;
+            grid.appendChild(cell);
+        });
+    }
+
+    function showModal(name) {
+        if (currentApproach !== 'hybrid-hover') return;
+        const modal = document.getElementById('hoverModal');
+        document.getElementById('modalBoxName').innerText = name;
+        modal.style.display = 'flex';
+    }
+
+    function hideModal() {
+        document.getElementById('hoverModal').style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        switchApproach('hybrid-hover', '1. 2.5D Slot + 3D Hover');
+    });
+</script>
+
+</body>
+</html>

@@ -71,6 +71,8 @@ export const GiftBoxModal = ({ instanceId, onClose }: GiftBoxModalProps) => {
                                 rarityGlow={rarityGlow}
                                 color={boxColor}
                                 contentType={resolveBoxContentType(box)}
+                                variant="2.5d-slot"
+                                coverUrl={(box as any).cover_url || (box as any).preview_url || null}
                             />
                         </div>
 

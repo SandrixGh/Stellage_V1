@@ -27,6 +27,8 @@ import { MessagesPage } from "./pages/Messages/MessagesPage";
 import { PublicShelfPage } from "./pages/Stellage/PublicShelfPage";
 import { NotFoundPage } from "./pages/NotFound/NotFoundPage";
 import { ProtectedRoute } from "./components/Auth/ProtectedRoute";
+import { StudyDashboardPage } from "./pages/Study/StudyDashboardPage";
+import { FocusModePage } from "./pages/Study/FocusModePage";
 
 function App() {
   const { getUser, isInitialized, isAuthenticated } = useAuthStore();
@@ -66,6 +68,11 @@ function App() {
       />
       <Route path="/auth/register_confirm" element={<RegisterConfirmPage />} />
 
+      {/* Standalone Focus Mode screen (no main app layout) */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/study/focus/:boxId" element={<FocusModePage />} />
+      </Route>
+
       {/* App shell. Внутри — публичные страницы (лента, каталог, публичные
           профили/полки) и приватные под ProtectedRoute (инвентарь, создание,
           свой профиль/стеллаж, сообщения, настройки). */}
@@ -87,6 +94,7 @@ function App() {
           <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/create-box" element={<CreateBoxPage />} />
           <Route path="/my-stellage" element={<MyStellagePage />} />
+          <Route path="/study" element={<StudyDashboardPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/messages/:username" element={<MessagesPage />} />

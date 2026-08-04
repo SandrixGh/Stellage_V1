@@ -8,9 +8,10 @@ import { Avatar } from "../../components/UI/Avatar";
 import { StellaCoinIcon } from "../../components/UI/StellaCoinIcon";
 import { resolveRarityVisual } from "../../data/mockTemplates";
 import {
-    ACCEPT_ATTR,
     MAX_ASSETS_PER_BOX,
     MAX_BYTES,
+    PHOTO_MIME_TYPES,
+    VIDEO_MIME_TYPES,
     formatBytes,
     kindForMime,
     uploadBoxAsset,
@@ -100,19 +101,38 @@ export const CreateBoxPage = () => {
         e.target.value = ""; // позволяем выбрать тот же файл повторно
         if (!picked.length) return;
 
-        setFiles((prev) => {
-            const free = MAX_ASSETS_PER_BOX - prev.length;
-            const next = picked.slice(0, Math.max(free, 0)).map((file) => ({
-                id: crypto.randomUUID(),
-                file,
-                progress: 0,
-                ...validateFile(file),
-            }));
-            if (picked.length > free) {
-                setError(`Не больше ${MAX_ASSETS_PER_BOX} файлов на коробку`);
+        // Если выложены файлы кода/текста — считываем их в поле текстового наполнения коробки
+        picked.forEach((file) => {
+            if (file.type.startsWith("text/") || /\.(py|js|ts|cpp|cs|json|md|txt|html|css|latex)$/i.test(file.name)) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const text = event.target?.result as string;
+                    if (text) {
+                        setContent((prev) => (prev ? prev + "\n\n" + text : text));
+                    }
+                };
+                reader.readAsText(file);
             }
-            return [...prev, ...next];
         });
+
+        // Медиафайлы (фото и видео) уходят на S3
+        const mediaPicked = picked.filter((f) => PHOTO_MIME_TYPES.includes(f.type) || VIDEO_MIME_TYPES.includes(f.type));
+
+        if (mediaPicked.length > 0) {
+            setFiles((prev) => {
+                const free = MAX_ASSETS_PER_BOX - prev.length;
+                const next = mediaPicked.slice(0, Math.max(free, 0)).map((file) => ({
+                    id: crypto.randomUUID(),
+                    file,
+                    progress: 0,
+                    ...validateFile(file),
+                }));
+                if (mediaPicked.length > free) {
+                    setError(`Не больше ${MAX_ASSETS_PER_BOX} медиа-файлов на коробку`);
+                }
+                return [...prev, ...next];
+            });
+        }
     };
 
     const removeFile = (id: string) => {
@@ -314,29 +334,29 @@ export const CreateBoxPage = () => {
                     </div>
 
                 <label className="create-box-field">
-                    <span className="create-box-label">Текст</span>
+                    <span className="create-box-label">Код / Markdown / LaTeX / Текст внутри коробки</span>
                     <textarea
                         className="create-box-input create-box-textarea"
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        placeholder="Текст, ссылка или заметка"
-                        rows={4}
+                        placeholder="Введите Python код, Markdown, LaTeX формулы ($$\frac{a}{b}$$) или текст..."
+                        rows={5}
                         disabled={metaLocked}
                     />
                 </label>
 
                 <div className="create-box-field">
-                    <span className="create-box-label">Файлы</span>
+                    <span className="create-box-label">Медиа & Файлы кода</span>
                     <label className="create-box-file-add">
                         <input
                             type="file"
-                            accept={ACCEPT_ATTR}
+                            accept="image/*,video/*,.py,.js,.ts,.tsx,.jsx,.cpp,.c,.h,.cs,.java,.json,.md,.txt,.html,.css,.latex,.tex,.sql,.sh,.yaml,.yml"
                             multiple
                             hidden
                             onChange={addFiles}
                             disabled={saving || files.length >= MAX_ASSETS_PER_BOX}
                         />
-                        + Добавить фото или видео
+                        + Загрузить медиа (Фото/Видео) или файл кода (.py/.md/.txt)
                     </label>
 
                     {files.length > 0 && (

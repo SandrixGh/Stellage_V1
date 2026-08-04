@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useThemeStore } from "../../store/useThemeStore";
+import { useStudyStore } from "../../store/useStudyStore";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { Avatar } from "../../components/UI/Avatar";
 import { AvatarCropper } from "../../components/Profile/AvatarCropper";
@@ -15,14 +16,28 @@ import {
     uploadAvatar,
 } from "../../api/profile";
 import { changePassword } from "../../api/sessions";
+import { getMyInviteCodesApi, generateInviteCodeApi, type InviteCodeOut } from "../../api/invites";
 import "./SettingsPage.css";
 
-type SettingsTab = "profile" | "security" | "appearance" | "sessions" | "danger";
+type SettingsTab = "profile" | "invites" | "security" | "appearance" | "sessions" | "danger";
 
 export const SettingsPage = () => {
     const navigate = useNavigate();
     const { user, isAuthenticated, logout, delete_account, updateProfile } = useAuthStore();
     const { theme, setTheme } = useThemeStore();
+    const {
+        studyModeEnabled,
+        toggleStudyMode,
+        focusTimerMinutes,
+        setFocusTimerMinutes,
+        gridLabelsVisible,
+        toggleGridLabels,
+        rowLabels,
+        setRowLabels,
+        colLabels,
+        setColLabels,
+        syncFromServer,
+    } = useStudyStore();
 
     const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
 
@@ -52,7 +67,46 @@ export const SettingsPage = () => {
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const [passwordSuccess, setPasswordSuccess] = useState(false);
 
-    // ----- ЗВУКИ STATE -----
+    // ----- ИНВАЙТ-КОДЫ STATE -----
+    const [inviteCodes, setInviteCodes] = useState<InviteCodeOut[]>([]);
+    const [loadingInvites, setLoadingInvites] = useState(false);
+    const [generatingInvite, setGeneratingInvite] = useState(false);
+    const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+    const loadInviteCodes = async () => {
+        setLoadingInvites(true);
+        try {
+            const list = await getMyInviteCodesApi();
+            setInviteCodes(list);
+        } catch {
+            setInviteCodes([]);
+        } finally {
+            setLoadingInvites(false);
+        }
+    };
+
+    const handleGenerateInvite = async () => {
+        setGeneratingInvite(true);
+        try {
+            await generateInviteCodeApi();
+            await loadInviteCodes();
+        } finally {
+            setGeneratingInvite(false);
+        }
+    };
+
+    const handleCopyCode = (code: string) => {
+        navigator.clipboard.writeText(code);
+        setCopiedCode(code);
+        setTimeout(() => setCopiedCode(null), 2500);
+    };
+
+    const handleCopyLink = (code: string) => {
+        const link = `${window.location.origin}/auth?invite=${code}`;
+        navigator.clipboard.writeText(link);
+        setCopiedCode(`link-${code}`);
+        setTimeout(() => setCopiedCode(null), 2500);
+    };
     const [soundEnabled, setSoundEnabled] = useState(() => {
         return localStorage.getItem("stellage-sound-fx") !== "disabled";
     });
@@ -71,6 +125,7 @@ export const SettingsPage = () => {
             if (p.bio !== undefined && p.bio !== null) setBio(p.bio);
             if (p.username) setUsername(p.username);
             if (p.nickname) setNickname(p.nickname);
+            if (p.study_mode_enabled !== undefined) syncFromServer(p.study_mode_enabled);
         } catch {
             setAvatarUrl(null);
         }
@@ -80,6 +135,12 @@ export const SettingsPage = () => {
         if (!isAuthenticated) return;
         loadProfileData();
     }, [isAuthenticated]);
+
+    useEffect(() => {
+        if (isAuthenticated && activeTab === "invites") {
+            loadInviteCodes();
+        }
+    }, [isAuthenticated, activeTab]);
 
     if (!isAuthenticated || !user) {
         return (
@@ -246,6 +307,24 @@ export const SettingsPage = () => {
                             </svg>
                         </span>
                         <span>Профиль</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        role="tab"
+                        aria-selected={activeTab === "invites"}
+                        className={`settings-nav-btn${activeTab === "invites" ? " active" : ""}`}
+                        onClick={() => setActiveTab("invites")}
+                    >
+                        <span className="settings-nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <line x1="19" y1="8" x2="19" y2="14" />
+                                <line x1="16" y1="11" x2="22" y2="11" />
+                            </svg>
+                        </span>
+                        <span>Приглашения</span>
                     </button>
 
                     <button
@@ -424,6 +503,97 @@ export const SettingsPage = () => {
                         </div>
                     )}
 
+                    {/* ТАБ ИНВАЙТ-КОДЫ */}
+                    {activeTab === "invites" && (
+                        <div className="settings-card">
+                            <div className="settings-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div>
+                                    <h2 className="settings-card-title">Приглашения и рефералы</h2>
+                                    <p className="settings-card-sub">
+                                        Приглашайте друзей в Stellage по вашим персональным инвайт-кодам
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="settings-btn primary"
+                                    onClick={handleGenerateInvite}
+                                    disabled={generatingInvite}
+                                >
+                                    {generatingInvite ? "Генерация…" : "+ Создать инвайт"}
+                                </button>
+                            </div>
+
+                            {loadingInvites ? (
+                                <div style={{ padding: '30px', textAlign: 'center', color: 'var(--ink-secondary, #888)' }}>
+                                    Загрузка ваших инвайтов…
+                                </div>
+                            ) : inviteCodes.length === 0 ? (
+                                <div style={{ padding: '30px', textAlign: 'center', color: 'var(--ink-secondary, #888)' }}>
+                                    У вас пока нет сгенерированных инвайт-кодов. Нажмите «+ Создать инвайт», чтобы пригласить друга!
+                                </div>
+                            ) : (
+                                <div className="settings-invites-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
+                                    {inviteCodes.map((inv) => (
+                                        <div
+                                            key={inv.id}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                padding: '14px 18px',
+                                                borderRadius: '12px',
+                                                background: 'var(--surface-raised, rgba(255,255,255,0.04))',
+                                                border: '1px solid var(--border-subtle, rgba(255,255,255,0.08))',
+                                            }}
+                                        >
+                                            <div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <span style={{ fontFamily: 'monospace', fontSize: '1.1rem', fontWeight: 700, letterSpacing: '1px', color: 'var(--ink, #fff)' }}>
+                                                        {inv.code}
+                                                    </span>
+                                                    <span
+                                                        className={`settings-badge ${inv.is_active ? 'verified' : ''}`}
+                                                        style={{
+                                                            fontSize: '0.75rem',
+                                                            padding: '2px 8px',
+                                                            borderRadius: '6px',
+                                                            background: inv.is_active ? 'rgba(79, 169, 142, 0.15)' : 'rgba(255, 255, 255, 0.08)',
+                                                            color: inv.is_active ? 'var(--accent, #4FA98E)' : 'var(--ink-tertiary, #888)'
+                                                        }}
+                                                    >
+                                                        {inv.is_active ? 'Активен' : 'Использован'}
+                                                    </span>
+                                                </div>
+                                                <div style={{ fontSize: '0.8rem', color: 'var(--ink-secondary, #888)', marginTop: '4px' }}>
+                                                    Использовано: {inv.uses_count} из {inv.max_uses}
+                                                </div>
+                                            </div>
+
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <button
+                                                    type="button"
+                                                    className="settings-btn secondary"
+                                                    style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                                                    onClick={() => handleCopyCode(inv.code)}
+                                                >
+                                                    {copiedCode === inv.code ? "✓ Скопирован" : "Код"}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="settings-btn primary"
+                                                    style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                                                    onClick={() => handleCopyLink(inv.code)}
+                                                >
+                                                    {copiedCode === `link-${inv.code}` ? "✓ Ссылка скопирована" : "Ссылка"}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     {/* ТАБ 2: БЕЗОПАСНОСТЬ */}
                     {activeTab === "security" && (
                         <div className="settings-card">
@@ -542,6 +712,93 @@ export const SettingsPage = () => {
                                     />
                                     <span className="settings-slider" />
                                 </label>
+                            </div>
+
+                            <div className="settings-divider" />
+
+                            <div className="settings-study-section">
+                                <h3 className="settings-section-subtitle">Учебный режим (Study Mode)</h3>
+                                <div className="settings-row-item">
+                                    <div className="settings-row-info">
+                                        <span className="settings-row-title">Включить Учебный Режим</span>
+                                        <span className="settings-row-desc">
+                                            Включите, чтобы превратить Stellage в пространственную систему для учёбы. В вашем профиле появится индикатор Study Mode.
+                                        </span>
+                                    </div>
+                                    <label className="settings-switch">
+                                        <input
+                                            type="checkbox"
+                                            checked={studyModeEnabled}
+                                            onChange={() => toggleStudyMode()}
+                                        />
+                                        <span className="settings-slider" />
+                                    </label>
+                                </div>
+
+                                {studyModeEnabled && (
+                                    <div className="settings-study-options">
+                                        <div className="settings-row-item">
+                                            <div className="settings-row-info">
+                                                <span className="settings-row-title">Фокус-таймер Pomodoro по умолчанию</span>
+                                                <span className="settings-row-desc">Длительность одной рабочей сессии (минуты)</span>
+                                            </div>
+                                            <input
+                                                type="number"
+                                                className="settings-number-input"
+                                                value={focusTimerMinutes}
+                                                min={5}
+                                                max={120}
+                                                onChange={(e) => setFocusTimerMinutes(Number(e.target.value))}
+                                            />
+                                        </div>
+
+                                        <div className="settings-row-item">
+                                            <div className="settings-row-info">
+                                                <span className="settings-row-title">Пространственные метки сетки</span>
+                                                <span className="settings-row-desc">Отображать названия рядов и колонок на доске стеллажа</span>
+                                            </div>
+                                            <label className="settings-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={gridLabelsVisible}
+                                                    onChange={() => toggleGridLabels()}
+                                                />
+                                                <span className="settings-slider" />
+                                            </label>
+                                        </div>
+
+                                        {gridLabelsVisible && (
+                                            <div className="settings-study-labels-editor">
+                                                <div className="settings-field">
+                                                    <label className="settings-label">Метки рядов (разделяйте запятой)</label>
+                                                    <input
+                                                        type="text"
+                                                        className="settings-input"
+                                                        value={rowLabels.join(", ")}
+                                                        onChange={(e) =>
+                                                            setRowLabels(
+                                                                e.target.value.split(",").map((s) => s.trim())
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                                <div className="settings-field" style={{ marginTop: "12px" }}>
+                                                    <label className="settings-label">Метки колонок (разделяйте запятой)</label>
+                                                    <input
+                                                        type="text"
+                                                        className="settings-input"
+                                                        value={colLabels.join(", ")}
+                                                        onChange={(e) =>
+                                                            setColLabels(
+                                                                e.target.value.split(",").map((s) => s.trim())
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}

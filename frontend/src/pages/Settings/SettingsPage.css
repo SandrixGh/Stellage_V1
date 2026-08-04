@@ -542,3 +542,40 @@ input:checked + .settings-slider:before {
         white-space: nowrap;
     }
 }
+
+/* Study Mode Settings Styles */
+.settings-study-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.settings-study-options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 12px;
+    padding-left: 12px;
+    border-left: 2px solid rgba(var(--accent-rgb), 0.3);
+}
+
+.settings-number-input {
+    width: 80px;
+    padding: 8px 12px;
+    background: var(--surface-elevated, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+    border-radius: var(--radius-sm, 6px);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 14px;
+    text-align: center;
+}
+
+.settings-study-labels-editor {
+    background: rgba(var(--chrome-rgb, 255, 255, 255), 0.03);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-radius: var(--radius-md, 10px);
+    padding: 16px;
+    margin-top: 8px;
+}
+
