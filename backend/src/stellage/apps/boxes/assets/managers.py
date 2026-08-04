@@ -263,6 +263,8 @@ class AssetManager:
             or can_view_box_content(
                 viewer_id=viewer_id,
                 owner_id=access.owner_id,
+                creator_id=access.creator_id,
+                is_sealed=access.is_sealed,
                 is_public=access.is_public,
                 shelf_id=access.shelf_id,
                 shelf_is_public=access.shelf_is_public,
@@ -311,6 +313,8 @@ class AssetManager:
             or can_view_box_content(
                 viewer_id=viewer_id,
                 owner_id=access.owner_id,
+                creator_id=access.creator_id,
+                is_sealed=access.is_sealed,
                 is_public=access.is_public,
                 shelf_id=access.shelf_id,
                 shelf_is_public=access.shelf_is_public,

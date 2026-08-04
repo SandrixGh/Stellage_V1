@@ -65,6 +65,7 @@ class AssetDownloadUrl(BaseModel):
 class BoxContentAccess(BaseModel):
     """Срез полей коробки и её полки для проверки правила видимости контента."""
     owner_id: uuid.UUID
+    creator_id: uuid.UUID | None = None
     is_public: VisibilityEnum
     is_sealed: SealingEnum
     shelf_id: uuid.UUID | None

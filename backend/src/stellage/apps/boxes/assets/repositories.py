@@ -12,7 +12,7 @@ from stellage.apps.boxes.assets.schemas import (
 from stellage.core.core_dependencies.db_dependency import DBDependency
 from stellage.database.enums.asset_kind import AssetKindEnum
 from stellage.database.enums.asset_status import AssetStatusEnum
-from stellage.database.models import BoxAsset, BoxInstance, Shelf
+from stellage.database.models import BoxAsset, BoxInstance, BoxTemplate, Shelf
 
 
 class BoxAssetRepository:
@@ -51,11 +51,13 @@ class BoxAssetRepository:
             query = (
                 select(
                     BoxInstance.user_id,
+                    BoxTemplate.creator_id,
                     BoxInstance.is_public,
                     BoxInstance.is_sealed,
                     BoxInstance.shelf_id,
                     Shelf.is_public.label("shelf_is_public"),
                 )
+                .join(BoxTemplate, BoxTemplate.id == BoxInstance.template_id)
                 .outerjoin(Shelf, Shelf.id == BoxInstance.shelf_id)
                 .where(BoxInstance.id == instance_id)
             )
@@ -67,11 +69,13 @@ class BoxAssetRepository:
 
             return BoxContentAccess(
                 owner_id=row.user_id,
+                creator_id=row.creator_id,
                 is_public=row.is_public,
                 is_sealed=row.is_sealed,
                 shelf_id=row.shelf_id,
                 shelf_is_public=row.shelf_is_public,
             )
+
 
     async def count_active_for_instance(
         self,
