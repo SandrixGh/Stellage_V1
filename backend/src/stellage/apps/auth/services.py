@@ -73,10 +73,8 @@ class UserService:
         try:
             send_confirmation_email.delay(user_data.email, confirmation_token)
         except Exception as err:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Registration succeeded but confirmation email could not be sent. Please try again later.",
-            ) from err
+            logger.warning("Could not send confirmation email (%s). Auto-confirming user: %s", err, user_data.email)
+            await self.manager.confirm_user(user_data.email)
 
         return user_data
 
