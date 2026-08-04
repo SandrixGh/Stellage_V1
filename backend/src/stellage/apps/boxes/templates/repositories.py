@@ -25,30 +25,30 @@ from stellage.database.enums.currency import CurrencyEnum
 from stellage.database.models import BoxAsset, BoxInstance, BoxTemplate
 
 
-def _to_rarity_value(val: object) -> str:
+def _to_rarity_value(val: object) -> object:
     if isinstance(val, BoxRarity):
-        return val.value
+        return val
     if isinstance(val, str):
         if val in BoxRarity.__members__:
-            return BoxRarity[val].value
+            return BoxRarity[val]
         try:
-            return BoxRarity(val).value
+            return BoxRarity(val)
         except ValueError:
             pass
-    return str(val)
+    return val
 
 
-def _to_currency_value(val: object) -> str:
+def _to_currency_value(val: object) -> object:
     if isinstance(val, CurrencyEnum):
-        return val.value
+        return val
     if isinstance(val, str):
         if val in CurrencyEnum.__members__:
-            return CurrencyEnum[val].value
+            return CurrencyEnum[val]
         try:
-            return CurrencyEnum(val).value
+            return CurrencyEnum(val)
         except ValueError:
             pass
-    return str(val)
+    return val
 
 
 class BoxTemplateRepository:
