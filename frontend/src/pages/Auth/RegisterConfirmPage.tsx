@@ -19,7 +19,7 @@ export const RegisterConfirmPage = () => {
             return;
         }
 
-        api.get("/auth/register_confirm/", { params: { token } })
+        api.get("/auth/register_confirm", { params: { token } })
             .then(() => setState("success"))
             .catch((err) => {
                 setErrorMsg(err.response?.data?.detail || "Ссылка недействительна или истекла.");

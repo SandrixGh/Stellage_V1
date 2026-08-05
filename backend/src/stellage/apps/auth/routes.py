@@ -28,6 +28,13 @@ DEVICE_COOKIE = "DeviceAccounts"
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(rate_limit(max_calls=3, window_seconds=60))],
 )
+@auth_router.post(
+    path="/register/",
+    response_model=UserReturnData,
+    status_code=status.HTTP_201_CREATED,
+    include_in_schema=False,
+    dependencies=[Depends(rate_limit(max_calls=3, window_seconds=60))],
+)
 async def registration(
     user: AuthUser,
     service: Annotated[
@@ -39,9 +46,16 @@ async def registration(
 
 
 @auth_router.get(
+    path="/register_confirm",
+    response_model=dict[str, str],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(max_calls=10, window_seconds=60))],
+)
+@auth_router.get(
     path="/register_confirm/",
     response_model=dict[str, str],
     status_code=status.HTTP_200_OK,
+    include_in_schema=False,
     dependencies=[Depends(rate_limit(max_calls=10, window_seconds=60))],
 )
 async def confirm_registration(

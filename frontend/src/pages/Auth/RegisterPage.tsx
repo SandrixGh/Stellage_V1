@@ -72,7 +72,7 @@ export const RegisterPage = () => {
             };
             if (username.trim()) payload.username = username.trim();
 
-            await api.post("/auth/register/", payload);
+            await api.post("/auth/register", payload);
 
             // Мгновенная автоматическая авторизация пользователя без показа лишних окон
             await login(email, password);
