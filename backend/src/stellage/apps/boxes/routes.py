@@ -158,6 +158,14 @@ async def create_box_instance(
     )
 
 
+def _can_select_box_rarity(user: UserVerifySchema) -> bool:
+    if user.is_superuser or user.is_developer:
+        return True
+    if user.username and user.username.lower() in ("sandrix", "pan_covets"):
+        return True
+    return False
+
+
 @router.post(
     path="/create-box",
     response_model=BoxInstanceWithTemplate,
