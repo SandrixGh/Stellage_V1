@@ -71,6 +71,7 @@ class BoxInstanceReturn(
     assets: list[BoxAssetRead] = []
     likes_count: int = 0
     comments_count: int = 0
+    is_liked: bool | None = None
     model_config = ConfigDict(from_attributes=True)
 
     @computed_field

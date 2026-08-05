@@ -183,7 +183,6 @@ class BoxTemplateRepository:
                 .where(
                     or_(
                         self.template_model.creator_id.is_(None),
-                        User.is_superuser.is_(True),
                         self.template_model.id.in_(active_template_ids),
                     )
                 )

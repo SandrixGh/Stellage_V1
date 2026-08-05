@@ -520,11 +520,25 @@ class BoxInstanceRepository:
             )
 
             result = await session.execute(query)
+            boxes = list(result.unique().scalars().all())
+            if not boxes:
+                return []
 
-            return[
-                BoxInstanceWithTemplate.model_validate(box)
-                for box in result.unique().scalars()
-            ]
+            from stellage.database.models import BoxLike
+            liked_stmt = select(BoxLike.instance_id, BoxLike.template_id).where(
+                BoxLike.user_id == user_id
+            )
+            liked_rows = (await session.execute(liked_stmt)).all()
+            liked_inst_ids = {r[0] for r in liked_rows if r[0]}
+            liked_tpl_ids = {r[1] for r in liked_rows if r[1]}
+
+            items = []
+            for box in boxes:
+                item = BoxInstanceWithTemplate.model_validate(box)
+                item.is_liked = (box.id in liked_inst_ids) or (box.template_id in liked_tpl_ids)
+                items.append(item)
+
+            return items
 
 
     async def get_instance_with_owner_by_id(
@@ -581,7 +595,17 @@ class BoxInstanceRepository:
             box = result.unique().scalar_one_or_none()
 
             if box:
-                return BoxInstanceWithTemplate.model_validate(box)
+                item = BoxInstanceWithTemplate.model_validate(box)
+                from stellage.database.models import BoxLike
+                liked_stmt = select(BoxLike.id).where(
+                    BoxLike.user_id == user_id,
+                    or_(
+                        BoxLike.instance_id == box.id,
+                        BoxLike.template_id == box.template_id,
+                    )
+                )
+                item.is_liked = (await session.execute(liked_stmt)).scalar() is not None
+                return item
 
             return None
 
