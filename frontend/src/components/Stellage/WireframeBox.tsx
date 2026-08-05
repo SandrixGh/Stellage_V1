@@ -126,7 +126,7 @@ const GLYPH_CENTER = {
     x: V.A.x + LAYOUT.frontWidth / 2,
     y: V.A.y + LAYOUT.frontHeight / 2,
 };
-const GLYPH_MIN_SIZE = 44;
+const GLYPH_MIN_SIZE = 16;
 
 const SILHOUETTE = roundedPath([V.D, V.A, V.E, V.F, V.G, V.C], CORNER_RADIUS, true);
 const INTERIOR = `${roundedPath([V.A, V.B, V.C], CORNER_RADIUS)} ${seg(V.B, V.F)}`;

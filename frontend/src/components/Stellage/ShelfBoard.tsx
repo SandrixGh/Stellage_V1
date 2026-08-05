@@ -145,7 +145,11 @@ export const ShelfBoard = ({
         let rafId: number | null = null;
         const measure = () => {
             const w = el.clientWidth / colCount;
-            const newRowH = Math.max(88, Math.min(DEFAULT_ROW_HEIGHT, Math.round(w * 1.3)));
+            const isSmallScreen = el.clientWidth < 840;
+            const minH = isSmallScreen ? 62 : 88;
+            const maxH = isSmallScreen ? 80 : DEFAULT_ROW_HEIGHT;
+            const targetFactor = isSmallScreen ? 1.05 : 1.3;
+            const newRowH = Math.max(minH, Math.min(maxH, Math.round(w * targetFactor)));
             setCellWidth((prevW) => (Math.abs(prevW - w) > 0.5 ? w : prevW));
             setRowHeight((prevH) => (Math.abs(prevH - newRowH) > 0.5 ? newRowH : prevH));
         };
@@ -229,6 +233,12 @@ export const ShelfBoard = ({
     const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>, p: PlacedBox) => {
         const el = boardRef.current;
         if (!el) return;
+
+        // Синхронный захват указателя при нажатии предотвращает отмену касания браузером
+        try {
+            el.setPointerCapture(e.pointerId);
+        } catch {}
+
         const rect = el.getBoundingClientRect();
         const boxLeft = p.col * (rect.width / colCount);
         const boxTop = TOP_PADDING + p.row * rowHeight;
@@ -240,8 +250,6 @@ export const ShelfBoard = ({
         clearLongPress();
 
         if (e.pointerType === "touch" || e.pointerType === "pen") {
-            // На сенсорных устройствах НЕ вызываем e.preventDefault() сразу,
-            // чтобы браузер мог свободно выполнять вертикальный скролл страницы.
             pendingTouchRef.current = {
                 id: p.box.id,
                 pointerId: e.pointerId,
@@ -251,37 +259,30 @@ export const ShelfBoard = ({
                 grabDy,
             };
 
-            // Если полка редактируемая — запускаем таймер зажатия (long press).
             if (editable) {
+                // Инициализируем структуру перетаскивания
+                setDrag({
+                    id: p.box.id,
+                    pointerId: e.pointerId,
+                    grabDx,
+                    grabDy,
+                    x,
+                    y,
+                    startX: x,
+                    startY: y,
+                    moved: false,
+                });
+
+                // Вибрация отклика через 140мс зажатия
                 longPressTimerRef.current = setTimeout(() => {
-                    const pending = pendingTouchRef.current;
-                    if (!pending) return;
-
-                    // Зажатие сработало: активируем драг и вибрацию
                     try {
-                        navigator?.vibrate?.(40);
+                        navigator?.vibrate?.(35);
                     } catch {}
-                    el.setPointerCapture?.(pending.pointerId);
-
-                    setDrag({
-                        id: pending.id,
-                        pointerId: pending.pointerId,
-                        grabDx: pending.grabDx,
-                        grabDy: pending.grabDy,
-                        x: pending.startX,
-                        y: pending.startY,
-                        startX: pending.startX,
-                        startY: pending.startY,
-                        moved: true,
-                    });
-                    pendingTouchRef.current = null;
-                    longPressTimerRef.current = null;
-                }, 220);
+                    setDrag((prev) => (prev ? { ...prev, moved: true } : null));
+                }, 140);
             }
         } else {
-            // Мышь — классическое перетаскивание при сдвиге
             e.preventDefault();
-            el.setPointerCapture?.(e.pointerId);
             setDrag({
                 id: p.box.id,
                 pointerId: e.pointerId,
@@ -303,26 +304,29 @@ export const ShelfBoard = ({
         const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
         const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
 
-        // Если ожидаем зажатие на тачскрине:
-        if (pendingTouchRef.current && pendingTouchRef.current.pointerId === e.pointerId) {
-            const dx = Math.abs(x - pendingTouchRef.current.startX);
-            const dy = Math.abs(y - pendingTouchRef.current.startY);
-            // Палец сдвинулся ощутимо (>22px) до срабатывания зажатия — скролл страницы
-            if (dx > 22 || dy > 22) {
+        const pending = pendingTouchRef.current;
+        if (pending && pending.pointerId === e.pointerId && !drag?.moved) {
+            const dy = Math.abs(y - pending.startY);
+            const dx = Math.abs(x - pending.startX);
+            // Отменяем удержание ТОЛЬКО при явном намерении прокрутить страницу по вертикали (>32px)
+            if (dy > 32 && dy > dx * 1.5) {
                 clearLongPress();
+                return;
             }
-            return;
         }
 
         if (!drag || e.pointerId !== drag.pointerId) return;
 
-        if (e.cancelable) {
+        if (e.cancelable && (drag.moved || editable)) {
             e.preventDefault();
         }
 
-        const moved =
-            drag.moved ||
-            Math.hypot(x - drag.startX, y - drag.startY) > DRAG_THRESHOLD;
+        const dist = Math.hypot(x - drag.startX, y - drag.startY);
+        const moved = drag.moved || (editable && dist > DRAG_THRESHOLD);
+
+        if (moved && longPressTimerRef.current) {
+            clearLongPress();
+        }
 
         const nextX = editable ? x : drag.x;
         const nextY = editable ? y : drag.y;
@@ -342,17 +346,25 @@ export const ShelfBoard = ({
         }
 
         const pending = pendingTouchRef.current;
-        if (pending && pending.pointerId === e.pointerId) {
-            // Быстрый клик/тап по коробке
+        clearLongPress();
+
+        try {
+            if (boardRef.current?.hasPointerCapture(e.pointerId)) {
+                boardRef.current.releasePointerCapture(e.pointerId);
+            }
+        } catch {}
+
+        if (pending && pending.pointerId === e.pointerId && (!drag || !drag.moved)) {
             const current = placed.find((p) => p.box.id === pending.id);
-            clearLongPress();
+            setDrag(null);
+            pendingTouchRef.current = null;
             if (current) {
                 onOpen?.(current.box);
             }
             return;
         }
 
-        clearLongPress();
+        pendingTouchRef.current = null;
 
         if (!drag || e.pointerId !== drag.pointerId) return;
         const id = drag.id;
@@ -360,13 +372,11 @@ export const ShelfBoard = ({
         const current = placed.find((p) => p.box.id === id);
         setDrag(null);
 
-        // Клик без перетаскивания (мышь) — открываем коробку.
         if (!moved) {
             if (current) onOpen?.(current.box);
             return;
         }
 
-        // Перетаскивание: сохраняем новую ячейку только на редактируемой полке.
         if (!editable) return;
         const { row, col } = pointToCell(e.clientX, e.clientY);
         if (current && (current.row !== row || current.col !== col)) {
@@ -374,16 +384,20 @@ export const ShelfBoard = ({
         }
     };
 
-    const boxSize = Math.min(160, Math.max(70, Math.round((cellWidth || 100) * 1.35)));
+    const isMobileGrid = cellWidth > 0 && cellWidth < 90;
+    const boxSize = Math.min(145, Math.max(34, Math.round((cellWidth || 45) * (isMobileGrid ? 0.94 : 1.18))));
+    const topPadding = isMobileGrid ? 6 : TOP_PADDING;
+    const labelSpace = isMobileGrid ? 42 : LABEL_SPACE;
 
     return (
         <div
             ref={boardRef}
             className={`shelf-board ${editable ? "is-editable" : ""} ${studyLabels ? "has-study-labels" : ""}`}
-            style={{ minHeight: TOP_PADDING + rowCount * rowHeight + LABEL_SPACE }}
+            style={{ minHeight: topPadding + rowCount * rowHeight + labelSpace }}
             onPointerMove={handlePointerMove}
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
+            onContextMenu={(e) => e.preventDefault()}
         >
             {/* Пространственные метки сетки в режиме учёбы */}
             {studyLabels && (
@@ -392,7 +406,7 @@ export const ShelfBoard = ({
                     colLabels={studyLabels.colLabels}
                     rowCount={rowCount}
                     colCount={colCount}
-                    topPadding={TOP_PADDING}
+                    topPadding={topPadding}
                     rowHeight={rowHeight}
                 />
             )}
@@ -402,7 +416,7 @@ export const ShelfBoard = ({
                 <div
                     key={`line-${row}`}
                     className="shelf-line"
-                    style={{ top: TOP_PADDING + (row + 1) * rowHeight - 1 }}
+                    style={{ top: topPadding + (row + 1) * rowHeight - 1 }}
                 />
             ))}
 
@@ -419,7 +433,7 @@ export const ShelfBoard = ({
                                 data-cell-status={status ?? undefined}
                                 style={{
                                     left: `${col * cellWidthPct}%`,
-                                    top: TOP_PADDING + row * rowHeight,
+                                    top: topPadding + row * rowHeight,
                                     width: `${cellWidthPct}%`,
                                     height: rowHeight,
                                 }}
@@ -441,24 +455,29 @@ export const ShelfBoard = ({
                 );
 
                 const boardW = cellWidth * colCount;
-                const boardH = TOP_PADDING + rowCount * rowHeight;
+                const boardH = topPadding + rowCount * rowHeight;
                 const cellW = cellWidth || 0;
+
+                // Смещение крайних колонок внутрь сетки предотвращает вылезание 3D коробок за рамки
+                const colShift = p.col === colCount - 1 ? -6 : p.col === 0 ? 4 : 0;
+
                 const style: React.CSSProperties = isDragging
                     ? {
                           left: Math.max(0, Math.min(drag!.x - drag!.grabDx, boardW - cellW)),
-                          top: Math.max(TOP_PADDING, Math.min(drag!.y - drag!.grabDy, boardH - rowHeight)),
+                          top: Math.max(topPadding, Math.min(drag!.y - drag!.grabDy, boardH - rowHeight)),
                           width: cellW || undefined,
                           height: rowHeight,
                       }
                     : {
-                          left: `${p.col * cellWidthPct}%`,
-                          top: TOP_PADDING + p.row * rowHeight,
+                          left: `calc(${p.col * cellWidthPct}% + ${colShift}px)`,
+                          top: topPadding + p.row * rowHeight,
                           width: `${cellWidthPct}%`,
                           height: rowHeight,
                       };
                 return (
                     <div
                         key={p.box.id}
+                        data-col={p.col}
                         className={`shelf-cell ${isDragging ? "is-dragging" : ""}`}
                         style={style}
                         onPointerDown={(e) => handlePointerDown(e, p)}

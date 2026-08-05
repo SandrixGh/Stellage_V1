@@ -43,78 +43,86 @@
 .box-filter-rarities {
     position: relative;
     z-index: 1;
-    display: inline-flex;
-    flex-wrap: wrap;
+    display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 5px 6px;
-    background: rgba(var(--chrome-rgb), 0.85);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow-sm), var(--glass-specular);
-    width: fit-content;
+    gap: 6px 4px;
+    padding: 2px 0;
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 .box-filter-chip {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
     font-family: var(--font-body);
-    font-size: 12.5px;
+    font-size: 11.5px;
     font-weight: 500;
-    padding: 7px 16px;
-    border-radius: var(--radius-pill);
+    padding: 5px 12px;
+    border-radius: 20px;
     color: var(--ink-secondary);
-    background: transparent;
-    border: 1px solid transparent;
+    background: rgba(var(--chrome-rgb, 18, 22, 30), 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .box-filter-chip:hover {
     color: var(--ink);
-    background: var(--surface-hover);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.18);
 }
 
 /* Liquid Glass Active Category Pill */
 .box-filter-chip.active {
-    color: var(--ink);
-    background: rgba(var(--accent-rgb), 0.25);
-    border: 1px solid var(--accent);
-    box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.2), var(--glass-specular);
+    color: var(--accent);
+    background: rgba(var(--accent-rgb, 79, 169, 142), 0.2);
+    border-color: var(--accent);
+    box-shadow: 0 4px 14px rgba(var(--accent-rgb, 79, 169, 142), 0.2);
     font-weight: 600;
 }
 
 .box-filter-chip.active.chip-common {
-    background: rgba(154, 160, 164, 0.28);
+    background: rgba(154, 160, 164, 0.22);
     border-color: rgba(154, 160, 164, 0.5);
-    box-shadow: 0 4px 14px rgba(154, 160, 164, 0.2), var(--glass-specular);
+    color: var(--ink);
+    box-shadow: 0 4px 14px rgba(154, 160, 164, 0.18);
 }
 
 .box-filter-chip.active.chip-rare {
-    background: rgba(var(--tag-rare-rgb), 0.22);
-    border-color: var(--tag-rare);
-    box-shadow: 0 4px 14px rgba(var(--tag-rare-rgb), 0.2), var(--glass-specular);
+    background: rgba(var(--tag-rare-rgb, 59, 130, 246), 0.22);
+    border-color: var(--tag-rare, #3B82F6);
+    color: var(--tag-rare, #3B82F6);
+    box-shadow: 0 4px 14px rgba(var(--tag-rare-rgb, 59, 130, 246), 0.2);
 }
 
 .box-filter-chip.active.chip-golden {
-    background: rgba(var(--tag-golden-rgb), 0.22);
-    border-color: var(--tag-golden);
-    box-shadow: 0 4px 14px rgba(var(--tag-golden-rgb), 0.2), var(--glass-specular);
+    background: rgba(var(--tag-golden-rgb, 217, 119, 6), 0.22);
+    border-color: var(--tag-golden, #D97706);
+    color: var(--tag-golden, #D97706);
+    box-shadow: 0 4px 14px rgba(var(--tag-golden-rgb, 217, 119, 6), 0.2);
 }
 
 .box-filter-chip.active.chip-developer\'s,
 .box-filter-chip.active.chip-dev {
-    background: rgba(var(--tag-dev-rgb), 0.22);
-    border-color: var(--tag-dev);
-    box-shadow: 0 4px 14px rgba(var(--tag-dev-rgb), 0.2), var(--glass-specular);
+    background: rgba(var(--tag-dev-rgb, 168, 85, 247), 0.22);
+    border-color: var(--tag-dev, #A855F7);
+    color: var(--tag-dev, #A855F7);
+    box-shadow: 0 4px 14px rgba(var(--tag-dev-rgb, 168, 85, 247), 0.2);
 }
 
 .box-filter-chip-dot {
-    width: 7px;
-    height: 7px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     flex-shrink: 0;
 }
@@ -122,8 +130,8 @@
 @media (max-width: 480px) {
     .box-filter-top { flex-direction: column; align-items: stretch; }
     .box-filter-sort-select { width: 100%; }
-    .box-filter-rarities { width: 100%; overflow-x: auto; flex-wrap: nowrap; box-sizing: border-box; }
-    .box-filter-chip { flex: 0 0 auto; padding: 6px 12px; font-size: 11.5px; }
+    .box-filter-rarities { gap: 5px 3px; }
+    .box-filter-chip { padding: 4px 10px; font-size: 11px; }
 }
 
 
