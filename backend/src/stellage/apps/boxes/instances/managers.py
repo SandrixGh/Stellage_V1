@@ -14,6 +14,7 @@ from stellage.apps.boxes.instances.schemas import (
     BoxTextContent,
 )
 from stellage.apps.shelves.cache_managers import ShelfCacheManager
+from stellage.database.enums.visibility import VisibilityEnum
 
 
 class InstanceManager:
@@ -167,10 +168,9 @@ class InstanceManager:
         instance_id: uuid.UUID,
         content: BoxTextContent | None,
         update_content: bool,
+        is_public: VisibilityEnum | None = None,
     ) -> BoxInstanceWithTemplate:
-        """Сбрасывает кэши экземпляра/полки и возвращает свежий снимок. content
-        пишется только когда update_content=True (иначе правка шаблона не должна
-        затирать содержимое); при False — просто перечитываем актуальные данные."""
+        """Сбрасывает кэши экземпляра/полки и возвращает свежий снимок."""
         await self.refresh_old_shelf(
             user_id=user_id,
             instance_id=instance_id,
@@ -180,11 +180,13 @@ class InstanceManager:
             user_id=user_id,
         )
 
-        if update_content:
+        if update_content or is_public is not None:
             box = await self.repository.update_content(
                 user_id=user_id,
                 instance_id=instance_id,
                 content=content.model_dump() if content is not None else None,
+                update_content=update_content,
+                is_public=is_public,
             )
         else:
             box = await self.repository.get_box_instance_by_id(

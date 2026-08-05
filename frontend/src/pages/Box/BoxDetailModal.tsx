@@ -94,6 +94,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("0");
     const [rarity, setRarity] = useState("common");
+    const [isPublic, setIsPublic] = useState<"public" | "private">("public");
     const [contentText, setContentText] = useState("");
     const [uploadProgress, setUploadProgress] = useState<number | null>(null);
     const [assetError, setAssetError] = useState<string | null>(null);
@@ -132,7 +133,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
 
     const isOwner = !!user && current.user_id === user.id;
     const isCreator = !!user && !!template.creator_id && template.creator_id === user.id;
-    const canEdit = isCreator;
+    const canEdit = isOwner || isCreator;
     const onShelf = current.shelf_id !== null;
     const isSealed = current.is_sealed === "sealed";
     const canViewContent = !isSealed || isOwner || isCreator;
@@ -148,6 +149,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
         setDescription(template.description ?? "");
         setPrice(String(Math.round(Number(template.price) || 0)));
         setRarity((template.rarity ?? "common").toLowerCase());
+        setIsPublic(current.is_public ?? "public");
         setContentText(contentTextValue);
         setMode("edit");
     };
@@ -164,6 +166,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
             price: Math.max(0, Math.floor(Number(price) || 0)),
             currency: "stella",
             rarity: isSuperuser ? rarity : undefined,
+            is_public: isPublic,
             content: text ? { text } : null,
         });
         setBusy(false);
@@ -648,6 +651,19 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                                         <StellaCoinIcon size={18} />
                                     </span>
                                 </div>
+                            </label>
+
+                            <label className="box-modal-field">
+                                <span>Доступность коробки</span>
+                                <select
+                                    value={isPublic}
+                                    onChange={(e) => setIsPublic(e.target.value as "public" | "private")}
+                                    className="create-box-input"
+                                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#fff", padding: "10px", borderRadius: "8px" }}
+                                >
+                                    <option value="public" style={{ background: "#1a1f22", color: "#fff" }}>Публичная (Видна всем в ленте и на стеллаже)</option>
+                                    <option value="private" style={{ background: "#1a1f22", color: "#fff" }}>Приватная (Видна только вам)</option>
+                                </select>
                             </label>
 
                             <label className="box-modal-field">

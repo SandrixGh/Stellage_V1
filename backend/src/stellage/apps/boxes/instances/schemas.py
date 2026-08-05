@@ -49,7 +49,7 @@ class BoxTextContent(BaseModel):
 
 class BoxInstanceBase(BaseModel):
     is_sealed: SealingEnum = SealingEnum.SEALED
-    is_public: VisibilityEnum = VisibilityEnum.PRIVATE
+    is_public: VisibilityEnum = VisibilityEnum.PUBLIC
     content: BoxTextContent | None = None
 
 
@@ -114,6 +114,7 @@ class BoxUpdate(BaseModel):
     price: Decimal | None = None
     currency: CurrencyEnum | None = None
     rarity: BoxRarity | None = None
+    is_public: VisibilityEnum | None = None
     content: BoxTextContent | None = None
 
 
@@ -122,6 +123,7 @@ class CustomBoxCreate(BaseModel):
     description: str | None = None
     price: Decimal = Decimal("0")
     currency: CurrencyEnum = CurrencyEnum.STELLA
+    is_public: VisibilityEnum = VisibilityEnum.PUBLIC
     content: BoxTextContent | None = None
     rarity: BoxRarity | None = None
 

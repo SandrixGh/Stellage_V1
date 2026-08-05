@@ -364,20 +364,28 @@ class BoxInstanceRepository:
         self,
         user_id: uuid.UUID,
         instance_id: uuid.UUID,
-        content: dict | None,
+        content: dict | None = None,
+        update_content: bool = False,
+        is_public: VisibilityEnum | None = None,
     ) -> BoxInstanceWithTemplate:
-        """Обновляет content экземпляра (владелец) и возвращает свежий снимок
-        с подгруженным шаблоном — чтобы правки шаблона тоже сразу отразились."""
+        """Обновляет content и/или is_public экземпляра (владелец) и возвращает свежий снимок."""
         async with self.db.db_session() as session:
-            update_query = (
-                update(self.instance_model)
-                .where(
-                    self.instance_model.user_id == user_id,
-                    self.instance_model.id == instance_id,
+            values_to_update = {}
+            if update_content:
+                values_to_update["content"] = content
+            if is_public is not None:
+                values_to_update["is_public"] = _to_visibility_enum(is_public).name
+
+            if values_to_update:
+                update_query = (
+                    update(self.instance_model)
+                    .where(
+                        self.instance_model.user_id == user_id,
+                        self.instance_model.id == instance_id,
+                    )
+                    .values(**values_to_update)
                 )
-                .values(content=content)
-            )
-            await session.execute(update_query)
+                await session.execute(update_query)
 
             # user_id и в SELECT: иначе правка content чужой коробки (UPDATE
             # затронул 0 строк) всё равно вернула бы её снимок — утечка content

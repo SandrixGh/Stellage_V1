@@ -20,6 +20,7 @@ from stellage.apps.profile.avatar import AvatarManager
 from stellage.apps.profile.managers import ProfileManager
 from stellage.apps.profile.schemas import PublicUser
 from stellage.database.enums.notification_type import NotificationTypeEnum
+from stellage.database.enums.visibility import VisibilityEnum
 
 
 class InstanceService:
@@ -101,12 +102,14 @@ class InstanceService:
         instance_id: uuid.UUID,
         content: BoxTextContent | None,
         update_content: bool,
+        is_public: VisibilityEnum | None = None,
     ) -> BoxInstanceWithTemplate:
         return await self.manager.update_box(
             user_id=user.id,
             instance_id=instance_id,
             content=content,
             update_content=update_content,
+            is_public=is_public,
         )
 
 

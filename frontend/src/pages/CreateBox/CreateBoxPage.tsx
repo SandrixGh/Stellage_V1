@@ -29,6 +29,11 @@ const RARITY_OPTIONS = [
     { value: "developer's", label: "Developer's" },
 ];
 
+const VISIBILITY_OPTIONS = [
+    { value: "public", label: "Публичная (Видна всем)" },
+    { value: "private", label: "Приватная (Видна только вам)" },
+];
+
 interface StagedFile {
     id: string;
     file: File;
@@ -65,6 +70,7 @@ export const CreateBoxPage = () => {
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("0");
     const [rarity, setRarity] = useState("common");
+    const [isPublic, setIsPublic] = useState<"public" | "private">("public");
     const [content, setContent] = useState("");
     const [files, setFiles] = useState<StagedFile[]>([]);
     // Коробка уже создана (метаданные заморожены) — дальше только догружаем файлы.
@@ -178,6 +184,7 @@ export const CreateBoxPage = () => {
                 currency: "stella",
                 content: text ? { text } : undefined,
                 rarity: isSuperuser ? rarity : undefined,
+                is_public: isPublic,
             });
             if (!box) {
                 setSaving(false);
@@ -319,6 +326,16 @@ export const CreateBoxPage = () => {
                                 </span>
                             </div>
                         </label>
+
+                        <div className="create-box-field">
+                            <span className="create-box-label">Доступность</span>
+                            <Select
+                                value={isPublic}
+                                options={VISIBILITY_OPTIONS}
+                                onChange={(val) => setIsPublic(val as "public" | "private")}
+                                ariaLabel="Доступность"
+                            />
+                        </div>
 
                         {isSuperuser && (
                             <div className="create-box-field">

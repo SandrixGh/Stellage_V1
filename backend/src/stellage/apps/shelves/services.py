@@ -147,20 +147,30 @@ class ShelfService:
                 detail="Shelf not found"
             )
 
-        # Контент коробки отдаём только тем, кому он положен по правилу
-        # видимости: чужие sealed/private коробки на публичной полке приходят
-        # с content=None и без ассетов (метаданные шаблона остаются видимыми).
+        # 1. Сначала отфильтровываем коробки, которые не видны зрителю (приватные чужие коробки)
+        visible_boxes = []
         for box in shelf.boxes:
-            if not can_view_box_content(
+            creator_id = getattr(box.template, "creator_id", None) if hasattr(box, "template") and box.template else None
+            if can_see_box(
                 viewer_id=viewer_id,
                 owner_id=box.user_id,
+                creator_id=creator_id,
                 is_public=box.is_public,
-                shelf_id=box.shelf_id,
-                shelf_is_public=shelf.is_public,
             ):
-                box.content = None
-                box.assets = []
+                if not can_view_box_content(
+                    viewer_id=viewer_id,
+                    owner_id=box.user_id,
+                    creator_id=creator_id,
+                    is_sealed=box.is_sealed,
+                    is_public=box.is_public,
+                    shelf_id=box.shelf_id,
+                    shelf_is_public=shelf.is_public,
+                ):
+                    box.content = None
+                    box.assets = []
+                visible_boxes.append(box)
 
+        shelf.boxes = visible_boxes
         return shelf
 
 

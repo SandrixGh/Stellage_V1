@@ -273,6 +273,7 @@ async def update_box(
         instance_id=instance_id,
         content=data.content,
         update_content=update_content,
+        is_public=data.is_public,
     )
 
 

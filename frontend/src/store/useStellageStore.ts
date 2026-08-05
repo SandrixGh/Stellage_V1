@@ -21,6 +21,7 @@ export interface CreateBoxInput {
     currency?: string;
     content?: BoxContent;
     rarity?: string;
+    is_public?: "public" | "private";
 }
 
 /** Частичное редактирование коробки владельцем. Любое поле опционально —
@@ -32,6 +33,7 @@ export interface UpdateBoxInput {
     currency?: string;
     rarity?: string;
     content?: BoxContent | null;
+    is_public?: "public" | "private";
 }
 
 interface StellageState {
@@ -192,6 +194,7 @@ export const useStellageStore = create<StellageState>((set, get) => ({
                 currency: (data.currency ?? "stella").toLowerCase(),
                 content: data.content ?? null,
                 rarity: data.rarity ?? null,
+                is_public: data.is_public ?? "public",
             });
             await get().fetchInstances();
             set({ isLoading: false });
@@ -216,6 +219,7 @@ export const useStellageStore = create<StellageState>((set, get) => ({
             }
             if (data.rarity !== undefined) body.rarity = data.rarity;
             if (data.content !== undefined) body.content = data.content;
+            if (data.is_public !== undefined) body.is_public = data.is_public;
 
             const res = await api.patch<Box>("/boxes/update-box", body, {
                 params: { instance_id: instanceId },
