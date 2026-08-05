@@ -341,8 +341,8 @@ export const BoxInstancePage = () => {
                                             )}
 
                                             {/* Smart Inspector for Text & Code */}
-                                            {contentText && (mediaFilter === "all" || mediaFilter === "text") && (
-                                                <SmartContentInspector content={contentText} boxTitle={template.title} />
+                                            {(contentText || box.content?.blocks) && (mediaFilter === "all" || mediaFilter === "text") && (
+                                                <SmartContentInspector content={contentText} rawContent={box.content} boxTitle={template.title} />
                                             )}
 
                                             {/* Assets Grid */}

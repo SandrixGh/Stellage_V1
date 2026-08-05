@@ -41,10 +41,20 @@ class GetParentsIds(
     pass
 
 
-class BoxTextContent(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+class BoxContentBlock(BaseModel):
+    id: str
+    title: str = "Окно"
+    mode: str = "code"  # "code" | "text" | "todo"
+    text: str = ""
+    is_completed: bool = False
+    language: str | None = None
 
-    text: Annotated[str, StringConstraints(max_length=10_000)] | None = None
+
+class BoxTextContent(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    text: Annotated[str, StringConstraints(max_length=50_000)] | None = None
+    blocks: list[BoxContentBlock] | None = None
 
 
 class BoxInstanceBase(BaseModel):
@@ -77,7 +87,12 @@ class BoxInstanceReturn(
     @computed_field
     @property
     def content_type(self) -> BoxContentTypeEnum:
-        has_text = bool(self.content and self.content.text)
+        has_text = bool(
+            self.content and (
+                (self.content.text and len(self.content.text.strip()) > 0) or
+                (self.content.blocks and len(self.content.blocks) > 0)
+            )
+        )
         return resolve_content_type(
             has_text=has_text,
             asset_kinds=[a.kind for a in self.assets],

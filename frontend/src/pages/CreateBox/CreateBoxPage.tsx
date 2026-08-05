@@ -3,66 +3,86 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useStellageStore } from "../../store/useStellageStore";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
-import { Select } from "../../components/UI/Select";
 import { Avatar } from "../../components/UI/Avatar";
-import { StellaCoinIcon } from "../../components/UI/StellaCoinIcon";
+import { Select } from "../../components/UI/Select";
+import { StellaCoinIcon } from "../../components/UI/Icons";
+import { SmartContentInspector } from "../../components/Stellage/SmartContentInspector";
+import { uploadBoxAsset } from "../../api/assets";
 import { resolveRarityVisual } from "../../data/mockTemplates";
-import {
-    MAX_ASSETS_PER_BOX,
-    MAX_BYTES,
-    PHOTO_MIME_TYPES,
-    VIDEO_MIME_TYPES,
-    formatBytes,
-    kindForMime,
-    uploadBoxAsset,
-    uploadErrorMessage,
-} from "../../api/assets";
-import type { AssetKind } from "../../types/Stellage/boxes";
+import type { BoxContent } from "../../types/Stellage/boxes";
 import "./CreateBoxPage.css";
-
-// Значения совпадают с BoxRarity на бэкенде. Доступно только суперюзерам —
-// обычным пользователям сервер всё равно форсит COMMON.
-const RARITY_OPTIONS = [
-    { value: "common", label: "Common" },
-    { value: "rare", label: "Rare" },
-    { value: "golden", label: "Golden" },
-    { value: "developer's", label: "Developer's" },
-];
-
-const VISIBILITY_OPTIONS = [
-    { value: "public", label: "Публичная (Видна всем)" },
-    { value: "private", label: "Приватная (Видна только вам)" },
-];
 
 interface StagedFile {
     id: string;
     file: File;
-    kind: AssetKind | null; // null = невалидный файл, загружаться не будет
-    progress: number;       // 0..1
     status: "queued" | "uploading" | "done" | "error";
+    progress: number;
     error?: string;
+    kind?: "photo" | "video";
 }
 
-const validateFile = (file: File): Pick<StagedFile, "kind" | "status" | "error"> => {
-    const kind = kindForMime(file.type);
-    if (!kind) {
-        return { kind: null, status: "error", error: "Неподдерживаемый тип файла" };
+interface FormBlock {
+    id: string;
+    title: string;
+    mode: "code" | "text" | "todo";
+    text: string;
+    is_completed: boolean;
+}
+
+const MAX_ASSETS_PER_BOX = 10;
+const MAX_PHOTO_BYTES = 10 * 1024 * 1024; // 10 МБ
+const MAX_VIDEO_BYTES = 100 * 1024 * 1024; // 100 МБ
+
+const PHOTO_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const VIDEO_MIME_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
+
+const RARITY_OPTIONS = [
+    { label: "Common", value: "common" },
+    { label: "Rare", value: "rare" },
+    { label: "Golden", value: "golden" },
+    { label: "Developer's", value: "developer's" },
+];
+
+const VISIBILITY_OPTIONS = [
+    { label: "Публичная", value: "public" },
+    { label: "Приватная (Секретная)", value: "private" },
+];
+
+const MODE_OPTIONS = [
+    { label: "Код (с нумерацией)", value: "code" },
+    { label: "Текст / Документ", value: "text" },
+    { label: "Список задач / Чекбокс", value: "todo" },
+];
+
+function validateFile(file: File): { kind?: "photo" | "video"; error?: string } {
+    const mime = file.type.toLowerCase();
+    if (PHOTO_MIME_TYPES.includes(mime)) {
+        if (file.size > MAX_PHOTO_BYTES) return { error: "Фотография превышает лимит 10 МБ" };
+        return { kind: "photo" };
     }
-    if (file.size > MAX_BYTES[kind]) {
-        return {
-            kind,
-            status: "error",
-            error: `Файл больше лимита ${formatBytes(MAX_BYTES[kind])}`,
-        };
+    if (VIDEO_MIME_TYPES.includes(mime)) {
+        if (file.size > MAX_VIDEO_BYTES) return { error: "Видеозапись превышает лимит 100 МБ" };
+        return { kind: "video" };
     }
-    return { kind, status: "queued" };
-};
+    return { error: "Формат не поддерживается. Разрешены только JPG, PNG, WEBP, GIF, MP4, WEBM, MOV." };
+}
+
+function uploadErrorMessage(err: unknown): string {
+    const ax = err as { response?: { data?: { detail?: string }; status?: number } };
+    if (ax.response?.status === 413) return "Файл слишком большой для сервера";
+    return ax.response?.data?.detail || "Сбой загрузки на S3";
+}
+
+function formatBytes(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 export const CreateBoxPage = () => {
     const navigate = useNavigate();
     const user = useAuthStore((s) => s.user);
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-    const isSuperuser = useAuthStore((s) => s.user?.is_superuser ?? false);
     const createBox = useStellageStore((s) => s.createBox);
     const fetchInstances = useStellageStore((s) => s.fetchInstances);
 
@@ -71,9 +91,13 @@ export const CreateBoxPage = () => {
     const [price, setPrice] = useState("0");
     const [rarity, setRarity] = useState("common");
     const [isPublic, setIsPublic] = useState<"public" | "private">("public");
-    const [content, setContent] = useState("");
+
+    // Множественные окна контента коробки
+    const [blocks, setBlocks] = useState<FormBlock[]>([
+        { id: "b-1", title: "Окно 1", mode: "code", text: "", is_completed: false },
+    ]);
+
     const [files, setFiles] = useState<StagedFile[]>([]);
-    // Коробка уже создана (метаданные заморожены) — дальше только догружаем файлы.
     const [createdBoxId, setCreatedBoxId] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -104,23 +128,49 @@ export const CreateBoxPage = () => {
     const { rarityGlow, boxColor } = resolveRarityVisual(isCanSelectRarity ? rarity : "common");
     const priceNum = Math.max(0, Number(price) || 0);
 
+    const addBlock = () => {
+        const nextNum = blocks.length + 1;
+        setBlocks((prev) => [
+            ...prev,
+            { id: crypto.randomUUID(), title: `Окно ${nextNum}`, mode: "code", text: "", is_completed: false },
+        ]);
+    };
+
+    const removeBlock = (id: string) => {
+        if (blocks.length <= 1) return;
+        setBlocks((prev) => prev.filter((b) => b.id !== id));
+    };
+
+    const updateBlock = (id: string, patch: Partial<FormBlock>) => {
+        setBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, ...patch } : b)));
+    };
+
     const patchFile = (id: string, patch: Partial<StagedFile>) => {
         setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, ...patch } : f)));
     };
 
     const addFiles = (e: ChangeEvent<HTMLInputElement>) => {
         const picked = Array.from(e.target.files ?? []);
-        e.target.value = ""; // позволяем выбрать тот же файл повторно
+        e.target.value = "";
         if (!picked.length) return;
 
-        // Если выложены файлы кода/текста — считываем их в поле текстового наполнения коробки
+        // Код / текстовые файлы заносятся как отдельные новые окна контента!
         picked.forEach((file) => {
-            if (file.type.startsWith("text/") || /\.(py|js|ts|cpp|cs|json|md|txt|html|css|latex)$/i.test(file.name)) {
+            if (file.type.startsWith("text/") || /\.(py|js|ts|tsx|jsx|cpp|cs|json|md|txt|html|css|latex|tex|sql)$/i.test(file.name)) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     const text = event.target?.result as string;
                     if (text) {
-                        setContent((prev) => (prev ? prev + "\n\n" + text : text));
+                        setBlocks((prev) => [
+                            ...prev,
+                            {
+                                id: crypto.randomUUID(),
+                                title: file.name,
+                                mode: file.name.endsWith(".md") || file.name.endsWith(".txt") ? "text" : "code",
+                                text,
+                                is_completed: false,
+                            },
+                        ]);
                     }
                 };
                 reader.readAsText(file);
@@ -133,9 +183,10 @@ export const CreateBoxPage = () => {
         if (mediaPicked.length > 0) {
             setFiles((prev) => {
                 const free = MAX_ASSETS_PER_BOX - prev.length;
-                const next = mediaPicked.slice(0, Math.max(free, 0)).map((file) => ({
+                const next: StagedFile[] = mediaPicked.slice(0, Math.max(free, 0)).map((file) => ({
                     id: crypto.randomUUID(),
                     file,
+                    status: "queued" as const,
                     progress: 0,
                     ...validateFile(file),
                 }));
@@ -151,7 +202,6 @@ export const CreateBoxPage = () => {
         setFiles((prev) => prev.filter((f) => f.id !== id));
     };
 
-    // Валидные файлы, ещё не загруженные (queued или упавшие — для повтора).
     const pendingUploads = files.filter((f) => f.kind && f.status !== "done");
     const hasInvalid = files.some((f) => !f.kind);
 
@@ -179,16 +229,28 @@ export const CreateBoxPage = () => {
         setSaving(true);
         setError(null);
 
-        // Шаг 1: создаём коробку (валюта форсируется в "stella" - Stellacoin)
         let boxId = createdBoxId;
         if (!boxId) {
-            const text = content.trim();
+            const validBlocks = blocks.filter((b) => b.text.trim().length > 0 || b.title.trim().length > 0);
+            const fullText = validBlocks.map((b) => b.text).filter(Boolean).join("\n\n");
+
+            const contentPayload: BoxContent | undefined = validBlocks.length > 0 ? {
+                text: fullText,
+                blocks: validBlocks.map((b, i) => ({
+                    id: b.id || `b-${i}`,
+                    title: b.title.trim() || `Окно ${i + 1}`,
+                    mode: b.mode,
+                    text: b.text,
+                    is_completed: b.is_completed,
+                })),
+            } : undefined;
+
             const box = await createBox({
                 title: trimmed,
                 description: description.trim() || undefined,
                 price: Number(price) || 0,
                 currency: "stella",
-                content: text ? { text } : undefined,
+                content: contentPayload,
                 rarity: isCanSelectRarity ? rarity : undefined,
                 is_public: isPublic,
             });
@@ -201,7 +263,6 @@ export const CreateBoxPage = () => {
             setCreatedBoxId(boxId);
         }
 
-        // Шаг 2: загружаем файлы напрямую в S3 (через presigned POST).
         const failures = await uploadStaged(boxId);
         setSaving(false);
 
@@ -218,18 +279,29 @@ export const CreateBoxPage = () => {
 
     const metaLocked = saving || createdBoxId !== null;
 
+    const previewContent: BoxContent = {
+        text: blocks.map((b) => b.text).filter(Boolean).join("\n\n"),
+        blocks: blocks.map((b, i) => ({
+            id: b.id || `b-${i}`,
+            title: b.title.trim() || `Окно ${i + 1}`,
+            mode: b.mode,
+            text: b.text,
+            is_completed: b.is_completed,
+        })),
+    };
+
     return (
         <section className="create-box-page">
             <header className="create-box-head">
                 <h1 className="create-box-title">Создать коробку</h1>
                 <p className="create-box-sub">
                     Новая коробка попадёт в твой инвентарь.
-                    {!isSuperuser && " Редкость — Common."}
+                    {!isCanSelectRarity && " Редкость — Common."}
                 </p>
             </header>
 
             <div className="create-box-split-layout">
-                {/* ── LEFT COLUMN: LIVE CARD PREVIEW ── */}
+                {/* ── LEFT COLUMN: LIVE CARD PREVIEW & INSPECTOR PREVIEW ── */}
                 <div className="create-box-preview-side">
                     <span className="create-preview-badge">Live Preview</span>
                     <div className={`create-preview-card rarity-${rarity.toLowerCase()}`}>
@@ -283,6 +355,17 @@ export const CreateBoxPage = () => {
                             </button>
                         </div>
                     </div>
+
+                    {/* Предпросмотр умного инспектора окон контента */}
+                    {blocks.some((b) => b.text.trim().length > 0 || b.title.trim().length > 0) && (
+                        <div className="create-box-inspector-preview">
+                            <span className="preview-sublabel">Инспектор контента:</span>
+                            <SmartContentInspector
+                                rawContent={previewContent}
+                                boxTitle={title.trim() || "Коробка"}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* ── RIGHT COLUMN: CREATION FORM ── */}
@@ -356,103 +439,158 @@ export const CreateBoxPage = () => {
                         )}
                     </div>
 
-                <label className="create-box-field">
-                    <span className="create-box-label">Код / Markdown / LaTeX / Текст внутри коробки</span>
-                    <textarea
-                        className="create-box-input create-box-textarea"
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="Введите Python код, Markdown, LaTeX формулы ($$\frac{a}{b}$$) или текст..."
-                        rows={5}
-                        disabled={metaLocked}
-                    />
-                </label>
+                    {/* ── МУЛЬТИ-БЛОЧНЫЙ КОНСТРУКТОР ОКОН КОНТЕНТА ── */}
+                    <div className="create-box-blocks-section">
+                        <div className="create-box-blocks-header">
+                            <span className="create-box-label">Окна контента коробки ({blocks.length})</span>
+                            <button
+                                type="button"
+                                className="create-box-add-block-btn"
+                                onClick={addBlock}
+                                disabled={metaLocked}
+                            >
+                                + Добавить окно
+                            </button>
+                        </div>
 
-                <div className="create-box-field">
-                    <span className="create-box-label">Медиа & Файлы кода</span>
-                    <label className="create-box-file-add">
-                        <input
-                            type="file"
-                            accept="image/*,video/*,.py,.js,.ts,.tsx,.jsx,.cpp,.c,.h,.cs,.java,.json,.md,.txt,.html,.css,.latex,.tex,.sql,.sh,.yaml,.yml"
-                            multiple
-                            hidden
-                            onChange={addFiles}
-                            disabled={saving || files.length >= MAX_ASSETS_PER_BOX}
-                        />
-                        + Загрузить медиа (Фото/Видео) или файл кода (.py/.md/.txt)
-                    </label>
+                        {blocks.map((block, idx) => (
+                            <div key={block.id} className="create-box-block-card">
+                                <div className="create-box-block-top">
+                                    <input
+                                        type="text"
+                                        className="create-box-input create-box-block-title-input"
+                                        value={block.title}
+                                        onChange={(e) => updateBlock(block.id, { title: e.target.value })}
+                                        placeholder={`Название окна ${idx + 1}...`}
+                                        disabled={metaLocked}
+                                    />
 
-                    {files.length > 0 && (
-                        <ul className="create-box-files">
-                            {files.map((f) => (
-                                <li key={f.id} className={`create-box-file is-${f.status}`}>
-                                    <div className="create-box-file-info">
-                                        <span className="create-box-file-name" title={f.file.name}>
-                                            {f.file.name}
-                                        </span>
-                                        <span className="create-box-file-size">
-                                            {formatBytes(f.file.size)}
-                                        </span>
+                                    {/* SVG Галочка начального выполнения окна */}
+                                    <button
+                                        type="button"
+                                        className={`create-box-block-check-toggle ${block.is_completed ? "is-checked" : ""}`}
+                                        onClick={() => updateBlock(block.id, { is_completed: !block.is_completed })}
+                                        title={block.is_completed ? "Выполнено" : "Отметить выполненным"}
+                                        disabled={metaLocked}
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                        <span>{block.is_completed ? "Выполнено" : "Выполнено?"}</span>
+                                    </button>
+
+                                    <div className="create-box-block-mode-select">
+                                        <Select
+                                            value={block.mode}
+                                            options={MODE_OPTIONS}
+                                            onChange={(val) => updateBlock(block.id, { mode: val as "code" | "text" | "todo" })}
+                                            ariaLabel="Режим отображения"
+                                        />
                                     </div>
-                                    {f.status === "uploading" && (
-                                        <div className="create-box-file-bar">
-                                            <div
-                                                className="create-box-file-bar-fill"
-                                                style={{ width: `${Math.round(f.progress * 100)}%` }}
-                                            />
-                                        </div>
-                                    )}
-                                    {f.error && (
-                                        <span className="create-box-file-error">{f.error}</span>
-                                    )}
-                                    {f.status === "done" ? (
-                                        <span className="create-box-file-done" aria-label="Загружен">✓</span>
-                                    ) : (
+
+                                    {blocks.length > 1 && (
                                         <button
                                             type="button"
-                                            className="create-box-file-remove"
-                                            aria-label="Убрать файл"
-                                            onClick={() => removeFile(f.id)}
-                                            disabled={saving}
+                                            className="create-box-block-remove-btn"
+                                            onClick={() => removeBlock(block.id)}
+                                            disabled={metaLocked}
+                                            title="Удалить окно"
                                         >
                                             ✕
                                         </button>
                                     )}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
+                                </div>
 
-                    <span className="create-box-hint">
-                        До {MAX_ASSETS_PER_BOX} файлов: фото до {formatBytes(MAX_BYTES.photo)},
-                        видео до {formatBytes(MAX_BYTES.video)}.
-                    </span>
-                </div>
+                                <textarea
+                                    className="create-box-input create-box-textarea"
+                                    value={block.text}
+                                    onChange={(e) => updateBlock(block.id, { text: e.target.value })}
+                                    placeholder={
+                                        block.mode === "code"
+                                            ? "Введите код (Python, JS, C++, HTML...)"
+                                            : block.mode === "todo"
+                                            ? "Введите список задач (каждая строка — пункт):\n[ ] Задача 1\n[ ] Задача 2"
+                                            : "Введите текст..."
+                                    }
+                                    rows={4}
+                                    disabled={metaLocked}
+                                />
+                            </div>
+                        ))}
+                    </div>
 
-                {error && <p className="create-box-error">{error}</p>}
+                    <div className="create-box-field">
+                        <span className="create-box-label">Медиа & Файлы кода</span>
+                        <label className="create-box-file-add">
+                            <input
+                                type="file"
+                                accept="image/*,video/*,.py,.js,.ts,.tsx,.jsx,.cpp,.c,.h,.cs,.java,.json,.md,.txt,.html,.css,.latex,.tex,.sql,.sh,.yaml,.yml"
+                                multiple
+                                hidden
+                                onChange={addFiles}
+                                disabled={saving || files.length >= MAX_ASSETS_PER_BOX}
+                            />
+                            + Загрузить медиа (Фото/Видео) или файл кода (.py/.md/.txt)
+                        </label>
 
-                <div className="create-box-actions">
-                    <Link to="/inventory" className="create-box-btn ghost">
-                        {createdBoxId ? "В инвентарь" : "Отмена"}
-                    </Link>
-                    <button
-                        type="submit"
-                        className="create-box-btn primary"
-                        disabled={
-                            saving
-                            || hasInvalid
-                            || (!createdBoxId && title.trim().length < 1)
-                            || (createdBoxId !== null && pendingUploads.length === 0)
-                        }
-                    >
-                        {saving
-                            ? "Загрузка…"
-                            : createdBoxId
-                                ? "Повторить загрузку"
-                                : "Создать коробку"}
-                    </button>
-                </div>
-            </form>
+                        {files.length > 0 && (
+                            <ul className="create-box-files">
+                                {files.map((f) => (
+                                    <li key={f.id} className={`create-box-file is-${f.status}`}>
+                                        <div className="create-box-file-info">
+                                            <span className="create-box-file-name" title={f.file.name}>
+                                                {f.file.name}
+                                            </span>
+                                            <span className="create-box-file-size">
+                                                {formatBytes(f.file.size)}
+                                            </span>
+                                        </div>
+                                        {f.status === "uploading" && (
+                                            <div className="create-box-file-bar">
+                                                <div
+                                                    className="create-box-file-bar-fill"
+                                                    style={{ width: `${Math.round(f.progress * 100)}%` }}
+                                                />
+                                            </div>
+                                        )}
+                                        {f.error && (
+                                            <span className="create-box-file-error">{f.error}</span>
+                                        )}
+                                        {f.status === "done" ? (
+                                            <span className="create-box-file-done" aria-label="Загружен">✓</span>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                className="create-box-file-remove"
+                                                aria-label="Убрать файл"
+                                                onClick={() => removeFile(f.id)}
+                                                disabled={saving}
+                                            >
+                                                ✕
+                                            </button>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+
+                    {error && <div className="create-box-error">{error}</div>}
+
+                    <div className="create-box-actions">
+                        <button
+                            type="submit"
+                            className="create-box-submit-btn"
+                            disabled={title.trim().length < 1 || saving || hasInvalid}
+                        >
+                            {saving ? "Создание…" : createdBoxId ? "Повторить загрузку файлов" : "Создать коробку"}
+                        </button>
+
+                        <Link to="/" className="create-box-cancel-btn">
+                            Отмена
+                        </Link>
+                    </div>
+                </form>
             </div>
         </section>
     );

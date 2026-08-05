@@ -196,3 +196,10 @@ export const GraduationCapIcon = ({ size = 16, className = "" }: IconProps) => (
     </svg>
 );
 
+export const StellaCoinIcon = ({ size = 16, className = "" }: IconProps) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 6v12M8 9.5h8M8 14.5h8" />
+    </svg>
+);
+

@@ -437,8 +437,8 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                                             )}
 
                                             {/* Text & Code Content */}
-                                            {contentTextValue && (
-                                                <SmartContentInspector content={contentTextValue} boxTitle={template.title} />
+                                            {(contentTextValue || box?.content?.blocks) && (
+                                                <SmartContentInspector content={contentTextValue} rawContent={box?.content} boxTitle={template.title} />
                                             )}
 
                                             {/* Media Assets */}

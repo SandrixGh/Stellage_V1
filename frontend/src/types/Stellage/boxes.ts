@@ -17,8 +17,18 @@ export interface BoxTemplate {
     updated_at: string;
 }
 
+export interface BoxContentBlock {
+    id: string;
+    title: string;
+    mode: "code" | "text" | "todo";
+    text: string;
+    is_completed?: boolean;
+    language?: string | null;
+}
+
 export interface BoxContent {
     text?: string | null;
+    blocks?: BoxContentBlock[] | null;
 }
 
 export type AssetKind = "photo" | "video";
