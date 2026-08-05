@@ -75,7 +75,7 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
                 useStellageStore.getState().updateBoxLikes(instanceId, cnt, lk);
             }
             if (templateId) {
-                useStellageStore.getState().updateTemplateLikes(templateId, cnt);
+                useStellageStore.getState().updateTemplateLikes(templateId, cnt, lk);
             }
         };
 

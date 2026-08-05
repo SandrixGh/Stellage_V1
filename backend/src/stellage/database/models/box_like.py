@@ -37,10 +37,15 @@ class BoxLike(IDMixin, TimestampMixin, Base):
     )
 
 
-# Счётчик лайков экземпляра
+# Счётчик лайков экземпляра (с учётом лайков шаблона)
 BoxInstance.likes_count = column_property(
-    select(func.count(BoxLike.id))
-    .where(BoxLike.instance_id == BoxInstance.id)
+    select(func.count(func.distinct(BoxLike.user_id)))
+    .where(
+        or_(
+            BoxLike.instance_id == BoxInstance.id,
+            BoxLike.template_id == BoxInstance.template_id,
+        )
+    )
     .correlate_except(BoxLike)
     .scalar_subquery(),
     deferred=False,

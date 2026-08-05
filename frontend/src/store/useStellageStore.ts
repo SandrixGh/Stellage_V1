@@ -71,8 +71,8 @@ interface StellageState {
 
     /** Мгновенное реактивное обновление количества лайков коробки на стеллаже. */
     updateBoxLikes: (boxId: string, likesCount: number, isLiked?: boolean) => void;
-    /** Мгновенное реактивное обновление количества лайков шаблона в ленте. */
-    updateTemplateLikes: (templateId: string, likesCount: number) => void;
+    /** Мгновенное реактивное обновление количества лайков шаблона в ленте и связанных коробок. */
+    updateTemplateLikes: (templateId: string, likesCount: number, isLiked?: boolean) => void;
 
     /** Сбросить всё пользовательское состояние (вызывается при смене аккаунта). */
     reset: () => void;
@@ -419,15 +419,92 @@ export const useStellageStore = create<StellageState>((set, get) => ({
 
     updateBoxLikes: (boxId: string, likesCount: number, isLiked?: boolean) => {
         set((state) => {
-            const patchBox = (b: Box) =>
-                b.id === boxId
-                    ? {
-                          ...b,
-                          likes_count: likesCount,
-                          is_liked: isLiked !== undefined ? isLiked : b.is_liked,
-                      }
-                    : b;
+            let matchedTemplateId: string | undefined;
+            const patchBox = (b: Box) => {
+                if (b.id === boxId) {
+                    matchedTemplateId = b.template_id || b.template?.id;
+                    return {
+                        ...b,
+                        likes_count: likesCount,
+                        is_liked: isLiked !== undefined ? isLiked : b.is_liked,
+                    };
+                }
+                return b;
+            };
+
+            const nextInstances = state.instances.map(patchBox);
+            const nextCurrent = state.currentBoxes.map(patchBox);
+            const nextMain = state.mainShelf
+                ? { ...state.mainShelf, boxes: state.mainShelf.boxes.map(patchBox) }
+                : null;
+            const nextSelected = state.selectedShelf
+                ? { ...state.selectedShelf, boxes: state.selectedShelf.boxes.map(patchBox) }
+                : null;
+            const nextPublic = state.publicShelf
+                ? { ...state.publicShelf, boxes: state.publicShelf.boxes.map(patchBox) }
+                : null;
+
+            const patchByTemplate = (b: Box) => {
+                const bTplId = b.template_id || b.template?.id;
+                if (matchedTemplateId && bTplId === matchedTemplateId) {
+                    return {
+                        ...b,
+                        likes_count: likesCount,
+                        is_liked: isLiked !== undefined ? isLiked : b.is_liked,
+                    };
+                }
+                return b;
+            };
+
             return {
+                instances: nextInstances.map(patchByTemplate),
+                currentBoxes: nextCurrent.map(patchByTemplate),
+                mainShelf: nextMain
+                    ? { ...nextMain, boxes: nextMain.boxes.map(patchByTemplate) }
+                    : null,
+                selectedShelf: nextSelected
+                    ? { ...nextSelected, boxes: nextSelected.boxes.map(patchByTemplate) }
+                    : null,
+                publicShelf: nextPublic
+                    ? { ...nextPublic, boxes: nextPublic.boxes.map(patchByTemplate) }
+                    : null,
+                templates: state.templates.map((t) =>
+                    matchedTemplateId && t.id === matchedTemplateId
+                        ? {
+                              ...t,
+                              likes_count: likesCount,
+                              is_liked: isLiked !== undefined ? isLiked : t.is_liked,
+                          }
+                        : t
+                ),
+            };
+        });
+    },
+
+    updateTemplateLikes: (templateId: string, likesCount: number, isLiked?: boolean) => {
+        set((state) => {
+            const patchBox = (b: Box) => {
+                const bTplId = b.template_id || b.template?.id;
+                if (bTplId === templateId) {
+                    return {
+                        ...b,
+                        likes_count: likesCount,
+                        is_liked: isLiked !== undefined ? isLiked : b.is_liked,
+                    };
+                }
+                return b;
+            };
+
+            return {
+                templates: state.templates.map((t) =>
+                    t.id === templateId
+                        ? {
+                              ...t,
+                              likes_count: likesCount,
+                              is_liked: isLiked !== undefined ? isLiked : t.is_liked,
+                          }
+                        : t
+                ),
                 instances: state.instances.map(patchBox),
                 currentBoxes: state.currentBoxes.map(patchBox),
                 mainShelf: state.mainShelf
@@ -441,13 +518,5 @@ export const useStellageStore = create<StellageState>((set, get) => ({
                     : null,
             };
         });
-    },
-
-    updateTemplateLikes: (templateId: string, likesCount: number) => {
-        set((state) => ({
-            templates: state.templates.map((t) =>
-                t.id === templateId ? { ...t, likes_count: likesCount } : t
-            ),
-        }));
     },
 }));

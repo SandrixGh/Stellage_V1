@@ -591,7 +591,15 @@ class BoxInstanceRepository:
         user_id: uuid.UUID,
         instance_id: uuid.UUID,
     ) -> None:
+        from stellage.database.models import BoxTemplate
         async with self.db.db_session() as session:
+            # Получаем template_id перед удалением инстанса
+            inst_stmt = select(self.instance_model.template_id).where(
+                self.instance_model.user_id == user_id,
+                self.instance_model.id == instance_id,
+            )
+            template_id = (await session.execute(inst_stmt)).scalar_one_or_none()
+
             query = (
                 delete(self.instance_model)
                 .where(
@@ -599,8 +607,22 @@ class BoxInstanceRepository:
                     self.instance_model.id == instance_id,
                 )
             )
-
             await session.execute(query)
+
+            # Если у кастомного шаблона пользователя больше не осталось экземпляров, удаляем сам шаблон из каталога
+            if template_id:
+                count_stmt = select(func.count(self.instance_model.id)).where(
+                    self.instance_model.template_id == template_id
+                )
+                remaining = (await session.execute(count_stmt)).scalar_one()
+                if remaining == 0:
+                    await session.execute(
+                        delete(BoxTemplate).where(
+                            BoxTemplate.id == template_id,
+                            BoxTemplate.creator_id == user_id,
+                        )
+                    )
+
             await session.commit()
 
     async def is_gift_participant(self, instance_id: uuid.UUID, user_id: uuid.UUID) -> bool:

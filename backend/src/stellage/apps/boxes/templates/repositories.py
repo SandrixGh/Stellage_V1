@@ -3,7 +3,7 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
-from sqlalchemy import delete, func, insert, select, update
+from sqlalchemy import delete, func, insert, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 from starlette import status
@@ -172,11 +172,21 @@ class BoxTemplateRepository:
         self,
         viewer_id: uuid.UUID | None = None,
     ) -> list[BoxTemplateReturn]:
-        from stellage.database.models import BoxComment, BoxLike, BoxInstance
+        from stellage.database.models import BoxComment, BoxLike, BoxInstance, User
         async with self.db.db_session() as session:
+            # Исключаем пользовательские шаблоны, у которых 0 экземпляров (удалённые коробки)
+            active_template_ids = select(BoxInstance.template_id).distinct().scalar_subquery()
             query = (
                 select(self.template_model)
+                .outerjoin(User, self.template_model.creator_id == User.id)
                 .options(joinedload(self.template_model.creator))
+                .where(
+                    or_(
+                        self.template_model.creator_id.is_(None),
+                        User.is_superuser.is_(True),
+                        self.template_model.id.in_(active_template_ids),
+                    )
+                )
             )
             result = await session.execute(query)
             scalars = list(result.unique().scalars().all())
