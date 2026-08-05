@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import ForeignKey, UniqueConstraint, func, select
+from sqlalchemy import ForeignKey, UniqueConstraint, func, or_, select
 from sqlalchemy.orm import Mapped, column_property, mapped_column
 
 from stellage.database.mixins.id_mixins import IDMixin
