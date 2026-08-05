@@ -59,9 +59,10 @@ class TemplateManager:
 
 
     async def get_templates(
-        self
+        self,
+        viewer_id: uuid.UUID | None = None,
     ) -> list[BoxTemplateReturn]:
-        return await self.repository.get_templates()
+        return await self.repository.get_templates(viewer_id=viewer_id)
 
 
     async def get_template_with_instances(

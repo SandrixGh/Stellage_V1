@@ -467,16 +467,17 @@ class ProfileService:
         gifts: list[GiftItemReturn] = []
         for inst in instances:
             sender_view = None
-            if inst.gifted_by:
+            sender_user = inst.gifted_by or (inst.template.creator if inst.template else None)
+            if sender_user:
                 avatar_url = None
-                if inst.gifted_by.avatar_key:
+                if sender_user.avatar_key:
                     avatar_url = await self.avatar_manager.get_avatar_url(
-                        avatar_key=inst.gifted_by.avatar_key
+                        avatar_key=sender_user.avatar_key
                     )
                 sender_view = GiftSenderView(
-                    id=inst.gifted_by.id,
-                    username=inst.gifted_by.username,
-                    nickname=inst.gifted_by.nickname,
+                    id=sender_user.id,
+                    username=sender_user.username,
+                    nickname=sender_user.nickname,
                     avatar_url=avatar_url,
                 )
 

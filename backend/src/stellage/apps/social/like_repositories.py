@@ -49,39 +49,73 @@ class LikeRepository:
 
     async def like(self, user_id: uuid.UUID, instance_id: uuid.UUID) -> bool:
         async with self.db.db_session() as session:
+            inst_res = await session.execute(
+                select(BoxInstance.template_id).where(BoxInstance.id == instance_id)
+            )
+            template_id = inst_res.scalar_one_or_none()
+
             stmt = (
                 pg_insert(BoxLike)
-                .values(user_id=user_id, instance_id=instance_id)
+                .values(user_id=user_id, instance_id=instance_id, template_id=template_id)
                 .on_conflict_do_nothing(constraint="uq_box_like_pair")
                 .returning(BoxLike.id)
             )
             inserted = (await session.execute(stmt)).scalar_one_or_none()
+
+            if template_id:
+                tpl_stmt = (
+                    pg_insert(BoxLike)
+                    .values(user_id=user_id, template_id=template_id)
+                    .on_conflict_do_nothing(constraint="uq_box_template_like_pair")
+                )
+                await session.execute(tpl_stmt)
+
             await session.commit()
             return inserted is not None
 
     async def unlike(self, user_id: uuid.UUID, instance_id: uuid.UUID) -> None:
         async with self.db.db_session() as session:
+            inst_res = await session.execute(
+                select(BoxInstance.template_id).where(BoxInstance.id == instance_id)
+            )
+            template_id = inst_res.scalar_one_or_none()
+
             stmt = delete(BoxLike).where(
                 BoxLike.user_id == user_id,
                 BoxLike.instance_id == instance_id,
             )
             await session.execute(stmt)
+            if template_id:
+                await session.execute(
+                    delete(BoxLike).where(
+                        BoxLike.user_id == user_id,
+                        BoxLike.template_id == template_id,
+                    )
+                )
             await session.commit()
 
     async def is_liked(self, user_id: uuid.UUID, instance_id: uuid.UUID) -> bool:
         async with self.db.db_session() as session:
             stmt = select(BoxLike.id).where(
                 BoxLike.user_id == user_id,
-                BoxLike.instance_id == instance_id,
+                or_(
+                    BoxLike.instance_id == instance_id,
+                    BoxLike.template_id == select(BoxInstance.template_id).where(BoxInstance.id == instance_id).scalar_subquery()
+                )
             )
             return (await session.execute(stmt)).scalar() is not None
 
     async def count_likes(self, instance_id: uuid.UUID) -> int:
         async with self.db.db_session() as session:
             stmt = (
-                select(func.count())
+                select(func.count(func.distinct(BoxLike.user_id)))
                 .select_from(BoxLike)
-                .where(BoxLike.instance_id == instance_id)
+                .where(
+                    or_(
+                        BoxLike.instance_id == instance_id,
+                        BoxLike.template_id == select(BoxInstance.template_id).where(BoxInstance.id == instance_id).scalar_subquery()
+                    )
+                )
             )
             return (await session.execute(stmt)).scalar_one()
 
@@ -110,17 +144,27 @@ class LikeRepository:
 
     async def is_template_liked(self, user_id: uuid.UUID, template_id: uuid.UUID) -> bool:
         async with self.db.db_session() as session:
+            subquery = select(BoxInstance.id).where(BoxInstance.template_id == template_id)
             stmt = select(BoxLike.id).where(
                 BoxLike.user_id == user_id,
-                BoxLike.template_id == template_id,
+                or_(
+                    BoxLike.template_id == template_id,
+                    BoxLike.instance_id.in_(subquery),
+                )
             )
             return (await session.execute(stmt)).scalar() is not None
 
     async def count_template_likes(self, template_id: uuid.UUID) -> int:
         async with self.db.db_session() as session:
+            subquery = select(BoxInstance.id).where(BoxInstance.template_id == template_id)
             stmt = (
-                select(func.count())
+                select(func.count(func.distinct(BoxLike.user_id)))
                 .select_from(BoxLike)
-                .where(BoxLike.template_id == template_id)
+                .where(
+                    or_(
+                        BoxLike.template_id == template_id,
+                        BoxLike.instance_id.in_(subquery),
+                    )
+                )
             )
             return (await session.execute(stmt)).scalar_one()

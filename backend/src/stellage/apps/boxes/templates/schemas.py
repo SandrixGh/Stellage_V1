@@ -47,6 +47,7 @@ class BoxTemplateReturn(GetBoxTemplateById, BoxTemplateBase, BoxTemplateTimeStam
     creator_id: uuid.UUID | None = None
     likes_count: int = 0
     comments_count: int = 0
+    is_liked: bool | None = None
 
     model_config = ConfigDict(
         from_attributes=True

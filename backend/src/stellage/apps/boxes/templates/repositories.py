@@ -170,8 +170,9 @@ class BoxTemplateRepository:
 
     async def get_templates(
         self,
+        viewer_id: uuid.UUID | None = None,
     ) -> list[BoxTemplateReturn]:
-        from stellage.database.models import BoxComment, BoxLike
+        from stellage.database.models import BoxComment, BoxLike, BoxInstance
         async with self.db.db_session() as session:
             query = (
                 select(self.template_model)
@@ -191,6 +192,32 @@ class BoxTemplateRepository:
                 likes_map = dict((await session.execute(likes_stmt)).all())
             except Exception:
                 pass
+
+            user_liked_templates: set[uuid.UUID] = set()
+            if viewer_id is not None:
+                try:
+                    user_liked_stmt = (
+                        select(BoxLike.template_id)
+                        .where(
+                            BoxLike.user_id == viewer_id,
+                            BoxLike.template_id.isnot(None),
+                        )
+                    )
+                    inst_subquery = select(BoxInstance.template_id).where(
+                        BoxInstance.id.in_(
+                            select(BoxLike.instance_id).where(
+                                BoxLike.user_id == viewer_id,
+                                BoxLike.instance_id.isnot(None),
+                            )
+                        )
+                    )
+                    user_liked_templates = set(
+                        (await session.execute(user_liked_stmt)).scalars().all()
+                    ) | set(
+                        (await session.execute(inst_subquery)).scalars().all()
+                    )
+                except Exception:
+                    pass
 
             comments_map = {}
             try:
@@ -224,6 +251,7 @@ class BoxTemplateRepository:
                                     pass
                         data.likes_count = likes_map.get(template.id, 0)
                         data.comments_count = comments_map.get(template.id, 0)
+                        data.is_liked = template.id in user_liked_templates if viewer_id else False
                         templates.append(data)
             except Exception as exc:
                 logger.exception("Error in presigning template avatars: %s", exc)
@@ -237,6 +265,7 @@ class BoxTemplateRepository:
                         data.owner_nickname = template.creator.nickname
                     data.likes_count = likes_map.get(template.id, 0)
                     data.comments_count = comments_map.get(template.id, 0)
+                    data.is_liked = template.id in user_liked_templates if viewer_id else False
                     templates.append(data)
 
             return templates

@@ -280,11 +280,12 @@ class ProfileManager:
             stmt = (
                 select(BoxInstance)
                 .options(
-                    joinedload(BoxInstance.template),
+                    joinedload(BoxInstance.template).joinedload(BoxTemplate.creator),
                     joinedload(BoxInstance.gifted_by),
                 )
                 .where(
                     BoxInstance.user_id == user_id,
+                    BoxInstance.gifted_by_id.isnot(None),
                 )
             )
             if not include_private:

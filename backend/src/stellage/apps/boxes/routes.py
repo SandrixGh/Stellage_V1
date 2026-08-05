@@ -63,9 +63,13 @@ async def get_box_templates(
     service: Annotated[
         TemplateService,
         Depends(TemplateService),
-    ]
+    ],
+    user: Annotated[
+        UserVerifySchema | None,
+        Depends(get_optional_current_user),
+    ] = None,
 ) -> list[BoxTemplateReturn]:
-    return await service.get_templates()
+    return await service.get_templates(viewer_id=user.id if user else None)
 
 
 @router.get(
