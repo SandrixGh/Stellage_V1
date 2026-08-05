@@ -30,15 +30,18 @@ export const BoxCard = memo(({ box }: { box: Box }) => {
                 <h3 className="box-title">{box.template.title}</h3>
 
                 <div className="box-card-sub">
-                    <span className="box-serial">#{box.serial_number}</span>
-                    <span className="dot-sep">•</span>
-                    <span className={`rarity-name rarity-color-${rarityKey}`}>
-                        {box.template.rarity}
-                    </span>
-                    <span className="dot-sep">•</span>
-                    <span className="status-name">
-                        {isSealed ? "Запечатана" : "Открыта"}
-                    </span>
+                    <div className="box-card-sub-primary">
+                        <span className="box-serial">#{box.serial_number}</span>
+                        <span className="dot-sep">•</span>
+                        <span className={`rarity-name rarity-color-${rarityKey}`}>
+                            {box.template.rarity}
+                        </span>
+                    </div>
+                    <div className="box-card-sub-status">
+                        <span className="status-name">
+                            {isSealed ? "Запечатана" : "Открыта"}
+                        </span>
+                    </div>
                 </div>
 
                 <div className="box-card-footer">

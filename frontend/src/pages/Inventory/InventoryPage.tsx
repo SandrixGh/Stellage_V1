@@ -80,14 +80,16 @@ export const InventoryPage = () => {
             {visible.length > 0 ? (
                 <div className="inventory-grid">
                     {visible.map((box) => (
-                        <button
+                        <div
                             key={box.id}
-                            type="button"
+                            role="button"
+                            tabIndex={0}
                             className="inventory-card-btn"
                             onClick={() => setOpenedBox(box)}
+                            onKeyDown={(e) => e.key === "Enter" && setOpenedBox(box)}
                         >
                             <BoxCard box={box} />
-                        </button>
+                        </div>
                     ))}
                 </div>
             ) : (

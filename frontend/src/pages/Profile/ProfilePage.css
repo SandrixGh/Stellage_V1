@@ -458,6 +458,7 @@
 }
 
 @media (max-width: 860px) {
+    .profile-page { padding-bottom: 96px; }
     .profile-hero-main-row {
         flex-direction: column;
         align-items: stretch;
@@ -474,6 +475,7 @@
 }
 
 @media (max-width: 480px) {
+    .profile-page { padding-bottom: 96px; }
     .profile-hero-banner { height: 140px; }
     .profile-hero-body { padding: 0 16px 14px; }
     .profile-identity-left { gap: 12px; min-width: 0; }
