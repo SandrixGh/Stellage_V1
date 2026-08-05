@@ -65,9 +65,9 @@ class S3Settings(BaseAppSettings):
     # http://localhost:9000. None = совпадает с s3_endpoint_url (Selectel, прод).
     s3_public_endpoint_url: str | None = None
 
-    # "path" (https://endpoint/bucket/key) работает и у MinIO, и у Selectel;
-    # "virtual" (https://bucket.endpoint/key) — на случай смены провайдера.
-    s3_addressing_style: str = "path"
+    # "virtual" (https://bucket.endpoint/key) — дефолт для vHosted бакетов Selectel;
+    # "path" (https://endpoint/bucket/key) — для локального MinIO.
+    s3_addressing_style: str = "virtual"
 
     upload_url_expire_seconds: int = 600
     download_url_expire_seconds: int = 300
