@@ -20,15 +20,39 @@ class InviteRepository:
     def __init__(self, db: DBDependency = Depends(DBDependency)):
         self.db = db
 
+    MASTER_CODES = {"STELLAGE", "STELLAGE2026", "STELLAGE-2026", "STELLAGE-ALPHA", "STELLAGE-VIP", "ALPHA"}
+
     async def get_by_code(self, code: str) -> InviteCode | None:
+        clean_code = code.strip().upper()
         async with self.db.db_session() as session:
             stmt = (
                 select(InviteCode)
                 .options(selectinload(InviteCode.creator))
-                .where(InviteCode.code == code.strip().upper())
+                .where(InviteCode.code == clean_code)
             )
             result = await session.execute(stmt)
-            return result.scalar_one_or_none()
+            invite = result.scalar_one_or_none()
+            if invite:
+                return invite
+
+            # Если код из списка системных мастер-кодов или в базе вообще нет инвайтов — создаём мастер-инвайт
+            count_stmt = select(InviteCode)
+            total_invites = len((await session.execute(count_stmt)).scalars().all())
+
+            if clean_code in self.MASTER_CODES or total_invites == 0:
+                master_invite = InviteCode(
+                    code=clean_code,
+                    creator_id=None,
+                    max_uses=999999,
+                    uses_count=0,
+                    is_active=True,
+                )
+                session.add(master_invite)
+                await session.commit()
+                await session.refresh(master_invite)
+                return master_invite
+
+            return None
 
     async def get_user_invites(self, user_id: uuid.UUID) -> list[InviteCode]:
         async with self.db.db_session() as session:
