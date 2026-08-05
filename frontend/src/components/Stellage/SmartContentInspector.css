@@ -12,6 +12,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
     padding: 10px 14px;
     background: var(--surface-hover);
     border-bottom: 1px solid var(--border-subtle);
@@ -21,16 +23,24 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
+    min-width: 0;
+    flex: 1 1 auto;
 }
 
 .inspector-sparkle {
     color: var(--accent);
+    flex-shrink: 0;
 }
 
 .inspector-title {
     font-size: 13px;
     font-weight: 600;
     color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
 }
 
 .inspector-lang-tag {
@@ -43,11 +53,15 @@
     background: rgba(var(--accent-rgb), 0.18);
     color: var(--accent);
     border: 1px solid rgba(var(--accent-rgb), 0.3);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .inspector-lines-tag {
     font-size: 11px;
     color: var(--ink-secondary);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .inspector-copy-btn {
@@ -63,6 +77,9 @@
     font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
+    flex-shrink: 0;
+    white-space: nowrap;
+    margin-left: auto;
 }
 
 .inspector-copy-btn:hover {

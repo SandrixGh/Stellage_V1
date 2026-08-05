@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useId } from "react";
 import { getContentGlyph } from "./contentGlyphs";
 
 interface WireframeBoxProps {
@@ -144,15 +144,17 @@ export const WireframeBox = memo(({
     variant = "2.5d-slot",
     coverUrl = null,
 }: WireframeBoxProps) => {
+    const rawId = useId();
+    const uid = rawId.replace(/:/g, "");
     const rarityKey = rarityGlow || "common";
     const rarityTheme = GRAD_BY_RARITY[rarityKey];
     
-    const strokeGradId = `wf-metal-grad-${rarityKey}-${variant}`;
-    const clipId = `wf-front-clip-${rarityKey}`;
-    const coverClipId = `wf-cover-clip-${rarityKey}`;
-    const poolRadialId = `wf-pool-radial-${rarityKey}`;
-    const topGradId = `wf-top-grad-${rarityKey}`;
-    const frontGradId = `wf-front-grad-${rarityKey}`;
+    const strokeGradId = `wf-metal-grad-${rarityKey}-${variant}-${uid}`;
+    const clipId = `wf-front-clip-${rarityKey}-${uid}`;
+    const coverClipId = `wf-cover-clip-${rarityKey}-${uid}`;
+    const poolRadialId = `wf-pool-radial-${rarityKey}-${uid}`;
+    const topGradId = `wf-top-grad-${rarityKey}-${uid}`;
+    const frontGradId = `wf-front-grad-${rarityKey}-${uid}`;
     const glyph = size >= GLYPH_MIN_SIZE ? getContentGlyph(contentType) : null;
 
     /* ── Render 2.5D Slot Mode (Unified Single-Color Engineering Box) ── */

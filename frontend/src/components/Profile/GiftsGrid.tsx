@@ -55,7 +55,10 @@ export const GiftsGrid = ({ gifts, isOwner = false, onGiftVisibilityChanged }: G
         <div className="gifts-grid-container">
             <div className="gifts-grid">
                 {gifts.map((gift) => {
-                    const senderName = gift.sender?.nickname?.trim() || (gift.sender?.username ? `@${gift.sender.username}` : "Аноним");
+                    const isSelf = Boolean(gift.sender && myUsername && gift.sender.username === myUsername);
+                    const senderName = isSelf
+                        ? "Вы"
+                        : gift.sender?.nickname?.trim() || (gift.sender?.username ? `@${gift.sender.username}` : "Stellage");
                     const senderTarget = getSenderLink(gift.sender?.username);
 
                     if (gift.gift_type === "coins" || gift.coins_amount) {
@@ -85,13 +88,19 @@ export const GiftsGrid = ({ gifts, isOwner = false, onGiftVisibilityChanged }: G
                                         <span className="gift-rarity-pill rarity-golden">МОНЕТЫ</span>
                                     </div>
                                     <span className="gift-from-line">
-                                        От{" "}
-                                        {senderTarget ? (
-                                            <Link to={senderTarget} className="gift-from-name-link">
-                                                {senderName}
-                                            </Link>
+                                        {isSelf ? (
+                                            <>Автор: <Link to="/profile" className="gift-from-name-link">Вы</Link></>
                                         ) : (
-                                            <span className="gift-from-name">{senderName}</span>
+                                            <>
+                                                От{" "}
+                                                {senderTarget ? (
+                                                    <Link to={senderTarget} className="gift-from-name-link">
+                                                        {senderName}
+                                                    </Link>
+                                                ) : (
+                                                    <span className="gift-from-name">{senderName}</span>
+                                                )}
+                                            </>
                                         )}
                                     </span>
                                 </div>
@@ -113,7 +122,7 @@ export const GiftsGrid = ({ gifts, isOwner = false, onGiftVisibilityChanged }: G
                                     <Link
                                         to={senderTarget}
                                         className="gift-sender-badge"
-                                        title={`Отправитель: ${senderName}`}
+                                        title={isSelf ? "Создано вами" : `Отправитель: ${senderName}`}
                                     >
                                         <Avatar
                                             url={gift.sender.avatar_url}
@@ -149,13 +158,19 @@ export const GiftsGrid = ({ gifts, isOwner = false, onGiftVisibilityChanged }: G
                                     <span className="gift-serial">#{String(gift.serial_number).padStart(3, "0")}</span>
                                 </div>
                                 <span className="gift-from-line">
-                                    От{" "}
-                                    {senderTarget ? (
-                                        <Link to={senderTarget} className="gift-from-name-link">
-                                            {senderName}
-                                        </Link>
+                                    {isSelf ? (
+                                        <>Создано вами</>
                                     ) : (
-                                        <span className="gift-from-name">{senderName}</span>
+                                        <>
+                                            От{" "}
+                                            {senderTarget ? (
+                                                <Link to={senderTarget} className="gift-from-name-link">
+                                                    {senderName}
+                                                </Link>
+                                            ) : (
+                                                <span className="gift-from-name">{senderName}</span>
+                                            )}
+                                        </>
                                     )}
                                 </span>
                             </div>

@@ -79,6 +79,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
                         <LikeButton
                             templateId={template.id}
                             initialLikesCount={template.likes_count ?? 0}
+                            initialIsLiked={template.is_liked ?? false}
                         />
 
                         <button

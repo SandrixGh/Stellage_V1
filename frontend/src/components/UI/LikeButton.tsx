@@ -18,14 +18,14 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
     templateId,
     instanceId,
     initialLikesCount = 0,
-    initialIsLiked = false,
+    initialIsLiked,
     className = "",
 }) => {
     const navigate = useNavigate();
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
     const [likesCount, setLikesCount] = useState(initialLikesCount);
-    const [isLiked, setIsLiked] = useState(initialIsLiked);
+    const [isLiked, setIsLiked] = useState<boolean>(initialIsLiked ?? false);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -33,7 +33,9 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
     }, [initialLikesCount]);
 
     useEffect(() => {
-        setIsLiked(initialIsLiked);
+        if (initialIsLiked !== undefined) {
+            setIsLiked(initialIsLiked);
+        }
     }, [initialIsLiked]);
 
     const endpoint = templateId
@@ -43,14 +45,14 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
             : null;
 
     useEffect(() => {
-        if (!endpoint || !isAuthenticated) return;
+        if (!endpoint || !isAuthenticated || initialIsLiked !== undefined) return;
         api.get<{ likes: number; is_liked: boolean | null }>(endpoint)
             .then((res) => {
                 if (typeof res.data.likes === "number") setLikesCount(res.data.likes);
                 if (typeof res.data.is_liked === "boolean") setIsLiked(res.data.is_liked);
             })
             .catch(() => {});
-    }, [endpoint, isAuthenticated]);
+    }, [endpoint, isAuthenticated, initialIsLiked]);
 
     const handleToggleLike = async (e: React.MouseEvent) => {
         e.stopPropagation();
