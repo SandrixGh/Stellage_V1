@@ -5,7 +5,7 @@ import { useStellageStore } from "../../store/useStellageStore";
 import { WireframeBox } from "../../components/Stellage/WireframeBox";
 import { Avatar } from "../../components/UI/Avatar";
 import { Select } from "../../components/UI/Select";
-import { StellaCoinIcon } from "../../components/UI/Icons";
+import { StellaCoinIcon } from "../../components/UI/StellaCoinIcon";
 import { SmartContentInspector } from "../../components/Stellage/SmartContentInspector";
 import { uploadBoxAsset } from "../../api/assets";
 import { resolveRarityVisual } from "../../data/mockTemplates";
@@ -359,7 +359,6 @@ export const CreateBoxPage = () => {
                     {/* Предпросмотр умного инспектора окон контента */}
                     {blocks.some((b) => b.text.trim().length > 0 || b.title.trim().length > 0) && (
                         <div className="create-box-inspector-preview">
-                            <span className="preview-sublabel">Инспектор контента:</span>
                             <SmartContentInspector
                                 rawContent={previewContent}
                                 boxTitle={title.trim() || "Коробка"}
@@ -464,20 +463,6 @@ export const CreateBoxPage = () => {
                                         placeholder={`Название окна ${idx + 1}...`}
                                         disabled={metaLocked}
                                     />
-
-                                    {/* SVG Галочка начального выполнения окна */}
-                                    <button
-                                        type="button"
-                                        className={`create-box-block-check-toggle ${block.is_completed ? "is-checked" : ""}`}
-                                        onClick={() => updateBlock(block.id, { is_completed: !block.is_completed })}
-                                        title={block.is_completed ? "Выполнено" : "Отметить выполненным"}
-                                        disabled={metaLocked}
-                                    >
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                            <polyline points="20 6 9 17 4 12" />
-                                        </svg>
-                                        <span>{block.is_completed ? "Выполнено" : "Выполнено?"}</span>
-                                    </button>
 
                                     <div className="create-box-block-mode-select">
                                         <Select

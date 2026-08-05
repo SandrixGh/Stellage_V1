@@ -48,12 +48,23 @@ export function uploadErrorMessage(err: unknown): string {
     return typeof detail === "string" ? detail : "Не удалось загрузить файл";
 }
 
+export function fixLocalS3Url(url: string): string {
+    if (!url) return url;
+    // Преобразуем virtual-host URL вида http://bucket.localhost:9000/key -> http://localhost:9000/bucket/key
+    return url.replace(/^http:\/\/([^.]+)\.localhost:(\d+)(\/.*)?$/, (_, bucket, port, path) => {
+        return `http://localhost:${port}/${bucket}${path || "/"}`;
+    });
+}
+
 /** Свежая ссылка на просмотр ассета (после серверной проверки видимости). */
 export async function getAssetUrl(assetId: string): Promise<AssetDownloadUrl> {
     const res = await api.get<AssetDownloadUrl>("/boxes/get-asset-url", {
         params: { asset_id: assetId },
     });
-    return res.data;
+    return {
+        ...res.data,
+        url: fixLocalS3Url(res.data.url),
+    };
 }
 
 export async function deleteAsset(assetId: string): Promise<void> {
@@ -90,7 +101,8 @@ export async function uploadBoxAsset(
 
     // Голый axios, НЕ общий api-инстанс: cookie авторизации не должна уходить
     // в S3, а Content-Type (multipart с boundary) выставляет сам браузер.
-    await axios.post(target.url, form, {
+    const uploadUrl = fixLocalS3Url(target.url);
+    await axios.post(uploadUrl, form, {
         withCredentials: false,
         onUploadProgress: (e) => {
             const total = e.total ?? file.size;

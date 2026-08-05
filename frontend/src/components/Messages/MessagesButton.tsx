@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { getUnreadMessages } from "../../api/messages";
 import { messagesSocket } from "../../api/messagesSocket";
+import { useAuthStore } from "../../store/useAuthStore";
 import "./MessagesButton.css";
 
 /**
@@ -11,12 +12,15 @@ import "./MessagesButton.css";
  */
 export const MessagesButton = () => {
     const [unread, setUnread] = useState(0);
+    const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
     const refresh = useCallback(() => {
+        if (!isAuthenticated) return;
         getUnreadMessages().then(setUnread).catch(() => {});
-    }, []);
+    }, [isAuthenticated]);
 
     useEffect(() => {
+        if (!isAuthenticated) return;
         refresh();
         const unsubscribe = messagesSocket.subscribe((event) => {
             if (
@@ -28,7 +32,7 @@ export const MessagesButton = () => {
             }
         });
         return unsubscribe;
-    }, [refresh]);
+    }, [refresh, isAuthenticated]);
 
     return (
         <NavLink

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { ShelfView } from "../../components/Stellage/ShelfView";
+import { fixLocalS3Url } from "../../api/assets";
 import { Avatar } from "../../components/UI/Avatar";
 import { DeveloperBadge } from "../../components/UI/DeveloperBadge";
 import { ProfileStatsRow } from "../../components/Profile/ProfileStatsRow";
@@ -124,7 +125,7 @@ export const ProfilePage = () => {
                 <div className="profile-hero-banner" data-yandex-image-search-skip="true" data-no-search="true">
                     {banner_url && (
                         <img
-                            src={banner_url}
+                            src={fixLocalS3Url(banner_url)}
                             alt=""
                             className="profile-banner-img"
                             style={{ objectPosition: `center ${profile?.banner_pos_y ?? 50}%` }}

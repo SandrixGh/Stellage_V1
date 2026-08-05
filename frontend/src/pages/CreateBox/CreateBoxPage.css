@@ -284,42 +284,55 @@
     margin-top: 4px;
 }
 
-.create-box-btn {
+.create-box-submit-btn {
     padding: 12px 24px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-sm, 8px);
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
+    background: var(--accent, #4FA98E);
+    border: 1px solid var(--accent, #4FA98E);
+    color: #ffffff;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(79, 169, 142, 0.25);
+}
+
+.create-box-submit-btn:hover:not(:disabled) {
+    background: #43967d;
+    border-color: #43967d;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(79, 169, 142, 0.35);
+}
+
+.create-box-submit-btn:disabled {
+    background: var(--surface-hover);
+    border-color: var(--border-subtle);
+    color: var(--ink-secondary);
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.create-box-cancel-btn {
+    padding: 12px 20px;
+    border-radius: var(--radius-sm, 8px);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-secondary);
+    background: transparent;
+    border: 1px solid var(--border-subtle);
     text-decoration: none;
-    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.2s ease;
 }
 
-.create-box-btn.ghost {
-    background: transparent;
-    border-color: rgba(var(--ink-rgb), 0.2);
-    color: rgba(var(--ink-rgb), 0.7);
-}
-
-.create-box-btn.ghost:hover {
-    border-color: rgba(var(--ink-rgb), 0.4);
+.create-box-cancel-btn:hover {
+    background: var(--surface-hover);
     color: var(--ink);
-}
-
-.create-box-btn.primary {
-    background: rgba(var(--ink-rgb), 0.14);
-    border-color: rgba(var(--ink-rgb), 0.35);
-    color: var(--ink);
-}
-
-.create-box-btn.primary:hover:not(:disabled) {
-    background: rgba(var(--ink-rgb), 0.22);
-    border-color: rgba(var(--ink-rgb), 0.55);
-}
-
-.create-box-btn.primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    border-color: rgba(var(--ink-rgb), 0.3);
 }
 
 /* ===== GATE ===== */

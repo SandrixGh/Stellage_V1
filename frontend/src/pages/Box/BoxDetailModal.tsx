@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import type { Box } from "../../types/Stellage/boxes";
@@ -27,14 +27,6 @@ import { useStellageStore } from "../../store/useStellageStore";
 import { rarityKey } from "../../utils/rarity";
 import { resolveRarityVisual, resolveBoxContentType } from "../../data/mockTemplates";
 import { useBodyScrollLock } from "../../hooks/useBodyScrollLock";
-import {
-    MAX_BYTES,
-    deleteAsset,
-    formatBytes,
-    kindForMime,
-    uploadBoxAsset,
-    uploadErrorMessage,
-} from "../../api/assets";
 import "./BoxDetailModal.css";
 
 interface BoxDetailModalProps {
@@ -68,17 +60,11 @@ const formatDate = (iso?: string) => {
 export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const navigate = useNavigate();
     const user = useAuthStore((s) => s.user);
-    const isSuperuser = useAuthStore((s) => s.user?.is_superuser ?? false);
-
-    const updateBox = useStellageStore((s) => s.updateBox);
     const giftBox = useStellageStore((s) => s.giftBox);
     const unsealBox = useStellageStore((s) => s.unsealBox);
-    const refreshBox = useStellageStore((s) => s.refreshBox);
     const moveBox = useStellageStore((s) => s.moveBox);
-    const deleteBox = useStellageStore((s) => s.deleteBox);
 
     const [current, setCurrent] = useState<Box | null>(box);
-    const [mode, setMode] = useState<"view" | "edit">("view");
     const [activeTab, setActiveTab] = useState<"content" | "specs" | "history" | "comments">("content");
     const [busy, setBusy] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -88,24 +74,12 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
     const [giftOpen, setGiftOpen] = useState(false);
     const [giftRecipient, setGiftRecipient] = useState<PublicUser | null>(null);
     const [giftError, setGiftError] = useState<string | null>(null);
-
-    // Edit form state
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [price, setPrice] = useState("0");
-    const [rarity, setRarity] = useState("common");
-    const [isPublic, setIsPublic] = useState<"public" | "private">("public");
-    const [contentText, setContentText] = useState("");
-    const [uploadProgress, setUploadProgress] = useState<number | null>(null);
-    const [assetError, setAssetError] = useState<string | null>(null);
-    const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
-    const [historyEvents, setHistoryEvents] = useState<BoxHistoryEvent[]>([]);
+    const [historyEvents] = useState<BoxHistoryEvent[]>([]);
 
     useBodyScrollLock(!!current);
 
     useEffect(() => {
         setCurrent(box);
-        setMode("view");
         setActiveTab("content");
         setLightboxIndex(null);
         setUnsealing(false);
@@ -144,48 +118,6 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
         navigate(`/box/instance/${current.id}`);
     };
 
-    const startEdit = () => {
-        setTitle(template.title);
-        setDescription(template.description ?? "");
-        setPrice(String(Math.round(Number(template.price) || 0)));
-        setRarity((template.rarity ?? "common").toLowerCase());
-        setIsPublic(current.is_public ?? "public");
-        setContentText(contentTextValue);
-        setMode("edit");
-    };
-
-    const handleSave = async () => {
-        const trimmed = title.trim();
-        if (trimmed.length < 1 || busy) return;
-        setBusy(true);
-        setSaveSuccess(null);
-        const text = contentText.trim();
-        const updated = await updateBox(current.id, {
-            title: trimmed,
-            description: description.trim() || null,
-            price: Math.max(0, Math.floor(Number(price) || 0)),
-            currency: "stella",
-            rarity: isSuperuser ? rarity : undefined,
-            is_public: isPublic,
-            content: text ? { text } : null,
-        });
-        setBusy(false);
-        if (updated) {
-            setCurrent(updated);
-            setSaveSuccess("Изменения успешно сохранены!");
-            setTimeout(() => setSaveSuccess(null), 4000);
-            setMode("view");
-            const editEvent: BoxHistoryEvent = {
-                id: `edit-${Date.now()}`,
-                eventType: "UPDATED",
-                actorName: user?.username || template.owner_username || "Автор",
-                timestamp: new Date().toISOString(),
-                details: "Содержимое и параметры коробки изменены автором",
-            };
-            setHistoryEvents((prev) => [editEvent, ...prev]);
-        }
-    };
-
     const handleUnseal = async () => {
         if (busy || unsealing) return;
         setUnsealing(true);
@@ -202,18 +134,6 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
         onClose();
     };
 
-    const handleDelete = async () => {
-        if (busy) return;
-        const ok = window.confirm(
-            `Удалить коробку «${template.title}» безвозвратно? Это действие нельзя отменить.`
-        );
-        if (!ok) return;
-        setBusy(true);
-        await deleteBox(current.id);
-        setBusy(false);
-        onClose();
-    };
-
     const handleGift = async () => {
         const uname = giftRecipient?.username;
         if (!uname || busy) return;
@@ -225,69 +145,6 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
             onClose();
         } else {
             setGiftError("Не удалось подарить: попробуйте выбрать получателя заново.");
-        }
-    };
-
-    const syncCurrent = async () => {
-        const fresh = await refreshBox(current.id);
-        if (fresh) setCurrent(fresh);
-    };
-
-    const handleAddAsset = async (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        e.target.value = "";
-        if (!file || busy || uploadProgress !== null) return;
-
-        // Если это файл кода / текста / markdown / LaTeX — считываем его содержимое в редактор контента
-        if (
-            file.type.startsWith("text/") ||
-            file.type.includes("latex") ||
-            file.type.includes("tex") ||
-            /\.(py|js|ts|tsx|jsx|cpp|c|h|cs|java|json|md|txt|html|css|latex|tex|sql|sh|yaml|yml)$/i.test(file.name)
-        ) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const text = event.target?.result as string;
-                if (text) {
-                    setContentText((prev) => (prev ? prev + "\n\n" + text : text));
-                    setAssetError(null);
-                    setSaveSuccess(`Текст файла «${file.name}» успешно добавлен в редактор!`);
-                    setTimeout(() => setSaveSuccess(null), 4000);
-                }
-            };
-            reader.readAsText(file);
-            return;
-        }
-
-        const kind = kindForMime(file.type);
-        if (!kind) {
-            setAssetError("Неподдерживаемый тип файла");
-            return;
-        }
-        if (file.size > MAX_BYTES[kind]) {
-            setAssetError(`Файл больше лимита ${formatBytes(MAX_BYTES[kind])}`);
-            return;
-        }
-
-        setAssetError(null);
-        setUploadProgress(0);
-        try {
-            await uploadBoxAsset(current.id, file, (fraction) => setUploadProgress(Math.round(fraction * 100)));
-            await syncCurrent();
-        } catch (err) {
-            setAssetError(uploadErrorMessage(err));
-        }
-        setUploadProgress(null);
-    };
-
-    const handleDeleteAsset = async (assetId: string) => {
-        if (busy || uploadProgress !== null) return;
-        setAssetError(null);
-        try {
-            await deleteAsset(assetId);
-            await syncCurrent();
-        } catch {
-            setAssetError("Не удалось удалить файл");
         }
     };
 
@@ -325,16 +182,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                         />
                     </div>
 
-                    {mode === "view" ? (
-                        <div className="box-modal-body">
-                            {saveSuccess && (
-                                <div className="box-modal-save-success">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                        <polyline points="20 6 9 17 4 12" />
-                                    </svg>
-                                    <span>{saveSuccess}</span>
-                                </div>
-                            )}
+                    <div className="box-modal-body">
                             {/* Title & Price Header */}
                             <div className="box-modal-head">
                                 <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
@@ -437,8 +285,8 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                                             )}
 
                                             {/* Text & Code Content */}
-                                            {(contentTextValue || box?.content?.blocks) && (
-                                                <SmartContentInspector content={contentTextValue} rawContent={box?.content} boxTitle={template.title} />
+                                            {(contentTextValue || current?.content?.blocks) && (
+                                                <SmartContentInspector content={contentTextValue} rawContent={current?.content} boxTitle={template.title} />
                                             )}
 
                                             {/* Media Assets */}
@@ -544,7 +392,10 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                                                 <button
                                                     type="button"
                                                     className="box-modal-btn secondary"
-                                                    onClick={startEdit}
+                                                    onClick={() => {
+                                                        onClose();
+                                                        navigate(`/box/instance/${current.id}/edit`);
+                                                    }}
                                                     disabled={busy}
                                                 >
                                                     Изменить
@@ -604,142 +455,8 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                                 </div>
                             )}
                         </div>
-                    ) : (
-                        /* EDIT MODE */
-                        <form
-                            className="box-modal-edit"
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                handleSave();
-                            }}
-                        >
-                            <h3 className="box-modal-edit-title">Редактирование параметров</h3>
-
-                            <label className="box-modal-field">
-                                <span>Название</span>
-                                <input
-                                    type="text"
-                                    value={title}
-                                    onChange={(e) => setTitle(e.target.value)}
-                                    maxLength={100}
-                                    required
-                                />
-                            </label>
-
-                            <label className="box-modal-field">
-                                <span>Описание</span>
-                                <textarea
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    maxLength={100}
-                                    rows={2}
-                                />
-                            </label>
-
-                            <label className="box-modal-field">
-                                <span>Цена в StellaCoins</span>
-                                <div className="create-box-price-input-wrap">
-                                    <input
-                                        type="text"
-                                        inputMode="numeric"
-                                        pattern="[0-9]*"
-                                        value={price}
-                                        onChange={(e) => setPrice(e.target.value.replace(/\D/g, ""))}
-                                        placeholder="0"
-                                    />
-                                    <span className="price-coin-suffix">
-                                        <StellaCoinIcon size={18} />
-                                    </span>
-                                </div>
-                            </label>
-
-                            <label className="box-modal-field">
-                                <span>Доступность коробки</span>
-                                <select
-                                    value={isPublic}
-                                    onChange={(e) => setIsPublic(e.target.value as "public" | "private")}
-                                    className="create-box-input"
-                                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#fff", padding: "10px", borderRadius: "8px" }}
-                                >
-                                    <option value="public" style={{ background: "#1a1f22", color: "#fff" }}>Публичная (Видна всем в ленте и на стеллаже)</option>
-                                    <option value="private" style={{ background: "#1a1f22", color: "#fff" }}>Приватная (Видна только вам)</option>
-                                </select>
-                            </label>
-
-                            <label className="box-modal-field">
-                                <span>Код / Markdown / LaTeX / Текст внутри коробки</span>
-                                <textarea
-                                    value={contentText}
-                                    onChange={(e) => setContentText(e.target.value)}
-                                    placeholder="Введите или вставьте Python код, Markdown, LaTeX формулы ($$\frac{a}{b}$$) или текст..."
-                                    rows={6}
-                                />
-                            </label>
-
-                            {/* Asset Management */}
-                            <div className="box-modal-field">
-                                <span>Файлы и медиа-содержимое</span>
-                                {assets.length > 0 && (
-                                    <ul className="box-modal-assets-list">
-                                        {assets.map((asset) => (
-                                            <li key={asset.id} className="box-modal-asset-row">
-                                                <span className="box-modal-asset-name">{asset.original_name}</span>
-                                                <button
-                                                    type="button"
-                                                    className="box-modal-asset-del"
-                                                    onClick={() => handleDeleteAsset(asset.id)}
-                                                    disabled={busy || uploadProgress !== null}
-                                                >
-                                                    Удалить
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                                {assets.length < 5 && (
-                                    <label className="box-modal-upload-btn">
-                                        <span>+ Загрузить картинку, видео или файл кода (.py/.md/.txt)</span>
-                                        <input
-                                            type="file"
-                                            accept="image/*,video/*,.py,.js,.ts,.tsx,.jsx,.cpp,.c,.h,.cs,.java,.json,.md,.txt,.html,.css,.latex,.tex,.sql,.sh,.yaml,.yml"
-                                            onChange={handleAddAsset}
-                                            disabled={busy || uploadProgress !== null}
-                                        />
-                                    </label>
-                                )}
-                                {uploadProgress !== null && (
-                                    <div className="box-modal-progress">
-                                        Загрузка… {uploadProgress}%
-                                    </div>
-                                )}
-                                {assetError && <div className="box-modal-asset-error">{assetError}</div>}
-                            </div>
-
-                            <div className="box-modal-edit-actions">
-                                <button type="submit" className="box-modal-btn primary" disabled={busy}>
-                                    Сохранить
-                                </button>
-                                <button
-                                    type="button"
-                                    className="box-modal-btn secondary"
-                                    onClick={() => setMode("view")}
-                                    disabled={busy}
-                                >
-                                    Отмена
-                                </button>
-                                <button
-                                    type="button"
-                                    className="box-modal-btn danger"
-                                    onClick={handleDelete}
-                                    disabled={busy}
-                                >
-                                    Удалить коробку
-                                </button>
-                            </div>
-                        </form>
-                    )}
+                    </div>
                 </div>
-            </div>
 
             {/* Lightbox for Images & Videos */}
             {activeAsset && activeAsset.kind === "video" && (

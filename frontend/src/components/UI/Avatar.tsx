@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { fixLocalS3Url } from "../../api/assets";
 import "./Avatar.css";
 
 interface AvatarProps {
@@ -31,7 +32,7 @@ export const Avatar = ({ url, name, size = 96, className = "" }: AvatarProps) =>
             <div className={`avatar ${className}`} style={style} data-yandex-image-search-skip="true" data-no-search="true">
                 <img
                     className="avatar-img"
-                    src={url}
+                    src={fixLocalS3Url(url)}
                     alt={name ?? "Аватар"}
                     onError={() => setFailed(true)}
                 />

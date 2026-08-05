@@ -423,57 +423,38 @@ export const useStellageStore = create<StellageState>((set, get) => ({
 
     updateBoxLikes: (boxId: string, likesCount: number, isLiked?: boolean) => {
         set((state) => {
-            let matchedTemplateId: string | undefined;
-            const patchBox = (b: Box) => {
-                if (b.id === boxId) {
-                    matchedTemplateId = b.template_id || b.template?.id;
-                    return {
-                        ...b,
-                        likes_count: likesCount,
-                        is_liked: isLiked !== undefined ? isLiked : b.is_liked,
-                    };
-                }
-                return b;
-            };
-
-            const nextInstances = state.instances.map(patchBox);
-            const nextCurrent = state.currentBoxes.map(patchBox);
-            const nextMain = state.mainShelf
-                ? { ...state.mainShelf, boxes: state.mainShelf.boxes.map(patchBox) }
-                : null;
-            const nextSelected = state.selectedShelf
-                ? { ...state.selectedShelf, boxes: state.selectedShelf.boxes.map(patchBox) }
-                : null;
-            const nextPublic = state.publicShelf
-                ? { ...state.publicShelf, boxes: state.publicShelf.boxes.map(patchBox) }
-                : null;
-
-            const patchByTemplate = (b: Box) => {
+            const matchesBox = (b: Box) => {
                 const bTplId = b.template_id || b.template?.id;
-                if (matchedTemplateId && bTplId === matchedTemplateId) {
+                return b.id === boxId || bTplId === boxId;
+            };
+
+            const patchBox = (b: Box) => {
+                if (matchesBox(b)) {
                     return {
                         ...b,
                         likes_count: likesCount,
                         is_liked: isLiked !== undefined ? isLiked : b.is_liked,
+                        template: b.template ? {
+                            ...b.template,
+                            likes_count: likesCount,
+                            is_liked: isLiked !== undefined ? isLiked : b.template.is_liked,
+                        } : b.template,
                     };
                 }
                 return b;
             };
+
+            const patchShelf = (s: Shelf | null) => s ? { ...s, boxes: s.boxes.map(patchBox) } : null;
 
             return {
-                instances: nextInstances.map(patchByTemplate),
-                currentBoxes: nextCurrent.map(patchByTemplate),
-                mainShelf: nextMain
-                    ? { ...nextMain, boxes: nextMain.boxes.map(patchByTemplate) }
-                    : null,
-                selectedShelf: nextSelected
-                    ? { ...nextSelected, boxes: nextSelected.boxes.map(patchByTemplate) }
-                    : null,
-                publicShelf: nextPublic
-                    ? { ...nextPublic, boxes: nextPublic.boxes.map(patchByTemplate) }
-                    : null,
+                instances: state.instances.map(patchBox),
+                currentBoxes: state.currentBoxes.map(patchBox),
+                mainShelf: patchShelf(state.mainShelf),
+                selectedShelf: patchShelf(state.selectedShelf),
+                publicShelf: patchShelf(state.publicShelf),
+                shelves: state.shelves.map((s) => ({ ...s, boxes: s.boxes.map(patchBox) })),
                 templates: state.templates.map((t) =>
-                    matchedTemplateId && t.id === matchedTemplateId
+                    t.id === boxId
                         ? {
                               ...t,
                               likes_count: likesCount,
@@ -489,15 +470,22 @@ export const useStellageStore = create<StellageState>((set, get) => ({
         set((state) => {
             const patchBox = (b: Box) => {
                 const bTplId = b.template_id || b.template?.id;
-                if (bTplId === templateId) {
+                if (bTplId === templateId || b.id === templateId) {
                     return {
                         ...b,
                         likes_count: likesCount,
                         is_liked: isLiked !== undefined ? isLiked : b.is_liked,
+                        template: b.template ? {
+                            ...b.template,
+                            likes_count: likesCount,
+                            is_liked: isLiked !== undefined ? isLiked : b.template.is_liked,
+                        } : b.template,
                     };
                 }
                 return b;
             };
+
+            const patchShelf = (s: Shelf | null) => s ? { ...s, boxes: s.boxes.map(patchBox) } : null;
 
             return {
                 templates: state.templates.map((t) =>
@@ -511,15 +499,10 @@ export const useStellageStore = create<StellageState>((set, get) => ({
                 ),
                 instances: state.instances.map(patchBox),
                 currentBoxes: state.currentBoxes.map(patchBox),
-                mainShelf: state.mainShelf
-                    ? { ...state.mainShelf, boxes: state.mainShelf.boxes.map(patchBox) }
-                    : null,
-                selectedShelf: state.selectedShelf
-                    ? { ...state.selectedShelf, boxes: state.selectedShelf.boxes.map(patchBox) }
-                    : null,
-                publicShelf: state.publicShelf
-                    ? { ...state.publicShelf, boxes: state.publicShelf.boxes.map(patchBox) }
-                    : null,
+                mainShelf: patchShelf(state.mainShelf),
+                selectedShelf: patchShelf(state.selectedShelf),
+                publicShelf: patchShelf(state.publicShelf),
+                shelves: state.shelves.map((s) => ({ ...s, boxes: s.boxes.map(patchBox) })),
             };
         });
     },

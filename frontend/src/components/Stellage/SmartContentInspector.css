@@ -1,11 +1,29 @@
-.smart-content-inspector {
+.smart-content-inspector-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.smart-content-inspector-block {
     background: var(--surface);
     backdrop-filter: blur(16px);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md, 12px);
     overflow: hidden;
-    margin-bottom: 16px;
     box-shadow: var(--shadow-sm), var(--glass-specular);
+}
+
+.inspector-checkmark-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background: var(--accent);
+    color: #ffffff;
+    flex-shrink: 0;
 }
 
 .inspector-header {
@@ -13,8 +31,8 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    flex-wrap: wrap;
-    padding: 10px 14px;
+    flex-wrap: nowrap;
+    padding: 8px 14px;
     background: var(--surface-hover);
     border-bottom: 1px solid var(--border-subtle);
 }
@@ -23,9 +41,9 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
     min-width: 0;
     flex: 1 1 auto;
+    overflow: hidden;
 }
 
 .inspector-sparkle {
@@ -40,21 +58,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 220px;
-}
-
-.inspector-lang-tag {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 2px 8px;
-    border-radius: 4px;
-    background: rgba(var(--accent-rgb), 0.18);
-    color: var(--accent);
-    border: 1px solid rgba(var(--accent-rgb), 0.3);
-    white-space: nowrap;
-    flex-shrink: 0;
 }
 
 .inspector-lines-tag {
@@ -67,24 +70,23 @@
 .inspector-copy-btn {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     color: var(--ink);
-    padding: 4px 10px;
     border-radius: 6px;
-    font-size: 12px;
-    font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
     flex-shrink: 0;
-    white-space: nowrap;
     margin-left: auto;
 }
 
 .inspector-copy-btn:hover {
     background: var(--surface-hover);
     color: var(--accent);
+    border-color: rgba(var(--accent-rgb), 0.4);
 }
 
 .inspector-code-body {

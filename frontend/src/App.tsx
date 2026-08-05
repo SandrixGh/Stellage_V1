@@ -23,6 +23,7 @@ import { SettingsPage } from "./pages/Settings/SettingsPage";
 import { RegisterConfirmPage } from "./pages/Auth/RegisterConfirmPage";
 import { BoxDetailPage } from "./pages/Box/BoxDetailPage";
 import { BoxInstancePage } from "./pages/Box/BoxInstancePage";
+import { EditBoxPage } from "./pages/Box/EditBoxPage";
 import { MessagesPage } from "./pages/Messages/MessagesPage";
 import { PublicShelfPage } from "./pages/Stellage/PublicShelfPage";
 import { NotFoundPage } from "./pages/NotFound/NotFoundPage";
@@ -93,6 +94,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/create-box" element={<CreateBoxPage />} />
+          <Route path="/box/instance/:id/edit" element={<EditBoxPage />} />
           <Route path="/my-stellage" element={<MyStellagePage />} />
           <Route path="/study" element={<StudyDashboardPage />} />
           <Route path="/profile" element={<ProfilePage />} />

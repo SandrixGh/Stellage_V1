@@ -28,8 +28,10 @@ export const LikeButton = ({ instanceId, canLike }: LikeButtonProps) => {
             .then((s) => {
                 if (cancelled) return;
                 setLikes(s.likes);
-                setIsLiked(s.is_liked === true);
+                const lk = s.is_liked === true;
+                setIsLiked(lk);
                 setReady(true);
+                useStellageStore.getState().updateBoxLikes(instanceId, s.likes, lk);
             })
             .catch(() => !cancelled && setReady(true));
         return () => {

@@ -173,10 +173,17 @@ export const BoxInstancePage = () => {
                             </div>
                         </div>
 
-                        {/* Actions Card */}
-                        {is_owner && (
+                        {(is_owner || isCreator) && (
                             <div className="box-instance-owner-actions">
-                                {onShelf && (
+                                <button
+                                    type="button"
+                                    className="instance-btn secondary"
+                                    onClick={() => navigate(`/box/instance/${box.id}/edit`)}
+                                >
+                                    Изменить коробку
+                                </button>
+
+                                {onShelf && is_owner && (
                                     <button
                                         type="button"
                                         className="instance-btn secondary"

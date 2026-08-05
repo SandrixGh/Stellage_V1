@@ -67,7 +67,7 @@ class S3Settings(BaseAppSettings):
 
     # "virtual" (https://bucket.endpoint/key) — дефолт для vHosted бакетов Selectel;
     # "path" (https://endpoint/bucket/key) — для локального MinIO.
-    s3_addressing_style: str = "virtual"
+    s3_addressing_style: str = "path"
 
     upload_url_expire_seconds: int = 600
     download_url_expire_seconds: int = 300

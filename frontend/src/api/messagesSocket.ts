@@ -82,8 +82,12 @@ class MessagesSocket {
                 }
             }
         };
-        this.ws.onclose = () => {
+        this.ws.onclose = (event: CloseEvent) => {
             this.ws = null;
+            // 4001 — WS_UNAUTHORIZED на бэкенде. Не пытаемся спамить реконнектами без куки.
+            if (event.code === 4001 || event.code === 1008) {
+                return;
+            }
             if (!this.manualClose && this.listeners.size > 0) {
                 this.scheduleReconnect();
             }
