@@ -201,12 +201,14 @@ class BoxAssetRepository:
                 select(
                     self.model,
                     BoxInstance.user_id,
+                    BoxTemplate.creator_id,
                     BoxInstance.is_public,
                     BoxInstance.is_sealed,
                     BoxInstance.shelf_id,
                     Shelf.is_public.label("shelf_is_public"),
                 )
                 .join(BoxInstance, BoxInstance.id == self.model.instance_id)
+                .join(BoxTemplate, BoxTemplate.id == BoxInstance.template_id)
                 .outerjoin(Shelf, Shelf.id == BoxInstance.shelf_id)
                 .where(self.model.id == asset_id)
             )
@@ -219,6 +221,7 @@ class BoxAssetRepository:
             asset = BoxAssetInternal.model_validate(row[0])
             access = BoxContentAccess(
                 owner_id=row.user_id,
+                creator_id=row.creator_id,
                 is_public=row.is_public,
                 is_sealed=row.is_sealed,
                 shelf_id=row.shelf_id,
