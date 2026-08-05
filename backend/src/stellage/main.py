@@ -1,8 +1,11 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 
 from stellage.apps import apps_router
@@ -52,5 +55,25 @@ app.include_router(
     router=apps_router,
 )
 
+# Монтируем фронтенд статику (директорию frontend/dist), если она собрана
+frontend_dist_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "frontend", "dist")
+if not os.path.exists(frontend_dist_path):
+    frontend_dist_path = "frontend/dist"
+
+if os.path.exists(frontend_dist_path):
+    assets_path = os.path.join(frontend_dist_path, "assets")
+    if os.path.exists(assets_path):
+        app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        if full_path.startswith("api.v1") or full_path == "health":
+            raise HTTPException(status_code=404)
+        file_path = os.path.join(frontend_dist_path, full_path)
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        return FileResponse(os.path.join(frontend_dist_path, "index.html"))
+
+
 def start():
-    uvicorn.run("stellage.main:app", reload=False)
+    uvicorn.run("stellage.main:app", reload=False)
