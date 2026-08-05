@@ -14,6 +14,8 @@ RUN npm run build
 FROM python:3.13-slim
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y --no-install-recommends redis-server && rm -rf /var/lib/apt/lists/*
+
 RUN pip install --no-cache-dir poetry
 
 COPY backend/pyproject.toml backend/poetry.lock ./
@@ -29,4 +31,4 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 ENV PYTHONPATH=/app/src
 
-CMD ["sh", "-c", "alembic upgrade head && uvicorn stellage.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "redis-server --daemonize yes --bind 127.0.0.1 --port 6379 && alembic upgrade head && uvicorn stellage.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
