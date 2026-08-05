@@ -14,6 +14,31 @@ export const MobileTabBar = () => {
         opacity: 0,
     });
 
+    // Если открыт конкретный чат с собеседником — скрываем плашку навигатора,
+    // чтобы она не загораживала поле ввода сообщений. Показываем только на списке диалогов.
+    const [hiddenInActiveChat, setHiddenInActiveChat] = useState(false);
+
+    useEffect(() => {
+        const checkActiveChat = () => {
+            const hasThread = document.querySelector(".msg-page.has-active-thread") !== null;
+            setHiddenInActiveChat(hasThread);
+        };
+
+        checkActiveChat();
+        if (!location.pathname.startsWith("/messages")) {
+            setHiddenInActiveChat(false);
+            return;
+        }
+
+        const msgTarget = document.querySelector(".msg-page");
+        if (!msgTarget) return;
+
+        const observer = new MutationObserver(checkActiveChat);
+        observer.observe(msgTarget, { attributes: true, attributeFilter: ["class"] });
+
+        return () => observer.disconnect();
+    }, [location.pathname]);
+
     useEffect(() => {
         const updatePill = () => {
             if (!navRef.current) return;
@@ -38,7 +63,9 @@ export const MobileTabBar = () => {
             clearTimeout(timer);
             window.removeEventListener("resize", updatePill);
         };
-    }, [location.pathname, studyModeEnabled]);
+    }, [location.pathname, studyModeEnabled, hiddenInActiveChat]);
+
+    if (hiddenInActiveChat) return null;
 
     return (
         <aside className="mobile-tab-bar" aria-label="Мобильная навигация">

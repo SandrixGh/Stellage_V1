@@ -139,17 +139,35 @@ export const ShelfBoard = ({
     );
 
     useLayoutEffect(() => {
+        const el = boardRef.current;
+        if (!el) return;
+
+        let rafId: number | null = null;
         const measure = () => {
-            const el = boardRef.current;
-            if (el) {
-                const w = el.clientWidth / colCount;
-                setCellWidth(w);
-                setRowHeight(Math.max(88, Math.min(DEFAULT_ROW_HEIGHT, Math.round(w * 1.3))));
+            const w = el.clientWidth / colCount;
+            const newRowH = Math.max(88, Math.min(DEFAULT_ROW_HEIGHT, Math.round(w * 1.3)));
+            setCellWidth((prevW) => (Math.abs(prevW - w) > 0.5 ? w : prevW));
+            setRowHeight((prevH) => (Math.abs(prevH - newRowH) > 0.5 ? newRowH : prevH));
+        };
+
+        const handleResize = () => {
+            if (rafId === null) {
+                rafId = requestAnimationFrame(() => {
+                    rafId = null;
+                    measure();
+                });
             }
         };
+
         measure();
-        window.addEventListener("resize", measure);
-        return () => window.removeEventListener("resize", measure);
+
+        const observer = new ResizeObserver(handleResize);
+        observer.observe(el);
+
+        return () => {
+            observer.disconnect();
+            if (rafId !== null) cancelAnimationFrame(rafId);
+        };
     }, [colCount]);
 
     const cellWidthPct = 100 / colCount;
@@ -258,7 +276,7 @@ export const ShelfBoard = ({
                     });
                     pendingTouchRef.current = null;
                     longPressTimerRef.current = null;
-                }, 300);
+                }, 220);
             }
         } else {
             // Мышь — классическое перетаскивание при сдвиге
@@ -289,8 +307,8 @@ export const ShelfBoard = ({
         if (pendingTouchRef.current && pendingTouchRef.current.pointerId === e.pointerId) {
             const dx = Math.abs(x - pendingTouchRef.current.startX);
             const dy = Math.abs(y - pendingTouchRef.current.startY);
-            // Если палец сдвинулся больше чем на 8px до срабатывания зажатия — отменяем зажатие для скролла!
-            if (dx > 8 || dy > 8) {
+            // Палец сдвинулся ощутимо (>22px) до срабатывания зажатия — скролл страницы
+            if (dx > 22 || dy > 22) {
                 clearLongPress();
             }
             return;

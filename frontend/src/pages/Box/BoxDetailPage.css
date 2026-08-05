@@ -146,11 +146,17 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .price-label {
     font-size: 13px;
     color: rgba(var(--ink-rgb, 20, 24, 26), 0.6);
+}
+
+.price-value {
+    min-width: 0;
 }
 
 .coin-tag {
@@ -160,6 +166,7 @@
     font-size: 20px;
     font-weight: 800;
     color: var(--accent, #4FA98E);
+    white-space: nowrap;
 }
 
 .free-tag {
@@ -293,9 +300,11 @@
 
 @media (max-width: 480px) {
     .box-detail-page { padding: 16px 12px 48px; }
+    .box-detail-preview-card { padding: 20px 16px; }
     .box-detail-main-title { font-size: 22px; }
-    .box-detail-nav-tabs { overflow-x: auto; flex-wrap: nowrap; }
-    .box-detail-nav-tab { flex: 0 0 auto; }
+    .coin-tag { font-size: 16px; }
+    .box-detail-nav-tabs { overflow-x: auto; flex-wrap: nowrap; padding: 4px; gap: 4px; }
+    .box-detail-nav-tab { flex: 0 0 auto; padding: 7px 12px; font-size: 12px; }
     .box-detail-tab-content { padding: 16px; }
 }
 

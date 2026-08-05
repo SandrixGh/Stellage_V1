@@ -125,3 +125,16 @@
     border-radius: 50%;
     background: #e6465a;
 }
+
+@media (max-width: 600px) {
+    .notif-dropdown {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: -44px;
+        width: calc(100vw - 32px);
+        max-width: 330px;
+        max-height: 380px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+        z-index: 250;
+    }
+}

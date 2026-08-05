@@ -234,6 +234,57 @@
     padding: 10px 14px;
     border-radius: 8px;
     margin-bottom: 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.unseal-action-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.16), rgba(245, 158, 11, 0.05));
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+.banner-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.banner-text strong {
+    font-size: 14px;
+    color: #f59e0b;
+}
+
+.banner-text span {
+    font-size: 12px;
+    color: var(--ink-secondary, rgba(255, 255, 255, 0.65));
+}
+
+.unseal-primary-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #d97706;
+    color: #ffffff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s ease, background 0.15s ease;
+    flex-shrink: 0;
+}
+
+.unseal-primary-btn:hover {
+    background: #b45309;
 }
 
 .box-modal-text-block {
@@ -594,10 +645,47 @@
 }
 
 @media (max-width: 480px) {
-    .box-modal-overlay { padding: 0; align-items: flex-end; }
+    .box-modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
     .box-modal {
-        max-width: 100%; max-height: 95vh; border-radius: 16px 16px 0 0;
-        padding: 20px 16px;
+        max-width: 100%;
+        max-height: 92vh;
+        border-radius: 20px 20px 0 0;
+        padding: 16px 14px 24px;
+    }
+    .box-modal-visual {
+        padding: 4px 0 10px;
+    }
+    .box-modal-title {
+        font-size: 19px;
+    }
+    .box-modal-tabs {
+        gap: 4px;
+        padding: 4px;
+    }
+    .box-modal-tab {
+        padding: 7px 12px;
+        font-size: 12px;
+    }
+    .unseal-action-banner {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        text-align: center;
+        padding: 12px 14px;
+    }
+    .unseal-primary-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    .box-modal-footer-btns {
+        width: 100%;
+        flex-direction: column;
+    }
+    .box-modal-btn {
+        width: 100%;
     }
 }
 

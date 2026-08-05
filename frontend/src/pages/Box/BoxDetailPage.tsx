@@ -86,7 +86,7 @@ export const BoxDetailPage = () => {
                             <div className="preview-ambient-glow" style={{ background: rarityGlow ?? undefined }} />
                             <div className="preview-box-wrapper">
                                 <WireframeBox
-                                    size={210}
+                                    size={typeof window !== "undefined" && window.innerWidth <= 480 ? 150 : 210}
                                     rarityGlow={rarityGlow}
                                     color={boxColor}
                                     contentType={resolveContentType(template)}

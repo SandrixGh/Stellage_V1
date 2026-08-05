@@ -14,14 +14,25 @@ body {
   margin: 0;
   padding: 0;
   background-color: var(--ground);
-  background-image: var(--background-image);
-  background-attachment: fixed;
+  position: relative;
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 14px;
   line-height: 1.5;
   overflow-x: hidden;
   min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--background-image);
+  background-repeat: no-repeat;
+  background-size: cover;
+  transform: translateZ(0);
 }
 
 /* Universal Image Protection (disables browser image search/AI popups on hover) */
@@ -66,6 +77,17 @@ img {
   border: 1px solid var(--border-subtle) !important;
   box-shadow: var(--shadow-lg), var(--glass-specular) !important;
   border-radius: var(--radius-xl) !important;
+}
+
+@media (max-width: 768px) {
+  .glass-panel {
+    backdrop-filter: blur(14px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(160%) !important;
+  }
+  .glass-modal {
+    backdrop-filter: blur(16px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+  }
 }
 
 /* Liquid Glass Interactive Action Buttons (Apple / Telegram pill style) */

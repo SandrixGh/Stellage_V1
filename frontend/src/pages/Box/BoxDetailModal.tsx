@@ -313,7 +313,7 @@ export const BoxDetailModal = ({ box, onClose }: BoxDetailModalProps) => {
                         }`}
                     >
                         <WireframeBox
-                            size={180}
+                            size={typeof window !== "undefined" && window.innerWidth <= 480 ? 135 : 160}
                             rarityGlow={glow}
                             color={boxColor}
                             contentType={resolveBoxContentType(current)}
