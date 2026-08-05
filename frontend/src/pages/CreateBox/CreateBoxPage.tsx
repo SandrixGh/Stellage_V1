@@ -93,9 +93,15 @@ export const CreateBoxPage = () => {
         );
     }
 
+    const isCanSelectRarity = Boolean(
+        user?.is_superuser ||
+        user?.is_developer ||
+        (user?.username && ["sandrix", "pan_covets"].includes(user.username.toLowerCase()))
+    );
+
     const authorNickname = user.nickname?.trim() || user.username || "Создатель";
     const authorUsername = user.username ? `@${user.username}` : "@stellage";
-    const { rarityGlow, boxColor } = resolveRarityVisual(isSuperuser ? rarity : "common");
+    const { rarityGlow, boxColor } = resolveRarityVisual(isCanSelectRarity ? rarity : "common");
     const priceNum = Math.max(0, Number(price) || 0);
 
     const patchFile = (id: string, patch: Partial<StagedFile>) => {
@@ -183,7 +189,7 @@ export const CreateBoxPage = () => {
                 price: Number(price) || 0,
                 currency: "stella",
                 content: text ? { text } : undefined,
-                rarity: isSuperuser ? rarity : undefined,
+                rarity: isCanSelectRarity ? rarity : undefined,
                 is_public: isPublic,
             });
             if (!box) {
@@ -337,7 +343,7 @@ export const CreateBoxPage = () => {
                             />
                         </div>
 
-                        {isSuperuser && (
+                        {isCanSelectRarity && (
                             <div className="create-box-field">
                                 <span className="create-box-label">Редкость</span>
                                 <Select

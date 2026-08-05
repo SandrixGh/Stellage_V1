@@ -179,9 +179,10 @@ async def create_box(
     data: CustomBoxCreate,
 ) -> BoxInstanceWithTemplate:
     # Создаём новый шаблон под коробку, затем кладём один экземпляр в инвентарь.
-    # Редкость: суперюзеры могут задать любую (data.rarity); обычным пользователям
-    # сервер форсит COMMON (см. модерацию в CLAUDE.md).
-    rarity = data.rarity if (user.is_superuser and data.rarity) else BoxRarity.COMMON
+    # Редкость: суперюзеры/девелоперы и выбранные пользователи (sandrix, Pan_Covets)
+    # могут задать любую; обычным пользователям сервер форсит COMMON.
+    can_change_rarity = _can_select_box_rarity(user)
+    rarity = data.rarity if (can_change_rarity and data.rarity) else BoxRarity.COMMON
     template = await template_service.create_template(
         data=BoxTemplateCreate(
             title=data.title,
@@ -251,12 +252,12 @@ async def update_box(
     )
 
     # Поля шаблона правит только создатель коробки (update_template форсит
-    # creator_id == user.id). Редкость меняем только суперюзеру.
+    # creator_id == user.id). Редкость меняем разрешённым пользователям.
     template_fields = data.model_dump(
         include={"title", "description", "price", "currency", "rarity"},
         exclude_none=True,
     )
-    if not user.is_superuser:
+    if not _can_select_box_rarity(user):
         template_fields.pop("rarity", None)
 
     if template_fields:

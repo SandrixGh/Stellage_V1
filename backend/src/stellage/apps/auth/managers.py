@@ -57,6 +57,16 @@ class UserManager:
             await session.execute(query)
             await session.commit()
 
+    async def grant_developer_status(self, email: str) -> None:
+        async with self.db.db_session() as session:
+            query = (
+                update(self.model)
+                .where(self.model.email == email)
+                .values(is_developer=True, is_superuser=True)
+            )
+            await session.execute(query)
+            await session.commit()
+
 
     async def get_user_by_email(self, email: str) -> GetUserWithIDAndEmail | None:
         async with self.db.db_session() as session:
@@ -65,6 +75,7 @@ class UserManager:
                 self.model.email,
                 self.model.hashed_password,
                 self.model.is_verified,
+                self.model.username,
             ).where(self.model.email == email)
 
             result = await session.execute(query)

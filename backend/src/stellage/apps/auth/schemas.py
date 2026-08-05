@@ -31,6 +31,7 @@ class AuthUser(LoginUserSchema):
         min_length=3,
         max_length=30,
         strip_whitespace=True,
+        pattern=r"^[a-z0-9_]+$",
     )] = None
     invite_code: Annotated[str, StringConstraints(
         min_length=4,
@@ -53,6 +54,8 @@ class CreateUser(GetUserByEmail):
     invited_by_id: uuid.UUID | None = None
     is_verified: bool = True
     is_active: bool = True
+    is_superuser: bool = False
+    is_developer: bool = False
 
 
 class UserReturnData(GetUserByID, GetUserByEmail, VerificationStatus):
