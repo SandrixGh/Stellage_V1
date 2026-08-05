@@ -380,7 +380,8 @@ class ProfileService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
         add_amount = amount if amount > 0 else 1
-        new_balance = full_user.stella_coins + add_amount
+        MAX_COINS = 2_147_483_647
+        new_balance = min(full_user.stella_coins + add_amount, MAX_COINS)
         await self.manager.update_user_fields(
             user_id=user.id,
             stella_coins=new_balance,

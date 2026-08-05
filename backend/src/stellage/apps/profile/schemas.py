@@ -2,7 +2,7 @@ import datetime
 import uuid
 from typing import TYPE_CHECKING, Annotated
 
-from pydantic import BaseModel, ConfigDict, EmailStr, StringConstraints
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, StringConstraints
 
 if TYPE_CHECKING:
     from stellage.apps.shelves.schemas import ShelfWithBoxInstances
@@ -13,11 +13,11 @@ class ChangeEmailRequest(BaseModel):
 
 
 class GiftCoinsRequest(BaseModel):
-    amount: int
+    amount: Annotated[int, Field(gt=0, le=2_147_483_647)]
 
 
 class AddCoinsRequest(BaseModel):
-    amount: int
+    amount: Annotated[int, Field(gt=0, le=2_147_483_647)]
 
 
 class ConfirmationCodeRequest(BaseModel):
