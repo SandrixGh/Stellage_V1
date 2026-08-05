@@ -2,7 +2,7 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import bindparam, delete, func, insert, select, text, update
+from sqlalchemy import bindparam, delete, func, insert, select, text, update, or_
 
 from stellage.apps.boxes.assets.schemas import (
     BoxAssetInternal,
@@ -181,6 +181,35 @@ class BoxAssetRepository:
                 .where(
                     self.model.id == asset_id,
                     self.model.owner_id == owner_id,
+                )
+            )
+            result = await session.execute(query)
+            asset = result.scalar_one_or_none()
+
+            if asset is None:
+                return None
+
+            return BoxAssetInternal.model_validate(asset)
+
+    async def get_asset_for_deletion(
+        self,
+        asset_id: uuid.UUID,
+        user_id: uuid.UUID,
+    ) -> BoxAssetInternal | None:
+        """Получает ассет для удаления, если пользователь является загрузчиком (owner_id),
+        текущим владельцем коробки (BoxInstance.user_id) или создателем шаблона (BoxTemplate.creator_id)."""
+        async with self.db.db_session() as session:
+            query = (
+                select(self.model)
+                .outerjoin(BoxInstance, BoxInstance.id == self.model.instance_id)
+                .outerjoin(BoxTemplate, BoxTemplate.id == BoxInstance.template_id)
+                .where(
+                    self.model.id == asset_id,
+                    or_(
+                        self.model.owner_id == user_id,
+                        BoxInstance.user_id == user_id,
+                        BoxTemplate.creator_id == user_id,
+                    )
                 )
             )
             result = await session.execute(query)

@@ -334,9 +334,9 @@ class AssetManager:
         user_id: uuid.UUID,
         asset_id: uuid.UUID,
     ) -> None:
-        asset = await self.repository.get_owned_asset(
+        asset = await self.repository.get_asset_for_deletion(
             asset_id=asset_id,
-            owner_id=user_id,
+            user_id=user_id,
         )
 
         if asset is None or asset.status == AssetStatusEnum.DELETING:
