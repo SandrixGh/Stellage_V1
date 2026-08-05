@@ -44,27 +44,32 @@ def rate_limit(
         now = time.time()
         window_start = now - window_seconds
 
-        async with redis.get_client() as client:
-            async with client.pipeline(transaction=True) as pipe:
-                # Выкидываем всё старше окна, считаем оставшееся, добавляем
-                # текущий вызов, продлеваем TTL ключа на длину окна.
-                pipe.zremrangebyscore(key, 0, window_start)
-                pipe.zcard(key)
-                pipe.zadd(key, {f"{now}:{id(request)}": now})
-                pipe.expire(key, window_seconds)
-                _, count, _, _ = await pipe.execute()
+        try:
+            async with redis.get_client() as client:
+                async with client.pipeline(transaction=True) as pipe:
+                    # Выкидываем всё старше окна, считаем оставшееся, добавляем
+                    # текущий вызов, продлеваем TTL ключа на длину окна.
+                    pipe.zremrangebyscore(key, 0, window_start)
+                    pipe.zcard(key)
+                    pipe.zadd(key, {f"{now}:{id(request)}": now})
+                    pipe.expire(key, window_seconds)
+                    _, count, _, _ = await pipe.execute()
 
-        # count — число вызовов ДО текущего; лимит превышен, когда их уже max.
-        if count >= max_calls:
-            logger.warning(
-                "Rate limit exceeded: ip=%s path=%s count=%d",
-                client_ip,
-                request.url.path,
-                count,
-            )
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail=f"Too many requests. Retry after {window_seconds} seconds.",
-            )
+            # count — число вызовов ДО текущего; лимит превышен, когда их уже max.
+            if count >= max_calls:
+                logger.warning(
+                    "Rate limit exceeded: ip=%s path=%s count=%d",
+                    client_ip,
+                    request.url.path,
+                    count,
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail=f"Too many requests. Retry after {window_seconds} seconds.",
+                )
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.warning("Rate limit Redis check failed (failing open): %s", exc)
 
     return dependency
